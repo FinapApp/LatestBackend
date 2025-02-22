@@ -12,7 +12,7 @@ export const getAllFollowerUserAggreagtion = async (userId: string, skip: string
             },
             {
                 $project: {
-                    following: 1,
+                    follower: 1,
                     _id: 0
                 }
             },

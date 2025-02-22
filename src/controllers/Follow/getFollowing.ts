@@ -7,7 +7,7 @@ import { getAllFollowingUserAggregation } from '../../aggregation/getAllFollowin
 
 export const getFollowing = async (req: Request, res: Response) => {
     try {
-        const validationError: Joi.ValidationError | undefined = getQueryParams(req.params);
+        const validationError: Joi.ValidationError | undefined = getQueryParams(req.query);
         if (validationError) {
             return handleResponse(res, 400, errors.validation, validationError.details);
         }
