@@ -22,7 +22,13 @@ if (cluster.isPrimary) {
   });
 } else {
   app.use(express.json());
-  app.use(cors({ credentials: true, origin: true }))
+  app.use(cors({
+    origin: "*",
+    methods: ["GET", "PUT", "POST", "DELETE", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization", "x-amz-date", "x-amz-content-sha256", "x-amz-security-token"],
+    exposedHeaders: ["ETag"]
+  }));
+  // app.use(cors({ credentials: true, origin: true }))
   app.use(helmet({ contentSecurityPolicy: false }))
   app.use("/api/v1", isAuthenticatedUser, protectedRoutes);
   app.use("/api", normalRoutes);

@@ -7,6 +7,7 @@ import { sendErrorToDiscord } from "../../config/discord/errorDiscord";
 import mongoose from "mongoose";
 
 export const createPresignedURLFlick = async (req: Request, res: Response) => {
+    console.log(req.body)
     try {
         const validationError: Joi.ValidationError | undefined = validatePresignedFlick(req.body);
         if (validationError) {

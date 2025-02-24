@@ -10,7 +10,7 @@ interface IStory extends Document {
     songEnd?: number;
     caption?: string;
     hashTags?: string[];
-    viewsCount: number;
+    viewCount: number;
     suspended: boolean;
     suspendedReason: string;
     expirationTime?: Date;
@@ -26,7 +26,7 @@ const StorySchema: Schema = new Schema(
         songStart: { type: Number },
         songEnd: { type: Number },
         caption: { type: String },
-        viewsCount: { type: Number, default: 0 },
+        viewCount: { type: Number, default: 0 },
         hashTags: { type: [String] },
         suspended: { type: Boolean },
         suspendedReason: { type: String },

@@ -146,7 +146,7 @@ export const validateCommentId = (params: object) => {
 export const validatePresignedFlick = (body: object) => {
   const schema = Joi.object({
     videoName : Joi.string(),
-    thumbnailName: Joi.string().required(),
+    thumbnailName: Joi.string(),
     audioName: Joi.string().optional(),
     photosName: Joi.array().items(Joi.string())
   })

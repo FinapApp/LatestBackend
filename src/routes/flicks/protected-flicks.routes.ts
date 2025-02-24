@@ -10,7 +10,6 @@ flickRoutes.route("/flick")
     .post(createPresignedURLFlick)
     .get(getAllFlicks)
 
-
 flickRoutes.route("/flick/:flickId")
     .post(createFlick)
     .delete(deleteFlick)
