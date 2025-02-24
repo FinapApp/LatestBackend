@@ -1,5 +1,6 @@
-import Joi from "joi";
+import Joi, { optional } from "joi";
 import countries from "../constants/countryList";
+import { config } from "../config/generalconfig";
 
 export const validateLogin = (body: object) => {
   const schema = Joi.object({
@@ -144,11 +145,10 @@ export const validateCommentId = (params: object) => {
 
 export const validatePresignedFlick = (body: object) => {
   const schema = Joi.object({
-    videoURL: Joi.string(),
-    thumbnailURL: Joi.string().required(),
-    song: Joi.string().regex(/^[0-9a-fA-F]{24}$/, 'object Id').optional(),
-    audio: Joi.string().optional(),
-    photos: Joi.array().items(Joi.string())
+    videoName : Joi.string(),
+    thumbnailName: Joi.string().required(),
+    audioName: Joi.string().optional(),
+    photosName: Joi.array().items(Joi.string())
   })
   const { error } = schema.validate(body)
   return error
@@ -417,10 +417,13 @@ export const validateCreateQuest = (body: object, params: object) => {
   const bodySchema = Joi.object({
     title: Joi.string().required(),
     description: Joi.string().required(),
-    media: Joi.array().items(Joi.string()).optional(),
+    media: Joi.array().items(Joi.string().pattern(new RegExp(`^${config.R2.R2_PUBLIC_URL}/.+$`)).required()).required().message("media must be a valid URL"),
     mode: Joi.string().valid("GoFlick", "OnFlick").required(),
     location: Joi.string().required(),
-    coords: Joi.array().items(Joi.number()).length(2).required(),
+    coords: Joi.object({
+      lat: Joi.number().required(),
+      long: Joi.number().required()
+    }),
     maxApplicants: Joi.number().required(),
     totalAmount: Joi.number().required(),
   })

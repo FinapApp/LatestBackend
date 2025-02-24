@@ -21,15 +21,15 @@ interface IQuests extends Document {
 
 export const QuestSchema = new Schema<IQuests>(
     {
-        title: { type: String },
         user: { type: Schema.Types.ObjectId, ref: "user" },
+        title: { type: String },
         description: { type: String },
         media: { type: [String] },
         mode: { type: String, enum: ['GoFlick', "OnFlick"] },
         location: { type: String },
         gps: {
-            type: { type: String },
-            coords: {
+            type: { type: String, enum : ["Point"] },
+            coordinates: {
                 type: [Number],
                 index: "2dsphere"
             }

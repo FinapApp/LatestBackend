@@ -64,8 +64,6 @@ export const FlickSchema = new Schema<IFlicks>(
         songEnd: { type: Number },
         commentVisible: { type: Boolean, default: true },
         likeVisible: { type: Boolean, default: true },
-        suspended: { type: Boolean, default: false },
-        suspendedReason: { type: String },
     },
     { timestamps: false, versionKey: false }
 );

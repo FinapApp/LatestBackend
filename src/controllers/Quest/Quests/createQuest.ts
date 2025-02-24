@@ -17,7 +17,7 @@ export const createQuest = async (req: Request, res: Response) => {
             user,
             gps : {
                 type: "Point",
-                coords: req.body.coords
+                coordinates: [req.body.coords.long , req.body.coords.lat]
             },
             ...req.body
         });

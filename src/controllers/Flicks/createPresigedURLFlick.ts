@@ -14,23 +14,23 @@ export const createPresignedURLFlick = async (req: Request, res: Response) => {
         }
         const user = res.locals.userId;
         // Extract metadata without media URLs
-        const { videoURL, photos, thumbnailURL, audio } = req.body;
+        const { videoName, photosName, thumbnailName, audioName } = req.body;
         const flickId = new mongoose.Types.ObjectId();
         // Create reel document without media URLs
         if (flickId) {
             let videoPresignedUrl, photoPresignedUrls, audioPresignedURL
-            if (videoURL) {
-                const videoPath = `${user}/flick/videos/${flickId}/${videoURL}`;
+            if (videoName) {
+                const videoPath = `${user}/flick/videos/${flickId}/${videoName}`;
                 videoPresignedUrl = await generateSignedURL(videoPath);
             }
-            if (photos) {
-                photoPresignedUrls = await Promise.all(photos.map((path: string) => generateSignedURL(`${user}/flick/photos/${flickId}/${path}`)));
+            if (photosName) {
+                photoPresignedUrls = await Promise.all(photosName.map((path: string) => generateSignedURL(`${user}/flick/photos/${flickId}/${path}`)));
             }
-            if (audio) {
-                const audioPath = `${user}/flick/audio/${flickId}/${audio}`;
+            if (audioName) {
+                const audioPath = `${user}/flick/audio/${flickId}/${audioName}`;
                 audioPresignedURL = await generateSignedURL(audioPath);
             }
-            const thumbnailPath = `${user}/flick/thumbnails/${flickId}/${thumbnailURL}`;
+            const thumbnailPath = `${user}/flick/thumbnails/${flickId}/${thumbnailName}`;
             const thumbnailPresignedUrl = await generateSignedURL(thumbnailPath);
             // Respond with presigned URLs and reel ID
             return handleResponse(res, 200, {

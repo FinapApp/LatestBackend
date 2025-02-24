@@ -10,12 +10,12 @@ import { deleteQuestApplication } from "../../controllers/Quest/QuestApplicants/
 export const questRoutes: Router = express.Router();
 
 questRoutes.route("/quest")
-    .post(createQuest)
+    .post(createPresignedURLQuest)
     .get(getAllQuests)
 
 questRoutes.route("/quest/:questId")
+    .post(createQuest)
     .delete(deleteQuest)
-    .put(createPresignedURLQuest)
 
 questRoutes.route("/quest-applicant")
     .post(createQuestApplicant)
