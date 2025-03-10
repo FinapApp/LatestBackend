@@ -4,17 +4,19 @@ export interface ISongSchema extends Document {
     name: string;
     url: string;
     icon: string;
-    user: Types.ObjectId;
+    admin: Types.ObjectId;
     used: number;
+    suspended: boolean;
+    suspendedReason : string;
     duration?: number;
 };
 
 const SongSchema = new Schema<ISongSchema>(
     {
-        user: {
-            type: Schema.Types.ObjectId,
+        admin: {
+            type: Schema.Types.ObjectId,    
             required: true,
-            ref: 'user',
+            ref: 'admin',
         },
         name: {
             type: String,
@@ -34,8 +36,10 @@ const SongSchema = new Schema<ISongSchema>(
         duration: {
             type: Number,
         },
+        suspended: { type: Boolean, default: false },
+        suspendedReason: { type: String },
     },
-    { versionKey: false, timestamps: true }
+    { versionKey: false, timestamps: true },
 );
 
 export const SONG = model<ISongSchema>('song', SongSchema);

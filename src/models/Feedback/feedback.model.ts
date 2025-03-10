@@ -1,22 +1,43 @@
-import {Schema , Types, model} from 'mongoose'
+import { Schema, Types, model } from 'mongoose'
 
-interface IFeedback {
+interface IFeedback extends Document {
   _id: string;
+  admin: Types.ObjectId;
   user: Types.ObjectId;
-  message: string;
+  message: IMessage[];
   rating: number;
   status: 'pending' | 'resolved';
 }
 
-let FeedbackSchema = new Schema(
+export interface IMessage {
+  sentBy: 'user' | 'admin';
+  message: string;
+  attachment: string;
+}
+
+export const MessageSchema = new Schema<IMessage>(
   {
+    sentBy: { type: String, enum: ['user', 'admin'] },
+    message: { type: String },
+    attachment: [{ type: String }],
+  },
+  { timestamps: { createdAt: true, updatedAt: false } }
+)
+
+
+let FeedbackSchema = new Schema<IFeedback>(
+  {
+    admin: {
+      type: Schema.Types.ObjectId,
+      ref: 'admin',
+    },
     user: {
       type: Schema.Types.ObjectId,
-      ref: 'User',
+      ref: 'user',
       require: true,
     },
     message: {
-      type: String,
+      type: [MessageSchema],
       require: true,
     },
     rating: {

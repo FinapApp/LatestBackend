@@ -51,7 +51,7 @@ export const login = async (req: Request, res: Response) => {
     const geoData: any = await fetchIpGeolocation(req.ip)
     const deviceData = useragent.parse(req.headers['user-agent'])
     await SESSION.create({
-      userId,
+      user : userId,
       refreshToken,
       ip: req.ip,
       device: deviceData.toAgent(),

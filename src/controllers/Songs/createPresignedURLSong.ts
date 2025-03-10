@@ -12,11 +12,11 @@ export const createPresignedURLSong = async (req: Request, res: Response) => {
             return handleResponse(res, 400, errors.validation, validationError.details);
         }
         const user = res.locals.userId
-        const { fileName } = req.body
+        const { fileName, fileType } = req.body
         const songId = new mongoose.Types.ObjectId();
         if (songId) {
             const songPath = `${user}/songs/${songId}/${fileName}`;
-            const audioSignedURL = await generateSignedURL(songPath);
+            const audioSignedURL = await generateSignedURL(songPath , fileType);
             return handleResponse(res, 200, {
                 songId,
                 AUDIOSIGNED: audioSignedURL

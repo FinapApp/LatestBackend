@@ -1,7 +1,7 @@
 import mongoose, { Document, Schema } from "mongoose";
 
 interface IUserSession extends Document {
-    userId: Schema.Types.ObjectId;
+    user: Schema.Types.ObjectId;
     refreshToken: string;
     device: string;
     fcmToken: string;
@@ -12,7 +12,7 @@ interface IUserSession extends Document {
 
 export const UserSessionSchema = new Schema<IUserSession>(
     {
-        userId: { type: Schema.Types.ObjectId, ref: "user" },
+        user: { type: Schema.Types.ObjectId, ref: "user" },
         refreshToken: { type: String, required: true },
         device: { type: String },
         fcmToken: { type: String },

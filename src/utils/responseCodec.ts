@@ -23,8 +23,23 @@ export const handleResponse = (
 };
 
 export const errors = {
-  cannot_rerunIt : {
-    message : "Don't rerun the code"
+  unable_to_create_signedURL: {
+    message: "Unable to create signed URL",
+  },
+  user_not_found: {
+    message: "User not found",
+  },
+  status_changed_flicked : {
+    message: "Status changed flicked"
+  },
+  session_not_found: {
+    message: "Session not found"
+  },
+  session_deleted: {
+    message: "Unable to delete session"
+  },
+  cannot_rerunIt: {
+    message: "Don't rerun the code"
   },
   create_audio: {
     message: "Unable to create audio",
@@ -189,6 +204,12 @@ export const errors = {
 
 
 export const success = {
+  status_changed_flicked : {
+    message: "Status changed successfully"
+  },
+  session_deleted: {
+    message: "Session deleted successfully",
+  },
   add_story_viewer: {
     message: "Story viewer added successfully",
   },

@@ -2,7 +2,6 @@ import { Request, Response } from 'express'
 import { getQueryParams } from '../../validators/validators';
 import Joi from 'joi';
 import { errors, handleResponse } from '../../utils/responseCodec';
-import { FOLLOWER } from '../../models/User/userFollower.model';
 import { getAllFollowingUserAggregation } from '../../aggregation/getAllFollowingUserAggregation';
 
 export const getFollowing = async (req: Request, res: Response) => {

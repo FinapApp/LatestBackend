@@ -145,10 +145,13 @@ export const validateCommentId = (params: object) => {
 
 export const validatePresignedFlick = (body: object) => {
   const schema = Joi.object({
-    videoName : Joi.string(),
-    thumbnailName: Joi.string(),
+    mediaFiles: Joi.array().items(Joi.object({
+      fileType: Joi.string().required(),
+      fileName: Joi.string().required()
+    })).required(),
+    thumbnailName: Joi.string().required(),
     audioName: Joi.string().optional(),
-    photosName: Joi.array().items(Joi.string())
+    audioFileType: Joi.string().optional()
   })
   const { error } = schema.validate(body)
   return error
@@ -160,22 +163,45 @@ export const validateCreateFlick = (body: object, params: object) => {
     flickId: Joi.string().regex(/^[0-9a-fA-F]{24}$/, 'object Id').required()
   })
   const bodySchema = Joi.object({
-    song: Joi.string().regex(/^[0-9a-fA-F]{24}$/, 'object Id').optional(),
-    audio: Joi.string().optional(),
-    audioName: Joi.string().optional(),
-    videoURL: Joi.string().optional(),
-    photos: Joi.array().items(Joi.string()).optional(),
-    thumbnailURL: Joi.string().optional(),
-    duration: Joi.number().optional(),
-    hashTags: Joi.array().items(Joi.string()).optional(),
+    media: Joi.array().items(Joi.object({
+      type: Joi.string().valid("photo", "video").required(),
+      duration: Joi.number().required(),
+      audio: Joi.string().regex(/^[0-9a-fA-F]{24}$/, 'object Id').optional(),
+      song: Joi.string().regex(/^[0-9a-fA-F]{24}$/, 'object Id').optional(),
+      songStart: Joi.number().optional(),
+      songEnd: Joi.number().optional(),
+      alt: Joi.string().required(),
+      songPosition: Joi.object({
+        x: Joi.number().required(),
+        y: Joi.number().required()
+      }).optional(),
+      taggedUsers: Joi.array().items(Joi.object({
+        user: Joi.string().regex(/^[0-9a-fA-F]{24}$/, 'object Id').required(),
+        position: Joi.object({
+          x: Joi.number().required(),
+          y: Joi.number().required()
+        }).required()
+      })).optional(),
+      url: Joi.string().required()
+    })).required(),
+    thumbnailURL: Joi.string().required(),
     description: Joi.array().items(Joi.object({
       type: Joi.string().valid("user", "text"),
       mention: Joi.string().regex(/^[0-9a-fA-F]{24}$/, 'object Id').optional(),
       text: Joi.string()
     })).optional(),
-    songStart: Joi.number().optional(),
-    songEnd: Joi.number().optional(),
-  }).xor('videoURL', 'photoPaths')
+    location: Joi.string().optional(),
+    collabs: Joi.array().items(Joi.object({
+      user: Joi.string().regex(/^[0-9a-fA-F]{24}$/, 'object Id').required(),
+      position: Joi.object({
+        x: Joi.number().required(),
+        y: Joi.number().required()
+      }).required()
+    })).optional(),
+    hashTags: Joi.array().items(Joi.string()).optional(),
+    commentVisible: Joi.boolean().optional(),
+    likeVisible: Joi.boolean().optional(),
+  })
   const combinedSchema = Joi.object({
     body: bodySchema,
     params: paramsSchema
@@ -253,7 +279,8 @@ export const validateShareFlick = (body: object) => {
 
 export const validatePresignedSong = (body: object) => {
   const schema = Joi.object({
-    fileName: Joi.string()
+    fileName: Joi.string(),
+    fileType : Joi.string()
   })
   const { error } = schema.validate(body)
   return error
@@ -347,7 +374,8 @@ export const validateNotificationQuery = (query: object) => {
 
 export const validateStoryUpload = (body: object) => {
   const schema = Joi.object({
-    mediaURL: Joi.string().required(),
+    fileType: Joi.string().required(),
+    fileName : Joi.string().required(),
     thumbnailURL: Joi.string().required(),
   })
   const { error } = schema.validate(body)
@@ -415,6 +443,7 @@ export const validatePresignedQuest = (body: object) => {
 
 export const validateCreateQuest = (body: object, params: object) => {
   const bodySchema = Joi.object({
+    _id: Joi.string().regex(/^[0-9a-fA-F]{24}$/, 'object Id').required(),
     title: Joi.string().required(),
     description: Joi.string().required(),
     media: Joi.array().items(Joi.string().pattern(new RegExp(`^${config.R2.R2_PUBLIC_URL}/.+$`)).required()).required().message("media must be a valid URL"),
@@ -462,9 +491,21 @@ export const validateCreateQuestApplication = (body: object, params: object) => 
 export const validatePresignedQuestApplication = (body: object) => {
   const schema = Joi.object({
     media: Joi.array().items(Joi.object({
-      mediaURL: Joi.string().required(),
-      thumbnailURL: Joi.string().required(),
+      fileType: Joi.string().required(),
+      fileName: Joi.string().required(),
     })).required(),
+    thumbnailURL: Joi.string().required(),
+  })
+  const { error } = schema.validate(body)
+  return error
+}
+
+export const validatePresinedURLQuest = (body: object) => {
+  const schema = Joi.object({
+    media: Joi.array().items(Joi.object({
+      fileName: Joi.string().required(),
+      fileType: Joi.string().required()
+    }))
   })
   const { error } = schema.validate(body)
   return error
@@ -587,6 +628,41 @@ export const validateUpdateFeedback = (body: object, params: object) => {
   })
   const paramsSchema = Joi.object({
     feedbackId: Joi.string().regex(/^[0-9a-fA-F]{24}$/, 'object Id').required()
+  })
+  const combinedSchema = Joi.object({
+    body: bodySchema,
+    params: paramsSchema
+  })
+  const { error } = combinedSchema.validate({ body, params })
+  return error
+}
+
+
+
+export const validateSessionId = (params: object) => {
+  const schema = Joi.object({
+    sessionId: Joi.string().regex(/^[0-9a-fA-F]{24}$/, 'object Id').required()
+  })
+  const { error } = schema.validate(params)
+  return error
+}
+
+
+export const validateRefreshToken = (body: object) => {
+  const schema = Joi.object({
+    refreshToken: Joi.string().required()
+  })
+  const { error } = schema.validate(body)
+  return error
+}
+
+
+export const validateChangeStatusQuestApplicant = (body: object, params: object) => {
+  const paramsSchema = Joi.object({
+    questApplicantId: Joi.string().regex(/^[0-9a-fA-F]{24}$/, 'object Id').required()
+  })
+  const bodySchema = Joi.object({
+    status: Joi.string().valid("approved", "rejected").required(),
   })
   const combinedSchema = Joi.object({
     body: bodySchema,

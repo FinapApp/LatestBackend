@@ -13,14 +13,14 @@ export const createPresignedURLStory = async (req: Request, res: Response) => {
             return handleResponse(res, 400, errors.validation, validationError.details);
         }
         const user = res.locals.userId;
-        const { mediaURL, thumbnailURL} = req.body
+        const { fileType, fileName, thumbnailURL } = req.body
         // Extract metadata without media URLs
         const storyId = new mongoose.Types.ObjectId();
-        const uploadPath = `${user}/story/${storyId}/${mediaURL}`;
-        const thumbnailImagePath = `${user}/story/${storyId}/thumbnail/${thumbnailURL}`;
+        const uploadPath = `user/${user}/story/${storyId}/${fileName}`;
+        const thumbnailImagePath = `user/${user}/story/${storyId}/thumbnail/${thumbnailURL}`;
         const [thumbnailSignedURL, mediaPresignedURL] = await Promise.all([
-            generateSignedURL(thumbnailImagePath),
-            generateSignedURL(uploadPath)
+            generateSignedURL(thumbnailImagePath , 'image/jpeg'),
+            generateSignedURL(uploadPath , fileType)
         ]);
         return handleResponse(res, 200, {
             storyId,
@@ -30,6 +30,6 @@ export const createPresignedURLStory = async (req: Request, res: Response) => {
     } catch (error) {
         console.error(error);
         sendErrorToDiscord("create-story", error)
-     return handleResponse(res, 500, errors.catch_error);
+        return handleResponse(res, 500, errors.catch_error);
     }
 };

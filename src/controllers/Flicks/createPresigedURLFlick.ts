@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import {  validatePresignedFlick } from "../../validators/validators";
+import { validatePresignedFlick } from "../../validators/validators";
 import Joi from "joi";
 import { errors, handleResponse, success } from "../../utils/responseCodec";
 import { generateSignedURL } from "../../utils/getSignedURL";
@@ -7,7 +7,6 @@ import { sendErrorToDiscord } from "../../config/discord/errorDiscord";
 import mongoose from "mongoose";
 
 export const createPresignedURLFlick = async (req: Request, res: Response) => {
-    console.log(req.body)
     try {
         const validationError: Joi.ValidationError | undefined = validatePresignedFlick(req.body);
         if (validationError) {
@@ -15,30 +14,25 @@ export const createPresignedURLFlick = async (req: Request, res: Response) => {
         }
         const user = res.locals.userId;
         // Extract metadata without media URLs
-        const { videoName, photosName, thumbnailName, audioName } = req.body;
+        const { mediaFiles, thumbnailName, audioName, audioFileType } = req.body;
         const flickId = new mongoose.Types.ObjectId();
         // Create reel document without media URLs
         if (flickId) {
-            let videoPresignedUrl, photoPresignedUrls, audioPresignedURL
-            if (videoName) {
-                const videoPath = `${user}/flick/videos/${flickId}/${videoName}`;
-                videoPresignedUrl = await generateSignedURL(videoPath);
+            let mediaSignedURLs,thumbnailSignedURLs,audioPresignedURL;
+            if (mediaFiles) {
+                mediaSignedURLs = Promise.all(mediaFiles.map((fileName: string , fileType : string) => generateSignedURL(`${user}/flick/videos/${flickId}/${fileName}` , fileType)))
             }
-            if (photosName) {
-                photoPresignedUrls = await Promise.all(photosName.map((path: string) => generateSignedURL(`${user}/flick/photos/${flickId}/${path}`)));
+            if (thumbnailName) {
+                thumbnailSignedURLs = await generateSignedURL(`${user}/flick/thumbnails/${flickId}/${thumbnailName}` , 'image/jpeg');
             }
             if (audioName) {
                 const audioPath = `${user}/flick/audio/${flickId}/${audioName}`;
-                audioPresignedURL = await generateSignedURL(audioPath);
+                audioPresignedURL = await generateSignedURL(audioPath , audioFileType);
             }
-            const thumbnailPath = `${user}/flick/thumbnails/${flickId}/${thumbnailName}`;
-            const thumbnailPresignedUrl = await generateSignedURL(thumbnailPath);
-            // Respond with presigned URLs and reel ID
             return handleResponse(res, 200, {
                 flickId,
-                videoUploadURL: videoPresignedUrl,
-                photoUploadURL: photoPresignedUrls,
-                thumbnailUploadURL: thumbnailPresignedUrl,
+                mediaUploadURLs: mediaSignedURLs,
+                thumbnailUploadURL: thumbnailSignedURLs,
                 audioUploadURL: audioPresignedURL
             });
         }

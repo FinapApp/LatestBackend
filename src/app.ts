@@ -9,8 +9,23 @@ import cluster from "cluster";
 import helmet from "helmet";
 import { kafkaConnecter } from "./config/kafka/kafka.config";
 import { isAuthenticatedUser } from "./middlewares/isAuthenticatedUser";
+import { specs, swaggerUi } from "./utils/swagger";
 const redisInitalizer = redis;
 const app: Express = express();
+
+const swaggerUiOptions = {
+  customCssUrl: 'https://cdnjs.cloudflare.com/ajax/libs/swagger-ui/5.18.2/swagger-ui.js',
+  customJsUrl: 'https://cdnjs.cloudflare.com/ajax/libs/swagger-ui/5.18.2/swagger-ui-bundle.js',
+  customJs: 'https://cdnjs.cloudflare.com/ajax/libs/swagger-ui/5.18.2/swagger-ui-standalone-preset.js',
+};
+// SWAGGER
+app.use(
+  "/flickstar/api-docs",
+  swaggerUi.serve,
+  // swaggerUi.setup(specs, { explorer: true })
+  swaggerUi.setup(specs, swaggerUiOptions)
+);
+
 if (cluster.isPrimary) {
   for (let i = 0; i < 1; i++) {
     cluster.fork();

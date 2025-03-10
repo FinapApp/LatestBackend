@@ -12,6 +12,7 @@ interface IQuests extends Document {
     media: string[]
     mode: 'Goflick' | 'OnFlick';
     location: string;
+    thumbnailURL: string;
     gps: IGPSLocation;
     maxApplicants: number;
     totalAmount: number;
@@ -34,12 +35,13 @@ export const QuestSchema = new Schema<IQuests>(
                 index: "2dsphere"
             }
         },
+        thumbnailURL: { type: String },
         maxApplicants: { type: Number },
-        totalAmount: { type: Number },
+        totalAmount: { type: Number },  
         suspended: { type: Boolean, default: false },
         suspendedReason : { type : String },
     },
-    { timestamps: false, versionKey: false }
+    { timestamps: false, versionKey: false }    
 );
 
 QuestSchema.index({ gps: "2dsphere" });

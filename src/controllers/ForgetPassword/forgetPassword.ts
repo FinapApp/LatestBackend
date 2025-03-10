@@ -28,7 +28,7 @@ export const forgetPassword = async (req: Request, res: Response) => {
         }
         const { identifier } = req.body as ForgetPasswordRequest;
         const checkUser = await USER.findOne({ $or: [{ email: identifier }, { username: identifier }, { phone: identifier }] }, "email username phone")
-        if (!checkUser) return handleResponse(res, 400, errors.email_not_found);
+        if (!checkUser) return handleResponse(res, 400, errors.user_not_found);
         let generatedOTP = generateOTP();
         if (checkUser.email || checkUser.username) {
             await sendOTPNewPassword(generatedOTP, checkUser.email as string, checkUser.username as string, "Forget Password")

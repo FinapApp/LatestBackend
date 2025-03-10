@@ -14,7 +14,7 @@ export const updateFeedback = async (req: Request, res: Response) => {
         const feedback = await FEEDBACK.findByIdAndUpdate(feedbackId, req.body, { new: true });
         if (feedback) {
             return handleResponse(res, 200, success.update_feedback);
-        }
+        }   
         return handleResponse(res, 500, errors.update_feedback);
     } catch (error) {
         return handleResponse(res, 500, errors.catch_error);

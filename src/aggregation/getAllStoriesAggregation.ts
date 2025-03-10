@@ -1,5 +1,5 @@
 import mongoose from "mongoose";
-import { FOLLOWER } from "../models/User/userFollower.model";
+import { FOLLOW } from "../models/User/userFollower.model";
 
 export const getAllStoriesAggregation = async (userId: string) => {
     try {
@@ -128,7 +128,7 @@ export const getAllStoriesAggregation = async (userId: string) => {
                 }
             }
         ];
-        return await FOLLOWER.aggregate(pipeline);
+        return await FOLLOW.aggregate(pipeline);
     } catch (error: any) {
         throw error;
     }

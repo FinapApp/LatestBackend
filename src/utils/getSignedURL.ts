@@ -4,15 +4,16 @@ import { s3Client } from "../config/s3/s3.config";
 import { config } from "../config/generalconfig";
 
 
-export const generateSignedURL = async (filePath: string) => {
+export const generateSignedURL = async (filePath: string, fileType: string) => {
     const command = new PutObjectCommand({
         Bucket: config.R2.R2_BUCKET,
         Key: `${filePath}`,
-        // ContentType: fileType 
+        ContentType: fileType
     });
     const url = await getSignedUrl(s3Client as any, command as any, { expiresIn: 3600 });
     return url;
 };
+
 
 
 

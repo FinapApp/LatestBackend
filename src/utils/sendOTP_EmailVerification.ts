@@ -144,6 +144,6 @@ export const sendOTPEmailVerification = (resetCode: string, email: string, name:
       }
       return transporter.sendMail(message)
    } catch (err) {
-      console.log("=====> loggger comes here")
+      console.log(err)
    }
 }

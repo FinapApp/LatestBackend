@@ -2,27 +2,22 @@ import mongoose, { Document, Schema } from "mongoose";
 import { ITextDataSchema, TextDataSchema } from "../Comment/comment.model";
 interface IFlicks extends Document {
     user: Schema.Types.ObjectId;
-    song: Schema.Types.ObjectId;
-    originFlicks: Schema.Types.ObjectId
-    videoURL: string;
-    photos: string[];
-    duration: number;
+    originFlicks: Schema.Types.ObjectId;
+    collabs: TaggedUser[];
+    media: IMediaSchema[];
+    location: string;
+    gps: {
+        type: string;
+        coordinates: [number , number];
+    };
+    thumbnailURL: string;
+    description: ITextDataSchema[];
+    quest: Schema.Types.ObjectId;
+    repostCount: number;
     suspended: boolean;
     suspendedReason: string;
-    hashTags: string[]
-    repostCount: number;
-    songStart: number;
-    songEnd: number;
-    audio: Schema.Types.ObjectId;
-    description: ITextDataSchema;
-    thumbnailURL: string;
     commentVisible: boolean;
     likeVisible: boolean;
-    status: boolean;
-    alt: string;
-    collabs: Schema.Types.ObjectId[];
-    taggedUsers: TaggedUser[];
-    location: string;
 }
 interface TaggedUser {
     user: Schema.Types.ObjectId;
@@ -39,29 +34,66 @@ const taggedAndCollabSchema = new Schema<TaggedUser>(
             y: { type: Number },
         }
     },
-    { versionKey: false, _id: false }
+    { versionKey: false, _id: true }
+);
+
+
+interface IMediaSchema extends Document {
+    type: 'video' | 'photo';
+    duration?: number;
+    audio?: Schema.Types.ObjectId;
+    song?: Schema.Types.ObjectId;
+    songStart?: number;
+    songEnd?: number;
+    alt: string;
+    songPosition?: {
+        x: number;
+        y: number
+    },
+    taggedUsers?: TaggedUser[];
+    url: string;
+}
+
+const MediaSchema = new Schema<IMediaSchema>(
+    {
+        type: { type: String, enum: ['video', 'photo'] },
+        duration: { type: Number },
+        audio: { type: Schema.Types.ObjectId, ref: "audio" },
+        song : { type: Schema.Types.ObjectId, ref: "song" },
+        songStart: { type: Number },
+        songEnd: { type: Number },
+        alt: { type: String }, // this 
+        songPosition: {
+            x: { type: Number },
+            y: { type: Number }
+        },
+        taggedUsers: { type: [taggedAndCollabSchema] },
+        url: { type: String }
+    },
+    { versionKey: false, _id: true }
 );
 
 
 export const FlickSchema = new Schema<IFlicks>(
     {
         user: { type: Schema.Types.ObjectId, ref: "user" },
-        song: { type: Schema.Types.ObjectId, ref: "song" },
         originFlicks: { type: Schema.Types.ObjectId, ref: "flick" },
-        audio: { type: Schema.Types.ObjectId, ref: "audio" },
-        alt: { type: String },
         collabs: { type: [taggedAndCollabSchema] },
-        taggedUsers: { type: [taggedAndCollabSchema] },
-        videoURL: { type: String },  // Uploaded video link
+        media: { type: [MediaSchema] },
         location: { type: String },
-        thumbnailURL: { type: String }, // Thumbnail of the video
+        gps: {
+            type: { type: String, enum: ["Point"] },
+            coordinates: {
+                type: [Number],
+                index: "2dsphere"
+            }
+        },
+        thumbnailURL: { type: String },
         description: { type: [TextDataSchema] },
-        photos: { type: [String] },  // Uploaded photos link
-        duration: { type: Number },
-        hashTags: { type: [String] },
+        quest: { type: Schema.Types.ObjectId, ref: 'quest' },
         repostCount: { type: Number },
-        songStart: { type: Number },
-        songEnd: { type: Number },
+        suspended: { type: Boolean, default: false },
+        suspendedReason: { type: String },
         commentVisible: { type: Boolean, default: true },
         likeVisible: { type: Boolean, default: true },
     },

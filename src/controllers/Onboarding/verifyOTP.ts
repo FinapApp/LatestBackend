@@ -22,6 +22,7 @@ interface ForgetOTPRequest {
 }
 
 export const verifyOTPAfterSignUp = async (req: Request, res: Response) => {
+    console.log(req.body)
     try {
         const validationError: Joi.ValidationError | undefined =
             validateVerifyOTPSignUp(req.body);

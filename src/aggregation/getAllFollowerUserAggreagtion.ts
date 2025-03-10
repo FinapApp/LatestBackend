@@ -1,9 +1,9 @@
 import mongoose from "mongoose";
-import { FOLLOWER } from "../models/User/userFollower.model";
+import { FOLLOW } from "../models/User/userFollower.model";
 
 export const getAllFollowerUserAggreagtion = async (userId: string, skip: string = "0") => {
     try {
-        let response = await FOLLOWER.aggregate([
+        let response = await FOLLOW.aggregate([
             {
                 $match: {
                     follower: new mongoose.Types.ObjectId(userId),

@@ -5,6 +5,8 @@ export type ICommentSchema = {
     flick?: Types.ObjectId;
     comment: ITextDataSchema[];
     parentComment?: Types.ObjectId;
+    suspended : boolean;
+    suspendedReason : string;
 };
 
 export type ITextDataSchema = {
@@ -52,7 +54,14 @@ const CommentSchema = new Schema<ICommentSchema>(
         parentComment: {
             type: Schema.Types.ObjectId,
             ref: 'comment', //To which comment of the reel it is
+        },  
+        suspended : {   
+            type: Boolean,
+            default: false
         },
+        suspendedReason : {
+            type: String
+        }
     },
     { timestamps: true, versionKey: false }
 );
