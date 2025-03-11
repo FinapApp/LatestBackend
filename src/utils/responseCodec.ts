@@ -23,6 +23,9 @@ export const handleResponse = (
 };
 
 export const errors = {
+  audio_reported: {
+    message: "Unable to report Audio"
+  },
   unable_to_create_signedURL: {
     message: "Unable to create signed URL",
   },
@@ -83,6 +86,7 @@ export const errors = {
   comment_not_found: {
     message: "Comment not found",
   },
+
   max_applicants: {
     message: "Max applicants reached",
   },
@@ -182,6 +186,18 @@ export const errors = {
   user_reported: {
     message: "Unable to report User"
   },
+  story_reported: {
+    message: "Unable to report Story"
+  },
+  audio_uploaded: {
+    message: "Unable to upload audio"
+  },
+  comment_reported: {
+    message: "Unable to report Comment"
+  },
+  flick_reported: {
+    message: "Unable to report Flick"
+  },
   share_post: {
     message: "Unable to share post"
   },
@@ -269,6 +285,18 @@ export const success = {
   },
   user_reported: {
     message: "User reported successfully",
+  },
+  story_reported: {
+    message: "Story reported successfully",
+  },
+  audio_reported : {
+    message: "Audio reported successfully",
+  },
+  comment_reported: {
+    message: "Comment reported successfully",
+  },
+  flick_reported: {
+    message: "Flick reported successfully",
   },
   create_feedback: {
     message: "Feedback created successfully",

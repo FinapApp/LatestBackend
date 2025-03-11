@@ -13,7 +13,7 @@ export const reportUser = async (req: Request, res: Response) => {
         const reportUser = await REPORT.create({
             user: res.locals.userId,
             reportedTo: req.params.userId,
-            message: req.body.reason,
+            ...req.body
         })
         if (reportUser) {
             //send things to kafka

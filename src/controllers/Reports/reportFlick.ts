@@ -13,13 +13,13 @@ export const reportFlick = async (req: Request, res: Response) => {
         const reportUser = await REPORT.create({
             user: res.locals.userId,
             flick: req.params.flickId,
-            message: req.body.reason,
+            ...req.body
         })
         if (reportUser) {
             //send things to kafka
-            return handleResponse(res, 200, success.user_reported)
+            return handleResponse(res, 200, success.flick_reported)
         }
-        return handleResponse(res, 304, errors.user_reported)
+        return handleResponse(res, 304, errors.flick_reported)
     } catch (error) {
         console.log(error)
      return handleResponse(res, 500, errors.catch_error)

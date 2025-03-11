@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import {  validatePresinedURLQuest } from "../../../validators/validators";
+import { validatePresinedURLQuest } from "../../../validators/validators";
 import Joi from "joi";
 import { errors, handleResponse } from "../../../utils/responseCodec";
 import { generateSignedURL } from "../../../utils/getSignedURL";
@@ -22,11 +22,15 @@ export const createPresignedURLQuest = async (req: Request, res: Response) => {
                 fileName: string;
                 fileType: string;
             }) => generateSignedURL(`user/${userId}/quest/${questId}/${metadata.fileName}`, metadata.fileType)));
-            return handleResponse(res, 200, {
-                userId,
-                questId,
-                mediaPresignedURLs
-            });
+
+            const thumbnailPresignedURL = await generateSignedURL(`user/${userId}/quest/${questId}/thumbnail`);
+
+            if (mediaPresignedURLs && thumbnailPresignedURL) {
+                return handleResponse(res, 200, {
+                    questId,
+                    mediaPresignedURLs
+                });
+            }
         }
         return handleResponse(res, 500, errors.unable_to_create_signedURL);
     } catch (error) {

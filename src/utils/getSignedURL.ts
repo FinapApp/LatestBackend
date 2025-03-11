@@ -4,7 +4,7 @@ import { s3Client } from "../config/s3/s3.config";
 import { config } from "../config/generalconfig";
 
 
-export const generateSignedURL = async (filePath: string, fileType: string) => {
+export const generateSignedURL = async (filePath: string, fileType: string = "image/jpeg") => {
     const command = new PutObjectCommand({
         Bucket: config.R2.R2_BUCKET,
         Key: `${filePath}`,

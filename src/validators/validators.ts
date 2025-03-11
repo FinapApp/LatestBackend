@@ -149,7 +149,6 @@ export const validatePresignedFlick = (body: object) => {
       fileType: Joi.string().required(),
       fileName: Joi.string().required()
     })).required(),
-    thumbnailName: Joi.string().required(),
     audioName: Joi.string().optional(),
     audioFileType: Joi.string().optional()
   })
@@ -165,7 +164,7 @@ export const validateCreateFlick = (body: object, params: object) => {
   const bodySchema = Joi.object({
     media: Joi.array().items(Joi.object({
       type: Joi.string().valid("photo", "video").required(),
-      duration: Joi.number().required(),
+      duration: Joi.number().optional(),
       audio: Joi.string().regex(/^[0-9a-fA-F]{24}$/, 'object Id').optional(),
       song: Joi.string().regex(/^[0-9a-fA-F]{24}$/, 'object Id').optional(),
       songStart: Joi.number().optional(),
@@ -188,7 +187,7 @@ export const validateCreateFlick = (body: object, params: object) => {
     description: Joi.array().items(Joi.object({
       type: Joi.string().valid("user", "text"),
       mention: Joi.string().regex(/^[0-9a-fA-F]{24}$/, 'object Id').optional(),
-      text: Joi.string()
+      text: Joi.string().optional()
     })).optional(),
     location: Joi.string().optional(),
     collabs: Joi.array().items(Joi.object({
@@ -223,6 +222,7 @@ export const validateReportUser = (body: object, params: object) => {
     userId: Joi.string().regex(/^[0-9a-fA-F]{24}$/, 'object Id').required(),
   })
   const bodySchema = Joi.object({
+    attachment: Joi.string().optional(),
     message: Joi.string().required()
   })
   const combinedSchema = Joi.object({
@@ -234,12 +234,45 @@ export const validateReportUser = (body: object, params: object) => {
 }
 
 
+export const validateReportStory = (body: object, params: object) => {
+  const paramsSchema = Joi.object({
+    storyId: Joi.string().regex(/^[0-9a-fA-F]{24}$/, 'object Id').required(),
+  })
+  const bodySchema = Joi.object({
+    attachment: Joi.string().optional(),
+    message: Joi.string().required()
+  })
+  const combinedSchema = Joi.object({
+    body: bodySchema,
+    params: paramsSchema
+  })
+  const { error } = combinedSchema.validate({ body, params })
+  return error
+}
+
+export const validateReportAudio = (body: object, params: object) => {
+  const paramsSchema = Joi.object({
+    audioId: Joi.string().regex(/^[0-9a-fA-F]{24}$/, 'object Id').required(),
+  })
+  const bodySchema = Joi.object({
+    attachment: Joi.string().optional(),
+    message: Joi.string().required()
+  })
+  const combinedSchema = Joi.object({
+    body: bodySchema,
+    params: paramsSchema
+  })
+  const { error } = combinedSchema.validate({ body, params })
+  return error
+}
+
 export const validateReportComment = (body: object, params: object) => {
   const paramsSchema = Joi.object({
     commentId: Joi.string().regex(/^[0-9a-fA-F]{24}$/, 'object Id').required(),
   })
   const bodySchema = Joi.object({
-    message: Joi.string().required()
+      attachment: Joi.string().optional(),
+      message: Joi.string().required()
   })
   const combinedSchema = Joi.object({
     body: bodySchema,
@@ -254,6 +287,7 @@ export const validateReportFlick = (body: object, params: object) => {
     flickId: Joi.string().regex(/^[0-9a-fA-F]{24}$/, 'object Id').required(),
   })
   const bodySchema = Joi.object({
+    attachment: Joi.string().optional(),
     message: Joi.string().required()
   })
   const combinedSchema = Joi.object({
@@ -376,7 +410,6 @@ export const validateStoryUpload = (body: object) => {
   const schema = Joi.object({
     fileType: Joi.string().required(),
     fileName : Joi.string().required(),
-    thumbnailURL: Joi.string().required(),
   })
   const { error } = schema.validate(body)
   return error
@@ -390,6 +423,7 @@ export const validateCreateStory = (body: string, params: object) => {
   })
   const bodySchema = Joi.object({
     mediaType: Joi.string().valid("photo", "video").required(),
+    caption : Joi.string().optional(),
     song: Joi.string().regex(/^[0-9a-fA-F]{24}$/, 'object Id').optional(),
     mediaURL: Joi.string().required(),
     thumbnailURL: Joi.string().required(),
@@ -443,10 +477,10 @@ export const validatePresignedQuest = (body: object) => {
 
 export const validateCreateQuest = (body: object, params: object) => {
   const bodySchema = Joi.object({
-    _id: Joi.string().regex(/^[0-9a-fA-F]{24}$/, 'object Id').required(),
     title: Joi.string().required(),
     description: Joi.string().required(),
     media: Joi.array().items(Joi.string().pattern(new RegExp(`^${config.R2.R2_PUBLIC_URL}/.+$`)).required()).required().message("media must be a valid URL"),
+    thumbnailURL : Joi.string().pattern(new RegExp(`^${config.R2.R2_PUBLIC_URL}/.+$`)).required().message("thumbnailURL must be a valid URL"),
     mode: Joi.string().valid("GoFlick", "OnFlick").required(),
     location: Joi.string().required(),
     coords: Joi.object({
@@ -473,10 +507,15 @@ export const validateCreateQuestApplication = (body: object, params: object) => 
   })
   const bodySchema = Joi.object({
     quest: Joi.string().regex(/^[0-9a-fA-F]{24}$/, 'object Id').required(),
-    description: Joi.string().required(),
+    description: Joi.array().items(Joi.object({
+      type: Joi.string().valid("user", "text"),
+      mention: Joi.string().regex(/^[0-9a-fA-F]{24}$/, 'object Id').optional(),
+      text: Joi.string().optional()
+    })).required(),
+    partialAllowance  : Joi.boolean().required(),
     media: Joi.array().items(Joi.object({
-      mediaURL: Joi.string().required(),
-      thumbnailURL: Joi.string().required(),
+      url: Joi.string().required(),
+      thumbnail: Joi.string().required(),
       type: Joi.string().valid('photo', 'video', 'audio', 'pdf').required()
     })).required(),
   })
@@ -494,7 +533,6 @@ export const validatePresignedQuestApplication = (body: object) => {
       fileType: Joi.string().required(),
       fileName: Joi.string().required(),
     })).required(),
-    thumbnailURL: Joi.string().required(),
   })
   const { error } = schema.validate(body)
   return error
@@ -506,6 +544,17 @@ export const validatePresinedURLQuest = (body: object) => {
       fileName: Joi.string().required(),
       fileType: Joi.string().required()
     }))
+  })
+  const { error } = schema.validate(body)
+  return error
+}
+
+export const validatePresignedURLReport = (body: object) => {
+  const schema = Joi.object({
+      attachment: Joi.array().items(Joi.object({
+      fileName: Joi.string().required(),
+      fileType: Joi.string().required()
+    })).required(),
   })
   const { error } = schema.validate(body)
   return error

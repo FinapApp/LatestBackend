@@ -20,10 +20,10 @@ export const createPresignedURLFlick = async (req: Request, res: Response) => {
         if (flickId) {
             let mediaSignedURLs,thumbnailSignedURLs,audioPresignedURL;
             if (mediaFiles) {
-                mediaSignedURLs = Promise.all(mediaFiles.map((fileName: string , fileType : string) => generateSignedURL(`${user}/flick/videos/${flickId}/${fileName}` , fileType)))
+                mediaSignedURLs = Promise.all(mediaFiles.map((fileName: string, fileType: string) => generateSignedURL(`${user}/flick/${flickId}/videos/${fileName}` , fileType)))
             }
             if (thumbnailName) {
-                thumbnailSignedURLs = await generateSignedURL(`${user}/flick/thumbnails/${flickId}/${thumbnailName}` , 'image/jpeg');
+                thumbnailSignedURLs = await generateSignedURL(`${user}/flick/${flickId}/thumbnail`);
             }
             if (audioName) {
                 const audioPath = `${user}/flick/audio/${flickId}/${audioName}`;

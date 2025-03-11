@@ -18,14 +18,16 @@ export const createPresignedURLQuestApplication = async (req: Request, res: Resp
             return handleResponse(res, 404, errors.quest_not_found);
         }
         const mediaPresignedURLs = await Promise.all(req.body.media.map((fileName: string, fileType : string) => generateSignedURL(`${user}/quest-applicant/${questApplicantId}/${fileName}` , fileType)));
-        return handleResponse(res, 200, {
-            questApplicantId,
-            MEDIASIGNED: mediaPresignedURLs
-        })
+        const thumbnailPresignedURL = await generateSignedURL(`user/${user}/quest-applicant/${questApplicantId}/thumbnail`);
+        if (mediaPresignedURLs && thumbnailPresignedURL) {
+            return handleResponse(res, 200, {
+                questApplicantId,
+                MEDIASIGNED: mediaPresignedURLs
+            });
+        }
+        return handleResponse(res, 500, errors.unable_to_create_signedURL);
     } catch (error) {
         sendErrorToDiscord("confirm-quest-applicant-upload", error)
         return handleResponse(res, 500, errors.catch_error);
     }
 };
-
-

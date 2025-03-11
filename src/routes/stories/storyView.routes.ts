@@ -55,15 +55,48 @@ export const storyRoutes: Router = express.Router();
  *           schema:
  *             type: object
  *             properties:
- *               viewerId:
- *                 type: string
- *               viewerName:
+ *               reaction:
  *                 type: string
  *     responses:
  *       200:
  *         description: Viewer added successfully
- *       404:
- *         description: Story not found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 message:
+ *                   type: string
+ *                   example: 'Viewer added successfully'
+ *       400:
+ *         description: Invalid request
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: false
+ *                 message:
+ *                   type: string
+ *                   example: Invalid request
+ *       500:
+ *         description: An error occurred
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: false
+ *                 message:
+ *                   type: string
+ *                   example: An error occurred
  */
 storyRoutes.route("/story-view/:storyId")
     .get(getStoryViewers)

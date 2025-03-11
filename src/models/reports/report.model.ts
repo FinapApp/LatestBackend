@@ -11,6 +11,7 @@ export interface IReportSchema extends Document {
     song? : Types.ObjectId;
     comment?: Types.ObjectId;
     reportedTo?: Types.ObjectId;
+    attachment :  string[]
     message: IMessage[];
     status: 'pending' | 'resolved';
 }
@@ -38,10 +39,6 @@ let reportSchema = new Schema<IReportSchema>(
             type: Schema.Types.ObjectId,
             ref: 'audio', // report against an audio.
         },
-        song: {
-            type: Schema.Types.ObjectId,
-            ref: 'song', // report against a song.
-        },
         story  :{
             type: Schema.Types.ObjectId,
             ref: 'story', // report against a story.
@@ -53,6 +50,9 @@ let reportSchema = new Schema<IReportSchema>(
         message: {
             type: [MessageSchema],
             require: true,
+        },
+        attachment: {
+            type : [String]
         },
         status: {
             type: String,

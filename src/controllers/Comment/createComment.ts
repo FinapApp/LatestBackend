@@ -18,7 +18,7 @@ export const createComment = async (req: Request, res: Response) => {
         })
         if (createComment) {
             //send things to kafka
-            return handleResponse(res, 200, success.create_comment)
+            return handleResponse(res, 201, success.create_comment)
         }
         return handleResponse(res, 304, errors.create_comment)
     } catch (error) {

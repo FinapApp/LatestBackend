@@ -12,7 +12,7 @@ export const updateReplyComment = async (req: Request, res: Response) => {
         }
         const { comment } = req.body
         const updateComment = await COMMENT.findByIdAndUpdate(req.params.commentId, {
-            comment: req.body.comment
+            comment
         })
         if (updateComment) {
             // // send this to the kafka

@@ -2,7 +2,6 @@ import { Request, Response } from "express"
 import Joi from "joi";
 import { validateSessionId} from "../../validators/validators";
 import { errors, handleResponse, success } from "../../utils/responseCodec";
-import { STORY } from "../../models/Stories/story.model";
 import { SESSION } from "../../models/User/userSession.model";
 
 export const deleteSession = async (req: Request, res: Response) => {

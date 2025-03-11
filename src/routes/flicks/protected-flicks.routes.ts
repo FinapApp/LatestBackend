@@ -12,7 +12,7 @@ export const flickRoutes: Router = express.Router();
  *   post:
  *     summary: Create a presigned URL for uploading a flick
  *     tags:
- *      - Protected Flicks
+ *       - Protected Flicks
  *     requestBody:
  *       description: Object containing media details for the flick
  *       required: true
@@ -21,9 +21,6 @@ export const flickRoutes: Router = express.Router();
  *           schema:
  *             type: object
  *             properties:
- *               thumbnailName:
- *                 type: string
- *                 example: 'thumbnail.jpg'
  *               audioName:
  *                 type: string
  *                 example: 'audio.mp3'
@@ -46,6 +43,9 @@ export const flickRoutes: Router = express.Router();
  *             schema:
  *               type: object
  *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
  *                 flickId:
  *                   type: string
  *                   example: 'flickId'
@@ -86,26 +86,32 @@ export const flickRoutes: Router = express.Router();
  *   get:
  *     summary: Get all flicks
  *     tags:
- *      - Protected Flicks
+ *       - Protected Flicks
  *     responses:
  *       200:
  *         description: Successfully retrieved all flicks
  *         content:
  *           application/json:
  *             schema:
- *               type: array
- *               items:
- *                 type: object
- *                 properties:
- *                   id:
- *                     type: string
- *                     example: 'flickId'
- *                   title:
- *                     type: string
- *                     example: 'Flick Title'
- *                   description:
- *                     type: string
- *                     example: 'Flick Description'
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 flicks:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *                     properties:
+ *                       id:
+ *                         type: string
+ *                         example: 'flickId'
+ *                       title:
+ *                         type: string
+ *                         example: 'Flick Title'
+ *                       description:
+ *                         type: string
+ *                         example: 'Flick Description'
  *       500:
  *         description: An error occurred
  *         content:
@@ -122,7 +128,7 @@ export const flickRoutes: Router = express.Router();
  */
 flickRoutes.route("/flick")
     .post(createPresignedURLFlick)
-    .get(getAllFlicks)
+    .get(getAllFlicks);
 
 /**
  * @swagger
@@ -130,7 +136,7 @@ flickRoutes.route("/flick")
  *   post:
  *     summary: Create a flick
  *     tags:
- *      - Protected Flicks
+ *       - Protected Flicks
  *     parameters:
  *       - in: path
  *         name: flickId
@@ -146,12 +152,27 @@ flickRoutes.route("/flick")
  *           schema:
  *             type: object
  *             properties:
- *               title:
+ *               media:
+ *                 type: array
+ *                 items:
+ *                   type: object
+ *                   properties:
+ *                     type:
+ *                       type: string
+ *                       enum: ["photo", "video"]
+ *                       example: "photo"
+ *                     duration:
+ *                       type: number
+ *                       example: 120
+ *                     url:
+ *                       type: string
+ *                       example: "http://example.com/media.jpg"
+ *               thumbnailURL:
  *                 type: string
- *                 example: 'Flick Title'
+ *                 example: "http://example.com/thumbnail.jpg"
  *               description:
  *                 type: string
- *                 example: 'Flick Description'
+ *                 example: "A sample description"
  *     responses:
  *       200:
  *         description: Successfully created flick
@@ -163,9 +184,9 @@ flickRoutes.route("/flick")
  *                 success:
  *                   type: boolean
  *                   example: true
- *                 flickId:
+ *                 messsage:
  *                   type: string
- *                   example: 'flickId'
+ *                   example: 'Flick created successfully'
  *       400:
  *         description: Invalid request
  *         content:
@@ -195,7 +216,7 @@ flickRoutes.route("/flick")
  *   delete:
  *     summary: Delete a flick
  *     tags:
- *      - Protected Flicks
+ *       - Protected Flicks
  *     parameters:
  *       - in: path
  *         name: flickId
@@ -244,7 +265,6 @@ flickRoutes.route("/flick")
  *                   type: string
  *                   example: An error occurred
  */
-
 flickRoutes.route("/flick/:flickId")
     .post(createFlick)
-    .delete(deleteFlick)
+    .delete(deleteFlick);

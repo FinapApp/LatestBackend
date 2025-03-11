@@ -11,31 +11,127 @@ export const questRoutes: Router = express.Router();
 
 /**
  * @swagger
- * /quest:
+ * /v1/quest:
  *   post:
- *     tags: 
+ *     tags:
  *       - Quests
  *     summary: Create a presigned URL for a quest
+ *     requestBody:
+ *       description: Object containing media details for the flick
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               media:
+ *                 type: array
+ *                 items:
+ *                   type: object
+ *                   properties:
+ *                     fileName:
+ *                       type: string
+ *                       example: 'video.mp4'
+ *                     fileType:
+ *                       type: string
+ *                       example: 'video/mp4'
  *     responses:
  *       200:
- *         description: Presigned URL created
+ *         description: Successfully created presigned URL
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 questId:
+ *                   type: string
+ *                   example: 'questId'
+ *                 media:
+ *                   type: array
+ *                   items:
+ *                     type: string
+ *                     example: 'mediaURL1'
+ *       400:
+ *         description: Invalid request
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: false
+ *                 message:
+ *                   type: string
+ *                   example: Invalid request
+ *       500:
+ *         description: An error occurred
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: false
+ *                 message:
+ *                   type: string
+ *                   example: An error occurred
  *   get:
- *     tags: 
+ *     tags:
  *       - Quests
  *     summary: Get all quests
  *     responses:
  *       200:
  *         description: A list of quests
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 quests:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *                     properties:
+ *                       id:
+ *                         type: string
+ *                         example: 'questId'
+ *                       title:
+ *                         type: string
+ *                         example: 'Quest Title'
+ *                       description:
+ *                         type: string
+ *                         example: 'Quest Description'
+ *       500:
+ *         description: An error occurred
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: false
+ *                 message:
+ *                   type: string
+ *                   example: An error occurred
  */
 questRoutes.route("/quest")
     .post(createPresignedURLQuest)
-    .get(getAllQuests)
+    .get(getAllQuests);
 
 /**
  * @swagger
- * /quest/{questId}:
+ * /v1/quest/{questId}:
  *   post:
- *     tags: 
+ *     tags:
  *       - Quests
  *     summary: Create a quest
  *     parameters:
@@ -44,11 +140,93 @@ questRoutes.route("/quest")
  *         required: true
  *         schema:
  *           type: string
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               title:
+ *                 type: string
+ *                 example: "Amazing Quest"
+ *               description:
+ *                 type: string
+ *                 example: "This is a challenging and fun quest."
+ *               media:
+ *                 type: array
+ *                 items:
+ *                   type: string
+ *                   format: uri
+ *                   example: "https://example.com/media.jpg"
+ *               thumbnailURL:
+ *                 type: string
+ *                 format: uri
+ *                 example: "https://example.com/thumbnail.jpg"
+ *               mode:
+ *                 type: string
+ *                 enum: ["GoFlick", "OnFlick"]
+ *                 example: "GoFlick"
+ *               location:
+ *                 type: string
+ *                 example: "Central Park, NYC"
+ *               coords:
+ *                 type: object
+ *                 properties:
+ *                   lat:
+ *                     type: number
+ *                     example: 40.785091
+ *                   long:
+ *                     type: number
+ *                     example: -73.968285
+ *               maxApplicants:
+ *                 type: number
+ *                 example: 10
+ *               totalAmount:
+ *                 type: number
+ *                 example: 500
  *     responses:
  *       200:
  *         description: Quest created
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 message:
+ *                   type: string
+ *                   example: "Quest created successfully"
+ *       400:
+ *         description: Invalid request
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: false
+ *                 message:
+ *                   type: string
+ *                   example: "Invalid request parameters"
+ *       500:
+ *         description: An error occurred
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: false
+ *                 message:
+ *                   type: string
+ *                   example: "An error occurred"
  *   delete:
- *     tags: 
+ *     tags:
  *       - Quests
  *     summary: Delete a quest
  *     parameters:
@@ -60,45 +238,237 @@ questRoutes.route("/quest")
  *     responses:
  *       200:
  *         description: Quest deleted
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 message:
+ *                   type: string
+ *                   example: "Quest deleted successfully"
+ *       400:
+ *         description: Invalid request
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: false
+ *                 message:
+ *                   type: string
+ *                   example: "Invalid request parameters"
+ *       500:
+ *         description: An error occurred
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: false
+ *                 message:
+ *                   type: string
+ *                   example: "An error occurred"
  */
+
 questRoutes.route("/quest/:questId")
     .post(createQuest)
-    .delete(deleteQuest)
+    .delete(deleteQuest);
 
 /**
  * @swagger
- * /quest-applicant:
+ * /v1/quest-applicant:
  *   post:
- *     tags: 
+ *     tags:
  *       - Quests
- *     summary: Create a quest applicant
+ *     summary: Create a presigned URL for a quest
+ *     requestBody:
+ *       description: Object containing media details for the flick
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               media:
+ *                 type: array
+ *                 items:
+ *                   type: object
+ *                   properties:
+ *                     fileName:
+ *                       type: string
+ *                       example: 'video.mp4'
+ *                     fileType:
+ *                       type: string
+ *                       example: 'video/mp4'
  *     responses:
  *       200:
- *         description: Quest applicant created
+ *         description: Successfully created presigned URL
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 questApplicantId:
+ *                   type: string
+ *                   example: 'questId'
+ *                 media:
+ *                   type: array
+ *                   items:
+ *                     type: string
+ *                     example: 'mediaURL1'
+ *       400:
+ *         description: Invalid request
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: false
+ *                 message:
+ *                   type: string
+ *                   example: Invalid request
+ *       500:
+ *         description: An error occurred
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: false
+ *                 message:
+ *                   type: string
+ *                   example: An error occurred
  */
 questRoutes.route("/quest-applicant")
-    .post(createQuestApplicant)
+    .post(createPresignedURLQuestApplication);
 
 /**
  * @swagger
- * /quest-applicant/{questApplicantId}:
- *   put:
- *     tags: 
+ * /v1/quest-applicant/{questApplicantId}:
+ *   post:
+ *     tags:
  *       - Quests
- *     summary: Create a presigned URL for a quest applicant
+ *     summary: Create a quest applicant
  *     parameters:
  *       - in: path
  *         name: questApplicantId
  *         required: true
  *         schema:
  *           type: string
+ *           pattern: "^[0-9a-fA-F]{24}$"
+ *         description: The unique ID of the quest applicant
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               quest:
+ *                 type: string
+ *                 pattern: "^[0-9a-fA-F]{24}$"
+ *                 example: "60b8d295f1b2c72f9c8b4567"
+ *                 description: The unique ID of the quest
+ *               description:
+ *                 type: array
+ *                 description: An array of descriptions, which may include text or user mentions.
+ *                 items:
+ *                   type: object
+ *                   properties:
+ *                     type:
+ *                       type: string
+ *                       enum: ["user", "text"]
+ *                       example: "text"
+ *                     mention:
+ *                       type: string
+ *                       pattern: "^[0-9a-fA-F]{24}$"
+ *                       example: "60b8d295f1b2c72f9c8b4568"
+ *                     text:
+ *                       type: string
+ *                       example: "This is a sample description"
+ *               partialAllowance:
+ *                 type: boolean
+ *                 example: true
+ *                 description: Whether partial payments are allowed
+ *               media:
+ *                 type: array
+ *                 description: List of media files included in the quest application
+ *                 items:
+ *                   type: object
+ *                   properties:
+ *                     url:
+ *                       type: string
+ *                       format: uri
+ *                       example: "https://example.com/media.jpg"
+ *                       description: The URL of the media file
+ *                     thumbnail:
+ *                       type: string
+ *                       format: uri
+ *                       example: "https://example.com/thumbnail.jpg"
+ *                       description: The thumbnail URL for the media file
+ *                     type:
+ *                       type: string
+ *                       enum: ["photo", "video", "audio", "pdf"]
+ *                       example: "photo"
+ *                       description: Type of media file
  *     responses:
  *       200:
- *         description: Presigned URL created
+ *         description: Quest applicant created successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 questApplicantId:
+ *                   type: string
+ *                   example: "questApplicantId"
+ *       400:
+ *         description: Invalid request parameters
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: false
+ *                 message:
+ *                   type: string
+ *                   example: "Invalid request parameters"
+ *       500:
+ *         description: An error occurred on the server
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: false
+ *                 message:
+ *                   type: string
+ *                   example: "An internal server error occurred"
  *   delete:
- *     tags: 
+ *     tags:
  *       - Quests
- *     summary: Delete a quest applicant
+ *     summary: Delete a quest
  *     parameters:
  *       - in: path
  *         name: questApplicantId
@@ -107,8 +477,46 @@ questRoutes.route("/quest-applicant")
  *           type: string
  *     responses:
  *       200:
- *         description: Quest applicant deleted
+ *         description: Quest Applicant deleted
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 message:
+ *                   type: string
+ *                   example: "Quest Applicant deleted successfully"
+ *       400:
+ *         description: Invalid request
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: false
+ *                 message:
+ *                   type: string
+ *                   example: "Invalid request parameters"
+ *       500:
+ *         description: An error occurred
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: false
+ *                 message:
+ *                   type: string
+ *                   example: "An error occurred"
  */
+
 questRoutes.route("/quest-applicant/:questApplicantId")
-    .put(createPresignedURLQuestApplication)
-    .delete(deleteQuestApplication)
+    .post(createQuestApplicant)
+    .delete(deleteQuestApplication);

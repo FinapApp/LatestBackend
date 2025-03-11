@@ -33,7 +33,7 @@ export const onboardingRoutes: Router = express.Router();
  *       400:
  *         description: Bad request
  */
-
+onboardingRoutes.post("/sign-up", signUp);
 /**
  * @swagger
  * /verify-otp:
@@ -58,5 +58,4 @@ export const onboardingRoutes: Router = express.Router();
  *       400:
  *         description: Bad request
  */
-onboardingRoutes.post("/sign-up", signUp);
 onboardingRoutes.post("/verify-otp", verifyOTPAfterSignUp);
