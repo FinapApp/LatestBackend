@@ -222,7 +222,7 @@ export const validateReportUser = (body: object, params: object) => {
     userId: Joi.string().regex(/^[0-9a-fA-F]{24}$/, 'object Id').required(),
   })
   const bodySchema = Joi.object({
-    attachment: Joi.string().optional(),
+    attachment: Joi.array().items(Joi.string().required()).optional(),
     message: Joi.string().required()
   })
   const combinedSchema = Joi.object({
@@ -239,7 +239,7 @@ export const validateReportStory = (body: object, params: object) => {
     storyId: Joi.string().regex(/^[0-9a-fA-F]{24}$/, 'object Id').required(),
   })
   const bodySchema = Joi.object({
-    attachment: Joi.string().optional(),
+    attachment: Joi.array().items(Joi.string().required()).optional(),
     message: Joi.string().required()
   })
   const combinedSchema = Joi.object({
@@ -255,7 +255,7 @@ export const validateReportAudio = (body: object, params: object) => {
     audioId: Joi.string().regex(/^[0-9a-fA-F]{24}$/, 'object Id').required(),
   })
   const bodySchema = Joi.object({
-    attachment: Joi.string().optional(),
+    attachment: Joi.array().items(Joi.string().required()).optional(),
     message: Joi.string().required()
   })
   const combinedSchema = Joi.object({
@@ -271,7 +271,7 @@ export const validateReportComment = (body: object, params: object) => {
     commentId: Joi.string().regex(/^[0-9a-fA-F]{24}$/, 'object Id').required(),
   })
   const bodySchema = Joi.object({
-      attachment: Joi.string().optional(),
+      attachment: Joi.array().items(Joi.string().required()).optional(),
       message: Joi.string().required()
   })
   const combinedSchema = Joi.object({
@@ -287,7 +287,7 @@ export const validateReportFlick = (body: object, params: object) => {
     flickId: Joi.string().regex(/^[0-9a-fA-F]{24}$/, 'object Id').required(),
   })
   const bodySchema = Joi.object({
-    attachment: Joi.string().optional(),
+    attachment: Joi.array().items(Joi.string().required()).optional(),
     message: Joi.string().required()
   })
   const combinedSchema = Joi.object({
@@ -479,17 +479,24 @@ export const validateCreateQuest = (body: object, params: object) => {
   const bodySchema = Joi.object({
     title: Joi.string().required(),
     description: Joi.string().required(),
-    media: Joi.array().items(Joi.string().pattern(new RegExp(`^${config.R2.R2_PUBLIC_URL}/.+$`)).required()).required().message("media must be a valid URL"),
-    thumbnailURL : Joi.string().pattern(new RegExp(`^${config.R2.R2_PUBLIC_URL}/.+$`)).required().message("thumbnailURL must be a valid URL"),
+    media: Joi.array()
+      .items(Joi.string()
+        .pattern(new RegExp(`^${config.R2.R2_PUBLIC_URL}/.+$`))
+        .message("Each media item must be a valid URL"))
+      .required(),
+    thumbnailURL: Joi.string()
+      .pattern(new RegExp(`^${config.R2.R2_PUBLIC_URL}/.+$`))
+      .message("thumbnailURL must be a valid URL")
+      .required(),
     mode: Joi.string().valid("GoFlick", "OnFlick").required(),
     location: Joi.string().required(),
     coords: Joi.object({
       lat: Joi.number().required(),
       long: Joi.number().required()
-    }),
+    }).required(),  // Ensure `coords` is required
     maxApplicants: Joi.number().required(),
     totalAmount: Joi.number().required(),
-  })
+  }); 
   const paramsSchema = Joi.object({
     questId: Joi.string().regex(/^[0-9a-fA-F]{24}$/, 'object Id').required()
   })

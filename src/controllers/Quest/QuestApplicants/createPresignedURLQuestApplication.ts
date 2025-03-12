@@ -11,7 +11,7 @@ export const createPresignedURLQuestApplication = async (req: Request, res: Resp
         const validationError: Joi.ValidationError | undefined = validatePresignedQuestApplication(req.body);
         if (validationError) {
             return handleResponse(res, 400, errors.validation, validationError.details);
-        }
+    }
         const user = res.locals.userId;
         const questApplicantId = new mongoose.Types.ObjectId();
         if (!questApplicantId) {

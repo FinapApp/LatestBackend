@@ -163,30 +163,98 @@ flickRoutes.route("/flick")
  *                       example: "photo"
  *                     duration:
  *                       type: number
- *                       example: 120
+ *                       example: 15
+ *                     alt:
+ *                       type: string
+ *                       example: "A beautiful sunset over the ocean"
  *                     url:
  *                       type: string
- *                       example: "http://example.com/media.jpg"
+ *                       example: "https://example.com/media/photo1.jpg"
+ *                     song:
+ *                       type: string
+ *                       example: "65a3d9f8b8e2c4f9a3d4e1f2"
+ *                     songStart:
+ *                       type: number
+ *                       example: 10
+ *                     songEnd:
+ *                       type: number
+ *                       example: 25
+ *                     songPosition:
+ *                       type: object
+ *                       properties:
+ *                         x:
+ *                           type: number
+ *                           example: 50
+ *                         y:
+ *                           type: number
+ *                           example: 80
+ *                     taggedUsers:
+ *                       type: array
+ *                       items:
+ *                         type: object
+ *                         properties:
+ *                           user:
+ *                             type: string
+ *                             example: "65a3e0f9c3d2b5f9a1e4c2d3"
+ *                           position:
+ *                             type: object
+ *                             properties:
+ *                               x:
+ *                                 type: number
+ *                                 example: 30
+ *                               y:
+ *                                 type: number
+ *                                 example: 60
  *               thumbnailURL:
  *                 type: string
- *                 example: "http://example.com/thumbnail.jpg"
+ *                 example: "https://example.com/media/thumbnail.jpg"
  *               description:
+ *                 type: array
+ *                 items:
+ *                   type: object
+ *                   properties:
+ *                     type:
+ *                       type: string
+ *                       enum: ["user", "text"]
+ *                       example: "text"
+ *                     mention:
+ *                       type: string
+ *                       example: "65c3e1d9b8f2a4c6d1e5b2f3"
+ *                     text:
+ *                       type: string
+ *                       example: "Nature never goes out of style. 🌿🌄"
+ *               location:
  *                 type: string
- *                 example: "A sample description"
- *     responses:
- *       200:
- *         description: Successfully created flick
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 success:
- *                   type: boolean
- *                   example: true
- *                 messsage:
+ *                 example: "Grand Canyon, Arizona"
+ *               collabs:
+ *                 type: array
+ *                 items:
+ *                   type: object
+ *                   properties:
+ *                     user:
+ *                       type: string
+ *                       example: "65d4f3b2a1e6c5d9b8f2e3c4"
+ *                     position:
+ *                       type: object
+ *                       properties:
+ *                         x:
+ *                           type: number
+ *                           example: 40
+ *                         y:
+ *                           type: number
+ *                           example: 70
+ *               hashTags:
+ *                 type: array
+ *                 items:
  *                   type: string
- *                   example: 'Flick created successfully'
+ *                 example: ["#travel", "#sunset", "#adventure"]
+ *               commentVisible:
+ *                 type: boolean
+ *                 example: true
+ *               likeVisible:
+ *                 type: boolean
+ *                 example: true
+ *     responses:
  *       400:
  *         description: Invalid request
  *         content:

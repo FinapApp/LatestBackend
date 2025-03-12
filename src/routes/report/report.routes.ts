@@ -105,6 +105,7 @@ reportRoutes.post("/report/presigned-url", createPresignedURLReport);
  *                   example: "attachment1"
  *               message:
  *                 type: string
+ *                 example: "This comment is inappropriate"
  *     responses:
  *       200:
  *         description: Comment reported successfully

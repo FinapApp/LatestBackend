@@ -158,11 +158,11 @@ questRoutes.route("/quest")
  *                 items:
  *                   type: string
  *                   format: uri
- *                   example: "https://example.com/media.jpg"
+ *                   example: "https://pub-301c1efdf41d428f9ab043c4d4ecbac9.r2.dev/song/67d0b6d2f1d6bb88fde0d962/1733091882152-8653235423482524-1730755306564-8543577671062357-Screenshot%202024-10-03%20at%202.10.40%E2%80%AFAM.png"
  *               thumbnailURL:
  *                 type: string
  *                 format: uri
- *                 example: "https://example.com/thumbnail.jpg"
+ *                 example: "https://pub-301c1efdf41d428f9ab043c4d4ecbac9.r2.dev/song/67d0b6d2f1d6bb88fde0d962/1733091882152-8653235423482524-1730755306564-8543577671062357-Screenshot%202024-10-03%20at%202.10.40%E2%80%AFAM.png"
  *               mode:
  *                 type: string
  *                 enum: ["GoFlick", "OnFlick"]
@@ -321,7 +321,7 @@ questRoutes.route("/quest/:questId")
  *                 questApplicantId:
  *                   type: string
  *                   example: 'questId'
- *                 media:
+ *                 MEDIASIGNED:
  *                   type: array
  *                   items:
  *                     type: string
@@ -413,12 +413,12 @@ questRoutes.route("/quest-applicant")
  *                     url:
  *                       type: string
  *                       format: uri
- *                       example: "https://example.com/media.jpg"
+ *                       example: "https://pub-301c1efdf41d428f9ab043c4d4ecbac9.r2.dev/song/67d0b6d2f1d6bb88fde0d962/1733091882152-8653235423482524-1730755306564-8543577671062357-Screenshot%202024-10-03%20at%202.10.40%E2%80%AFAM.png"
  *                       description: The URL of the media file
  *                     thumbnail:
  *                       type: string
  *                       format: uri
- *                       example: "https://example.com/thumbnail.jpg"
+ *                       example: "https://pub-301c1efdf41d428f9ab043c4d4ecbac9.r2.dev/song/67d0b6d2f1d6bb88fde0d962/1733091882152-8653235423482524-1730755306564-8543577671062357-Screenshot%202024-10-03%20at%202.10.40%E2%80%AFAM.png"
  *                       description: The thumbnail URL for the media file
  *                     type:
  *                       type: string

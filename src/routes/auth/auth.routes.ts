@@ -28,7 +28,7 @@ export const authRoutes: Router = express.Router();
  *                 example: 'dcode.0n1@gmail.com'
  *               password:
  *                 type: string
- *                 example: 'password'
+ *                 example: 'jalwa'
  *               fcmToken:
  *                 type: string    
  *                 example: "fcmTokenstring"
