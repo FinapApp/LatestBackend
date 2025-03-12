@@ -16,10 +16,10 @@ const options = {
     },
     servers: [
       {
-        url: process.env.NODE_ENV === 'production'
+        url: process.env.PROJECT_ENVIRONMENT === 'production'
           ? "http://4.213.171.49:4003/api"
           : "http://localhost:4003/api", 
-        description: process.env.NODE_ENV === 'production'
+        description: process.env.PROJECT_ENVIRONMENT === 'production'
           ? "Production Server"
           : "Local Server",
       },
