@@ -8,7 +8,7 @@ const options = {
       title: "Flickstar Backend User Routes",
       version: "0.1.0",
       description:
-        "This is a simple CRUD API application made with Express and documented with Swagger",
+        "This consist of all the routes that are used by the user in the Flickstar Backend,  if found an issue do contact t.me/dcode0n1",
       contact: {
         name: "Flickstar",
         email: "krakshak@flickstar.net",
