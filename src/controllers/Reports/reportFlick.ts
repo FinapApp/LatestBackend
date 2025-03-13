@@ -13,7 +13,10 @@ export const reportFlick = async (req: Request, res: Response) => {
         const reportUser = await REPORT.create({
             user: res.locals.userId,
             flick: req.params.flickId,
-            ...req.body
+            message: {
+                sentBy: "user",
+                ...req.body
+            }
         })
         if (reportUser) {
             //send things to kafka

@@ -6,7 +6,7 @@ interface IFlicks extends Document {
     collabs: TaggedUser[];
     media: IMediaSchema[];
     location: string;
-    gps: {
+gps: {
         type: string;
         coordinates: [number , number];
     };

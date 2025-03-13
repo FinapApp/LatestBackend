@@ -9,23 +9,29 @@ import cluster from "cluster";
 import helmet from "helmet";
 import { kafkaConnecter } from "./config/kafka/kafka.config";
 import { isAuthenticatedUser } from "./middlewares/isAuthenticatedUser";
+import BasicAuth from 'express-basic-auth'
 import { specs, swaggerUi } from "./utils/swagger";
 const redisInitalizer = redis;
 const app: Express = express();
 
-  const swaggerUiOptions = {
-    customCssUrl: 'https://cdnjs.cloudflare.com/ajax/libs/swagger-ui/5.18.2/swagger-ui.js',
-    customJsUrl: 'https://cdnjs.cloudflare.com/ajax/libs/swagger-ui/5.18.2/swagger-ui-bundle.js',
-    customJs: 'https://cdnjs.cloudflare.com/ajax/libs/swagger-ui/5.18.2/swagger-ui-standalone-preset.js',
-  };
 // SWAGGER
-app.use(
-  "/flickstar/api-docs",
+const swaggerUiOptions = {
+  swaggerOptions: {
+    persistAuthorization: false,
+  },
+  customCssUrl: 'https://cdnjs.cloudflare.com/ajax/libs/swagger-ui/5.18.2/swagger-ui.js',
+  customJsUrl: 'https://cdnjs.cloudflare.com/ajax/libs/swagger-ui/5.18.2/swagger-ui-bundle.js',
+  customJs: 'https://cdnjs.cloudflare.com/ajax/libs/swagger-ui/5.18.2/swagger-ui-standalone-preset.js',
+};
+app.use("/flickstar/api-docs", BasicAuth({
+  users: {
+    'admin': 'shokhdevs11@'
+  },
+  challenge: true,
+}),
   swaggerUi.serve,
-  // swaggerUi.setup(specs, { explorer: true })
   swaggerUi.setup(specs, swaggerUiOptions)
 );
-
 if (cluster.isPrimary) {
   for (let i = 0; i < 1; i++) {
     cluster.fork();
@@ -47,7 +53,7 @@ if (cluster.isPrimary) {
   app.use(helmet({ contentSecurityPolicy: false }))
   app.use("/api/v1", isAuthenticatedUser, protectedRoutes);
   app.use("/api", normalRoutes);
-  
+
   const startServer = async () => {
     try {
       await connectDB();

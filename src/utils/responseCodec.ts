@@ -23,6 +23,9 @@ export const handleResponse = (
 };
 
 export const errors = {
+  unable_to_create_user: {
+    message: "Unable to create user",
+  },
   audio_reported: {
     message: "Unable to report Audio"
   },
@@ -220,6 +223,9 @@ export const errors = {
 
 
 export const success = {
+  account_created: {
+    message: "Account created successfully",
+  },
   status_changed_flicked : {
     message: "Status changed successfully"
   },

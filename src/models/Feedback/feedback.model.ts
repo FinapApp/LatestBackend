@@ -29,7 +29,7 @@ let FeedbackSchema = new Schema<IFeedback>(
   {
     admin: {
       type: Schema.Types.ObjectId,
-      ref: 'admin',
+    ref: 'admin',
     },
     user: {
       type: Schema.Types.ObjectId,

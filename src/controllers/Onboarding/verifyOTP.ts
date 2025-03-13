@@ -42,20 +42,13 @@ export const verifyOTPAfterSignUp = async (req: Request, res: Response) => {
         }
         const { OTP } = JSON.parse(checkData)
         if (otp !== OTP) {
-            return handleResponse(res, 404, errors.otp_not_match)
+            return handleResponse(res, 400, errors.otp_not_match)
         }
         const userCreate = await USER.create({ email ,...rest})
-        const accessToken = jwt.sign(
-            { userId: userCreate._id },
-            config.JWT.ACCESS_TOKEN_SECRET as string,
-            { expiresIn: config.JWT.ACCESS_TOKEN_EXPIRE_IN }
-        );
-        const refreshToken = jwt.sign({
-            userId: userCreate._id
-        },
-            config.JWT.REFRESH_TOKEN_SECRET as string
-        )
-        return handleResponse(res, 200, { accessToken, refreshToken });
+        if (!userCreate) {
+            return handleResponse(res, 400, errors.unable_to_create_user);
+        }
+        return handleResponse(res, 200, success.account_created);
     } catch (err: any) {
         console.log(err)
         if(err.code === 11000){

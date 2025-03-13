@@ -1,27 +1,40 @@
-import { Type } from '@aws-sdk/client-s3';
 import { Schema, model, Types } from 'mongoose';
-import { IMessage, MessageSchema } from '../Feedback/feedback.model';
+
+
+export interface IMessage {
+    sentBy: 'user' | 'admin';
+    staff: Types.ObjectId;
+    message: string;
+    attachment: string;
+}
+
+export const MessageSchema = new Schema<IMessage>(
+    {
+        sentBy: { type: String, enum: ['user', 'admin'] },
+        staff: {
+            type: Schema.Types.ObjectId,
+            ref: 'staff'
+        },
+        message: { type: String },
+        attachment: [{ type: String }],
+    },
+    { timestamps: { createdAt: true, updatedAt: false }, _id: true, versionKey: false }
+)
 
 export interface IReportSchema extends Document {
     user: Types.ObjectId;
-    admin?: Types.ObjectId;
     flick?: Types.ObjectId;
-    story? : Types.ObjectId;
-    audio? :  Types.ObjectId;
-    song? : Types.ObjectId;
+    story?: Types.ObjectId;
+    audio?: Types.ObjectId;
+    quest?: Types.ObjectId;
     comment?: Types.ObjectId;
     reportedTo?: Types.ObjectId;
-    attachment :  string[]
     message: IMessage[];
     status: 'pending' | 'resolved';
 }
 
 let reportSchema = new Schema<IReportSchema>(
     {
-        admin: {
-            type: Schema.Types.ObjectId,
-            ref: 'admin',
-        },
         user: {
             type: Schema.Types.ObjectId,
             ref: 'user',
@@ -39,9 +52,13 @@ let reportSchema = new Schema<IReportSchema>(
             type: Schema.Types.ObjectId,
             ref: 'audio', // report against an audio.
         },
-        story  :{
+        story: {
             type: Schema.Types.ObjectId,
             ref: 'story', // report against a story.
+        },
+        quest: {
+            type: Schema.Types.ObjectId,
+            ref: 'quest', // report against a quest
         },
         reportedTo: {
             type: Schema.Types.ObjectId,
@@ -50,9 +67,6 @@ let reportSchema = new Schema<IReportSchema>(
         message: {
             type: [MessageSchema],
             require: true,
-        },
-        attachment: {
-            type : [String]
         },
         status: {
             type: String,
