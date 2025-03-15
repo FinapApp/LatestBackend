@@ -1,0 +1,5 @@
+.github/workflows/
+kubernetes/
+.env
+dist/
+node_modules
