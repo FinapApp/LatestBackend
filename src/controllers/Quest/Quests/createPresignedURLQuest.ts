@@ -33,8 +33,9 @@ export const createPresignedURLQuest = async (req: Request, res: Response) => {
             }
         }
         return handleResponse(res, 500, errors.unable_to_create_signedURL);
-    } catch (error) {
+    } catch (error: any) {
         sendErrorToDiscord("create-flicks", error)
+	console.log("====> error", error) 
         return handleResponse(res, 500, errors.catch_error);
     }
 };
