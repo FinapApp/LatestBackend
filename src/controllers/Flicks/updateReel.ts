@@ -21,12 +21,13 @@ export const updateReel = async (req: AuthenticatedRequest, res: Response) => {
             );
         }
         const updateReel = await FLICKS.findByIdAndUpdate(
-            res.locals.userId,
+            req.params.flickId ,
             req.body
         );
         if (updateReel) {
-           
+            return handleResponse(res, 200, success.flick_updated);
         }
+        return handleResponse(res, 304, errors.flick_updated);
     } catch (err: any) {
 
         return handleResponse(res, 500, errors.catch_error);

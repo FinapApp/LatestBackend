@@ -24,7 +24,7 @@ export const createQuest = async (req: Request, res: Response) => {
         if (!quest) {
             return handleResponse(res, 404, errors.quest_not_found);
         }
-        return handleResponse(res, 200, success.quest_uploaded);
+        return handleResponse(res, 200, success.quest_created);
     } catch (error) {
         console.error(error);
         return handleResponse(res, 500, errors.catch_error);

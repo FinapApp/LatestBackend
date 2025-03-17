@@ -36,7 +36,7 @@ export const createPresignedURLFlick = async (req: Request, res: Response) => {
                 audioUploadURL: audioPresignedURL
             });
         }
-        return handleResponse(res, 500, errors.create_flick);
+        return handleResponse(res, 500, errors.unable_to_create_signedURL);
     } catch (error) {
         sendErrorToDiscord("create-flicks", error)
         return handleResponse(res, 500, errors.catch_error);

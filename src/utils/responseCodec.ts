@@ -21,128 +21,32 @@ export const handleResponse = (
     });
   }
 };
-
 export const errors = {
+  // Profile-related errors
+  profile_not_updated: {
+    message: "Unable to update profile",
+  },
+  profile_not_found: {
+    message: "Profile not found",
+  },
+
+  // Password-related errors
+  password_not_updated: {
+    message: "Password not updated",
+  },
+
+  // User-related errors
   unable_to_create_user: {
     message: "Unable to create user",
   },
-  audio_reported: {
-    message: "Unable to report Audio"
-  },
-  unable_to_create_signedURL: {
-    message: "Unable to create signed URL",
-  },
   user_not_found: {
     message: "User not found",
-  },
-  status_changed_flicked : {
-    message: "Status changed flicked"
-  },
-  session_not_found: {
-    message: "Session not found"
-  },
-  session_deleted: {
-    message: "Unable to delete session"
-  },
-  cannot_rerunIt: {
-    message: "Don't rerun the code"
-  },
-  create_audio: {
-    message: "Unable to create audio",
-  },
-  invalid_refresh_token: {
-    message: "Invalid refresh token",
-  },
-  refresh_token_expired: {
-    message: "Refresh token has expired",
-  },
-  refresh_token_not_found: {
-    message: "Refresh token not found",
-  },
-  add_story_viewer: {
-    message: "Unable to add story viewer",
-  },
-  get_story_view: {
-    message: "Unable to get story",
-  },
-  update_feedback: {
-    message: "Unable to update feedback",
-  },
-  delete_feedback: {
-    message: "Unable to delete feedback",
-  },
-  no_flicks: {
-    message: "No flicks found"
-  },
-  toggle_like: {
-    message: "Unable to toggle like"
-  },
-  retry_signup: {
-    message: "Please retry signup",
   },
   username_exist: {
     message: "Username already exists",
   },
   email_exist: {
-    message: "Email already exists"
-  },
-  comment_not_found: {
-    message: "Comment not found",
-  },
-
-  max_applicants: {
-    message: "Max applicants reached",
-  },
-  song_not_found: {
-    message: "Song not found",
-  },
-  create_songs: {
-    message: "Unable to create songs"
-  },
-  retry_login: {
-    message: "Please get yourself authenticated"
-  },
-  create_quest_applicants: {
-    message: "Unable to create quest applicants"
-  },
-  quest_deleted: {
-    message: "Unable to delete quest"
-  },
-  story_uploaded: {
-    message: "Unable to upload story"
-  },
-  story_deleted: {
-    message: "Unable to delete story"
-  },
-  quest_not_found: {
-    message: "Quest not found"
-  },
-  unauthorized: {
-    message: "You're unauthorized to perform this action"
-  },
-  create_flick: {
-    message: "Unable to create flick"
-  },
-  delete_story: {
-    message: "Unable to delete story"
-  },
-  notification: {
-    message: 'Unable to get notifications'
-  },
-  flick_uploaded: {
-    message: "Unable to upload flick",
-  },
-  flick_not_found: {
-    message: "flick not found",
-  },
-  comment_delete: {
-    message: "Unable to delete comment",
-  },
-  password_not_updated: {
-    message: "Password not updated",
-  },
-  validation: {
-    success: false,
+    message: "Email already exists",
   },
   email_not_found: {
     message: "Email not found",
@@ -150,9 +54,119 @@ export const errors = {
   invalid_credentials: {
     message: "Invalid Credentials",
   },
-  catch_error: {
-    message: "An error occurred",
+  unauthorized: {
+    message: "You're unauthorized to perform this action",
   },
+  user_reported: {
+    message: "Unable to report User",
+  },
+  user_followed: {
+    message: "Unable to follow user",
+  },
+  user_unfollowed: {
+    message: "Unable to unfollow user",
+  },
+  self_follow: {
+    message: "You can't follow yourself",
+  },
+
+  // Session-related errors
+  session_not_found: {
+    message: "Session not found",
+  },
+  session_deleted: {
+    message: "Unable to delete session",
+  },
+
+  // Flick-related errors
+  flick_not_found: {
+    message: "flick not found",
+  },
+  flick_uploaded: {
+    message: "Unable to upload flick",
+  },
+  flick_created: {
+    message: "Unable to create flick",
+  },
+  flick_updated: {
+    message: "Unable to update flick",
+  },
+  flick_deleted: {
+    message: "Unable to delete flick",
+  },
+  flick_reported: {
+    message: "Unable to report Flick",
+  },
+  no_flicks: {
+    message: "No flicks found",
+  },
+  toggle_like: {
+    message: "Unable to toggle like",
+  },
+  status_changed_flicked: {
+    message: "Status changed flicked",
+  },
+
+  // Story-related errors
+  story_uploaded: {
+    message: "Unable to upload story",
+  },
+  story_deleted: {
+    message: "Unable to delete story",
+  },
+  story_reported: {
+    message: "Unable to report Story",
+  },
+  add_story_viewer: {
+    message: "Unable to add story viewer",
+  },
+  get_story_view: {
+    message: "Unable to get story",
+  },
+
+  // Comment-related errors
+  comment_not_found: {
+    message: "Comment not found",
+  },
+  comment_delete: {
+    message: "Unable to delete comment",
+  },
+  comment_reported: {
+    message: "Unable to report Comment",
+  },
+  create_comment: {
+    message: "Unable to create comment",
+  },
+  update_comment: {
+    message: "Unable to update comment",
+  },
+
+  // Feedback-related errors
+  update_feedback: {
+    message: "Unable to update feedback",
+  },
+  delete_feedback: {
+    message: "Unable to delete feedback",
+  },
+  create_feedback: {
+    message: "Unable to create feedback",
+  },
+
+  // Quest-related errors
+  quest_not_found: {
+    message: "Quest not found",
+  },
+  create_quest: {
+    message: "Unable to create quest",
+  },
+  quest_deleted: {
+    message: "Unable to delete quest",
+  },
+  create_quest_applicants: {
+    message: "Unable to create quest applicants",
+  },
+
+  // Authentication-related errors
   no_token: {
     message: "No token provided",
   },
@@ -165,123 +179,83 @@ export const errors = {
   jwt_verification_error: {
     message: "JWT verification error",
   },
+  invalid_refresh_token: {
+    message: "Invalid refresh token",
+  },
+  refresh_token_expired: {
+    message: "Refresh token has expired",
+  },
+  refresh_token_not_found: {
+    message: "Refresh token not found",
+  },
+
+  // OTP-related errors
   otp_expired: {
-    message: "OTP has expired"
+    message: "OTP has expired",
   },
   otp_not_match: {
-    message: "OTP does not match"
+    message: "OTP does not match",
   },
-  update_comment: {
-    message: "Unable to update comment"
+
+  // Miscellaneous errors
+  retry_signup: {
+    message: "Please retry signup",
   },
-  create_comment: {
-    message: "Unable to create comment",
+  retry_login: {
+    message: "Please get yourself authenticated",
   },
-  flick_updated: {
-    message: "Unable to update flick"
-  },
-  flick_created: {
-    message: "Unable to create flick"
-  },
-  flick_deleted: {
-    message: "Unable to delete flick"
-  },
-  user_reported: {
-    message: "Unable to report User"
-  },
-  story_reported: {
-    message: "Unable to report Story"
+  audio_reported: {
+    message: "Unable to report Audio",
   },
   audio_uploaded: {
-    message: "Unable to upload audio"
+    message: "Unable to upload audio",
   },
-  comment_reported: {
-    message: "Unable to report Comment"
+  create_audio: {
+    message: "Unable to create audio",
   },
-  flick_reported: {
-    message: "Unable to report Flick"
+  create_songs: {
+    message: "Unable to create songs",
+  },
+  song_not_found: {
+    message: "Song not found",
+  },
+  max_applicants: {
+    message: "Max applicants reached",
+  },
+  notification: {
+    message: "Unable to get notifications",
   },
   share_post: {
-    message: "Unable to share post"
+    message: "Unable to share post",
   },
-  create_feedback: {
-    message: "Unable to create feedback"
+  validation: {
+    success: false,
   },
-  self_follow: {
-    message: "You can't follow yourself"
+  catch_error: {
+    message: "An error occurred",
   },
-  user_unfollowed: {
-    message: "Unable to unfollow user"
+  unable_to_create_signedURL: {
+    message: "Unable to create signed URL",
   },
-  user_followed: {
-    message: "Unable to follow user"
-  },
-  create_quest: {
-    message: "Unable to create quest"
+  cannot_rerunIt: {
+    message: "Don't rerun the code",
   },
 };
 
-
 export const success = {
+  // Profile-related success
+  profile_updated: {
+    message: "Profile updated successfully",
+  },
+
+  // Password-related success
+  password_updated: {
+    message: "Password updated successfully",
+  },
+
+  // User-related success
   account_created: {
     message: "Account created successfully",
-  },
-  status_changed_flicked : {
-    message: "Status changed successfully"
-  },
-  session_deleted: {
-    message: "Session deleted successfully",
-  },
-  add_story_viewer: {
-    message: "Story viewer added successfully",
-  },
-  update_feedback: {
-    message: "Feedback updated successfully",
-  },
-  delete_feedback: {
-    message: "Feedback deleted successfully",
-  },
-  toggle_like: {
-    message: "Like toggled successfully"
-  },
-  song_uploaded: {
-    message: "Song uploaded successfully",
-  },
-  create_quest_applicants: {
-    message: "Quest applicants created successfully"
-  },
-  quest_deleted: {
-    message: "Quest deleted successfully"
-  },
-  story_uploaded: {
-    message: "Story uploaded successfully"
-  },
-  story_deleted: {
-    message: "Story deleted successfully"
-  },
-  quest_uploaded: {
-    message: "Quest uploaded successfully"
-  },
-  quest_created: {
-    message: "Quest created successfully"
-  },
-  create_quest: {
-    message: "Quest created successfully"
-  },
-  delete_story: {
-    message: "Story deleted successfully"
-  },
-  flick_uploaded: {
-    message: "flick uploaded successfully",
-  },
-  flick_updated: {
-    message: "flick updated successfully",
-  },
-  flick_created: {
-    message: "flick created successfully",
-  },
-  flick_deleted: {
-    message: "flick deleted successfully",
   },
   user_followed: {
     message: "User followed successfully",
@@ -292,24 +266,50 @@ export const success = {
   user_reported: {
     message: "User reported successfully",
   },
-  story_reported: {
-    message: "Story reported successfully",
+
+  // Session-related success
+  session_deleted: {
+    message: "Session deleted successfully",
   },
-  audio_reported : {
-    message: "Audio reported successfully",
+
+  // Flick-related success
+  flick_uploaded: {
+    message: "flick uploaded successfully",
   },
-  comment_reported: {
-    message: "Comment reported successfully",
+  flick_created: {
+    message: "flick created successfully",
+  },
+  flick_updated: {
+    message: "flick updated successfully",
+  },
+  flick_deleted: {
+    message: "flick deleted successfully",
   },
   flick_reported: {
     message: "Flick reported successfully",
   },
-  create_feedback: {
-    message: "Feedback created successfully",
+  toggle_like: {
+    message: "Like toggled successfully",
   },
-  share_post: {
-    message: "Post shared successfully",
+  status_changed_flicked: {
+    message: "Status changed successfully",
   },
+
+  // Story-related success
+  story_uploaded: {
+    message: "Story uploaded successfully",
+  },
+  story_deleted: {
+    message: "Story deleted successfully",
+  },
+  story_reported: {
+    message: "Story reported successfully",
+  },
+  add_story_viewer: {
+    message: "Story viewer added successfully",
+  },
+
+  // Comment-related success
   comment_deleted: {
     message: "Comment deleted successfully",
   },
@@ -319,6 +319,33 @@ export const success = {
   update_comment: {
     message: "Comment updated successfully",
   },
+  comment_reported: {
+    message: "Comment reported successfully",
+  },
+
+  // Feedback-related success
+  update_feedback: {
+    message: "Feedback updated successfully",
+  },
+  delete_feedback: {
+    message: "Feedback deleted successfully",
+  },
+  create_feedback: {
+    message: "Feedback created successfully",
+  },
+
+  // Quest-related success
+  quest_created: {
+    message: "Quest created successfully",
+  },
+  quest_deleted: {
+    message: "Quest deleted successfully",
+  },
+  create_quest_applicants: {
+    message: "Quest applicants created successfully",
+  },
+
+  // Authentication-related success
   login: {
     message: "Login successful",
   },
@@ -330,5 +357,16 @@ export const success = {
   },
   otp_sent: {
     message: "OTP sent successfully",
+  },
+
+  // Miscellaneous success
+  share_post: {
+    message: "Post shared successfully",
+  },
+  song_uploaded: {
+    message: "Song uploaded successfully",
+  },
+  audio_reported: {
+    message: "Audio reported successfully",
   },
 };

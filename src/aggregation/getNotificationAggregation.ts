@@ -24,7 +24,7 @@ export const getNotificationAggregation = async (userId: string, skip: string) =
                                     {
                                         $project: {
                                             username: 1,
-                                            profile: 1,
+                                            photo: 1,
                                         }
                                     }
                                 ]
@@ -64,7 +64,7 @@ export const getNotificationAggregation = async (userId: string, skip: string) =
                                                     $project: {
                                                         _id: 1,
                                                         name: 1,
-                                                        profilePicture: 1
+                                                        photo: 1
                                                     }
                                                 }
                                             ]

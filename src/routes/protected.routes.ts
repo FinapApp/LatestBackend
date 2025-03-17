@@ -4,6 +4,7 @@ import { followRoutes } from "./follow/follow.routes";
 import { likeRoutes } from "./like/like.routes";
 import { questRoutes } from "./quest/quest.routes";
 import { reportRoutes } from "./report/report.routes";
+import { settingProfile } from "./setting/settingProfile.routes";
 import { storyRoutes } from "./stories/story.routes";
 import { walletRoutes } from "./wallet/wallet.routes";
 
@@ -16,7 +17,8 @@ const routes = [
     storyRoutes,
     followRoutes,
     likeRoutes,
-    questRoutes
+    questRoutes,
+    settingProfile
 ];
 
 export default routes;

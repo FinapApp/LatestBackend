@@ -271,8 +271,8 @@ export const validateReportComment = (body: object, params: object) => {
     commentId: Joi.string().regex(/^[0-9a-fA-F]{24}$/, 'object Id').required(),
   })
   const bodySchema = Joi.object({
-      attachment: Joi.array().items(Joi.string().required()).optional(),
-      message: Joi.string().required()
+    attachment: Joi.array().items(Joi.string().required()).optional(),
+    message: Joi.string().required()
   })
   const combinedSchema = Joi.object({
     body: bodySchema,
@@ -314,12 +314,20 @@ export const validateShareFlick = (body: object) => {
 export const validatePresignedSong = (body: object) => {
   const schema = Joi.object({
     fileName: Joi.string(),
-    fileType : Joi.string()
+    fileType: Joi.string()
   })
   const { error } = schema.validate(body)
   return error
 }
 
+
+export const validatePresignedProfile = (body: object) => {
+  const schema = Joi.object({
+    fileType: Joi.string()
+  })
+  const { error } = schema.validate(body)
+  return error
+}
 
 export const validateCreateSong = (body: object, params: object) => {
   const paramsSchema = Joi.object({
@@ -409,7 +417,7 @@ export const validateNotificationQuery = (query: object) => {
 export const validateStoryUpload = (body: object) => {
   const schema = Joi.object({
     fileType: Joi.string().required(),
-    fileName : Joi.string().required(),
+    fileName: Joi.string().required(),
   })
   const { error } = schema.validate(body)
   return error
@@ -423,7 +431,7 @@ export const validateCreateStory = (body: string, params: object) => {
   })
   const bodySchema = Joi.object({
     mediaType: Joi.string().valid("photo", "video").required(),
-    caption : Joi.string().optional(),
+    caption: Joi.string().optional(),
     song: Joi.string().regex(/^[0-9a-fA-F]{24}$/, 'object Id').optional(),
     mediaURL: Joi.string().required(),
     thumbnailURL: Joi.string().required(),
@@ -496,7 +504,7 @@ export const validateCreateQuest = (body: object, params: object) => {
     }).required(),  // Ensure `coords` is required
     maxApplicants: Joi.number().required(),
     totalAmount: Joi.number().required(),
-  }); 
+  });
   const paramsSchema = Joi.object({
     questId: Joi.string().regex(/^[0-9a-fA-F]{24}$/, 'object Id').required()
   })
@@ -519,7 +527,7 @@ export const validateCreateQuestApplication = (body: object, params: object) => 
       mention: Joi.string().regex(/^[0-9a-fA-F]{24}$/, 'object Id').optional(),
       text: Joi.string().optional()
     })).required(),
-    partialAllowance  : Joi.boolean().required(),
+    partialAllowance: Joi.boolean().required(),
     media: Joi.array().items(Joi.object({
       url: Joi.string().required(),
       thumbnail: Joi.string().required(),
@@ -558,7 +566,7 @@ export const validatePresinedURLQuest = (body: object) => {
 
 export const validatePresignedURLReport = (body: object) => {
   const schema = Joi.object({
-      attachment: Joi.array().items(Joi.object({
+    attachment: Joi.array().items(Joi.object({
       fileName: Joi.string().required(),
       fileType: Joi.string().required()
     })).required(),
@@ -725,5 +733,37 @@ export const validateChangeStatusQuestApplicant = (body: object, params: object)
     params: paramsSchema
   })
   const { error } = combinedSchema.validate({ body, params })
+  return error
+}
+
+
+
+export const validateUpdateProfile = (body: object) => {
+  const schema = Joi.object({
+    name: Joi.string().optional(),
+    surname : Joi.string().optional(),
+    gender : Joi.string().optional(),
+    phone: Joi.string().optional(),
+    username: Joi.string().optional(),
+    dob: Joi.string().optional(),
+    country: Joi.string().optional().custom((value, helpers) => {
+      // Check if country exists in your predefined countries list
+      if (!countries.some(e => e.code === value)) {
+        return helpers.error("any.invalid", { message: "Country is not valid" });
+      }
+      return value;
+    }),
+    photo: Joi.string().optional(),
+  })
+  const { error } = schema.validate(body)
+  return error
+}
+
+export const validatePassword = (body: object) => {
+  const schema = Joi.object({
+    password : Joi.string().required(),
+    newPassword: Joi.string().required()
+  })
+  const { error } = schema.validate(body)
   return error
 }
