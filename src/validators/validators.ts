@@ -767,3 +767,53 @@ export const validatePassword = (body: object) => {
   const { error } = schema.validate(body)
   return error
 }
+
+export const validateUpdateNotificationSetting  = (body: object) => {
+  const schema  = Joi.object({
+    pauseAll: Joi.boolean().optional(),
+    likes: Joi.string().valid("everyone", "following", "none").optional(),
+    comments: Joi.string().valid("everyone", "following", "none").optional(),
+    tagged: Joi.string().valid("everyone", "following", "none").optional(),
+    addToPost: Joi.string().valid("everyone", "following", "none").optional(),
+    storyReaction: Joi.string().valid("everyone", "following", "none").optional(),
+    storyComment: Joi.string().valid("everyone", "following", "none").optional(),
+    storyTagged: Joi.string().valid("everyone", "following", "none").optional(),
+    message: Joi.string().valid("everyone", "following", "none").optional(),
+    messageRequest: Joi.string().valid("everyone", "following", "none").optional(),
+    messageRequestGroup: Joi.string().valid("everyone", "following", "none").optional(),
+    newFollower: Joi.string().valid("everyone", "following", "none").optional(),
+    newFollowing: Joi.string().valid("everyone", "following", "none").optional(),
+    acceptedFollower: Joi.string().valid("everyone", "following", "none").optional(),
+    suggestedFollower: Joi.string().valid("everyone", "following", "none").optional(),
+    profileMention: Joi.string().valid("everyone", "following", "none").optional(),
+    audioCall: Joi.string().valid("everyone", "following", "none").optional(),
+    videoCall: Joi.string().valid("everyone", "following", "none").optional(),
+    liveVideoStart: Joi.string().valid("everyone", "following", "none").optional(),
+    liveVideoEnd: Joi.string().valid("everyone", "following", "none").optional(),
+    recentlyUploaded: Joi.string().valid("everyone", "following", "none").optional(),
+    repost: Joi.string().valid("everyone", "following", "none").optional(),
+    audio: Joi.string().valid("everyone", "following", "none").optional(),
+    mostWatched: Joi.string().valid("everyone", "following", "none").optional(),
+    createdAQuest: Joi.array().items(Joi.string().valid("all", "everyone", "following", "goflick", "onflick", "none")).optional(),
+    sponsoredQuest: Joi.array().items(Joi.string().valid("all", "goflick", "onflick", "node")).optional(),
+    appliedForQuest: Joi.string().valid("everyone", "following", "none").optional(),
+    likedQuest: Joi.string().valid("everyone", "following", "none").optional(),
+    questUpdates: Joi.string().valid("everyone", "following", "none").optional(),
+    creditedTxn: Joi.string().valid("everyone", "following", "none").optional(),
+    debitedTxn: Joi.string().valid("everyone", "following", "none").optional(),
+    flickstarTxn: Joi.string().valid("everyone", "following", "none").optional(),
+    support: Joi.string().valid("everyone", "following", "none").optional(),
+    trending: Joi.string().valid("everyone", "following", "none").optional(),
+    feedback: Joi.string().valid("everyone", "following", "none").optional(),
+    achievement: Joi.string().valid("everyone", "following", "none").optional(),
+    newFeatures: Joi.string().valid("everyone", "following", "none").optional(),
+    followingActivity: Joi.string().valid("everyone", "following", "none").optional(),
+    engagement: Joi.string().valid("everyone", "following", "none").optional(),
+    socialCause: Joi.string().valid("everyone", "following", "none").optional(),
+    birthDay: Joi.string().valid("everyone", "following", "none").optional(),
+    shareBirthday: Joi.string().valid("everyone", "following", "none").optional(),
+    loginAlert: Joi.string().valid("everyone", "following", "none").optional(),
+  })
+  const { error } = schema.validate(body)
+  return error
+}

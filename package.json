@@ -6,10 +6,7 @@
     "@bugsnag/js": "^7.22.4",
     "@bugsnag/plugin-express": "^7.19.0",
     "axios": "^1.7.7",
-<<<<<<< HEAD
     "bcrypt": "^5.1.1",
-=======
->>>>>>> 2aebf2a1460fb411998d77ac9922b95cef6b4276
     "cookie-parser": "^1.4.7",
     "cors": "^2.8.5",
     "dotenv": "^16.4.5",
@@ -51,10 +48,7 @@
   "license": "ISC",
   "description": "",
   "devDependencies": {
-<<<<<<< HEAD
     "@types/bcrypt": "^5.0.2",
-=======
->>>>>>> 2aebf2a1460fb411998d77ac9922b95cef6b4276
     "@types/cookie-parser": "^1.4.7",
     "@types/cors": "^2.8.17",
     "@types/express": "^4.17.21",

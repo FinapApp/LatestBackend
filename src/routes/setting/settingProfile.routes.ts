@@ -208,8 +208,6 @@ settingProfile.route("/profile")
     .get(getProfile)
 
 
-    
-
 
     
 settingProfile.route("/password")

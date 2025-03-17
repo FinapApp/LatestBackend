@@ -22,6 +22,14 @@ export const handleResponse = (
   }
 };
 export const errors = {
+// Notification-related errors
+  user_notification_not_found: {
+    message: "Unable to get notifications",
+  },
+  update_notification_setting: {
+    message: "Unable to update notification setting",
+  },
+
   // Profile-related errors
   profile_not_updated: {
     message: "Unable to update profile",
@@ -243,6 +251,11 @@ export const errors = {
 };
 
 export const success = {
+// Notification-related success
+  update_notification_setting: {
+    message: "Notification setting updated successfully",
+  },
+
   // Profile-related success
   profile_updated: {
     message: "Profile updated successfully",

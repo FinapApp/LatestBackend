@@ -9,7 +9,7 @@ export const getProfile = async (req: Request, res: Response) => {
         if (getProfileDetails) {
             return handleResponse(res, 200, { PROFILEDETAILS :  getProfileDetails })
         }
-        return handleResponse(res, 200, errors.profile_not_found);
+        return handleResponse(res, 400, errors.profile_not_found);
     } catch (error : any) {
         sendErrorToDiscord('profile:GET' ,error);
         return handleResponse(res, 500, errors.catch_error);

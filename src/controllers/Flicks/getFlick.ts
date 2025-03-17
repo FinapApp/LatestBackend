@@ -15,7 +15,7 @@ export const getFlick = async (req: Request, res: Response) => {
         if (checkFlick) {
             return handleResponse(res , 200 , { checkFlick })
         }
-        return handleResponse(res, 200, errors.no_flicks);
+        return handleResponse(res, 400, errors.no_flicks);
     } catch (error) {
         console.error(error);
      return handleResponse(res, 500, errors.catch_error);

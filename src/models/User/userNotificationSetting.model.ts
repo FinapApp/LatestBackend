@@ -47,7 +47,7 @@ export interface IShareSchema extends Document {
     loginAlert : "everyone" | "following" | "none";
 };
 
-const NotificationSettingSchema = new Schema<IShareSchema>(
+const UserNotificationSetting = new Schema<IShareSchema>(
     {
         _id: {
             type: Schema.Types.ObjectId,
@@ -272,4 +272,4 @@ const NotificationSettingSchema = new Schema<IShareSchema>(
     { timestamps: { createdAt: false, updatedAt: true }, versionKey: false }
 );
 
-export const NOTIFICATIONSETTING = model<IShareSchema>('notificationsetting', NotificationSettingSchema);
+export const NOTIFICATIONSETTING = model<IShareSchema>('notificationsetting', UserNotificationSetting);
