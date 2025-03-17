@@ -6,7 +6,7 @@ export const storyRoutes: Router = express.Router();
 
 /**
  * @swagger
- * /story-view/{storyId}:
+ * /v1/story-view/{storyId}:
  *   get:
  *     tags:
  *       - StoryViews
