@@ -1,7 +1,6 @@
 import Joi, { optional } from "joi";
 import countries from "../constants/countryList";
 import { config } from "../config/generalconfig";
-
 export const validateLogin = (body: object) => {
   const schema = Joi.object({
     email: Joi.string().required(),
@@ -11,8 +10,6 @@ export const validateLogin = (body: object) => {
   const { error } = schema.validate(body);
   return error;
 };
-
-
 export const validateForgetPassword = (body: object) => {
   const schema = Joi.object({
     identifier: Joi.string().required()
@@ -20,8 +17,6 @@ export const validateForgetPassword = (body: object) => {
   const { error } = schema.validate(body);
   return error;
 }
-
-
 export const validateOTPAfterForgetPassword = (body: object) => {
   const schema = Joi.object({
     otp: Joi.string().required(),
@@ -31,7 +26,6 @@ export const validateOTPAfterForgetPassword = (body: object) => {
   const { error } = schema.validate(body);
   return error;
 }
-
 export const validateAfterSignUp = (body: object) => {
   const schema = Joi.object({
     otp: Joi.string().required(),
@@ -41,8 +35,6 @@ export const validateAfterSignUp = (body: object) => {
   const { error } = schema.validate(body);
   return error;
 }
-
-
 export const validateSignUp = (body: object) => {
   const schema = Joi.object({
     email: Joi.string().email().required(),
@@ -52,7 +44,6 @@ export const validateSignUp = (body: object) => {
   const { error } = schema.validate(body);
   return error;
 }
-
 export const validateVerifyOTPSignUp = (body: object) => {
   const schema = Joi.object({
     fcmToken: Joi.string().required(),
@@ -73,7 +64,6 @@ export const validateVerifyOTPSignUp = (body: object) => {
   const { error } = schema.validate(body);
   return error;
 }
-
 export const validateUpdateComment = (body: object, params: object) => {
   const bodySchema = Joi.object({
     comment: Joi.array().items(Joi.object({
@@ -92,7 +82,6 @@ export const validateUpdateComment = (body: object, params: object) => {
   const { error } = combinedSchema.validate({ body, params })
   return error
 }
-
 
 export const validateUpdateReplyComment = (body: object, params: object) => {
   const bodySchema = Joi.object({
@@ -133,7 +122,6 @@ export const validateComment = (body: object, params: object) => {
   return error
 }
 
-
 export const validateCommentId = (params: object) => {
   const schema = Joi.object({
     commentId: Joi.string().regex(/^[0-9a-fA-F]{24}$/, 'object Id').required()
@@ -141,7 +129,6 @@ export const validateCommentId = (params: object) => {
   const { error } = schema.validate(params)
   return error
 }
-
 
 export const validatePresignedFlick = (body: object) => {
   const schema = Joi.object({
@@ -155,7 +142,6 @@ export const validatePresignedFlick = (body: object) => {
   const { error } = schema.validate(body)
   return error
 }
-
 
 export const validateCreateFlick = (body: object, params: object) => {
   const paramsSchema = Joi.object({
@@ -209,7 +195,6 @@ export const validateCreateFlick = (body: object, params: object) => {
   return error
 }
 
-
 export const validateFlickId = (params: object) => {
   const schema = Joi.object({
     flickId: Joi.string().regex(/^[0-9a-fA-F]{24}$/, 'object Id').required()
@@ -217,6 +202,7 @@ export const validateFlickId = (params: object) => {
   const { error } = schema.validate(params)
   return error
 }
+
 export const validateReportUser = (body: object, params: object) => {
   const paramsSchema = Joi.object({
     userId: Joi.string().regex(/^[0-9a-fA-F]{24}$/, 'object Id').required(),
@@ -232,7 +218,6 @@ export const validateReportUser = (body: object, params: object) => {
   const { error } = combinedSchema.validate({ body, params })
   return error
 }
-
 
 export const validateReportStory = (body: object, params: object) => {
   const paramsSchema = Joi.object({
@@ -298,9 +283,6 @@ export const validateReportFlick = (body: object, params: object) => {
   return error
 }
 
-
-
-
 export const validateShareFlick = (body: object) => {
   const schema = Joi.object({
     flickId: Joi.string().regex(/^[0-9a-fA-F]{24}$/, 'object Id').required(),
@@ -309,18 +291,6 @@ export const validateShareFlick = (body: object) => {
   return error
 }
 
-
-
-export const validatePresignedSong = (body: object) => {
-  const schema = Joi.object({
-    fileName: Joi.string(),
-    fileType : Joi.string()
-  })
-  const { error } = schema.validate(body)
-  return error
-}
-
-
 export const validatePresignedProfile = (body: object) => {
   const schema = Joi.object({
     fileType: Joi.string()
@@ -328,25 +298,6 @@ export const validatePresignedProfile = (body: object) => {
   const { error } = schema.validate(body)
   return error
 }
-
-export const validateCreateSong = (body: object, params: object) => {
-  const paramsSchema = Joi.object({
-    songId: Joi.string().regex(/^[0-9a-fA-F]{24}$/, 'object Id').required()
-  })
-  const bodySchema = Joi.object({
-    name: Joi.string().required(),
-    url: Joi.string().required(),
-    duration: Joi.number().required(),
-    icon: Joi.string().required(),
-  })
-  const combinedSchema = Joi.object({
-    body: bodySchema,
-    params: paramsSchema
-  })
-  const { error } = combinedSchema.validate({ body, params })
-  return error
-}
-
 
 export const validateCreateFeedback = (body: object) => {
   const schema = Joi.object({
@@ -357,7 +308,6 @@ export const validateCreateFeedback = (body: object) => {
   return error
 }
 
-
 export const validateCreateFollower = (params: object) => {
   const schema = Joi.object({
     followerId: Joi.string().regex(/^[0-9a-fA-F]{24}$/, 'object Id').required()
@@ -365,7 +315,6 @@ export const validateCreateFollower = (params: object) => {
   const { error } = schema.validate(params)
   return error
 }
-
 
 export const getQueryParams = (query: object) => {
   const schema = Joi.object({
@@ -375,11 +324,6 @@ export const getQueryParams = (query: object) => {
   const { error } = schema.validate(query)
   return error
 }
-
-
-// export const validateCreateQuest = (body: object) => {
-
-
 
 export const validateUpdateFlick = (body: object, params: object) => {
   const bodySchema = Joi.object({
@@ -413,7 +357,6 @@ export const validateNotificationQuery = (query: object) => {
   return error
 }
 
-
 export const validateStoryUpload = (body: object) => {
   const schema = Joi.object({
     fileType: Joi.string().required(),
@@ -422,8 +365,6 @@ export const validateStoryUpload = (body: object) => {
   const { error } = schema.validate(body)
   return error
 }
-
-
 
 export const validateCreateStory = (body: string, params: object) => {
   const paramSchema = Joi.object({
@@ -447,8 +388,6 @@ export const validateCreateStory = (body: string, params: object) => {
   return error
 }
 
-
-
 export const validateStoryId = (params: object) => {
   const schema = Joi.object({
     storyId: Joi.string().regex(/^[0-9a-fA-F]{24}$/, 'object Id').required()
@@ -456,7 +395,6 @@ export const validateStoryId = (params: object) => {
   const { error } = schema.validate(params)
   return error
 }
-
 
 export const validateAddStoryViewer = (body: object, params: object) => {
   const bodySchema = Joi.object({
@@ -480,8 +418,6 @@ export const validatePresignedQuest = (body: object) => {
   const { error } = schema.validate(body)
   return error
 }
-
-
 
 export const validateCreateQuest = (body: object, params: object) => {
   const bodySchema = Joi.object({
@@ -575,8 +511,6 @@ export const validatePresignedURLReport = (body: object) => {
   return error
 }
 
-
-
 export const validateQuestId = (params: object) => {
   const schema = Joi.object({
     questId: Joi.string().regex(/^[0-9a-fA-F]{24}$/, 'object Id').required()
@@ -584,10 +518,6 @@ export const validateQuestId = (params: object) => {
   const { error } = schema.validate(params)
   return error
 }
-
-
-
-
 
 export const validateGetAllFlicks = (query: object) => {
   const schema = Joi.object({
@@ -597,7 +527,6 @@ export const validateGetAllFlicks = (query: object) => {
   return error
 }
 
-
 export const validateGetAllComments = (query: object) => {
   const schema = Joi.object({
     skip: Joi.string().optional()
@@ -605,26 +534,6 @@ export const validateGetAllComments = (query: object) => {
   const { error } = schema.validate(query)
   return error
 }
-
-
-
-
-
-export const validateSongUpload = (body: object, params: object) => {
-  const paramsSchema = Joi.object({
-    songId: Joi.string().regex(/^[0-9a-fA-F]{24}$/, 'object Id').required()
-  })
-  const bodySchema = Joi.object({
-    fileName: Joi.string().required()
-  })
-  const combinedSchema = Joi.object({
-    params: paramsSchema,
-    body: bodySchema
-  })
-  const { error } = combinedSchema.validate({ body, params })
-  return error
-}
-
 
 export const validateSignedURLFlicks = (body: object) => {
   const schema = Joi.object({
@@ -636,8 +545,6 @@ export const validateSignedURLFlicks = (body: object) => {
   return error
 }
 
-
-
 export const validateQuestApplicantId = (params: object) => {
   const schema = Joi.object({
     questApplicantId: Joi.string().regex(/^[0-9a-fA-F]{24}$/, 'object Id').required()
@@ -645,7 +552,6 @@ export const validateQuestApplicantId = (params: object) => {
   const { error } = schema.validate(params)
   return error
 }
-
 
 export const validateCreateQuestApplicant = (body: object, params: object) => {
   const bodySchema = Joi.object({
@@ -674,7 +580,6 @@ export const validateLike = (body: object) => {
   return error
 }
 
-
 export const validateFeedbackId = (params: object) => {
   const schema = Joi.object({
     feedbackId: Joi.string().regex(/^[0-9a-fA-F]{24}$/, 'object Id').required()
@@ -682,7 +587,6 @@ export const validateFeedbackId = (params: object) => {
   const { error } = schema.validate(params)
   return error
 }
-
 
 export const validateUpdateFeedback = (body: object, params: object) => {
   const bodySchema = Joi.object({
@@ -701,8 +605,6 @@ export const validateUpdateFeedback = (body: object, params: object) => {
   return error
 }
 
-
-
 export const validateSessionId = (params: object) => {
   const schema = Joi.object({
     sessionId: Joi.string().regex(/^[0-9a-fA-F]{24}$/, 'object Id').required()
@@ -711,7 +613,6 @@ export const validateSessionId = (params: object) => {
   return error
 }
 
-
 export const validateRefreshToken = (body: object) => {
   const schema = Joi.object({
     refreshToken: Joi.string().required()
@@ -719,7 +620,6 @@ export const validateRefreshToken = (body: object) => {
   const { error } = schema.validate(body)
   return error
 }
-
 
 export const validateChangeStatusQuestApplicant = (body: object, params: object) => {
   const paramsSchema = Joi.object({
@@ -735,8 +635,6 @@ export const validateChangeStatusQuestApplicant = (body: object, params: object)
   const { error } = combinedSchema.validate({ body, params })
   return error
 }
-
-
 
 export const validateUpdateProfile = (body: object) => {
   const schema = Joi.object({
@@ -817,3 +715,4 @@ export const validateUpdateNotificationSetting  = (body: object) => {
   const { error } = schema.validate(body)
   return error
 }
+

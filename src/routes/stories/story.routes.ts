@@ -26,20 +26,12 @@ export const storyRoutes: Router = express.Router();
  *           schema:
  *             type: object
  *             properties:
- *               audioName:
- *                 type: string
- *                 example: 'audio.mp3'
- *               mediaFiles:
- *                 type: array
- *                 items:
- *                   type: object
- *                   properties:
- *                     fileName:
- *                       type: string
- *                       example: 'video.mp4'
- *                     fileType:
- *                       type: string
- *                       example: 'video/mp4'
+ *              fileType:
+ *                type: string
+ *                example: 'image/jpeg'
+ *              fileName:
+ *               type: string
+ *               example: 'image.jpg'
  *     responses:
  *       200:
  *         description: Successfully created presigned URL

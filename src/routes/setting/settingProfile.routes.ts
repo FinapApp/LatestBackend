@@ -209,8 +209,8 @@ settingProfile.route("/profile")
 
 
 
+
+settingProfile.put("/password",updatePassword)
     
-settingProfile.route("/password")
-    .put(updatePassword)
 
 
