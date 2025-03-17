@@ -314,7 +314,7 @@ export const validateShareFlick = (body: object) => {
 export const validatePresignedSong = (body: object) => {
   const schema = Joi.object({
     fileName: Joi.string(),
-    fileType: Joi.string()
+    fileType : Joi.string()
   })
   const { error } = schema.validate(body)
   return error

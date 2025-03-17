@@ -60,6 +60,7 @@ export const login = async (req: Request, res: Response) => {
     })
     return handleResponse(res, 200, { accessToken, refreshToken });
   } catch (err: any) {
+	  console.log("login-errors" , err) 
     return handleResponse(res, 500, errors.catch_error);
   }
 };
