@@ -5,7 +5,7 @@ export const likeRoutes: Router = express.Router();
 
 /**
  * @swagger
- * /like:
+ * /v1/like:
  *   post:
  *     summary: Toggle like
  *     tags: 

@@ -8,7 +8,7 @@ export const followRoutes: Router = express.Router();
 
 /**
  * @swagger
- * /follow/{followerId}:
+ * /v1/follow/{followerId}:
  *   post:
  *     summary: Toggle follower
  *     tags:
@@ -78,7 +78,7 @@ followRoutes.post("/follow/:followerId", followerToggle);
 
 /**
  * @swagger
- * /follower:
+ * /v1/follower:
  *   get:
  *     summary: Get followers
  *     tags:
@@ -136,7 +136,7 @@ followRoutes.get("/follower", getFollowers);
 
 /**
  * @swagger
- * /following:
+ * /v1/following:
  *   get:
  *     summary: Get following
  *     tags:
