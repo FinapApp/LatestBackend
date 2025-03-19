@@ -2,17 +2,18 @@ import { Request, Response } from "express";
 import { validateLogin } from "../../validators/validators";
 import Joi from "joi";
 import jwt from "jsonwebtoken";
-import { handleResponse, errors} from "../../utils/responseCodec";
+import { handleResponse, errors } from "../../utils/responseCodec";
 import { config } from "../../config/generalconfig";
 import { USER } from "../../models/User/user.model";
 import { SESSION } from "../../models/User/userSession.model";
 import { fetchIpGeolocation } from "../../utils/IP_helpers";
-import useragent from 'useragent'
+import useragent from "useragent";
+import bcrypt from "bcrypt";
 
 interface LoginRequest {
   email: string;
   password: string;
-  fcmToken : string;
+  fcmToken: string;
 }
 
 /**
@@ -28,39 +29,66 @@ interface LoginRequest {
 
 export const login = async (req: Request, res: Response) => {
   try {
+    // Validate request body
     const validationError: Joi.ValidationError | undefined = validateLogin(req.body);
     if (validationError) {
       return handleResponse(res, 400, errors.validation, validationError.details);
     }
-    const { email, password , fcmToken} = req.body as LoginRequest;
-    const checkUser = await USER.findOne({ email, password }, "_id")
+
+    const { email, password, fcmToken } = req.body as LoginRequest;
+
+    // Find user by email
+    const checkUser = await USER.findOne({ email }, "_id password");
     if (!checkUser) {
       return handleResponse(res, 400, errors.invalid_credentials);
     }
-    const userId = checkUser._id
+
+    // Compare hashed password
+    const passwordMatch = await bcrypt.compare(password, checkUser.password);
+    if (!passwordMatch) {
+      return handleResponse(res, 400, errors.invalid_credentials);
+    }
+
+    const userId = checkUser._id;
+
+    // Generate tokens
     const accessToken = jwt.sign(
       { userId },
       config.JWT.ACCESS_TOKEN_SECRET as string,
       { expiresIn: config.JWT.ACCESS_TOKEN_EXPIRE_IN }
     );
-    const refreshToken = jwt.sign({ userId }, config.JWT.REFRESH_TOKEN_SECRET as string)
-    const checkSession = await SESSION.find({ userId } , "_id" ,  { sort: { createdAt: -1 } })
-    if(checkSession && checkSession.length >= config.MAX_LOGIN_SESSION){
-      await SESSION.findByIdAndDelete(checkSession[0]._id)
+
+    const refreshToken = jwt.sign(
+      { userId },
+      config.JWT.REFRESH_TOKEN_SECRET as string
+    );
+
+    // Manage user sessions
+    const checkSession = await SESSION.find({ userId }, "_id", {
+      sort: { createdAt: -1 },
+    });
+
+    if (checkSession && checkSession.length >= config.MAX_LOGIN_SESSION) {
+      await SESSION.findByIdAndDelete(checkSession[0]._id);
     }
-    const geoData: any = await fetchIpGeolocation(req.ip)
-    const deviceData = useragent.parse(req.headers['user-agent'])
+
+    // Fetch IP and device data
+    const geoData: any = await fetchIpGeolocation(req.ip);
+    const deviceData = useragent.parse(req.headers["user-agent"]);
+
+    // Save session
     await SESSION.create({
-      user : userId,
+      user: userId,
       refreshToken,
+      fcmToken,
       ip: req.ip,
       device: deviceData.toAgent(),
       os: deviceData.os.toString(),
-      location: geoData ? `${geoData.city}, ${geoData.country_name}` : undefined
-    })
+      location: geoData ? `${geoData.city}, ${geoData.country_name}` : undefined,
+    });
     return handleResponse(res, 200, { accessToken, refreshToken });
   } catch (err: any) {
-	  console.log("login-errors" , err) 
+    console.log("login-errors", err);
     return handleResponse(res, 500, errors.catch_error);
   }
 };
