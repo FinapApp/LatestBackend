@@ -12,7 +12,9 @@ export const validateLogin = (body: object) => {
 };
 export const validateForgetPassword = (body: object) => {
   const schema = Joi.object({
-    identifier: Joi.string().required()
+    email: Joi.string().email().optional(),
+    phone: Joi.string().optional(),
+    username: Joi.string().optional()
   })
   const { error } = schema.validate(body);
   return error;
@@ -20,7 +22,9 @@ export const validateForgetPassword = (body: object) => {
 export const validateOTPAfterForgetPassword = (body: object) => {
   const schema = Joi.object({
     otp: Joi.string().required(),
-    identifier: Joi.string().required(),
+    email: Joi.string().optional(),
+    phone: Joi.string().optional(),
+    username: Joi.string().optional(),
     password: Joi.string().required()
   }).xor('email', 'username', 'phone');
   const { error } = schema.validate(body);
@@ -39,7 +43,6 @@ export const validateSignUp = (body: object) => {
   const schema = Joi.object({
     email: Joi.string().email().required(),
     name: Joi.string().required(),
-    username: Joi.string().required(),
   });
   const { error } = schema.validate(body);
   return error;
@@ -716,3 +719,21 @@ export const validateUpdateNotificationSetting  = (body: object) => {
   return error
 }
 
+
+
+
+export const validateUsername = (body: object) => {
+  const schema = Joi.object({
+    username: Joi.string().required()
+  })
+  const { error } = schema.validate(body)
+  return error
+}
+
+export const validateEmail = (body: object) => {
+  const schema = Joi.object({
+    email: Joi.string().required()
+  })
+  const { error } = schema.validate(body)
+  return error
+}

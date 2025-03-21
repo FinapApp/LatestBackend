@@ -20,19 +20,7 @@ export const signUp = async (req: Request, res: Response) => {
         if (validationError) {
             return handleResponse(res, 400, errors.validation, validationError.details);
         }
-        const { email, name, username } = req.body as SignUpRequest;
-        const checkUser = await USER.findOne(
-            { $or: [{ email }, { username }] },
-            "email username"
-        ).lean();
-        if (checkUser) {
-            if (checkUser.email === email) {
-                return handleResponse(res, 400, errors.email_exist); // Email already taken
-            }
-            if (checkUser.username === username) {
-                return handleResponse(res, 400, errors.username_exist); // Username already taken
-            }
-        }
+        const { email, name } = req.body as SignUpRequest;
         let OTP = generateOTP();
         await sendOTPEmailVerification(OTP, email, name)
         await redis.set(`OTP:${email}`, JSON.stringify({ OTP }), "EX", config.REDIS_EXPIRE_IN);  // when in resend otp we often dont have to search back again and again and cache could do the thing.

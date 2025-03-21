@@ -22,6 +22,7 @@ interface IQuests extends Document {
 
 export const QuestSchema = new Schema<IQuests>(
     {
+        
         user: { type: Schema.Types.ObjectId, ref: "user" },
         title: { type: String },
         description: { type: String },

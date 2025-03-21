@@ -196,6 +196,9 @@ export const errors = {
   refresh_token_not_found: {
     message: "Refresh token not found",
   },
+  identifier_not_found: {
+    message: "Identifier not found",
+  },
 
   // OTP-related errors
   otp_expired: {
@@ -211,6 +214,9 @@ export const errors = {
   },
   retry_login: {
     message: "Please get yourself authenticated",
+  },
+  forget_password: {
+    message: "Unable to send OTP",
   },
   audio_reported: {
     message: "Unable to report Audio",
@@ -371,8 +377,17 @@ export const success = {
   otp_sent: {
     message: "OTP sent successfully",
   },
+  username_available : {
+    message: "Username is available",
+  },
+  email_available : {
+    message: "Email is available",
+  },
 
   // Miscellaneous success
+  forget_password: {
+    message: "OTP sent successfully",
+  },
   share_post: {
     message: "Post shared successfully",
   },

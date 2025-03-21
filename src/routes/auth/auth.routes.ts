@@ -3,6 +3,7 @@ import { login } from "../../controllers/Auth/login";
 import { forgetPassword } from "../../controllers/ForgetPassword/forgetPassword";
 import { logout } from "../../controllers/Auth/logout";
 import { revalidateSessions } from "../../controllers/Auth/revalidateSessions";
+import { verifyOTPForgetPassword } from "../../controllers/ForgetPassword/verifyOTPForgetPassword";
 
 export const authRoutes: Router = express.Router();
 
@@ -85,16 +86,23 @@ authRoutes.post("/login", login);
  *     summary: Forget Password
  *     tags: [Auth]
  *     requestBody:
- *       description: Have an identifier for it could be your username ,phoneNumber or email
+ *       description: >
+ *         Provide one of the following identifiers: email, phone number, or username
  *       required: true
  *       content:
  *         application/json:
  *           schema:
  *             type: object
  *             properties:
- *               identifier:
+ *               email:
  *                 type: string
  *                 example: 'dcode.0n1@gmail.com'
+ *               phone:
+ *                 type: string  
+ *                 example: "1234567890"
+ *               username:
+ *                 type: string
+ *                 example: "dcode"
  *     responses:
  *       200:
  *         description: Successfully Logged In
@@ -136,7 +144,10 @@ authRoutes.post("/login", login);
  *                   type: string
  *                   example: An error occurred
  */
-authRoutes.post("/forget-password", forgetPassword);
+
+authRoutes.route("/forget-password")
+    .post(forgetPassword)
+    .put(verifyOTPForgetPassword)
 
 /**
  * @swagger
@@ -233,3 +244,6 @@ authRoutes.post("/logout", logout)
  *                   example: An error occurred
  */
 authRoutes.post("/revalidate", revalidateSessions)
+
+
+

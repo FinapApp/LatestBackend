@@ -1,9 +1,167 @@
 import express, { Router } from "express";
 import { signUp } from "../../controllers/Onboarding/signUp";
 import { verifyOTPAfterSignUp } from "../../controllers/Onboarding/verifyOTP";
+import { checkUserNameExist } from "../../controllers/Onboarding/checkUsernameExist";
+import { checkEmailExist } from "../../controllers/Onboarding/checkEmailExist";
 
 export const onboardingRoutes: Router = express.Router();
 
+
+
+/**
+ * @swagger
+ * /check-username:
+ *   post:
+ *     summary: Check if a username exists
+ *     tags: 
+ *       - Onboarding
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               username:
+ *                 type: string
+ *             example:
+ *               username: "user123"
+ *     responses:
+ *       200:
+ *         description: Username availability check
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                 message:
+ *                   type: string
+ *             example:
+ *               success: true
+ *               message: "Username is available"
+ *       400:
+ *         description: Bad request
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                 message:
+ *                   type: string
+ *             example:
+ *               success: false
+ *               message: "Username is required"
+ *       409:
+ *         description: Conflict - Username already exists
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                 message:
+ *                   type: string
+ *             example:
+ *               success: false
+ *               message: "Username already exists"
+ *       500:
+ *         description: An error occurred
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: false
+ *                 message:
+ *                   type: string
+ *                   example: "An error occurred"
+ */
+onboardingRoutes.post("/check-username", checkUserNameExist);
+
+
+/**
+ * @swagger
+ * /check-email:
+ *   post:
+ *     summary: Check if an email exists
+ *     tags: 
+ *       - Onboarding
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               email:
+ *                 type: string
+ *             example:
+ *               email: "user@example.com"
+ *     responses:
+ *       200:
+ *         description: Email availability check
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                 message:
+ *                   type: string
+ *             example:
+ *               success: true
+ *               message: "Email is available"
+ *       400:
+ *         description: Bad request
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                 message:
+ *                   type: string
+ *             example:
+ *               success: false
+ *               message: "Email is required"
+ *       409:
+ *         description: Conflict - Email already exists
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                 message:
+ *                   type: string
+ *             example:
+ *               success: false
+ *               message: "Email already exists"
+ *       500:
+ *         description: An error occurred
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: false
+ *                 message:
+ *                   type: string
+ *                   example: "An error occurred"
+ */
+onboardingRoutes.post("/check-email", checkEmailExist);
 /**
  * @swagger
  * /sign-up:
@@ -20,13 +178,10 @@ export const onboardingRoutes: Router = express.Router();
  *             properties:
  *               email:
  *                 type: string
- *               username:
- *                 type: string
  *               name:
  *                type: string
  *             example:
  *               email: "dcode.0n1@gmail.com"
- *               username: "user123"
  *               name: "John Doe"
  *     responses:
  *       200:
@@ -59,14 +214,10 @@ export const onboardingRoutes: Router = express.Router();
  *                 value:
  *                   success: false
  *                   message: "\"email\" must be a valid email"
- *               EmailExist:
+ *               InvalidName:
  *                 value:
  *                   success: false
- *                   message: "Email already exists"
- *               UsernameExist:
- *                 value:
- *                   success: false
- *                   message: "Username already exists"
+ *                   message: "\"name\" is required"
  *       500:
  *         description: An error occurred
  *         content:
@@ -172,3 +323,4 @@ onboardingRoutes.post("/sign-up", signUp);
  *                   example: "An error occurred"
  */
 onboardingRoutes.post("/verify-otp", verifyOTPAfterSignUp);
+
