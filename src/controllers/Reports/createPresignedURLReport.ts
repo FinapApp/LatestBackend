@@ -18,14 +18,14 @@ export const createPresignedURLReport = async (req: Request, res: Response) => {
         const userId = res.locals.userId as string;
         // Create reel document without media URLs
         if (reportId) {
-            const attachmentSignedURLs = await Promise.all(attachment.map((metadata: {
+            const ATTACHMENTPRESIGNEDURL = await Promise.all(attachment.map((metadata: {
                 fileName: string;
                 fileType: string;
             }) => generateSignedURL(`user/${userId}/report/${reportId}/${metadata.fileName}`, metadata.fileType)));
-            if (attachmentSignedURLs) {
+            if (ATTACHMENTPRESIGNEDURL) {
                 return handleResponse(res, 200, {
                     reportId,
-                    attachmentSignedURLs
+                    ATTACHMENTPRESIGNEDURL
                 });
             }
         }

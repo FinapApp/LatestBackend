@@ -1,4 +1,5 @@
 import { commentRoutes } from "./comment/comment.routes";
+import { feedbackRoutes } from "./feedback/feedback.routes";
 import { flickRoutes } from "./flicks/protected-flicks.routes";
 import { followRoutes } from "./follow/follow.routes";
 import { likeRoutes } from "./like/like.routes";
@@ -20,7 +21,8 @@ const routes = [
     likeRoutes,
     questRoutes,
     settingProfile,
-    settingNotificationRoutes
+    settingNotificationRoutes,
+    feedbackRoutes
 ];
 
 export default routes;

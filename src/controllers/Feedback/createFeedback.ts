@@ -13,7 +13,7 @@ export const createFeedback = async (req: Request, res: Response) => {
         const { message, rating } = req.body;
         const feedback = await FEEDBACK.create({
             user: res.locals.userId,
-            message,
+            message: { sentBy: 'user', message },
             rating
         });
         if (feedback) {
@@ -21,6 +21,7 @@ export const createFeedback = async (req: Request, res: Response) => {
         }
         return handleResponse(res, 500, errors.create_feedback);
     } catch (err) {
+        console.log(err)
         return handleResponse(res, 500, errors.catch_error)
     }
 }

@@ -14,26 +14,24 @@ export const createPresignedURLFlick = async (req: Request, res: Response) => {
         }
         const user = res.locals.userId;
         // Extract metadata without media URLs
-        const { mediaFiles, thumbnailName, audioName, audioFileType } = req.body;
+        const { mediaFiles, audioName, audioFileType } = req.body;
         const flickId = new mongoose.Types.ObjectId();
         // Create reel document without media URLs
         if (flickId) {
-            let mediaSignedURLs,thumbnailSignedURLs,audioPresignedURL;
+            let MEDIASIGNEDURL, THUMBNAILSIGNEDURL, AUDIOSIGNEDURL;
             if (mediaFiles) {
-                mediaSignedURLs =await Promise.all(mediaFiles.map((fileName: string, fileType: string) => generateSignedURL(`${user}/flick/${flickId}/videos/${fileName}` , fileType)))
+                MEDIASIGNEDURL = await Promise.all(mediaFiles.map((x: { fileName: string, fileType: string }) => generateSignedURL(`${user}/flick/${flickId}/videos/${x.fileName}`, x.fileType)));
             }
-            if (thumbnailName) {
-                thumbnailSignedURLs = await generateSignedURL(`/user/${user}/flick/${flickId}/thumbnail`);
-            }
+            THUMBNAILSIGNEDURL = await generateSignedURL(`/user/${user}/flick/${flickId}/thumbnail`);
             if (audioName) {
                 const audioPath = `/user/${user}/flick/audio/${flickId}/${audioName}`;
-                audioPresignedURL = await generateSignedURL(audioPath , audioFileType);
+                AUDIOSIGNEDURL = await generateSignedURL(audioPath, audioFileType);
             }
             return handleResponse(res, 200, {
                 flickId,
-                mediaUploadURLs: mediaSignedURLs,
-                thumbnailUploadURL: thumbnailSignedURLs,
-                audioUploadURL: audioPresignedURL
+                MEDIASIGNEDURL,
+                THUMBNAILSIGNEDURL,
+                AUDIOSIGNEDURL
             });
         }
         return handleResponse(res, 500, errors.unable_to_create_signedURL);

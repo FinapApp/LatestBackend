@@ -624,20 +624,8 @@ export const validateRefreshToken = (body: object) => {
   return error
 }
 
-export const validateChangeStatusQuestApplicant = (body: object, params: object) => {
-  const paramsSchema = Joi.object({
-    questApplicantId: Joi.string().regex(/^[0-9a-fA-F]{24}$/, 'object Id').required()
-  })
-  const bodySchema = Joi.object({
-    status: Joi.string().valid("approved", "rejected").required(),
-  })
-  const combinedSchema = Joi.object({
-    body: bodySchema,
-    params: paramsSchema
-  })
-  const { error } = combinedSchema.validate({ body, params })
-  return error
-}
+
+
 
 export const validateUpdateProfile = (body: object) => {
   const schema = Joi.object({

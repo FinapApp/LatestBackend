@@ -9,17 +9,15 @@ interface IFeedback extends Document {
   status: 'pending' | 'resolved';
 }
 
-export interface IMessage {
+interface IMessage {
   sentBy: 'user' | 'admin';
   message: string;
-  attachment: string;
 }
 
-export const MessageSchema = new Schema<IMessage>(
+const MessageSchema = new Schema<IMessage>(
   {
     sentBy: { type: String, enum: ['user', 'admin'] },
     message: { type: String },
-    attachment: [{ type: String }],
   },
   { timestamps: { createdAt: true, updatedAt: false } }
 )

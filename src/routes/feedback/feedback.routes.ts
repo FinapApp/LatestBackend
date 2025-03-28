@@ -21,9 +21,61 @@ export const feedbackRoutes : Router = express.Router();
  *   post:
  *     summary: Create a new feedback
  *     tags: [Feedback]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               message:
+ *                 type: string
+ *                 description: The feedback message
+ *                 example: "Great app!"
+ *               rating:
+ *                 type: string
+ *                 description: The feedback rating
+ *                 example: "5"
  *     responses:
  *       200:
  *         description: Feedback created successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 message:
+ *                   type: string
+ *                   example: Feedback created successfully
+ *       400:
+ *         description: Unable to create feedback
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: false
+ *                 message:
+ *                   type: string
+ *                   example: Unable to create feedback
+ *       500:
+ *         description: An error occurred
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: false
+ *                 message:
+ *                   type: string
+ *                   example: An error occurred
  */
 feedbackRoutes.route("/feedback")
     .post(createFeedback)

@@ -18,24 +18,24 @@ export const createPresignedURLQuest = async (req: Request, res: Response) => {
         const userId = res.locals.userId as string;
         // Create reel document without media URLs
         if (questId) {
-            const mediaPresignedURLs = await Promise.all(media.map((metadata: {
+            const MEDIASIGNEDURL = await Promise.all(media.map((metadata: {
                 fileName: string;
                 fileType: string;
             }) => generateSignedURL(`user/${userId}/quest/${questId}/${metadata.fileName}`, metadata.fileType)));
 
-            const thumbnailPresignedURL = await generateSignedURL(`user/${userId}/quest/${questId}/thumbnail`);
+            const THUMBNAILSIGNEDURL = await generateSignedURL(`user/${userId}/quest/${questId}/thumbnail`);
 
-            if (mediaPresignedURLs && thumbnailPresignedURL) {
+            if (MEDIASIGNEDURL && THUMBNAILSIGNEDURL) {
                 return handleResponse(res, 200, {
                     questId,
-                    mediaPresignedURLs
+                    MEDIASIGNEDURL,
+                    THUMBNAILSIGNEDURL,
                 });
             }
         }
         return handleResponse(res, 500, errors.unable_to_create_signedURL);
     } catch (error: any) {
-        sendErrorToDiscord("create-flicks", error)
-	console.log("====> error", error) 
+        await sendErrorToDiscord("presigned-url-quest", error)
         return handleResponse(res, 500, errors.catch_error);
     }
 };

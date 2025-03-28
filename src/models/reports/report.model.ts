@@ -8,7 +8,7 @@ export interface IMessage {
     attachment: string;
 }
 
-export const MessageSchema = new Schema<IMessage>(
+const MessageSchema = new Schema<IMessage>(
     {
         sentBy: { type: String, enum: ['user', 'admin'] },
         staff: {

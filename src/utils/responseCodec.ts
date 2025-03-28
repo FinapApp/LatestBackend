@@ -1,10 +1,9 @@
-import { create } from "domain";
 import { Response } from "express";
 
 export const handleResponse = (
   res: Response,
   statusCode: number,
-  value: object | null,
+  value: any,
   meta: Array<{
     message: string | null
   }> = []
@@ -15,14 +14,20 @@ export const handleResponse = (
       message: meta?.[0]?.message ?? null, ...value
     });
   } else {
+    if (value?.message) {
+      return res.status(statusCode).json({
+        success: true,
+        message: value.message,
+      });
+    }
     return res.status(statusCode).json({
       success: true,
-      ...value,
+      data: { ...(value || {}) },
     });
   }
 };
 export const errors = {
-// Notification-related errors
+  // Notification-related errors
   user_notification_not_found: {
     message: "Unable to get notifications",
   },
@@ -257,7 +262,7 @@ export const errors = {
 };
 
 export const success = {
-// Notification-related success
+  // Notification-related success
   update_notification_setting: {
     message: "Notification setting updated successfully",
   },
@@ -377,10 +382,10 @@ export const success = {
   otp_sent: {
     message: "OTP sent successfully",
   },
-  username_available : {
+  username_available: {
     message: "Username is available",
   },
-  email_available : {
+  email_available: {
     message: "Email is available",
   },
 

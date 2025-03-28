@@ -12,6 +12,7 @@ interface IUserSchema extends Document {
     description: string;
     country: string;
     flickCount: number; // Number of flicks user has , increment/decrement when uploading/deleting flicks
+    successfulQuest :  number; // Number of successful quests user has , increment/decrement when quest is completed
     balance: number;
     private: boolean;
     deletedAt: Date;

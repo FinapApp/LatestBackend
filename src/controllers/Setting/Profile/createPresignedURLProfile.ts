@@ -18,7 +18,7 @@ export const createPresignedURLProfile = async (req: Request, res: Response) => 
             const profileImagePath = `user/${userId}/profile-image`;
             const profileImageSigned = await generateSignedURL(profileImagePath, fileType);
             return handleResponse(res, 200, {
-                presignedURL: profileImageSigned
+                PROFILEPRESIGNEDURL: profileImageSigned
             })
         }
         return handleResponse(res, 500, errors.create_songs);

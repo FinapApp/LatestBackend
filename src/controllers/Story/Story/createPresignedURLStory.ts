@@ -18,14 +18,14 @@ export const createPresignedURLStory = async (req: Request, res: Response) => {
         const storyId = new mongoose.Types.ObjectId();
         const uploadPath = `user/${user}/story/${storyId}/${fileName}`;
         const thumbnailImagePath = `user/${user}/story/${storyId}/thumbnail`;
-        const [thumbnailSignedURL, mediaPresignedURL] = await Promise.all([
+        const [THUMBNAILSIGNEDURL, MEDIASIGNEDURL] = await Promise.all([
             generateSignedURL(thumbnailImagePath),
             generateSignedURL(uploadPath , fileType)
         ]);
         return handleResponse(res, 200, {
             storyId,
-            storySignedURL: mediaPresignedURL,
-            thumbnailSignedURL: thumbnailSignedURL
+            MEDIASIGNEDURL,
+            THUMBNAILSIGNEDURL
         });
     } catch (error) {
         console.error(error);

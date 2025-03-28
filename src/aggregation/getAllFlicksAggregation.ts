@@ -159,41 +159,6 @@ export const getAllFlicksAggregation = async (userId: string, skip: string = "0"
                 }
             }
         ];
-        const check = await FLICKS.aggregate([
-            {
-                $match: {
-                    user: new mongoose.Types.ObjectId(userId),
-                    status: false,
-                    suspended: false
-                },
-            },
-            {
-                $lookup: {
-                    from: "songs",
-                    localField: "song",
-                    foreignField: "_id",
-                    as: "song",
-                    pipeline: [{ $project: { name: 1, url: 1, icon: 1, duration: 1 } }]
-                }
-            },
-            {
-                $lookup: {
-                    from: "users",
-                    localField: "user",
-                    foreignField: "_id",
-                    as: "user",
-                    pipeline: [
-                        {
-                            $project: {
-                                _id: 1,
-                                username: 1,
-                                photo: 1,
-                            }
-                        }
-                    ]
-                },
-            }
-        ]);
         return await FLICKS.aggregate(pipeline);
     } catch (error: any) {
         throw error;
