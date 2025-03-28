@@ -3,6 +3,8 @@ import { deleteFlick } from "../../controllers/Flicks/deleteFlick";
 import { createPresignedURLFlick } from "../../controllers/Flicks/createPresigedURLFlick";
 import { createFlick } from "../../controllers/Flicks/createFlick";
 import { getAllFlicks } from "../../controllers/Flicks/getFlicks";
+import { getSelfFlicks } from "../../controllers/Flicks/getSelfFlicks";
+import { getAllTaggedFlicks } from "../../controllers/Flicks/getAllTaggedFlicks";
 
 export const flickRoutes: Router = express.Router();
 
@@ -336,3 +338,7 @@ flickRoutes.route("/flick")
 flickRoutes.route("/flick/:flickId")
     .post(createFlick)
     .delete(deleteFlick);
+
+flickRoutes.get("/user-flicks", getSelfFlicks)
+
+flickRoutes.get("/user-tagged-flicks",  getAllTaggedFlicks)

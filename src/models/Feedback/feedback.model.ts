@@ -19,7 +19,7 @@ const MessageSchema = new Schema<IMessage>(
     sentBy: { type: String, enum: ['user', 'admin'] },
     message: { type: String },
   },
-  { timestamps: { createdAt: true, updatedAt: false } }
+  { timestamps: { createdAt: true, updatedAt: false }, _id: true }
 )
 
 

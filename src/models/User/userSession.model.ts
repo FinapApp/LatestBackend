@@ -20,7 +20,7 @@ export const UserSessionSchema = new Schema<IUserSession>(
         os: { type: String },
         location: { type: String },
     },
-    { timestamps: { createdAt: false, updatedAt: true }, versionKey: false }
+    { timestamps: { createdAt: true , updatedAt: false }, versionKey: false }
 );
 
 export const SESSION = mongoose.model<IUserSession>("usersession", UserSessionSchema);

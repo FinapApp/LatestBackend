@@ -1,5 +1,5 @@
 import { Request, Response } from "express"
-import { validateReportStory, validateReportUser } from "../../validators/validators"
+import { validateReportStory } from "../../validators/validators"
 import Joi from "joi"
 import { errors, handleResponse, success } from "../../utils/responseCodec"
 import { REPORT } from "../../models/reports/report.model"

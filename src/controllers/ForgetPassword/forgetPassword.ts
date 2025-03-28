@@ -19,6 +19,7 @@ export const forgetPassword = async (req: Request, res: Response) => {
             return handleResponse(res, 400, errors.validation, validationError.details);
         }
         const { email, username, phone } = req.body as ForgetPasswordRequest;
+        
         const checkUser = await USER.findOne({
             ...(email && { email }),
             ...(username && { username }),

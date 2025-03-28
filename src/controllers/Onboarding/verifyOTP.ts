@@ -1,12 +1,10 @@
 import { Request, Response } from "express";
-import { validateAfterSignUp, validateVerifyOTPSignUp } from "../../validators/validators";
+import {  validateVerifyOTPSignUp } from "../../validators/validators";
 import Joi from "joi";
 import { handleResponse, errors, success } from "../../utils/responseCodec";
 import { redis } from "../../config/redis/redis.config";
-import jwt from "jsonwebtoken"
 import { config } from "../../config/generalconfig";
 import { USER } from "../../models/User/user.model";
-import { USERFCM } from "../../models/User/userFCM.model";
 
 
 interface ForgetOTPRequest {

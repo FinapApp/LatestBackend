@@ -1,13 +1,13 @@
-import { Response } from "express";
+import { Response, Request } from "express";
 import { validatePassword } from "../../../validators/validators";
 import { handleResponse, errors, success } from "../../../utils/responseCodec";
 import Joi from "joi";
-import { AuthenticatedRequest } from "../../../types/AuthenticatedRequest.types";
+
 import { USER } from "../../../models/User/user.model";
 import { sendErrorToDiscord } from "../../../config/discord/errorDiscord";
 
 
-export const updatePassword = async (req: AuthenticatedRequest, res: Response) => {
+export const updatePassword = async (req: Request, res: Response) => {
     try {
         const validationError: Joi.ValidationError | undefined = validatePassword(
             req.body

@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import { validatePresignedURLReport, validatePresinedURLQuest } from "../../validators/validators";
+import { validatePresignedURLReport } from "../../validators/validators";
 import Joi from "joi";
 import { errors, handleResponse } from "../../utils/responseCodec";
 import { generateSignedURL } from "../../utils/getSignedURL";

@@ -1,5 +1,5 @@
 import Joi from "joi";
-import { validateAddStoryViewer, validateStoryId } from "../../../validators/validators";
+import { validateAddStoryViewer} from "../../../validators/validators";
 import { Request, Response } from "express";
 import { errors, handleResponse, success } from "../../../utils/responseCodec";
 import { STORYVIEW } from "../../../models/Stories/storyView.model";

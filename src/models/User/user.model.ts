@@ -1,5 +1,6 @@
 import mongoose, { Document, Schema } from "mongoose";
 import bcrypt from "bcrypt";
+import { ITextDataSchema, TextDataSchema } from "../Comment/comment.model";
 
 interface IUserSchema extends Document {
     username: string;
@@ -9,7 +10,7 @@ interface IUserSchema extends Document {
     phone: string;
     password: string;
     dob: string;
-    description: string;
+    description: ITextDataSchema[];
     country: string;
     flickCount: number; // Number of flicks user has , increment/decrement when uploading/deleting flicks
     successfulQuest :  number; // Number of successful quests user has , increment/decrement when quest is completed
@@ -24,6 +25,8 @@ interface IUserSchema extends Document {
     warnedCount: number,
     suspended: boolean,
     suspensionReason: string,
+    deactivationReason: string[],
+    twoFactor : boolean
 }
 
 export const UserSchema = new Schema<IUserSchema>(
@@ -35,7 +38,7 @@ export const UserSchema = new Schema<IUserSchema>(
         phone: { type: String },
         password: { type: String },
         dob: { type: String },
-        description: { type: String },
+        description: { type: [TextDataSchema] },
         country: { type: String },
         flickCount: { type: Number },
         balance: { type: Number, default: 0 },
@@ -48,6 +51,8 @@ export const UserSchema = new Schema<IUserSchema>(
         textSize : { type : String , enum : ['small' , 'medium' , 'large'] , default : 'medium'}, // could be shifted to some other places if not this.
         nightMode : { type : Boolean , default : false},
         suspended: { type: Boolean, default: false },
+        twoFactor : {type : Boolean , default : true},
+        deactivationReason: { type: [String] },
         suspensionReason: { type: String },
     },
     { timestamps: { createdAt: true, updatedAt: false }, versionKey: false }

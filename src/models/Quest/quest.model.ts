@@ -1,5 +1,4 @@
 import mongoose, { Document, Schema } from "mongoose";
-import { USER } from "../User/user.model";
 
 interface IGPSLocation {
     type: string;

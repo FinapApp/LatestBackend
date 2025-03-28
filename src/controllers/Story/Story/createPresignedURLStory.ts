@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import { validateCreateStory, validateStoryUpload } from "../../../validators/validators";
+import { validateStoryUpload } from "../../../validators/validators";
 import Joi from "joi";
 import { errors, handleResponse } from "../../../utils/responseCodec";
 import { generateSignedURL } from "../../../utils/getSignedURL";

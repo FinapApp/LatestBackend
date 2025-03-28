@@ -27,6 +27,14 @@ export const handleResponse = (
   }
 };
 export const errors = {
+// Two-factor authentication-related errors
+  update_two_factor: {
+    message: "Unable to update two-factor authentication",
+  },
+  get_two_factor: {
+    message: "Unable to get two-factor authentication",
+  },
+
   // Notification-related errors
   user_notification_not_found: {
     message: "Unable to get notifications",
@@ -158,11 +166,22 @@ export const errors = {
   update_feedback: {
     message: "Unable to update feedback",
   },
+  get_feedback: {
+    message: "Unable to get feedback",
+  },
   delete_feedback: {
     message: "Unable to delete feedback",
   },
   create_feedback: {
     message: "Unable to create feedback",
+  },
+
+  // Theme-related errors 
+  update_theme :  {
+    message: "Unable to update theme",
+  },
+  get_theme :  {
+    message: "Unable to get theme",
   },
 
   // Quest-related errors
@@ -262,6 +281,10 @@ export const errors = {
 };
 
 export const success = {
+  // Two-factor authentication-related success
+  update_two_factor: {
+    message: "Two-factor authentication updated successfully",
+  },
   // Notification-related success
   update_notification_setting: {
     message: "Notification setting updated successfully",
@@ -357,7 +380,10 @@ export const success = {
   create_feedback: {
     message: "Feedback created successfully",
   },
-
+  //Theme Setting
+  update_theme :  {
+    message: "Theme updated successfully",
+  },
   // Quest-related success
   quest_created: {
     message: "Quest created successfully",

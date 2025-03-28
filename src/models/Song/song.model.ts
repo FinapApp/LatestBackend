@@ -4,7 +4,7 @@ export interface ISongSchema extends Document {
     name: string;
     url: string;
     icon: string;
-    admin: Types.ObjectId;
+    staff: Types.ObjectId;
     used: number;
     suspended: boolean;
     suspendedReason : string;
@@ -13,10 +13,10 @@ export interface ISongSchema extends Document {
 
 const SongSchema = new Schema<ISongSchema>(
     {
-        admin: {
+        staff: {
             type: Schema.Types.ObjectId,    
             required: true,
-            ref: 'admin',
+            ref: 'staff',
         },
         name: {
             type: String,

@@ -3,6 +3,7 @@ import { config } from "../generalconfig";
 interface nodeMailerConf {
     host: string, 
     port: number,
+    service :   string;
     secure: boolean,
     auth: {
         user: string,
@@ -18,7 +19,7 @@ interface nodeMailerConf {
  }
 */
 
- export let nodemailerConfig = {
+ export let nodemailerConfig: nodeMailerConf = {
 	host: 'smtp.gmail.com',
 	port  : 587 ,
 	service : 'gmail',

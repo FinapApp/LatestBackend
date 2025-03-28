@@ -286,7 +286,7 @@ questRoutes.route("/quest/:questId")
  * /v1/quest-applicant:
  *   post:
  *     tags:
- *       - Quests
+ *       - [Quests Applicants]
  *     summary: Create a presigned URL for a quest
  *     requestBody:
  *       description: Object containing media details for the flick
@@ -353,6 +353,7 @@ questRoutes.route("/quest/:questId")
  *                   type: string
  *                   example: An error occurred
  */
+
 questRoutes.route("/quest-applicant")
     .post(createPresignedURLQuestApplication);
 
@@ -361,7 +362,7 @@ questRoutes.route("/quest-applicant")
  * /v1/quest-applicant/{questApplicantId}:
  *   post:
  *     tags:
- *       - Quests
+ *       - [Quests Applicants]
  *     summary: Create a quest applicant
  *     parameters:
  *       - in: path
@@ -467,7 +468,7 @@ questRoutes.route("/quest-applicant")
  *                   example: "An internal server error occurred"
  *   delete:
  *     tags:
- *       - Quests
+ *       - [Quests Applicants]
  *     summary: Delete a quest
  *     parameters:
  *       - in: path

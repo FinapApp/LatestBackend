@@ -7,7 +7,7 @@ import { redis } from "./config/redis/redis.config";
 import cors from 'cors';
 import cluster from "cluster";
 import helmet from "helmet";
-import { kafkaConnecter } from "./config/kafka/kafka.config";
+// import { kafkaConnecter } from "./config/kafka/kafka.config";
 import { isAuthenticatedUser } from "./middlewares/isAuthenticatedUser";
 import BasicAuth from 'express-basic-auth'
 import { specs, swaggerUi } from "./utils/swagger";
@@ -17,7 +17,7 @@ const app: Express = express();
 // SWAGGER
 const swaggerUiOptions = {
   swaggerOptions: {
-    persistAuthorization: false,
+    persistAuthorization: true,
   },
   customCssUrl: 'https://cdnjs.cloudflare.com/ajax/libs/swagger-ui/5.18.2/swagger-ui.js',
   customJsUrl: 'https://cdnjs.cloudflare.com/ajax/libs/swagger-ui/5.18.2/swagger-ui-bundle.js',

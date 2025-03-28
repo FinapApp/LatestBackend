@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
 import Joi from "joi";
-import { errors, handleResponse, success } from "../../utils/responseCodec";
+import { errors, handleResponse} from "../../utils/responseCodec";
 import { validateFlickId } from "../../validators/validators";
 import { FLICKS } from "../../models/Flicks/flicks.model";
 

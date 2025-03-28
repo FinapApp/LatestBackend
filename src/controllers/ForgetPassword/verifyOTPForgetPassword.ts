@@ -31,18 +31,19 @@ export const verifyOTPForgetPassword = async (req: Request, res: Response) => {
 
         const identifier = email || username || phone;
         const getOTP = await redis.get(`FORGET-PASSWORD:${identifier}`);
-        if (!getOTP) {
+        if(getOTP){
+            const filteredOTP  = JSON.parse(getOTP as string)
+            if (otp !== filteredOTP.generatedOTP) {
+                return handleResponse(res, 404, errors.otp_not_match)
+            }
+            const updatePassword = await USER.findByIdAndUpdate(filteredOTP._id, { password }, { new: true })
+            if (!updatePassword) {
+                return handleResponse(res, 400, errors.password_not_updated);
+            }
+            await redis.del(`FORGET-PASSWORD:${identifier}`);
+            return handleResponse(res, 200, success.password_updated);
+        }
             return handleResponse(res, 400, errors.otp_expired);
-        }
-        if (otp !== getOTP.generatedOTP) {
-            return handleResponse(res, 404, errors.otp_not_match)
-        }
-        const updatePassword = await USER.findByIdAndUpdate(getOTP._id, { password }, { new: true })
-        if (!updatePassword) {
-            return handleResponse(res, 400, errors.password_not_updated);
-        }
-        await redis.del(`FORGET-PASSWORD:${identifier}`);
-        return handleResponse(res, 200, success.verify_otp);
     } catch (err: any) {
         return handleResponse(res, 500, errors.catch_error);
     }

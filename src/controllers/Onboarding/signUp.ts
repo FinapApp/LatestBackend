@@ -1,12 +1,11 @@
 import { Request, Response } from "express";
-import { validateLogin, validateSignUp } from "../../validators/validators";
+import {  validateSignUp } from "../../validators/validators";
 import Joi from "joi";
 import { handleResponse, errors, success } from "../../utils/responseCodec";
 import { sendOTPEmailVerification } from "../../utils/sendOTP_EmailVerification";
 import { generateOTP } from "../../utils/OTPGenerator";
 import { redis } from "../../config/redis/redis.config";
 import { config } from "../../config/generalconfig";
-import { USER } from "../../models/User/user.model";
 
 interface SignUpRequest {
     email: string;

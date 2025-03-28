@@ -1,9 +1,7 @@
 import express, { Router } from "express";
 import { login } from "../../controllers/Auth/login";
-import { forgetPassword } from "../../controllers/ForgetPassword/forgetPassword";
 import { logout } from "../../controllers/Auth/logout";
 import { revalidateSessions } from "../../controllers/Auth/revalidateSessions";
-import { verifyOTPForgetPassword } from "../../controllers/ForgetPassword/verifyOTPForgetPassword";
 
 export const authRoutes: Router = express.Router();
 
@@ -78,76 +76,6 @@ export const authRoutes: Router = express.Router();
  *                   example: An error occurred
  */
 authRoutes.post("/login", login);
-
-/**
- * @swagger
- * /forget-password:
- *   post:
- *     summary: Forget Password
- *     tags: [Auth]
- *     requestBody:
- *       description: >
- *         Provide one of the following identifiers: email, phone number, or username
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             properties:
- *               email:
- *                 type: string
- *                 example: 'dcode.0n1@gmail.com'
- *               phone:
- *                 type: string  
- *                 example: "1234567890"
- *               username:
- *                 type: string
- *                 example: "dcode"
- *     responses:
- *       200:
- *         description: Successfully Logged In
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 success:
- *                   type: boolean
- *                   example: true
- *                 message:
- *                   type: string
- *                   example: "OTP has been sent to your email"
- *       400:
- *         description: User Not found
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 success:
- *                   type: boolean
- *                   example: false
- *                 message:
- *                   type: string
- *                   example: User not found
- *       500:
- *         description: An error occurred
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 success:
- *                   type: boolean
- *                   example: false
- *                 message:
- *                   type: string
- *                   example: An error occurred
- */
-
-authRoutes.route("/forget-password")
-    .post(forgetPassword)
-    .put(verifyOTPForgetPassword)
 
 /**
  * @swagger

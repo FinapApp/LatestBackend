@@ -1,4 +1,4 @@
-import Joi, { optional } from "joi";
+import Joi from "joi";
 import countries from "../constants/countryList";
 import { config } from "../config/generalconfig";
 export const validateLogin = (body: object) => {
@@ -10,12 +10,22 @@ export const validateLogin = (body: object) => {
   const { error } = schema.validate(body);
   return error;
 };
+export const validateGetters = (query: object) => {
+  const schema = Joi.object({
+    search: Joi.string().optional(),
+    skip: Joi.string().optional(),
+    sort: Joi.string().optional(),
+    order: Joi.string().valid('asc', 'desc').optional()
+  })
+  const { error } = schema.validate(query)
+  return error
+}
 export const validateForgetPassword = (body: object) => {
   const schema = Joi.object({
     email: Joi.string().email().optional(),
     phone: Joi.string().optional(),
-    username: Joi.string().optional()
-  })
+    username: Joi.string().optional(),
+  }).xor('email', 'username', 'phone');
   const { error } = schema.validate(body);
   return error;
 }
@@ -328,6 +338,23 @@ export const getQueryParams = (query: object) => {
   return error
 }
 
+export const validateUpdateTheme = (body : object) => {
+  const schema = Joi.object({
+    theme: Joi.string().valid("light", "dark" , "system").required()
+  })
+  const { error } = schema.validate(body)
+  return error
+}
+
+
+export const validateUpdateTwoFactor  = (body : object) => {
+  const schema = Joi.object({
+    twoFactor: Joi.boolean().optional(),
+    twoFactorMethod :Joi.string().valid("sms", "email").optional()
+  })
+  const { error } = schema.validate(body)
+  return error
+}
 export const validateUpdateFlick = (body: object, params: object) => {
   const bodySchema = Joi.object({
     description: Joi.array().items(Joi.object({
@@ -627,10 +654,13 @@ export const validateRefreshToken = (body: object) => {
 
 
 
+
+
 export const validateUpdateProfile = (body: object) => {
   const schema = Joi.object({
     name: Joi.string().optional(),
     surname : Joi.string().optional(),
+    email: Joi.string().email().optional(),
     gender : Joi.string().optional(),
     phone: Joi.string().optional(),
     username: Joi.string().optional(),

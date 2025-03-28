@@ -1,7 +1,7 @@
 import { Request, Response } from "express";
 import { validatePresignedFlick } from "../../validators/validators";
 import Joi from "joi";
-import { errors, handleResponse, success } from "../../utils/responseCodec";
+import { errors, handleResponse } from "../../utils/responseCodec";
 import { generateSignedURL } from "../../utils/getSignedURL";
 import { sendErrorToDiscord } from "../../config/discord/errorDiscord";
 import mongoose from "mongoose";

@@ -1,13 +1,11 @@
-import { Response } from "express";
+import { Response,Request } from "express";
 import { validateUpdateFlick } from "../../validators/validators";
 import { handleResponse, errors, success } from "../../utils/responseCodec";
 import Joi from "joi";
-import { AuthenticatedRequest } from "../../types/AuthenticatedRequest.types";
-import { redis } from "../../config/redis/redis.config";
 import { FLICKS } from "../../models/Flicks/flicks.model";
 
 
-export const updateReel = async (req: AuthenticatedRequest, res: Response) => {
+export const updateReel = async (req: Request, res: Response) => {
     try {
         const validationError: Joi.ValidationError | undefined = validateUpdateFlick(
             req.body, req.params

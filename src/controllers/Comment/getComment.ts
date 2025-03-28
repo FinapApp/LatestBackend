@@ -1,8 +1,6 @@
 import { Request, Response } from 'express'
-import { IUser } from "../../models/User/user.model"
-import { Types } from 'mongoose'
 import { COMMENT } from '../../models/Comment/comment.model'
-import { validateCommentId, validateFlickId } from '../../validators/validators'
+import { validateCommentId } from '../../validators/validators'
 import { errors, handleResponse } from '../../utils/responseCodec'
 import Joi from 'joi'
 import { sendErrorToDiscord } from '../../config/discord/errorDiscord'

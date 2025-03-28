@@ -4,9 +4,8 @@ import Joi from 'joi';
 import { errors, handleResponse } from '../../utils/responseCodec';
 import { FLICKS } from '../../models/Flicks/flicks.model';
 
-export const getAllFlicks = async (req: Request, res: Response) => {
+export const getSelfFlicks = async (req: Request, res: Response) => {
     try {
-
         //  IT IS OF THE HOME PAGE
         const validationError: Joi.ValidationError | undefined = validateGetAllFlicks(req.query);
         if (validationError) {
@@ -15,13 +14,13 @@ export const getAllFlicks = async (req: Request, res: Response) => {
         // const user = res.locals.userId
 
         //FOR TESTING THEIR OWN FLICKS  // REMOVE WHEN AGGREGATION IS BEING DONE
-        const FLICK = await FLICKS.find({})
+        const PERSONALFLICKS = await FLICKS.find({ user: res.locals.userId }, )
 
         // let response = await getAllFlicksAggregation(user, req.query.params as string)
         // if(!response){
         //     return handleResponse(res, 304, errors.no_flicks)
         // }
-        return handleResponse(res, 200, { FLICK })
+        return handleResponse(res, 200, { PERSONALFLICKS })
     } catch (error) {
         console.log(error)
         return handleResponse(res, 500, errors.catch_error)

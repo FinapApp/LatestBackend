@@ -27,6 +27,8 @@ export interface IReportSchema extends Document {
     story?: Types.ObjectId;
     audio?: Types.ObjectId;
     quest?: Types.ObjectId;
+    incidentDate? : Date;
+    profileLink?: string;
     comment?: Types.ObjectId;
     reportedTo?: Types.ObjectId;
     message: IMessage[];
@@ -63,6 +65,12 @@ let reportSchema = new Schema<IReportSchema>(
         reportedTo: {
             type: Schema.Types.ObjectId,
             ref: 'user',  //report against a user.
+        },
+        incidentDate: {
+            type: Date,
+        },
+        profileLink : {
+            type: String,
         },
         message: {
             type: [MessageSchema],

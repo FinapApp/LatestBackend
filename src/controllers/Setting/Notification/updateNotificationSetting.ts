@@ -1,13 +1,12 @@
-import { Response } from "express";
+import { Response, Request } from "express";
 import { validateUpdateNotificationSetting } from "../../../validators/validators";
 import { handleResponse, errors, success } from "../../../utils/responseCodec";
 import Joi from "joi";
-import { AuthenticatedRequest } from "../../../types/AuthenticatedRequest.types";
 import { sendErrorToDiscord } from "../../../config/discord/errorDiscord";
 import { NOTIFICATIONSETTING } from "../../../models/User/userNotificationSetting.model";
 
 
-export const updateNotificationSetting = async (req: AuthenticatedRequest, res: Response) => {
+export const updateNotificationSetting = async (req: Request, res: Response) => {
     try {
         const validationError: Joi.ValidationError | undefined = validateUpdateNotificationSetting(
             req.body

@@ -178,6 +178,9 @@ export const settingProfile: Router = express.Router();
  *                     username:
  *                       type: string
  *                       example: 'johndoe'
+ *                     email:
+ *                       type: string
+ *                       example : 'dcode.0n1 @gmail.com'
  *                     dob:
  *                       type: string
  *                       example: '1990-01-01'
