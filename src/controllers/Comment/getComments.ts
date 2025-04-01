@@ -12,7 +12,17 @@ export const getComments = async (req: Request, res: Response) => {
             return handleResponse(res, 400, errors.validation, validationError.details);
         }
         const { flickId } = req.params
-        const COMMENTSLIST = await COMMENT.find({ flick: flickId }, "user comment ").populate('user', 'username photo').sort({ createdAt: -1 });
+        const COMMENTSLIST = await COMMENT.find({ flick: flickId }, "user comment", {
+            populate: [
+                {
+                    path: "user",
+                    select: "username photo"
+                }
+            ],
+            sort: {
+                createdAt: -1
+            }
+        })
         if (!COMMENTSLIST) {
             return handleResponse(res, 404, errors.comment_not_found)
         }

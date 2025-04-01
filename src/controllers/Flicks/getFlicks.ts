@@ -3,6 +3,7 @@ import { validateGetAllFlicks } from '../../validators/validators';
 import Joi from 'joi';
 import { errors, handleResponse } from '../../utils/responseCodec';
 import { FLICKS } from '../../models/Flicks/flicks.model';
+import { redis } from '../../config/redis/redis.config';
 
 export const getAllFlicks = async (req: Request, res: Response) => {
     try {
@@ -15,13 +16,45 @@ export const getAllFlicks = async (req: Request, res: Response) => {
         // const user = res.locals.userId
 
         //FOR TESTING THEIR OWN FLICKS  // REMOVE WHEN AGGREGATION IS BEING DONE
-        const FLICK = await FLICKS.find({})
-
+        const getFlicks = await FLICKS.find({}, "-updatedAt", {
+            populate: [
+                { path: 'user', select: 'username photo' }, //check whether I follow this guy or not ? 
+                { path: 'originFlicks', select: 'user' }, // link to the original flick
+                { path: 'media.audio', select: 'name artist duration url' },
+                // { path: 'media.song', select: 'name artist duration url' },
+                { path: 'media.taggedUsers.user', select: 'username photo' },
+                { path: 'collabs.user', select: 'username photo' },
+                { path: 'quest', select: 'name' },
+                { path: 'media.taggedUsers.user', select: 'username photo' },
+                { path: "description.mention", select: "username photo" },
+            ],
+            lean: true
+        })
+        if (!getFlicks) {
+            return handleResponse(res, 304, errors.no_flicks)
+        }
         // let response = await getAllFlicksAggregation(user, req.query.params as string)
         // if(!response){
         //     return handleResponse(res, 304, errors.no_flicks)
         // }
-        return handleResponse(res, 200, { FLICK })
+        const likeData = await Promise.all(
+            getFlicks.map(flick =>
+                redis.hgetall(`flick:likes:${flick._id}`)
+            )
+        );
+        const commentData = await Promise.all(
+            getFlicks.map(flick =>
+                redis.hgetall(`flick:comments:${flick._id}`)
+            )
+        );
+        const mergedFeed = getFlicks.map((flick, idx) => (
+            console.log(flick._id, likeData[idx].count),
+            {
+                ...flick,
+                likeCount: Number(likeData[idx]?.count || flick.likeCount || 0),
+                commentCount: Number(commentData[idx]?.count || flick.commentCount || 0),
+            }));
+        return handleResponse(res, 200, { FLICK: mergedFeed })
     } catch (error) {
         console.log(error)
         return handleResponse(res, 500, errors.catch_error)

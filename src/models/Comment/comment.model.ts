@@ -24,7 +24,7 @@ export const TextDataSchema = new Schema<ITextDataSchema>(
         },
         mention: {
             type: Schema.Types.ObjectId,    // It gets the latest data from here so basically we need this.
-            ref: 'User',
+            ref: 'user',
         },
         text: {
             type: String,

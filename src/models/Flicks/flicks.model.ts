@@ -18,6 +18,8 @@ gps: {
     suspendedReason: string;
     commentVisible: boolean;
     likeVisible: boolean;
+    commentCount: number;
+    likeCount: number;
 }
 interface TaggedUser {
     user: Schema.Types.ObjectId;
@@ -28,7 +30,7 @@ interface TaggedUser {
 }
 const taggedAndCollabSchema = new Schema<TaggedUser>(
     {
-        user: { type: Schema.Types.ObjectId, ref: "User" },
+        user: { type: Schema.Types.ObjectId, ref: "user" },
         position: {
             x: { type: Number },
             y: { type: Number },
@@ -91,7 +93,9 @@ export const FlickSchema = new Schema<IFlicks>(
         thumbnailURL: { type: String },
         description: { type: [TextDataSchema] },
         quest: { type: Schema.Types.ObjectId, ref: 'quest' },
-        repostCount: { type: Number },
+        repostCount: { type: Number, default : 0 },
+        commentCount : { type: Number, default: 0 },
+        likeCount : { type: Number, default: 0 },
         suspended: { type: Boolean, default: false },
         suspendedReason: { type: String },
         commentVisible: { type: Boolean, default: true },
@@ -99,4 +103,6 @@ export const FlickSchema = new Schema<IFlicks>(
     },
     { timestamps: false, versionKey: false }
 );
+
+FlickSchema.index({ gps: "2dsphere" });
 export const FLICKS = mongoose.model<IFlicks>("flick", FlickSchema);

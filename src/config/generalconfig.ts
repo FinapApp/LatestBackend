@@ -25,6 +25,7 @@ export const config = {
     user: process.env.GMAIL_USER!,
     pass: process.env.GMAIL_PASSWORD!,
   },
+  STRIPE_PRIVATE_KEY :  process.env.PRIVATE_KEY!  ,
   MAX_OTP_COUNT_LIMIT: 5,
   MAX_LOGIN_SESSION: 4,
   MASTER_OTP: process.env.MASTER_OTP!,

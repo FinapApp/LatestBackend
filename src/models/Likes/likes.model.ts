@@ -5,7 +5,7 @@ export interface ILikeSchema extends Document {
   user: Types.ObjectId;
   flick?: Types.ObjectId;
   comment?: Types.ObjectId;
-  battle?: Types.ObjectId;
+  quest?: Types.ObjectId;
 };
 
 const LikeSchema = new Schema<ILikeSchema>(
@@ -19,9 +19,13 @@ const LikeSchema = new Schema<ILikeSchema>(
       type: Schema.Types.ObjectId,
       ref: 'flick',
     },
+    quest : {
+      type: Schema.Types.ObjectId,
+      ref: 'quest',
+    },
     value: {
-     type : "boolean",
-     default : true
+      type: "boolean",
+      default: true
     },
     comment: {
       type: Schema.Types.ObjectId,

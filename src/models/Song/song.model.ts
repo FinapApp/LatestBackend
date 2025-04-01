@@ -1,20 +1,18 @@
 import { Schema, model, Types } from 'mongoose';
 
 export interface ISongSchema extends Document {
+    staff: Types.ObjectId;
     name: string;
     url: string;
     icon: string;
-    staff: Types.ObjectId;
     used: number;
-    suspended: boolean;
-    suspendedReason : string;
     duration?: number;
 };
 
 const SongSchema = new Schema<ISongSchema>(
     {
         staff: {
-            type: Schema.Types.ObjectId,    
+            type: Schema.Types.ObjectId,
             required: true,
             ref: 'staff',
         },
@@ -36,10 +34,8 @@ const SongSchema = new Schema<ISongSchema>(
         duration: {
             type: Number,
         },
-        suspended: { type: Boolean, default: false },
-        suspendedReason: { type: String },
     },
-    { versionKey: false, timestamps: true },
+    { versionKey: false, timestamps: { updatedAt: false, createdAt: true } }
 );
 
 export const SONG = model<ISongSchema>('song', SongSchema);

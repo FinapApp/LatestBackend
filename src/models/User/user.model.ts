@@ -47,11 +47,7 @@ export const UserSchema = new Schema<IUserSchema>(
         photo: { type: String },
         private: { type: Boolean, default: false },
         warnedCount: { type: Number, default: 0 },
-        theme : { type : String , enum : ['dark' , 'light' , 'system'] , default : 'system'}, // could be shifted to some other places if not this
-        textSize : { type : String , enum : ['small' , 'medium' , 'large'] , default : 'medium'}, // could be shifted to some other places if not this.
-        nightMode : { type : Boolean , default : false},
         suspended: { type: Boolean, default: false },
-        twoFactor : {type : Boolean , default : true},
         deactivationReason: { type: [String] },
         suspensionReason: { type: String },
     },

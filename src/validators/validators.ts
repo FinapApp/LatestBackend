@@ -3,10 +3,12 @@ import countries from "../constants/countryList";
 import { config } from "../config/generalconfig";
 export const validateLogin = (body: object) => {
   const schema = Joi.object({
-    email: Joi.string().required(),
+    email: Joi.string().optional(),
+    username : Joi.string().optional(),
+    phone : Joi.string().optional(),
     password: Joi.string().required(),
     fcmToken: Joi.string().required()
-  });
+  }).xor("email" , "username" , "phone")
   const { error } = schema.validate(body);
   return error;
 };
@@ -142,6 +144,8 @@ export const validateCommentId = (params: object) => {
   const { error } = schema.validate(params)
   return error
 }
+
+
 
 export const validatePresignedFlick = (body: object) => {
   const schema = Joi.object({
@@ -600,13 +604,12 @@ export const validateCreateQuestApplicant = (body: object, params: object) => {
   return error
 }
 
-export const validateLike = (body: object) => {
+export const validateLike = (query: object) => {
   const schema = Joi.object({
-    flick: Joi.string().regex(/^[0-9a-fA-F]{24}$/, 'object Id').optional(),
-    comment: Joi.string().regex(/^ [0 - 9a - fA - F]{ 24}$ /, 'object Id').optional(),
-    value: Joi.boolean()
-  }).xor("flick", "comment")
-  const { error } = schema.validate(body)
+    id : Joi.string().regex(/^[0-9a-fA-F]{24}$/, 'object Id').required(),
+    type: Joi.string().valid("flick", "comment", "quest").required(),
+  })
+  const { error } = schema.validate(query)
   return error
 }
 
@@ -687,6 +690,7 @@ export const validatePassword = (body: object) => {
   return error
 }
 
+
 export const validateUpdateNotificationSetting  = (body: object) => {
   const schema  = Joi.object({
     pauseAll: Joi.boolean().optional(),
@@ -751,6 +755,22 @@ export const validateUsername = (body: object) => {
 export const validateEmail = (body: object) => {
   const schema = Joi.object({
     email: Joi.string().required()
+  })
+  const { error } = schema.validate(body)
+  return error
+}
+
+
+//Payment 
+
+
+
+
+export  const validateCreatePayments = (body : object) => {
+  const schema = Joi.object({
+    stripeAccountId : Joi.string().required(),
+    email : Joi.string().required(),
+    phoneNumber : Joi.string().optional()
   })
   const { error } = schema.validate(body)
   return error

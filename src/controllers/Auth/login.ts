@@ -4,14 +4,16 @@ import Joi from "joi";
 import jwt from "jsonwebtoken";
 import { handleResponse, errors } from "../../utils/responseCodec";
 import { config } from "../../config/generalconfig";
-import {  USER } from "../../models/User/user.model";
+import { USER } from "../../models/User/user.model";
 import { SESSION } from "../../models/User/userSession.model";
 import { fetchIpGeolocation } from "../../utils/IP_helpers";
 import useragent from "useragent";
 import bcrypt from "bcrypt";
 
 interface LoginRequest {
-  email: string;
+  email?: string;
+  username?: string;
+  phone?: string;
   password: string;
   fcmToken: string;
 }
@@ -44,15 +46,20 @@ export const login = async (req: Request, res: Response) => {
     if (validationError) {
       return handleResponse(res, 400, errors.validation, validationError.details);
     }
-
-    const { email, password, fcmToken } = req.body as LoginRequest;
-
+    const { username, email, phone, password, fcmToken } = req.body as LoginRequest;
     // Find user by email
-    const checkUser = await USER.findOne({ email }, "_id password theme textSize nightMode twoFactor twoFactorMethod") as User
+    const query: Record<string, string> = {}
+    if (email) query.email = email;
+    else if (username) query.username = username;
+    else if (phone) query.phone = phone;
+    // Asked for regex in the frontend to indentify whether to give email or phone or username
+    const checkUser = await USER.findOne(
+      query ,
+      "_id password theme textSize nightMode twoFactor twoFactorMethod"
+    ) as User;
     if (!checkUser) {
       return handleResponse(res, 400, errors.invalid_credentials);
     }
-
     // Compare hashed password
     const passwordMatch = await bcrypt.compare(password, checkUser.password);
     if (!passwordMatch) {
@@ -61,7 +68,7 @@ export const login = async (req: Request, res: Response) => {
 
 
     // SEND NOTIFICATION TO ALL SESSIONS ABOUT THIS LOGIN
-    if (checkUser?.twoFactor && checkUser?.twoFactorMethod  == "email") {
+    if (checkUser?.twoFactor && checkUser?.twoFactorMethod == "email") {
       // Send OTP to email
     } else {
       // Send OTP to phone

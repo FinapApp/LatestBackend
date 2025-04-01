@@ -67,12 +67,12 @@ export const getAllSongs = async (req: Request, res: Response) => {
             }
         };
         if (lengthOfQuery === 0) {
-            await redis.set(
+                await redis.set(
                 `MEDIA-SONGS:${userId}`,
-                JSON.stringify(response),
-                "EX",
-                config?.REDIS_EXPIRE_IN
-            );
+                    JSON.stringify(response),
+                    "EX",
+                    config?.REDIS_EXPIRE_IN
+                );
         }
         return handleResponse(res, 200, response);
     } catch (err: any) {
