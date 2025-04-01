@@ -9,6 +9,7 @@ import { SESSION } from "../../models/User/userSession.model";
 import { fetchIpGeolocation } from "../../utils/IP_helpers";
 import useragent from "useragent";
 import bcrypt from "bcrypt";
+import { USERPREFERENCE } from "../../models/User/userPreference.model";
 
 interface LoginRequest {
   email?: string;
@@ -32,6 +33,10 @@ interface LoginRequest {
 interface User {
   password: string;
   _id: string;
+}
+
+
+interface UserPreference {
   theme: string;
   textSize: string;
   nightMode: boolean;
@@ -54,8 +59,8 @@ export const login = async (req: Request, res: Response) => {
     else if (phone) query.phone = phone;
     // Asked for regex in the frontend to indentify whether to give email or phone or username
     const checkUser = await USER.findOne(
-      query ,
-      "_id password theme textSize nightMode twoFactor twoFactorMethod"
+      query,
+      "_id password"
     ) as User;
     if (!checkUser) {
       return handleResponse(res, 400, errors.invalid_credentials);
@@ -66,16 +71,14 @@ export const login = async (req: Request, res: Response) => {
       return handleResponse(res, 400, errors.invalid_credentials);
     }
 
-
+    const userId = checkUser._id;
+    const checkUserPreference = await USERPREFERENCE.findById(userId, "theme textSize nightMode twoFactor", { upsert: true }) as UserPreference;
     // SEND NOTIFICATION TO ALL SESSIONS ABOUT THIS LOGIN
-    if (checkUser?.twoFactor && checkUser?.twoFactorMethod == "email") {
+    if (checkUserPreference?.twoFactor && checkUserPreference?.twoFactorMethod == "email") {
       // Send OTP to email
     } else {
       // Send OTP to phone
     }
-
-    const userId = checkUser._id;
-
     // Generate tokens
     const accessToken = jwt.sign(
       { userId },
@@ -111,9 +114,7 @@ export const login = async (req: Request, res: Response) => {
       os: deviceData.os.toString(),
       location: geoData ? `${geoData.city}, ${geoData.country_name}` : undefined,
     });
-
-    const { theme, textSize, nightMode } = checkUser;
-    return handleResponse(res, 200, { accessToken, refreshToken, userPreferences: { theme, textSize, nightMode } });
+    return handleResponse(res, 200, { accessToken, refreshToken, userPreferences: checkUserPreference });
   } catch (err: any) {
     console.log("login-errors", err);
     return handleResponse(res, 500, errors.catch_error);

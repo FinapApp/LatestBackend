@@ -58,9 +58,7 @@ export const UserSchema = new Schema<IUserSchema>(
 // Middleware to hash password before saving
 UserSchema.pre("save", async function (next) {
     const user = this as IUserSchema;
-
     if (!user.isModified("password")) return next(); // Only hash if password is modified
-
     try {
         const salt = await bcrypt.genSalt(10);
         user.password = await bcrypt.hash(user.password, salt);
