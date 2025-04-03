@@ -3,6 +3,7 @@ import Joi from 'joi';
 import { errors, handleResponse, success } from '../../utils/responseCodec';
 import { FEEDBACK } from '../../models/Feedback/feedback.model';
 import { validateFeedbackId } from '../../validators/validators';
+import { sendErrorToDiscord } from '../../config/discord/errorDiscord';
 export const deleteFeedback = async (req: Request, res: Response) => {
     try {
         const validationError: Joi.ValidationError | undefined = validateFeedbackId(req.params);
@@ -16,6 +17,7 @@ export const deleteFeedback = async (req: Request, res: Response) => {
         }
         return handleResponse(res, 500, errors.delete_feedback);
     } catch (err) {
+        sendErrorToDiscord('DELETE:delete-feedback', err);
         return handleResponse(res, 500, errors.catch_error);
     }
 }

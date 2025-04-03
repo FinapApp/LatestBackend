@@ -3,6 +3,7 @@ import { COMMENT } from "../../../models/Comment/comment.model"
 import Joi from "joi";
 import { validateCommentId } from "../../../validators/validators";
 import { errors, handleResponse, success } from "../../../utils/responseCodec";
+import { sendErrorToDiscord } from "../../../config/discord/errorDiscord";
 
 export const deleteComment = async (req: Request, res: Response)  => {
     try {
@@ -17,6 +18,7 @@ export const deleteComment = async (req: Request, res: Response)  => {
         }
         return handleResponse(res, 404, errors.comment_delete)
     } catch (error) {
+        sendErrorToDiscord("DELETE:delete-comment", error)
         return handleResponse(res, 500, errors.catch_error)
     }
 }

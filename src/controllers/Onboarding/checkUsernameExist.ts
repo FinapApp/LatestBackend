@@ -3,6 +3,7 @@ import { errors, handleResponse, success } from "../../utils/responseCodec";
 import Joi from "joi";
 import { validateUsername } from "../../validators/validators";
 import { USER } from "../../models/User/user.model";
+import { sendErrorToDiscord } from "../../config/discord/errorDiscord";
 
 
 export const checkUserNameExist = async (req: Request, res: Response) => {
@@ -17,10 +18,10 @@ export const checkUserNameExist = async (req: Request, res: Response) => {
         }
         return handleResponse(res, 200, success.username_available);
     } catch (error: any) {
+        sendErrorToDiscord("POST:username-exist", error)
         if (error.code == 11000) {
             return handleResponse(res, 500, errors.cannot_rerunIt)
         }
-        console.error(error);
         return handleResponse(res, 500, errors.catch_error);
     }
 };

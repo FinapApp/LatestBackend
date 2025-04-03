@@ -1,8 +1,9 @@
 import { Request, Response } from "express";
 import Joi from "joi";
-import { errors, handleResponse} from "../../utils/responseCodec";
+import { errors, handleResponse } from "../../utils/responseCodec";
 import { validateFlickId } from "../../validators/validators";
 import { FLICKS } from "../../models/Flicks/flicks.model";
+import { sendErrorToDiscord } from "../../config/discord/errorDiscord";
 
 export const getFlick = async (req: Request, res: Response) => {
     try {
@@ -13,11 +14,11 @@ export const getFlick = async (req: Request, res: Response) => {
         const flickId = req.params.flickId;
         const checkFlick = await FLICKS.findById(flickId)
         if (checkFlick) {
-            return handleResponse(res , 200 , { checkFlick })
+            return handleResponse(res, 200, { FLICK : checkFlick })
         }
         return handleResponse(res, 400, errors.no_flicks);
     } catch (error) {
-        console.error(error);
-     return handleResponse(res, 500, errors.catch_error);
+        sendErrorToDiscord("GET:get-flick", error);
+        return handleResponse(res, 500, errors.catch_error);
     }
 };

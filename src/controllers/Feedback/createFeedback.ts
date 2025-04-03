@@ -3,6 +3,7 @@ import { FEEDBACK } from "../../models/Feedback/feedback.model";
 import { validateCreateFeedback } from "../../validators/validators";
 import { errors, handleResponse, success } from "../../utils/responseCodec";
 import Joi from "joi";
+import { sendErrorToDiscord } from '../../config/discord/errorDiscord';
 
 export const createFeedback = async (req: Request, res: Response) => {
     try {
@@ -21,7 +22,7 @@ export const createFeedback = async (req: Request, res: Response) => {
         }
         return handleResponse(res, 500, errors.create_feedback);
     } catch (err) {
-        console.log(err)
+        sendErrorToDiscord("POST:create-feedback", err)
         return handleResponse(res, 500, errors.catch_error)
     }
 }

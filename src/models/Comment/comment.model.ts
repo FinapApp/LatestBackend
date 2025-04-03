@@ -13,6 +13,7 @@ export type ITextDataSchema = {
     type: 'user' | 'text'
     mention?: Schema.Types.ObjectId
     text?: string
+    hashtag?: string
 };
 
 export const TextDataSchema = new Schema<ITextDataSchema>(
@@ -20,7 +21,7 @@ export const TextDataSchema = new Schema<ITextDataSchema>(
         type: {
             type: String,
             required: true,
-            enum: ['user', 'text'],
+            enum: ['user', 'text' , 'hashtag'],
         },
         mention: {
             type: Schema.Types.ObjectId,    // It gets the latest data from here so basically we need this.
@@ -28,6 +29,10 @@ export const TextDataSchema = new Schema<ITextDataSchema>(
         },
         text: {
             type: String,
+        },
+        hashtag: {
+            type: Schema.Types.ObjectId,
+            ref: 'hashtag'
         },
     },
     { versionKey: false, _id: false }

@@ -18,22 +18,31 @@ export const friendSuggestionRoutes: Router = express.Router();
  *         content:
  *           application/json:
  *             schema:
- *               type: array
- *               items:
- *                 type: object
- *                 properties:
- *                   _id:
- *                     type: string
- *                     example: "60f7b3b4b3f3b30015f3f3b4"
- *                   name:
- *                     type: string
- *                     example: "John Doe"
- *                   username:
- *                     type: string
- *                     example: "johndoe"
- *                   photo:
- *                     type: string
- *                     example: "https://via.placeholder.com/150"
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 data:
+ *                   type: object
+ *                   properties:
+ *                     FRIENDSUGGESTIONS:
+ *                       type: array
+ *                       items:
+ *                         type: object
+ *                         properties:
+ *                           _id:
+ *                             type: string
+ *                             example: "67d2ce97854e076d22d7c9c8"
+ *                           username:
+ *                             type: string
+ *                             example: "johndoe"
+ *                           name:
+ *                             type: string
+ *                             example: "John"
+ *                           photo:
+ *                             type: string
+ *                             example: "https://pub-301c1efdf41d428f9ab043c4d4ecbac9.r2.dev/staff/67d96ac17d0486db4b315bbc/profile-image"
  *       500:
  *         description: An error occurred
  *         content:

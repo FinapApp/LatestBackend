@@ -15,6 +15,9 @@ gps: {
     quest: Schema.Types.ObjectId;
     repostCount: number;
     suspended: boolean;
+    song?: Schema.Types.ObjectId;
+    songStart?: number;
+    songEnd?: number;
     suspendedReason: string;
     commentVisible: boolean;
     likeVisible: boolean;
@@ -44,14 +47,7 @@ interface IMediaSchema extends Document {
     type: 'video' | 'photo';
     duration?: number;
     audio?: Schema.Types.ObjectId;
-    song?: Schema.Types.ObjectId;
-    songStart?: number;
-    songEnd?: number;
     alt: string;
-    songPosition?: {
-        x: number;
-        y: number
-    },
     taggedUsers?: TaggedUser[];
     url: string;
 }
@@ -61,14 +57,7 @@ const MediaSchema = new Schema<IMediaSchema>(
         type: { type: String, enum: ['video', 'photo'] },
         duration: { type: Number },
         audio: { type: Schema.Types.ObjectId, ref: "audio" },
-        song : { type: Schema.Types.ObjectId, ref: "song" },
-        songStart: { type: Number },
-        songEnd: { type: Number },
-        alt: { type: String }, // this 
-        songPosition: {
-            x: { type: Number },
-            y: { type: Number }
-        },
+        alt: { type: String }, 
         taggedUsers: { type: [taggedAndCollabSchema] },
         url: { type: String }
     },
@@ -93,6 +82,9 @@ export const FlickSchema = new Schema<IFlicks>(
         thumbnailURL: { type: String },
         description: { type: [TextDataSchema] },
         quest: { type: Schema.Types.ObjectId, ref: 'quest' },
+        song: { type: Schema.Types.ObjectId, ref: 'song' },
+        songStart: { type: Number },
+        songEnd: { type: Number },
         repostCount: { type: Number, default : 0 },
         commentCount : { type: Number, default: 0 },
         likeCount : { type: Number, default: 0 },

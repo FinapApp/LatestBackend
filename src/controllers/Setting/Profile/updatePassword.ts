@@ -31,7 +31,7 @@ export const updatePassword = async (req: Request, res: Response) => {
         }
         return handleResponse(res, 304, errors.profile_not_updated);
     } catch (err: any) {
-        await sendErrorToDiscord("profile-PUT", err);
+        await sendErrorToDiscord("PUT:password", err);
         return handleResponse(res, 500, errors.catch_error);
     }
 };

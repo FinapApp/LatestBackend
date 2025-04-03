@@ -1,12 +1,14 @@
-    import { Request, Response } from 'express'
-    import { errors, handleResponse } from '../../utils/responseCodec';
-    import jwt from 'jsonwebtoken'
-    import { config } from '../../config/generalconfig';
-    import { SESSION } from '../../models/User/userSession.model';
-    import Joi from 'joi';
-    import { validateRefreshToken } from '../../validators/validators';
+import { Request, Response } from 'express'
+import { errors, handleResponse } from '../../utils/responseCodec';
+import jwt from 'jsonwebtoken'
+import { config } from '../../config/generalconfig';
+import { SESSION } from '../../models/User/userSession.model';
+import Joi from 'joi';
+import { validateRefreshToken } from '../../validators/validators';
+import { sendErrorToDiscord } from '../../config/discord/errorDiscord';
 
-    export const revalidateSessions = async (req: Request, res: Response) => {
+export const revalidateSessions = async (req: Request, res: Response) => {
+    try {
         const validationError: Joi.ValidationError | undefined = validateRefreshToken(req.body);
         if (validationError) {
             return handleResponse(res, 400, errors.validation, validationError.details);
@@ -39,4 +41,8 @@
                 return handleResponse(res, 200, { accessToken });
             }
         })
+    } catch (error) {
+        sendErrorToDiscord("POST:revalidate-sessions", error)
+        return handleResponse(res, 500, errors.catch_error);
     }
+}

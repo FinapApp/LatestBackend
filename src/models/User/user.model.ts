@@ -5,48 +5,50 @@ import { ITextDataSchema, TextDataSchema } from "../Comment/comment.model";
 interface IUserSchema extends Document {
     username: string;
     name: string;
-    surname  : string   // added after revisiting the profile screens 
     email: string;
     phone: string;
     password: string;
     dob: string;
     description: ITextDataSchema[];
     country: string;
-    flickCount: number; // Number of flicks user has , increment/decrement when uploading/deleting flicks
-    successfulQuest :  number; // Number of successful quests user has , increment/decrement when quest is completed
+    flickCount: number; 
+    successfulQuest: number; 
+    followingCount: number; 
+    followerCount: number; 
     balance: number;
     private: boolean;
     deletedAt: Date;
     gender: string;
     photo: string;
-    theme : 'dark' | 'light' | 'system';
-    textSize : 'small' | 'medium' | 'large';
-    nightMode : boolean;
+    theme: 'dark' | 'light' | 'system';
+    textSize: 'small' | 'medium' | 'large';
+    nightMode: boolean;
     warnedCount: number,
     suspended: boolean,
     suspensionReason: string,
     deactivationReason: string[],
-    twoFactor : boolean
+    twoFactor: boolean
 }
 
 export const UserSchema = new Schema<IUserSchema>(
     {
         username: { type: String, unique: true },
         name: { type: String },
-        surname : {type : String},
         email: { type: String, unique: true },
         phone: { type: String },
         password: { type: String },
         dob: { type: String },
         description: { type: [TextDataSchema] },
         country: { type: String },
-        flickCount: { type: Number },
         balance: { type: Number, default: 0 },
         deletedAt: { type: Date },
         gender: { type: String },
         photo: { type: String },
         private: { type: Boolean, default: false },
         warnedCount: { type: Number, default: 0 },
+        flickCount: { type: Number, default: 0 },
+        followingCount: { type: Number, default: 0 },
+        followerCount: { type: Number, default: 0 },
         suspended: { type: Boolean, default: false },
         deactivationReason: { type: [String] },
         suspensionReason: { type: String },
@@ -63,7 +65,7 @@ UserSchema.pre("save", async function (next) {
         const salt = await bcrypt.genSalt(10);
         user.password = await bcrypt.hash(user.password, salt);
         next();
-    } catch (error : any) {
+    } catch (error: any) {
         next(error);
     }
 });
@@ -77,7 +79,7 @@ UserSchema.pre("findOneAndUpdate", async function (next) {
             const salt = await bcrypt.genSalt(10);
             update.password = await bcrypt.hash(update.password, salt);
             this.setUpdate(update);
-        } catch (error : any) {
+        } catch (error: any) {
             return next(error);
         }
     }

@@ -16,6 +16,7 @@ export const getFriendSuggestion = async (req: Request, res: Response) => {
         }
         return handleResponse(res, 404, errors.notification)
     } catch (err: any) {
+        console.log(err)
         return handleResponse(res, 500, errors.catch_error, err);
     }
 };

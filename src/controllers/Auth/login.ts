@@ -37,6 +37,7 @@ interface User {
 
 
 interface UserPreference {
+  _id: string;
   theme: string;
   textSize: string;
   nightMode: boolean;
@@ -72,7 +73,7 @@ export const login = async (req: Request, res: Response) => {
     }
 
     const userId = checkUser._id;
-    const checkUserPreference = await USERPREFERENCE.findById(userId, "theme textSize nightMode twoFactor", { upsert: true }) as UserPreference;
+    const checkUserPreference = await USERPREFERENCE.findById(userId, "theme textSize nightMode twoFactor -_id") as UserPreference;
     // SEND NOTIFICATION TO ALL SESSIONS ABOUT THIS LOGIN
     if (checkUserPreference?.twoFactor && checkUserPreference?.twoFactorMethod == "email") {
       // Send OTP to email
@@ -114,7 +115,7 @@ export const login = async (req: Request, res: Response) => {
       os: deviceData.os.toString(),
       location: geoData ? `${geoData.city}, ${geoData.country_name}` : undefined,
     });
-    return handleResponse(res, 200, { accessToken, refreshToken, userPreferences: checkUserPreference });
+    return handleResponse(res, 200, { accessToken, refreshToken, userPreferences: checkUserPreference});
   } catch (err: any) {
     console.log("login-errors", err);
     return handleResponse(res, 500, errors.catch_error);

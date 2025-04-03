@@ -3,6 +3,7 @@ import { validateUpdateProfile } from "../../../validators/validators";
 import { handleResponse, errors, success } from "../../../utils/responseCodec";
 import Joi from "joi";
 import { USER } from "../../../models/User/user.model";
+import { sendErrorToDiscord } from "../../../config/discord/errorDiscord";
 
 
 export const updateProfile = async (req: Request, res: Response) => {
@@ -28,14 +29,13 @@ export const updateProfile = async (req: Request, res: Response) => {
         }
         return handleResponse(res, 304, errors.profile_not_updated);
     } catch (err: any) {
-        console.log("=====> err", err);
         if(err.code ==  "11000" && err.keyValue.email){
             return handleResponse(res, 500, errors.email_exist);
         }
         if(err.code ==  "11000" && err.keyValue.username){
             return handleResponse(res, 500, errors.username_exist);
         }
-        // await sendErrorToDiscord("profile-PUT", err);
+        sendErrorToDiscord("PUT:profile", err);
         return handleResponse(res, 500, errors.catch_error);
     }
 };

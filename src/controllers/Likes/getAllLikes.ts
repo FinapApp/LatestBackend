@@ -1,13 +1,13 @@
 import { Request, Response } from 'express'
 import Joi from 'joi';
-import { validateLike } from '../../validators/validators';
+import { validateGetAllLikes } from '../../validators/validators';
 import { errors, handleResponse } from '../../utils/responseCodec';
 import { sendErrorToDiscord } from '../../config/discord/errorDiscord';
 import { LIKE } from '../../models/Likes/likes.model';
 
 export const getAllLikes = async (req: Request, res: Response) => {
     try {
-        const validationError: Joi.ValidationError | undefined = validateLike(req.query);
+        const validationError: Joi.ValidationError | undefined = validateGetAllLikes(req.query);
         if (validationError) {
             return handleResponse(res, 400, errors.validation, validationError.details);
         }
@@ -17,7 +17,7 @@ export const getAllLikes = async (req: Request, res: Response) => {
         if (type == 'comment') query.comment = id;
         if (type == 'quest') query.quest = id;
         console.log(query, "query")
-        const LIKELIST = await LIKE.find(query, "user", {
+        const LIKELIST = await LIKE.find(query, "user -_id", {
             populate: [
                 {
                     path: "user",

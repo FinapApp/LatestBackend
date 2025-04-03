@@ -3,6 +3,7 @@ import Joi from "joi";
 import { validateFlickId } from "../../validators/validators";
 import { errors, handleResponse, success } from "../../utils/responseCodec";
 import { FLICKS } from "../../models/Flicks/flicks.model";
+import { sendErrorToDiscord } from "../../config/discord/errorDiscord";
 
 export const deleteFlick = async (req: Request, res: Response) => {
     try {
@@ -17,6 +18,7 @@ export const deleteFlick = async (req: Request, res: Response) => {
         }
         return handleResponse(res, 404, errors.flick_deleted)
     } catch (error) {
+        sendErrorToDiscord("DELETE:delete-flick", error)
         return handleResponse(res, 500, errors.catch_error)
     }
 }

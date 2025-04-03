@@ -5,6 +5,7 @@ import { handleResponse, errors, success } from "../../utils/responseCodec";
 import { redis } from "../../config/redis/redis.config";
 import { config } from "../../config/generalconfig";
 import { USER } from "../../models/User/user.model";
+import { sendErrorToDiscord } from "../../config/discord/errorDiscord";
 
 
 interface ForgetOTPRequest {
@@ -48,7 +49,7 @@ export const verifyOTPAfterSignUp = async (req: Request, res: Response) => {
         }
         return handleResponse(res, 400, errors.otp_not_match)
     } catch (err: any) {
-        console.log(err)
+        sendErrorToDiscord("POST:verify-otp", err)
         if(err.code === 11000){
             return handleResponse(res, 400, errors.retry_signup);
         }

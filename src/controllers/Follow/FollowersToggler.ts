@@ -4,6 +4,7 @@ import { errors, handleResponse, success } from "../../utils/responseCodec";
 import Joi from "joi";
 import { FOLLOW  } from '../../models/User/userFollower.model';
 import { USER } from '../../models/User/user.model';
+import { sendErrorToDiscord } from '../../config/discord/errorDiscord';
 
 export const followerToggle = async (req: Request, res: Response) => {
     try {
@@ -38,6 +39,7 @@ export const followerToggle = async (req: Request, res: Response) => {
         }
         return handleResponse(res, 500, errors.user_followed);
     } catch (err) {
+        sendErrorToDiscord("POST:follow", err);
         return handleResponse(res, 500, errors.catch_error);
     }
 };

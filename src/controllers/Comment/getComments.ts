@@ -28,7 +28,7 @@ export const getComments = async (req: Request, res: Response) => {
         }
         return handleResponse(res, 200, { COMMENTSLIST })
     } catch (error) {
-        sendErrorToDiscord("get-comments", error)
+        sendErrorToDiscord("GET:get-comments", error)
         return handleResponse(res, 500, errors.catch_error)
     }
 }

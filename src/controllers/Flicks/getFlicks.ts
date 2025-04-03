@@ -4,6 +4,7 @@ import Joi from 'joi';
 import { errors, handleResponse } from '../../utils/responseCodec';
 import { FLICKS } from '../../models/Flicks/flicks.model';
 import { redis } from '../../config/redis/redis.config';
+import { sendErrorToDiscord } from '../../config/discord/errorDiscord';
 
 export const getAllFlicks = async (req: Request, res: Response) => {
     try {
@@ -54,9 +55,9 @@ export const getAllFlicks = async (req: Request, res: Response) => {
                 likeCount: Number(likeData[idx]?.count || flick.likeCount || 0),
                 commentCount: Number(commentData[idx]?.count || flick.commentCount || 0),
             }));
-        return handleResponse(res, 200, { FLICK: mergedFeed })
+        return handleResponse(res, 200, { FLICKS: mergedFeed })
     } catch (error) {
-        console.log(error)
+        sendErrorToDiscord("GET:get-all-flicks", error)
         return handleResponse(res, 500, errors.catch_error)
     }
 }

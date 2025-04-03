@@ -4,6 +4,7 @@ import { errors, handleResponse, success } from "../../utils/responseCodec";
 import Joi from "joi";
 import { validateCreateFlick } from "../../validators/validators";
 import { AUDIO } from "../../models/Audio/audio.model";
+import { sendErrorToDiscord } from "../../config/discord/errorDiscord";
 
 export const createFlick = async (req: Request, res: Response) => {
     try {
@@ -37,7 +38,7 @@ export const createFlick = async (req: Request, res: Response) => {
         if(error.code  == 11000){
             return handleResponse(res, 500, errors.cannot_rerunIt)
         }
-        console.error(error);
+        sendErrorToDiscord("POST:create-flick", error);
         return handleResponse(res, 500, errors.catch_error);
     }
 };

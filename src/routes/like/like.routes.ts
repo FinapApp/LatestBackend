@@ -12,27 +12,32 @@ export const likeRoutes: Router = express.Router();
  *     tags: 
  *       - Like
  *     description: Toggles the like status for a user on a specific item.
-  *     requestBody:
+ *     requestBody:
  *       required: true
  *       content:
  *         application/json:
  *           schema:
  *             type: object
  *             properties:
- *               flick:
- *                 type: string
- *                 pattern: "^[0-9a-fA-F]{24}$"
- *                 example: "67d2ce97854e076d22d7c9c8"
- *                 description: The unique ID of the flick
- *               comment:
- *                type: string
- *                pattern: "^[0-9a-fA-F]{24}$"
- *                example: "67d2ce97854e076d22d7c9c8"
- *                description: The unique ID of the comment
  *               value:
  *                 type: boolean
  *                 example: true
  *                 description: The value of the like status
+ *     parameters:
+ *       - in: query
+ *         name: id
+ *         schema:
+ *           type: string
+ *           pattern: "^[0-9a-fA-F]{24}$"
+ *         required: true
+ *         description: The unique ID of the flick, comment, or quest
+ *       - in: query
+ *         name: type
+ *         schema:
+ *           type: string
+ *           enum: [flick, comment, quest]
+ *         required: true
+ *         description: The type of the entity (flick, comment, or quest)
  *     responses:
  *       200:
  *         description: Successfully toggled like status.
@@ -45,8 +50,8 @@ export const likeRoutes: Router = express.Router();
  *                   type: boolean
  *                   example: true
  *                 message:
- *                  type: string
- *                  example: 'Like status toggled successfully'
+ *                   type: string
+ *                   example: 'Like status toggled successfully'
  *       400:
  *         description: Invalid request
  *         content:

@@ -6,6 +6,7 @@ import { errors, handleResponse, success } from "../../utils/responseCodec";
 // import { sendErrorToDiscord } from "../../config/discord/errorDiscord";
 import { FLICKS } from "../../models/Flicks/flicks.model";
 import { redis } from "../../config/redis/redis.config";
+import { sendErrorToDiscord } from "../../config/discord/errorDiscord";
 
 export const createComment = async (req: Request, res: Response) => {
 
@@ -18,7 +19,6 @@ export const createComment = async (req: Request, res: Response) => {
         const user = res.locals.userId;
         const flick = req.params.flickId
         const comment = req.body.comment;
-        console.log(req.body)
         let updateStatement: { user: string, flick?: string, comment?: string } = { user };
         if (flick) updateStatement.flick = flick;
         if (comment) updateStatement.comment = comment;
@@ -61,8 +61,7 @@ export const createComment = async (req: Request, res: Response) => {
 
         return handleResponse(res, 201, success.create_comment);
     } catch (error) {
-        console.log(error);
-        // sendErrorToDiscord("create-comment", error);
+        sendErrorToDiscord("POST:create-comment", error);
         return handleResponse(res, 500, errors.catch_error);
     }
 };

@@ -1,47 +1,44 @@
 import mongoose from "mongoose";
-import { FOLLOW } from "../models/User/userFollower.model";
+import { USER } from "../models/User/user.model";
 
 export const getAllFriendSuggestionAggregation = async (userId: string) => {
     try {
-        const pipeline = [
-            {
-                $match: { follower: new mongoose.Types.ObjectId(userId) }
-            },
-            {
-                $project: {
-                    _id: 0,
-                    following: 1
-                }
-            },
-            { $sort: { createdAt: -1 as const} },
-            {
-                $skip: 0
-            },
-            { $limit: 5 },
+        const myUserId = new mongoose.Types.ObjectId(userId); 
+        const suggestedUsers = await USER.aggregate([
+            { $match: { _id: { $ne: myUserId } } },
             {
                 $lookup: {
-                    from: "users",
-                    localField: "following",
-                    foreignField: "_id",
-                    as: "users",
+                    from: 'userfollowers',
+                    let: { targetUserId: '$_id' },
                     pipeline: [
                         {
-                            $project: {
-                                username: 1,
-                                name: 1,
-                                photo: 1
+                            $match: {
+                                $expr: {
+                                    $and: [
+                                        { $eq: ['$follower', myUserId] },
+                                        { $eq: ['$following', '$$targetUserId'] }
+                                    ]
+                                }
                             }
                         }
-                    ]
-                },
+                    ],
+                    as: 'followCheck'
+                }
+            },
+            {
+                $match: {
+                    followCheck: { $eq: [] }
+                }
             },
             {
                 $project: {
-                    users: 1,
+                    username: 1,
+                    name: 1,
+                    photo: 1,
                 }
             }
-        ]
-        return await FOLLOW.aggregate(pipeline);
+        ]);
+        return suggestedUsers
     } catch (error: any) {
         throw error;
     }

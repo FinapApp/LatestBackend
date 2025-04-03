@@ -3,6 +3,7 @@ import Joi from "joi";
 import { errors, handleResponse, success } from "../../../utils/responseCodec";
 import { validateUpdateComment } from "../../../validators/validators";
 import { COMMENT } from "../../../models/Comment/comment.model";
+import { sendErrorToDiscord } from "../../../config/discord/errorDiscord";
 
 export const updateReplyComment = async (req: Request, res: Response) => {
     try {
@@ -22,6 +23,7 @@ export const updateReplyComment = async (req: Request, res: Response) => {
         }
         return handleResponse(res, 304, errors.update_comment)
     } catch (error) {
+        sendErrorToDiscord("PUT:update-reply-comment", error)
         return handleResponse
     }
 }

@@ -1,14 +1,15 @@
 import Joi from "joi";
 import countries from "../constants/countryList";
 import { config } from "../config/generalconfig";
+
 export const validateLogin = (body: object) => {
   const schema = Joi.object({
     email: Joi.string().optional(),
-    username : Joi.string().optional(),
-    phone : Joi.string().optional(),
+    username: Joi.string().optional(),
+    phone: Joi.string().optional(),
     password: Joi.string().required(),
     fcmToken: Joi.string().required()
-  }).xor("email" , "username" , "phone")
+  }).xor("email", "username", "phone");
   const { error } = schema.validate(body);
   return error;
 };
@@ -169,14 +170,7 @@ export const validateCreateFlick = (body: object, params: object) => {
       type: Joi.string().valid("photo", "video").required(),
       duration: Joi.number().optional(),
       audio: Joi.string().regex(/^[0-9a-fA-F]{24}$/, 'object Id').optional(),
-      song: Joi.string().regex(/^[0-9a-fA-F]{24}$/, 'object Id').optional(),
-      songStart: Joi.number().optional(),
-      songEnd: Joi.number().optional(),
       alt: Joi.string().required(),
-      songPosition: Joi.object({
-        x: Joi.number().required(),
-        y: Joi.number().required()
-      }).optional(),
       taggedUsers: Joi.array().items(Joi.object({
         user: Joi.string().regex(/^[0-9a-fA-F]{24}$/, 'object Id').required(),
         position: Joi.object({
@@ -186,6 +180,9 @@ export const validateCreateFlick = (body: object, params: object) => {
       })).optional(),
       url: Joi.string().required()
     })).required(),
+    song: Joi.string().regex(/^[0-9a-fA-F]{24}$/, 'object Id').optional(),
+    songStart: Joi.number().optional(),
+    songEnd: Joi.number().optional(),
     thumbnailURL: Joi.string().required(),
     description: Joi.array().items(Joi.object({
       type: Joi.string().valid("user", "text"),
@@ -342,35 +339,59 @@ export const getQueryParams = (query: object) => {
   return error
 }
 
-export const validateUpdateTheme = (body : object) => {
+export const validateUpdateTheme = (body: object) => {
   const schema = Joi.object({
-    theme: Joi.string().valid("light", "dark" , "system").required()
+    theme: Joi.string().valid("light", "dark", "system").required()
   })
   const { error } = schema.validate(body)
   return error
 }
 
 
-export const validateUpdateTwoFactor  = (body : object) => {
+export const validateUpdateTwoFactor = (body: object) => {
   const schema = Joi.object({
     twoFactor: Joi.boolean().optional(),
-    twoFactorMethod :Joi.string().valid("sms", "email").optional()
+    twoFactorMethod: Joi.string().valid("sms", "email").optional()
   })
   const { error } = schema.validate(body)
   return error
 }
 export const validateUpdateFlick = (body: object, params: object) => {
   const bodySchema = Joi.object({
-    description: Joi.array().items(Joi.object({
-      type: Joi.string().valid("user", "text"),
-      mention: Joi.string().regex(/^[0-9a-fA-F]{24}$/, 'object Id').optional(),
-      text: Joi.string()
+    media: Joi.array().items(Joi.object({
+      type: Joi.string().valid("photo", "video").optional(),
+      duration: Joi.number().optional(),
+      audio: Joi.string().regex(/^[0-9a-fA-F]{24}$/, 'object Id').optional(),
+      alt: Joi.string().optional(),
+      taggedUsers: Joi.array().items(Joi.object({
+        user: Joi.string().regex(/^[0-9a-fA-F]{24}$/, 'object Id').required(),
+        position: Joi.object({
+          x: Joi.number().required(),
+          y: Joi.number().required()
+        }).optional()
+      })).optional(),
+      url: Joi.string().optional()
     })).optional(),
-    hashTags: Joi.array().items(Joi.string()).optional(),
+    song: Joi.string().regex(/^[0-9a-fA-F]{24}$/, 'object Id').optional(),
     songStart: Joi.number().optional(),
     songEnd: Joi.number().optional(),
+    thumbnailURL: Joi.string().optional(),
+    description: Joi.array().items(Joi.object({
+      type: Joi.string().valid("user", "text").optional(),
+      mention: Joi.string().regex(/^[0-9a-fA-F]{24}$/, 'object Id').optional(),
+      text: Joi.string().optional()
+    })).optional(),
     location: Joi.string().optional(),
-    collabs: Joi.array().items(Joi.string().regex(/^[0-9a-fA-F]{24}$/, 'object Id')).optional(),
+    collabs: Joi.array().items(Joi.object({
+      user: Joi.string().regex(/^[0-9a-fA-F]{24}$/, 'object Id').required(),
+      position: Joi.object({
+        x: Joi.number().optional(),
+        y: Joi.number().optional()
+      }).required()
+    })).optional(),
+    hashTags: Joi.array().items(Joi.string()).optional(),
+    commentVisible: Joi.boolean().optional(),
+    likeVisible: Joi.boolean().optional(),
   })
   const paramsSchema = Joi.object({
     flickId: Joi.string().regex(/^[0-9a-fA-F]{24}$/, 'object Id').required()
@@ -604,9 +625,25 @@ export const validateCreateQuestApplicant = (body: object, params: object) => {
   return error
 }
 
-export const validateLike = (query: object) => {
+export const validateLikeToggle = (body: object, query: object) => {
+  const bodySchema = Joi.object({
+    value: Joi.boolean().required()
+  })
+  const querySchema = Joi.object({
+    id: Joi.string().regex(/^[0-9a-fA-F]{24}$/, 'object Id').required(),
+    type: Joi.string().valid("flick", "comment", "quest").required(),
+  })
+  const combinedSchema = Joi.object({
+    body: bodySchema,
+    query: querySchema
+  })
+  const { error } = combinedSchema.validate({ body, query })
+  return error
+}
+
+export const validateGetAllLikes = (query: object) => {
   const schema = Joi.object({
-    id : Joi.string().regex(/^[0-9a-fA-F]{24}$/, 'object Id').required(),
+    id: Joi.string().regex(/^[0-9a-fA-F]{24}$/, 'object Id').required(),
     type: Joi.string().valid("flick", "comment", "quest").required(),
   })
   const { error } = schema.validate(query)
@@ -662,9 +699,8 @@ export const validateRefreshToken = (body: object) => {
 export const validateUpdateProfile = (body: object) => {
   const schema = Joi.object({
     name: Joi.string().optional(),
-    surname : Joi.string().optional(),
     email: Joi.string().email().optional(),
-    gender : Joi.string().optional(),
+    gender: Joi.string().optional(),
     phone: Joi.string().optional(),
     username: Joi.string().optional(),
     dob: Joi.string().optional(),
@@ -683,7 +719,7 @@ export const validateUpdateProfile = (body: object) => {
 
 export const validatePassword = (body: object) => {
   const schema = Joi.object({
-    password : Joi.string().required(),
+    password: Joi.string().required(),
     newPassword: Joi.string().required()
   })
   const { error } = schema.validate(body)
@@ -691,8 +727,8 @@ export const validatePassword = (body: object) => {
 }
 
 
-export const validateUpdateNotificationSetting  = (body: object) => {
-  const schema  = Joi.object({
+export const validateUpdateNotificationSetting = (body: object) => {
+  const schema = Joi.object({
     pauseAll: Joi.boolean().optional(),
     likes: Joi.string().valid("everyone", "following", "none").optional(),
     comments: Joi.string().valid("everyone", "following", "none").optional(),
@@ -766,11 +802,11 @@ export const validateEmail = (body: object) => {
 
 
 
-export  const validateCreatePayments = (body : object) => {
+export const validateCreatePayments = (body: object) => {
   const schema = Joi.object({
-    stripeAccountId : Joi.string().required(),
-    email : Joi.string().required(),
-    phoneNumber : Joi.string().optional()
+    stripeAccountId: Joi.string().required(),
+    email: Joi.string().required(),
+    phoneNumber: Joi.string().optional()
   })
   const { error } = schema.validate(body)
   return error

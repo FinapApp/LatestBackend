@@ -6,6 +6,11 @@ interface IStory extends Document {
     mediaURL: string;
     thumbnailURL: string;
     song?: mongoose.Types.ObjectId;
+    songPosition?: {
+        x: number;
+        y: number
+    },
+    audio?: mongoose.Types.ObjectId;
     songStart?: number;
     songEnd?: number;
     caption?: string;
@@ -24,6 +29,11 @@ const StorySchema: Schema = new Schema(
         thumbnailURL: { type: String },
         song: { type: Schema.Types.ObjectId, ref: 'song' },
         songStart: { type: Number },
+        songPosition: {
+            x: { type: Number },
+            y: { type: Number },
+        },
+        audio: { type: Schema.Types.ObjectId, ref: 'audio' },
         songEnd: { type: Number },
         caption: { type: String },
         viewCount: { type: Number, default: 0 },

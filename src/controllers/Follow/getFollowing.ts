@@ -3,6 +3,7 @@ import { getQueryParams } from '../../validators/validators';
 import Joi from 'joi';
 import { errors, handleResponse } from '../../utils/responseCodec';
 import { getAllFollowingUserAggregation } from '../../aggregation/getAllFollowingUserAggregation';
+import { sendErrorToDiscord } from '../../config/discord/errorDiscord';
 
 export const getFollowing = async (req: Request, res: Response) => {
     try {
@@ -15,7 +16,7 @@ export const getFollowing = async (req: Request, res: Response) => {
         const result = await getAllFollowingUserAggregation(userId as any, skip as any)
         return handleResponse(res, 200, result)
     } catch (error) {
-        console.log(error)
+        sendErrorToDiscord("GET:following", error)
         return handleResponse(res, 500, errors.catch_error);
     }
 }

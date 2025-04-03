@@ -3,6 +3,7 @@ import { validateGetAllFlicks } from '../../validators/validators';
 import Joi from 'joi';
 import { errors, handleResponse } from '../../utils/responseCodec';
 import { FLICKS } from '../../models/Flicks/flicks.model';
+import { sendErrorToDiscord } from '../../config/discord/errorDiscord';
 
 export const getAllTaggedFlicks = async (req: Request, res: Response) => {
     try {
@@ -22,7 +23,7 @@ export const getAllTaggedFlicks = async (req: Request, res: Response) => {
         // }
         return handleResponse(res, 200, { TAGGEDFLICKS })
     } catch (error) {
-        console.log(error)
+        sendErrorToDiscord("GET:get-all-tagged-flicks", error)
         return handleResponse(res, 500, errors.catch_error)
     }
 }

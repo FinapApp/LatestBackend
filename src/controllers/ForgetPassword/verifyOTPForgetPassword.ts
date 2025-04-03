@@ -4,6 +4,7 @@ import Joi from "joi";
 import { handleResponse, errors, success } from "../../utils/responseCodec";
 import { redis } from "../../config/redis/redis.config";
 import { USER } from "../../models/User/user.model";
+import { sendErrorToDiscord } from "../../config/discord/errorDiscord";
 
 
 interface VerifyOTPForgetPasswordRequest {
@@ -45,6 +46,7 @@ export const verifyOTPForgetPassword = async (req: Request, res: Response) => {
         }
             return handleResponse(res, 400, errors.otp_expired);
     } catch (err: any) {
+        sendErrorToDiscord("POST:verify-otp-forget-password", err);
         return handleResponse(res, 500, errors.catch_error);
     }
 };

@@ -3,6 +3,7 @@ import { validateGetAllFlicks } from '../../validators/validators';
 import Joi from 'joi';
 import { errors, handleResponse } from '../../utils/responseCodec';
 import { FEEDBACK } from '../../models/Feedback/feedback.model';
+import { sendErrorToDiscord } from '../../config/discord/errorDiscord';
 
 export const getAllFeedbacks = async (req: Request, res: Response) => {
     try {
@@ -18,7 +19,7 @@ export const getAllFeedbacks = async (req: Request, res: Response) => {
         }
         return handleResponse(res, 200, errors.get_feedback)
     } catch (error) {
-        console.log(error)
+        sendErrorToDiscord("GET:get-all-feedbacks", error)
         return handleResponse(res, 500, errors.catch_error)
     }
 }

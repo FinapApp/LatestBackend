@@ -15,7 +15,7 @@ export const getComment = async (req: Request, res: Response) => {
         const CHILDCOMMENT = await COMMENT.find({ parentComment: commentId }).populate('user', 'username profilePicture')
         return handleResponse(res, 200, { CHILDCOMMENT })
     } catch (error) {
-        sendErrorToDiscord("get-comment", error)
+        sendErrorToDiscord("GET:get-comment", error)
         return handleResponse(res, 500, errors.catch_error)
     }
 }

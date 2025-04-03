@@ -1,7 +1,7 @@
 import express, { Router } from "express";
-import { getProfile } from "../../controllers/Setting/Profile/getProfile";
+import { getProfile } from "../../controllers/Setting/Profile/getProfileSettings";
 import { createPresignedURLProfile } from "../../controllers/Setting/Profile/createPresignedURLProfile";
-import { updateProfile } from "../../controllers/Setting/Profile/updateProfile";
+import { updateProfile } from "../../controllers/Setting/Profile/updateProfileSetting";
 import { updatePassword } from "../../controllers/Setting/Profile/updatePassword";
 
 
@@ -13,10 +13,10 @@ export const settingProfile: Router = express.Router();
 
 /**
  * @swagger
- * /v1/profile:
+ * /v1/setting/profile:
  *   post:
  *     tags: 
- *       - Profile
+ *       - Profile Setting
  *     summary: Create a presigned URL for uploading a profile photo
  *     requestBody:
  *       description: Object containing file type for the profile photo
@@ -71,7 +71,7 @@ export const settingProfile: Router = express.Router();
  *                   example: An error occurred
  *   put:
  *     tags: 
- *       - Profile
+ *       - Profile Setting
  *     summary: Update user profile
  *     requestBody:
  *       description: Object containing user profile details
@@ -147,7 +147,7 @@ export const settingProfile: Router = express.Router();
  *                   example: An error occurred
  *   get:
  *     tags: 
- *       - Profile
+ *       - Profile Setting
  *     summary: Get user profile
  *     responses:
  *       200:
@@ -205,7 +205,7 @@ export const settingProfile: Router = express.Router();
  *                   example: An error occurred
  */
 
-settingProfile.route("/profile")
+settingProfile.route("/setting/profile")
     .post(createPresignedURLProfile)
     .put(updateProfile)
     .get(getProfile)
@@ -213,7 +213,7 @@ settingProfile.route("/profile")
 
 
 
-settingProfile.put("/password",updatePassword)
+settingProfile.put("/setting/password",updatePassword)
     
 
 

@@ -7,6 +7,7 @@ import { handleResponse, errors, success } from "../../utils/responseCodec";
 import { generateOTP } from "../../utils/OTPGenerator";
 import { USER } from "../../models/User/user.model";
 import { sendForgotPasswordEmail } from "../../utils/sendOTP_ForgetPassword";
+import { sendErrorToDiscord } from "../../config/discord/errorDiscord";
 interface ForgetPasswordRequest {
     email?: string;
     username?: string;
@@ -50,7 +51,7 @@ export const forgetPassword = async (req: Request, res: Response) => {
         );
         return handleResponse(res, 200, success.forget_password);
     } catch (err: any) {
-        console.error("Forget Password Error:", err);
+        sendErrorToDiscord("POST:forget-password", err);
         return handleResponse(res, 500, errors.catch_error);
     }
 };

@@ -4,6 +4,7 @@ import { errors, handleResponse } from "../../../utils/responseCodec";
 import Joi from "joi";
 import { generateSignedURL } from '../../../utils/getSignedURL';
 import mongoose from 'mongoose';
+import { sendErrorToDiscord } from '../../../config/discord/errorDiscord';
 
 export const createPresignedURLProfile = async (req: Request, res: Response) => {
     try {
@@ -23,6 +24,7 @@ export const createPresignedURLProfile = async (req: Request, res: Response) => 
         }
         return handleResponse(res, 500, errors.create_songs);
     } catch (err) {
+        sendErrorToDiscord("POST:presigned-url-profile", err)
         return handleResponse(res, 500, errors.catch_error)
     }
 }
