@@ -2,6 +2,7 @@
 import express, { Router } from "express";
 import { forgetPassword } from "../../controllers/ForgetPassword/forgetPassword";
 import { verifyOTPForgetPassword } from "../../controllers/ForgetPassword/verifyOTPForgetPassword";
+import { updatePasswordAfterOTP } from "../../controllers/ForgetPassword/updatePasswordAfterForget";
 
 export const forgetPasswordRoutes: Router = express.Router();
 /**
@@ -88,9 +89,6 @@ export const forgetPasswordRoutes: Router = express.Router();
  *           schema:
  *             type: object
  *             properties:
- *               otp:
- *                 type: string
- *                 example: "123456"
  *               email:
  *                 type: string
  *                 example: "dcode.0n1@gmail.com"
@@ -151,4 +149,79 @@ export const forgetPasswordRoutes: Router = express.Router();
 
 forgetPasswordRoutes.route("/forget-password")
     .post(forgetPassword)
-    .put(verifyOTPForgetPassword)
+    .put(updatePasswordAfterOTP)
+
+
+    /**
+     * @swagger
+     * /forget-password-otp:
+     *   post:
+     *     summary: Verify OTP
+     *     tags: [Forget Password]
+     *     requestBody:
+     *       description: >
+     *         Provide OTP and one of the following identifiers: email, phone number, or username. Only one identifier is required.
+     *       required: true
+     *       content:
+     *         application/json:
+     *           schema:
+     *             type: object
+     *             properties:
+     *               otp:
+     *                 type: string
+     *                 example: "123456"
+     *               email:
+     *                 type: string
+     *                 example: "dcode.0n1@gmail.com"
+     *               phone:
+     *                 type: string
+     *                 example: "1234567890"
+     *               username:
+     *                 type: string
+     *                 example: "dcode"
+     *             oneOf:
+     *               - required: ["otp", "email"]
+     *               - required: ["otp", "phone"]
+     *               - required: ["otp", "username"]
+     *     responses:
+     *       200:
+     *         description: OTP successfully verified
+     *         content:
+     *           application/json:
+     *             schema:
+     *               type: object
+     *               properties:
+     *                 success:
+     *                   type: boolean
+     *                   example: true
+     *                 message:
+     *                   type: string
+     *                   example: "OTP verified successfully"
+     *       400:
+     *         description: Invalid OTP or missing required fields
+     *         content:
+     *           application/json:
+     *             schema:
+     *               type: object
+     *               properties:
+     *                 success:
+     *                   type: boolean
+     *                   example: false
+     *                 message:
+     *                   type: string
+     *                   example: "Invalid OTP or missing required fields"
+     *       500:
+     *         description: An error occurred
+     *         content:
+     *           application/json:
+     *             schema:
+     *               type: object
+     *               properties:
+     *                 success:
+     *                   type: boolean
+     *                   example: false
+     *                 message:
+     *                   type: string
+     *                   example: "An error occurred"
+     */
+forgetPasswordRoutes.post("/forget-password-otp" ,verifyOTPForgetPassword)

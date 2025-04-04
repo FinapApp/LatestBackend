@@ -14,7 +14,7 @@ export const checkUserNameExist = async (req: Request, res: Response) => {
         }
         const checkUserExist = await USER.findOne({username : req.body.username})
         if(checkUserExist){
-            return handleResponse(res, 409, errors.username_exist)
+            return handleResponse(res, 404  , errors.username_exist)
         }
         return handleResponse(res, 200, success.username_available);
     } catch (error: any) {

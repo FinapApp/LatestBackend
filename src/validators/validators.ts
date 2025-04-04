@@ -55,7 +55,7 @@ export const validateForgetPassword = (body: object) => {
   const { error } = schema.validate(body);
   return error;
 }
-export const validateOTPAfterForgetPassword = (body: object) => {
+export const validateOTPForgetPassword = (body: object) => {
   const schema = Joi.object({
     otp: Joi.string().required(),
     email: Joi.string().email().optional(),
@@ -72,10 +72,32 @@ export const validateOTPAfterForgetPassword = (body: object) => {
       .messages({
         "string.pattern.base": "Invalid username format",
       }),
-    password: Joi.string().required()
   }).xor('email', 'username', 'phone');
   const { error } = schema.validate(body);
   return error;
+}
+
+
+export const validateUpdatePasswordAfterOTP = (body: object) => {
+  const schema = Joi.object({
+    email: Joi.string().email().optional(),
+    phone: Joi.string()
+      .optional()
+      .pattern(REGEX.PHONE)
+      .messages({
+        'string.pattern.base': 'Phone number must be a valid international format',
+      }),
+    username: Joi.string().optional()
+      .min(4)
+      .max(30)
+      .regex(REGEX.USERNAME)
+      .messages({
+        "string.pattern.base": "Invalid username format",
+      }),
+    password: Joi.string().required(),
+  })
+  const { error } = schema.validate(body)
+  return error
 }
 export const validateAfterSignUp = (body: object) => {
   const schema = Joi.object({
@@ -228,7 +250,7 @@ export const validateCreateFlick = (body: object, params: object) => {
     songEnd: Joi.number().optional(),
     thumbnailURL: Joi.string().required(),
     description: Joi.array().items(Joi.object({
-      type: Joi.string().valid("user", "text" , "hashtag").required(),
+      type: Joi.string().valid("user", "text", "hashtag").required(),
       mention: Joi.string().regex(/^[0-9a-fA-F]{24}$/, 'object Id').optional(),
       text: Joi.string().optional(),
       hashTag: Joi.string().regex(/^[0-9a-fA-F]{24}$/, 'object Id').optional()
@@ -242,8 +264,8 @@ export const validateCreateFlick = (body: object, params: object) => {
       }).required()
     })).optional(),
     newHashTag: Joi.array().items(Joi.object({
-      id : Joi.string().regex(/^[0-9a-fA-F]{24}$/, 'object Id').required(),
-      value : Joi.string().required()
+      id: Joi.string().regex(/^[0-9a-fA-F]{24}$/, 'object Id').required(),
+      value: Joi.string().required()
     })).optional(),
     commentVisible: Joi.boolean().optional(),
     likeVisible: Joi.boolean().optional(),
