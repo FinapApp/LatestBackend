@@ -14,7 +14,7 @@ export const getFlick = async (req: Request, res: Response) => {
         const flickId = req.params.flickId;
         const checkFlick = await FLICKS.findById(flickId)
         if (checkFlick) {
-            return handleResponse(res, 200, { FLICK : checkFlick })
+            return handleResponse(res, 200, { flick : checkFlick })
         }
         return handleResponse(res, 400, errors.no_flicks);
     } catch (error) {

@@ -10,6 +10,7 @@ import { fetchIpGeolocation } from "../../utils/IP_helpers";
 import useragent from "useragent";
 import bcrypt from "bcrypt";
 import { USERPREFERENCE } from "../../models/User/userPreference.model";
+import { sendErrorToDiscord } from "../../config/discord/errorDiscord";
 
 interface LoginRequest {
   email?: string;
@@ -117,7 +118,7 @@ export const login = async (req: Request, res: Response) => {
     });
     return handleResponse(res, 200, { accessToken, refreshToken, userPreferences: checkUserPreference});
   } catch (err: any) {
-    console.log("login-errors", err);
+    sendErrorToDiscord("POST:login", err);
     return handleResponse(res, 500, errors.catch_error);
   }
 };

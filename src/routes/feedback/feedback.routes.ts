@@ -2,7 +2,7 @@ import express, { Router } from "express";
 import { createFeedback } from "../../controllers/Feedback/createFeedback";
 import { deleteFeedback } from "../../controllers/Feedback/deleteFeedback";
 import { updateFeedback } from "../../controllers/Feedback/updateFeedback";
-import { getAllFeedbacks } from "../../controllers/Feedback/getFeedbacks";
+import { getAllFeedBacks } from "../../controllers/Feedback/getFeedbacks";
 
 
 
@@ -146,7 +146,7 @@ export const feedbackRoutes : Router = express.Router();
  */
 feedbackRoutes.route("/feedback")
     .post(createFeedback)
-    .get(getAllFeedbacks)
+    .get(getAllFeedBacks)
 
 /**
  * @swagger

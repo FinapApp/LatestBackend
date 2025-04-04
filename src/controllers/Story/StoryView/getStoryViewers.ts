@@ -14,7 +14,7 @@ export const getStoryViewers = async (req: Request, res: Response) => {
         const storyView = await STORYVIEW.find({ story: storyId });
         if (storyView) {
             return handleResponse(res, 200, { 
-                STORYVIEWS :  storyView });
+                storyViews :  storyView });
         }
         return handleResponse(res, 500, errors.get_story_view);
     } catch (error) {

@@ -1,12 +1,24 @@
 import Joi from "joi";
 import countries from "../constants/countryList";
 import { config } from "../config/generalconfig";
+import { REGEX } from "../utils/regex";
 
 export const validateLogin = (body: object) => {
   const schema = Joi.object({
-    email: Joi.string().optional(),
-    username: Joi.string().optional(),
-    phone: Joi.string().optional(),
+    email: Joi.string().email().optional(),
+    username: Joi.string().optional()
+      .min(4)
+      .max(30)
+      .regex(REGEX.USERNAME)
+      .messages({
+        "string.pattern.base": "Invalid username format",
+      }),
+    phone: Joi.string()
+      .optional()
+      .pattern(REGEX.PHONE)
+      .messages({
+        'string.pattern.base': 'Phone number must be a valid international format',
+      }),
     password: Joi.string().required(),
     fcmToken: Joi.string().required()
   }).xor("email", "username", "phone");
@@ -26,8 +38,19 @@ export const validateGetters = (query: object) => {
 export const validateForgetPassword = (body: object) => {
   const schema = Joi.object({
     email: Joi.string().email().optional(),
-    phone: Joi.string().optional(),
-    username: Joi.string().optional(),
+    phone: Joi.string()
+      .optional()
+      .pattern(REGEX.PHONE)
+      .messages({
+        'string.pattern.base': 'Phone number must be a valid international format',
+      }),
+    username: Joi.string().optional()
+      .min(4)
+      .max(30)
+      .regex(REGEX.USERNAME)
+      .messages({
+        "string.pattern.base": "Invalid username format",
+      }),
   }).xor('email', 'username', 'phone');
   const { error } = schema.validate(body);
   return error;
@@ -35,9 +58,20 @@ export const validateForgetPassword = (body: object) => {
 export const validateOTPAfterForgetPassword = (body: object) => {
   const schema = Joi.object({
     otp: Joi.string().required(),
-    email: Joi.string().optional(),
-    phone: Joi.string().optional(),
-    username: Joi.string().optional(),
+    email: Joi.string().email().optional(),
+    phone: Joi.string()
+      .optional()
+      .pattern(REGEX.PHONE)
+      .messages({
+        'string.pattern.base': 'Phone number must be a valid international format',
+      }),
+    username: Joi.string().optional()
+      .min(4)
+      .max(30)
+      .regex(REGEX.USERNAME)
+      .messages({
+        "string.pattern.base": "Invalid username format",
+      }),
     password: Joi.string().required()
   }).xor('email', 'username', 'phone');
   const { error } = schema.validate(body);
@@ -74,7 +108,13 @@ export const validateVerifyOTPSignUp = (body: object) => {
       }
       return value;
     }),
-    username: Joi.string().required(),
+    username: Joi.string().required()
+      .min(4)
+      .max(30)
+      .regex(REGEX.USERNAME)
+      .messages({
+        "string.pattern.base": "Invalid username format",
+      }),
     password: Joi.string().required(),
   });
   const { error } = schema.validate(body);
@@ -179,15 +219,19 @@ export const validateCreateFlick = (body: object, params: object) => {
         }).required()
       })).optional(),
       url: Joi.string().required()
-    })).required(),
+    }).min(1).max(14)).required().messages({
+      'array.min': 'At least one media item is required',
+      'array.max': 'A maximum of 14 media items are allowed'
+    }),
     song: Joi.string().regex(/^[0-9a-fA-F]{24}$/, 'object Id').optional(),
     songStart: Joi.number().optional(),
     songEnd: Joi.number().optional(),
     thumbnailURL: Joi.string().required(),
     description: Joi.array().items(Joi.object({
-      type: Joi.string().valid("user", "text"),
+      type: Joi.string().valid("user", "text" , "hashtag").required(),
       mention: Joi.string().regex(/^[0-9a-fA-F]{24}$/, 'object Id').optional(),
-      text: Joi.string().optional()
+      text: Joi.string().optional(),
+      hashTag: Joi.string().regex(/^[0-9a-fA-F]{24}$/, 'object Id').optional()
     })).optional(),
     location: Joi.string().optional(),
     collabs: Joi.array().items(Joi.object({
@@ -197,7 +241,10 @@ export const validateCreateFlick = (body: object, params: object) => {
         y: Joi.number().required()
       }).required()
     })).optional(),
-    hashTags: Joi.array().items(Joi.string()).optional(),
+    newHashTag: Joi.array().items(Joi.object({
+      id : Joi.string().regex(/^[0-9a-fA-F]{24}$/, 'object Id').required(),
+      value : Joi.string().required()
+    })).optional(),
     commentVisible: Joi.boolean().optional(),
     likeVisible: Joi.boolean().optional(),
   })
@@ -206,6 +253,15 @@ export const validateCreateFlick = (body: object, params: object) => {
     params: paramsSchema
   })
   const { error } = combinedSchema.validate({ body, params })
+  return error
+}
+
+
+export const validateGetHashtags = (query: object) => {
+  const schema = Joi.object({
+    search: Joi.string().required()
+  })
+  const { error } = schema.validate(query)
   return error
 }
 
@@ -701,8 +757,19 @@ export const validateUpdateProfile = (body: object) => {
     name: Joi.string().optional(),
     email: Joi.string().email().optional(),
     gender: Joi.string().optional(),
-    phone: Joi.string().optional(),
-    username: Joi.string().optional(),
+    phone: Joi.string()
+      .optional()
+      .pattern(REGEX.PHONE)
+      .messages({
+        'string.pattern.base': 'Phone number must be a valid international format',
+      }),
+    username: Joi.string().optional()
+      .min(4)
+      .max(30)
+      .regex(REGEX.USERNAME)
+      .messages({
+        "string.pattern.base": "Invalid username format",
+      }),
     dob: Joi.string().optional(),
     country: Joi.string().optional().custom((value, helpers) => {
       // Check if country exists in your predefined countries list
@@ -783,6 +850,12 @@ export const validateUpdateNotificationSetting = (body: object) => {
 export const validateUsername = (body: object) => {
   const schema = Joi.object({
     username: Joi.string().required()
+      .min(4)
+      .max(30)
+      .regex(REGEX.USERNAME)
+      .messages({
+        "string.pattern.base": "Invalid username format",
+      }),
   })
   const { error } = schema.validate(body)
   return error
@@ -790,7 +863,7 @@ export const validateUsername = (body: object) => {
 
 export const validateEmail = (body: object) => {
   const schema = Joi.object({
-    email: Joi.string().required()
+    email: Joi.string().email().required()
   })
   const { error } = schema.validate(body)
   return error
@@ -805,7 +878,7 @@ export const validateEmail = (body: object) => {
 export const validateCreatePayments = (body: object) => {
   const schema = Joi.object({
     stripeAccountId: Joi.string().required(),
-    email: Joi.string().required(),
+    email: Joi.string().email().required(),
     phoneNumber: Joi.string().optional()
   })
   const { error } = schema.validate(body)

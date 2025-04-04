@@ -18,18 +18,18 @@ export const createPresignedURLQuest = async (req: Request, res: Response) => {
         const userId = res.locals.userId as string;
         // Create reel document without media URLs
         if (questId) {
-            const MEDIASIGNEDURL = await Promise.all(media.map((metadata: {
+            const mediaSignedURL = await Promise.all(media.map((metadata: {
                 fileName: string;
                 fileType: string;
             }) => generateSignedURL(`user/${userId}/quest/${questId}/${metadata.fileName}`, metadata.fileType)));
 
-            const THUMBNAILSIGNEDURL = await generateSignedURL(`user/${userId}/quest/${questId}/thumbnail`);
+            const thumbnailSignedURL = await generateSignedURL(`user/${userId}/quest/${questId}/thumbnail`);
 
-            if (MEDIASIGNEDURL && THUMBNAILSIGNEDURL) {
+            if (mediaSignedURL && thumbnailSignedURL) {
                 return handleResponse(res, 200, {
                     questId,
-                    MEDIASIGNEDURL,
-                    THUMBNAILSIGNEDURL,
+                    mediaSignedURL,
+                    thumbnailSignedURL,
                 });
             }
         }

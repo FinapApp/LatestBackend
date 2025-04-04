@@ -31,7 +31,7 @@ export const getAllLikes = async (req: Request, res: Response) => {
         if (!LIKELIST) {
             return handleResponse(res, 404, errors.comment_not_found)
         }
-        return handleResponse(res, 200, { LIKELIST })
+        return handleResponse(res, 200, { likeList : LIKELIST })
     } catch (error) {
         sendErrorToDiscord("get-comments", error)
         return handleResponse(res, 500, errors.catch_error)

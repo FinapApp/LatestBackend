@@ -7,7 +7,7 @@ export const getSel = async (req: Request, res: Response) => {
 try {
         const getProfileDetails = await USER.findById(res.locals.userId, "name username followerCount followingCount flickCount")
         if (getProfileDetails) {
-            return handleResponse(res, 200, { ME: getProfileDetails })
+            return handleResponse(res, 200, { profileDetail : getProfileDetails })
         }
         return handleResponse(res, 400, errors.profile_not_found);
     } catch (error: any) {

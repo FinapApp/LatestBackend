@@ -15,13 +15,13 @@ export const getSelfFlicks = async (req: Request, res: Response) => {
         // const user = res.locals.userId
 
         //FOR TESTING THEIR OWN FLICKS  // REMOVE WHEN AGGREGATION IS BEING DONE
-        const PERSONALFLICKS = await FLICKS.find({ user: res.locals.userId }, )
+        const personalFlicks = await FLICKS.find({ user: res.locals.userId } )
 
         // let response = await getAllFlicksAggregation(user, req.query.params as string)
         // if(!response){
         //     return handleResponse(res, 304, errors.no_flicks)
         // }
-        return handleResponse(res, 200, { PERSONALFLICKS })
+        return handleResponse(res, 200, { personalFlicks })
     } catch (error) {
         sendErrorToDiscord("GET:get-self-flicks", error)
         return handleResponse(res, 500, errors.catch_error)

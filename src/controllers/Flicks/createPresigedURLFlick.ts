@@ -18,20 +18,20 @@ export const createPresignedURLFlick = async (req: Request, res: Response) => {
         const flickId = new mongoose.Types.ObjectId();
         // Create reel document without media URLs
         if (flickId) {
-            let MEDIASIGNEDURL, THUMBNAILSIGNEDURL, AUDIOSIGNEDURL;
+            let mediaSignedURL, thumbnailSignedUrl, audioSignedURL;
             if (mediaFiles) {
-                MEDIASIGNEDURL = await Promise.all(mediaFiles.map((x: { fileName: string, fileType: string }) => generateSignedURL(`${user}/flick/${flickId}/videos/${x.fileName}`, x.fileType)));
+                mediaSignedURL = await Promise.all(mediaFiles.map((x: { fileName: string, fileType: string }) => generateSignedURL(`${user}/flick/${flickId}/videos/${x.fileName}`, x.fileType)));
             }
-            THUMBNAILSIGNEDURL = await generateSignedURL(`/user/${user}/flick/${flickId}/thumbnail`);
+            thumbnailSignedUrl = await generateSignedURL(`/user/${user}/flick/${flickId}/thumbnail`);
             if (audioName) {
                 const audioPath = `/user/${user}/flick/audio/${flickId}/${audioName}`;
-                AUDIOSIGNEDURL = await generateSignedURL(audioPath, audioFileType);
+                audioSignedURL = await generateSignedURL(audioPath, audioFileType);
             }
             return handleResponse(res, 200, {
                 flickId,
-                MEDIASIGNEDURL,
-                THUMBNAILSIGNEDURL,
-                AUDIOSIGNEDURL
+                mediaSignedURL,
+                thumbnailSignedUrl,
+                audioSignedURL
             });
         }
         return handleResponse(res, 500, errors.unable_to_create_signedURL);

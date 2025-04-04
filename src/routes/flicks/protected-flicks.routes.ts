@@ -133,12 +133,11 @@ flickRoutes.route("/flick")
     .post(createPresignedURLFlick)
     .get(getAllFlicks);
 
-
     /**
      * @swagger
      * /v1/flick/{flickId}:
      *   post:
-     *     summary: Create a new flick
+     *     summary: Create a flick with detailed media and metadata
      *     tags:
      *       - Protected Flicks
      *     parameters:
@@ -147,10 +146,10 @@ flickRoutes.route("/flick")
      *         required: true
      *         schema:
      *           type: string
-     *           pattern: "^[0-9a-fA-F]{24}$"
+     *           example: "60c72b2f9b1e8a5f4c8e7d1a"
      *         description: The ID of the flick
      *     requestBody:
-     *       description: Object containing details for the new flick
+     *       description: Object containing media and metadata for the flick
      *       required: true
      *       content:
      *         application/json:
@@ -164,14 +163,13 @@ flickRoutes.route("/flick")
      *                   properties:
      *                     type:
      *                       type: string
-     *                       enum: ["photo", "video"]
-     *                     duration:
-     *                       type: number
-     *                     audio:
-     *                       type: string
-     *                       pattern: "^[0-9a-fA-F]{24}$"
+     *                       example: "photo"
      *                     alt:
      *                       type: string
+     *                       example: "A scenic view"
+     *                     url:
+     *                       type: string
+     *                       example: "https://example.com/media1.jpg"
      *                     taggedUsers:
      *                       type: array
      *                       items:
@@ -179,25 +177,34 @@ flickRoutes.route("/flick")
      *                         properties:
      *                           user:
      *                             type: string
-     *                             pattern: "^[0-9a-fA-F]{24}$"
+     *                             example: "60c72b2f9b1e8a5f4c8e7d1b"
      *                           position:
      *                             type: object
      *                             properties:
      *                               x:
      *                                 type: number
+     *                                 example: 0.5
      *                               y:
      *                                 type: number
-     *                     url:
+     *                                 example: 0.5
+     *                     duration:
+     *                       type: number
+     *                       example: 12.5
+     *                     audio:
      *                       type: string
+     *                       example: "60c72b2f9b1e8a5f4c8e7d1c"
      *               song:
      *                 type: string
-     *                 pattern: "^[0-9a-fA-F]{24}$"
+     *                 example: "60c72b2f9b1e8a5f4c8e7d1d"
      *               songStart:
      *                 type: number
+     *                 example: 10
      *               songEnd:
      *                 type: number
+     *                 example: 25
      *               thumbnailURL:
      *                 type: string
+     *                 example: "https://example.com/thumb.jpg"
      *               description:
      *                 type: array
      *                 items:
@@ -205,14 +212,19 @@ flickRoutes.route("/flick")
      *                   properties:
      *                     type:
      *                       type: string
-     *                       enum: ["user", "text"]
+     *                       example: "text"
      *                     mention:
      *                       type: string
-     *                       pattern: "^[0-9a-fA-F]{24}$"
+     *                       example: "60c72b2f9b1e8a5f4c8e7d1e"
      *                     text:
      *                       type: string
+     *                       example: "Enjoying the vibes!"
+     *                     hashTag:
+     *                       type: string
+     *                       example: "60c72b2f9b1e8a5f4c8e7d1f"
      *               location:
      *                 type: string
+     *                 example: "Los Angeles, CA"
      *               collabs:
      *                 type: array
      *                 items:
@@ -220,25 +232,36 @@ flickRoutes.route("/flick")
      *                   properties:
      *                     user:
      *                       type: string
-     *                       pattern: "^[0-9a-fA-F]{24}$"
+     *                       example: "60c72b2f9b1e8a5f4c8e7d20"
      *                     position:
      *                       type: object
      *                       properties:
      *                         x:
      *                           type: number
+     *                           example: 0.3
      *                         y:
      *                           type: number
-     *               hashTags:
+     *                           example: 0.6
+     *               newHashTag:
      *                 type: array
      *                 items:
-     *                   type: string
+     *                   type: object
+     *                   properties:
+     *                     id:
+     *                       type: string
+     *                       example: "60c72b2f9b1e8a5f4c8e7d21"
+     *                     value:
+     *                       type: string
+     *                       example: "sunsetvibes"
      *               commentVisible:
      *                 type: boolean
+     *                 example: true
      *               likeVisible:
      *                 type: boolean
+     *                 example: false
      *     responses:
-     *       201:
-     *         description: Successfully created the flick
+     *       200:
+     *         description: Successfully created flick
      *         content:
      *           application/json:
      *             schema:
@@ -247,9 +270,9 @@ flickRoutes.route("/flick")
      *                 success:
      *                   type: boolean
      *                   example: true
-     *                 flickId:
+     *                 message:
      *                   type: string
-     *                   example: "flickId"
+     *                   example: Flick created successfully
      *       400:
      *         description: Invalid request
      *         content:
@@ -277,7 +300,7 @@ flickRoutes.route("/flick")
      *                   type: string
      *                   example: An error occurred
      *   put:
-     *     summary: Update an existing flick
+     *     summary: Update a flick with optional fields
      *     tags:
      *       - Protected Flicks
      *     parameters:
@@ -286,10 +309,10 @@ flickRoutes.route("/flick")
      *         required: true
      *         schema:
      *           type: string
-     *           pattern: "^[0-9a-fA-F]{24}$"
+     *           example: "60c72b2f9b1e8a5f4c8e7d1a"
      *         description: The ID of the flick
      *     requestBody:
-     *       description: Object containing updated details for the flick
+     *       description: Object containing optional media and metadata for the flick
      *       required: true
      *       content:
      *         application/json:
@@ -303,14 +326,13 @@ flickRoutes.route("/flick")
      *                   properties:
      *                     type:
      *                       type: string
-     *                       enum: ["photo", "video"]
-     *                     duration:
-     *                       type: number
-     *                     audio:
-     *                       type: string
-     *                       pattern: "^[0-9a-fA-F]{24}$"
+     *                       example: "photo"
      *                     alt:
      *                       type: string
+     *                       example: "A scenic view"
+     *                     url:
+     *                       type: string
+     *                       example: "https://example.com/media1.jpg"
      *                     taggedUsers:
      *                       type: array
      *                       items:
@@ -318,25 +340,34 @@ flickRoutes.route("/flick")
      *                         properties:
      *                           user:
      *                             type: string
-     *                             pattern: "^[0-9a-fA-F]{24}$"
+     *                             example: "60c72b2f9b1e8a5f4c8e7d1b"
      *                           position:
      *                             type: object
      *                             properties:
      *                               x:
      *                                 type: number
+     *                                 example: 0.5
      *                               y:
      *                                 type: number
-     *                     url:
+     *                                 example: 0.5
+     *                     duration:
+     *                       type: number
+     *                       example: 12.5
+     *                     audio:
      *                       type: string
+     *                       example: "60c72b2f9b1e8a5f4c8e7d1c"
      *               song:
      *                 type: string
-     *                 pattern: "^[0-9a-fA-F]{24}$"
+     *                 example: "60c72b2f9b1e8a5f4c8e7d1d"
      *               songStart:
      *                 type: number
+     *                 example: 10
      *               songEnd:
      *                 type: number
+     *                 example: 25
      *               thumbnailURL:
      *                 type: string
+     *                 example: "https://example.com/thumb.jpg"
      *               description:
      *                 type: array
      *                 items:
@@ -344,14 +375,19 @@ flickRoutes.route("/flick")
      *                   properties:
      *                     type:
      *                       type: string
-     *                       enum: ["user", "text"]
+     *                       example: "text"
      *                     mention:
      *                       type: string
-     *                       pattern: "^[0-9a-fA-F]{24}$"
+     *                       example: "60c72b2f9b1e8a5f4c8e7d1e"
      *                     text:
      *                       type: string
+     *                       example: "Enjoying the vibes!"
+     *                     hashTag:
+     *                       type: string
+     *                       example: "60c72b2f9b1e8a5f4c8e7d1f"
      *               location:
      *                 type: string
+     *                 example: "Los Angeles, CA"
      *               collabs:
      *                 type: array
      *                 items:
@@ -359,25 +395,36 @@ flickRoutes.route("/flick")
      *                   properties:
      *                     user:
      *                       type: string
-     *                       pattern: "^[0-9a-fA-F]{24}$"
+     *                       example: "60c72b2f9b1e8a5f4c8e7d20"
      *                     position:
      *                       type: object
      *                       properties:
      *                         x:
      *                           type: number
+     *                           example: 0.3
      *                         y:
      *                           type: number
-     *               hashTags:
+     *                           example: 0.6
+     *               newHashTag:
      *                 type: array
      *                 items:
-     *                   type: string
+     *                   type: object
+     *                   properties:
+     *                     id:
+     *                       type: string
+     *                       example: "60c72b2f9b1e8a5f4c8e7d21"
+     *                     value:
+     *                       type: string
+     *                       example: "sunsetvibes"
      *               commentVisible:
      *                 type: boolean
+     *                 example: true
      *               likeVisible:
      *                 type: boolean
+     *                 example: false
      *     responses:
      *       200:
-     *         description: Successfully updated the flick
+     *         description: Successfully updated flick
      *         content:
      *           application/json:
      *             schema:
@@ -386,6 +433,9 @@ flickRoutes.route("/flick")
      *                 success:
      *                   type: boolean
      *                   example: true
+     *                 message:
+     *                   type: string
+     *                   example: Flick updated successfully
      *       400:
      *         description: Invalid request
      *         content:
@@ -422,11 +472,11 @@ flickRoutes.route("/flick")
      *         required: true
      *         schema:
      *           type: string
-     *           pattern: "^[0-9a-fA-F]{24}$"
-     *         description: The ID of the flick
+     *           example: "60c72b2f9b1e8a5f4c8e7d1a"
+     *         description: The ID of the flick to delete
      *     responses:
      *       200:
-     *         description: Successfully deleted the flick
+     *         description: Successfully deleted flick
      *         content:
      *           application/json:
      *             schema:
@@ -435,6 +485,9 @@ flickRoutes.route("/flick")
      *                 success:
      *                   type: boolean
      *                   example: true
+     *                 message:
+     *                   type: string
+     *                   example: Flick deleted successfully
      *       400:
      *         description: Invalid request
      *         content:

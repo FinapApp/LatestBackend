@@ -5,6 +5,7 @@ import Joi from "joi";
 import { validateCreateFlick } from "../../validators/validators";
 import { AUDIO } from "../../models/Audio/audio.model";
 import { sendErrorToDiscord } from "../../config/discord/errorDiscord";
+import { HASHTAGS } from "../../models/User/userHashTag.model";
 
 export const createFlick = async (req: Request, res: Response) => {
     try {
@@ -14,12 +15,20 @@ export const createFlick = async (req: Request, res: Response) => {
         }
         const user = res.locals.userId
         const flickId = req.params.flickId;
-        const { audio, audioName, ...rest } = req.body;
+        const { audio, audioName ,newHashTag ,  ...rest } = req.body;
         let checkAudio;
         if (audio) {
             checkAudio = await AUDIO.create({ url: audio, name: audioName });
             if (!checkAudio) {
                 return handleResponse(res, 404, errors.create_audio);
+            }
+        }
+        // EVERYTIME I MAKE A NEWHASHTAG ID STORED I WANT THE ID TO BE THE SAME AS THE ID IN THE DATABASE
+        // YOU GET THOSE IDS IF YOU DONT GET THE DESIRED RESULT I RETURN YOU WITH A ID FOR THE SEARCHED ELEMENT WHEN YOU'RE SURE ENOUGH WE JUST DO IT LIKE  THAT.
+        if(newHashTag){
+            const createHashTags = await HASHTAGS.insertMany(newHashTag.map((tag: {id : string , value : string}) => ({ value: tag.value, _id: tag.id  })));
+            if (!createHashTags) {
+                return handleResponse(res, 404, errors.create_hashtags);
             }
         }
         const flick = await FLICKS.create(

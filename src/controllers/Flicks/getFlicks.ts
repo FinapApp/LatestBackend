@@ -20,14 +20,14 @@ export const getAllFlicks = async (req: Request, res: Response) => {
         const getFlicks = await FLICKS.find({}, "-updatedAt", {
             populate: [
                 { path: 'user', select: 'username photo' }, //check whether I follow this guy or not ? 
-                { path: 'originFlicks', select: 'user' }, // link to the original flick
-                { path: 'media.audio', select: 'name artist duration url' },
-                // { path: 'media.song', select: 'name artist duration url' },
+                // { path: 'originFlicks', select: 'user' }, // link to the original flick
+                { path: 'media.audio', select: 'name url' },
+                // { path: 'media.song', select: 'name  url' },
                 { path: 'media.taggedUsers.user', select: 'username photo' },
                 { path: 'collabs.user', select: 'username photo' },
                 { path: 'quest', select: 'name' },
                 { path: 'media.taggedUsers.user', select: 'username photo' },
-                { path: "description.mention", select: "username photo" },
+                { path: "description.mention", select: "username" },
             ],
             lean: true
         })
@@ -55,7 +55,7 @@ export const getAllFlicks = async (req: Request, res: Response) => {
                 likeCount: Number(likeData[idx]?.count || flick.likeCount || 0),
                 commentCount: Number(commentData[idx]?.count || flick.commentCount || 0),
             }));
-        return handleResponse(res, 200, { FLICKS: mergedFeed })
+        return handleResponse(res, 200, { flicks: mergedFeed })
     } catch (error) {
         sendErrorToDiscord("GET:get-all-flicks", error)
         return handleResponse(res, 500, errors.catch_error)

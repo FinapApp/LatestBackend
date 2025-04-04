@@ -10,7 +10,7 @@ export type ICommentSchema = {
 };
 
 export type ITextDataSchema = {
-    type: 'user' | 'text'
+    type: 'user' | 'text' | 'hashtag';
     mention?: Schema.Types.ObjectId
     text?: string
     hashtag?: string

@@ -25,7 +25,7 @@ export const createPresignedURLReport = async (req: Request, res: Response) => {
             if (ATTACHMENTPRESIGNEDURL) {
                 return handleResponse(res, 200, {
                     reportId,
-                    ATTACHMENTPRESIGNEDURL
+                    attachmentSignedURL : ATTACHMENTPRESIGNEDURL
                 });
             }
         }

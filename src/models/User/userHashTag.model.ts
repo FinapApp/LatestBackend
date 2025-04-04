@@ -1,16 +1,16 @@
 import mongoose, { Document, Schema } from "mongoose";
 
 interface IUserHashTag extends Document {
-    hashTag: string;
-    hashTagCount :  number;
+    value: string;
+    count :  number;
 }
 
 export const UserHashTagSchema = new Schema<IUserHashTag>(
     {
-        hashTagCount: { type: Number, default: 0 },
-        hashTag: { type: String }
+        count: { type: Number, default: 1},
+        value: { type: String }
     },
     { timestamps: false, versionKey: false }
 );
 
-export const USERHASHTAG = mongoose.model<IUserHashTag>("hashtag", UserHashTagSchema);
+export const HASHTAGS = mongoose.model<IUserHashTag>("hashtag", UserHashTagSchema);

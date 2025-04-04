@@ -12,7 +12,7 @@ export const getNotifications = async (req: Request, res: Response) => {
         }
         const NOTIFICATIONS = await getNotificationAggregation(res.locals.userId, req.query.skip as string);
         if (NOTIFICATIONS) {
-            return handleResponse(res, 200, NOTIFICATIONS);
+            return handleResponse(res, 200, { notification: NOTIFICATIONS });
         }
         return handleResponse(res, 404, errors.notification)
     } catch (err: any) {

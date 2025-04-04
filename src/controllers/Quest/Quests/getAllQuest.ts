@@ -1,6 +1,7 @@
 import { Request, Response } from "express";
 import { handleResponse } from "../../../utils/responseCodec";
 import { QUESTS } from "../../../models/Quest/quest.model";
+import { sendErrorToDiscord } from "../../../config/discord/errorDiscord";
 
 export const getAllQuests = async (req: Request, res: Response) => {
     try {
@@ -8,11 +9,12 @@ export const getAllQuests = async (req: Request, res: Response) => {
         if (data) {
             return handleResponse(res,
                 200,
-                {QUESTS : data}
+                {quests : data}
             );
         }
         return handleResponse(res, 404, { message: "No Quests Found" });
     } catch (err: any) {
-        console.log(err);
+        sendErrorToDiscord("GET:all-quests", err);
+        return handleResponse(res, 500, { message: "Internal Server Error" });
     }
 };

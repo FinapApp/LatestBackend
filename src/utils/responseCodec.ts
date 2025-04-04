@@ -27,6 +27,13 @@ export const handleResponse = (
   }
 };
 export const errors = {
+  //HashTags
+  no_hashtags: {
+    message: "No hashtags found",
+  },
+  create_hashtags: {
+    message: "Unable to create hashtags",
+  },
 // Two-factor authentication-related errors
   update_two_factor: {
     message: "Unable to update two-factor authentication",

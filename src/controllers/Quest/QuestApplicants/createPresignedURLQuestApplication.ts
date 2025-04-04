@@ -17,13 +17,13 @@ export const createPresignedURLQuestApplication = async (req: Request, res: Resp
         if (!questApplicantId) {
             return handleResponse(res, 404, errors.quest_not_found);
         }
-        const MEDIASIGNEDURL = await Promise.all(req.body.media.map((x: { fileName: string, fileType: string }) => generateSignedURL(`${user}/quest-applicant/${questApplicantId}/${x.fileName}`, x.fileType)));
-        const THUMBNAILSIGNEDURL = await generateSignedURL(`user/${user}/quest-applicant/${questApplicantId}/thumbnail`);
-        if (MEDIASIGNEDURL && THUMBNAILSIGNEDURL) {
+        const mediaSignedURL = await Promise.all(req.body.media.map((x: { fileName: string, fileType: string }) => generateSignedURL(`${user}/quest-applicant/${questApplicantId}/${x.fileName}`, x.fileType)));
+        const thumbnailSignedURL = await generateSignedURL(`user/${user}/quest-applicant/${questApplicantId}/thumbnail`);
+        if (mediaSignedURL && thumbnailSignedURL) {
             return handleResponse(res, 200, {
                 questApplicantId,
-                MEDIASIGNEDURL,
-                THUMBNAILSIGNEDURL
+                mediaSignedURL,
+                thumbnailSignedURL
             });
         }
         return handleResponse(res, 500, errors.unable_to_create_signedURL);

@@ -17,9 +17,9 @@ export const createPresignedURLProfile = async (req: Request, res: Response) => 
         const songId = new mongoose.Types.ObjectId();
         if (songId) {
             const profileImagePath = `user/${userId}/profile-image`;
-            const profileImageSigned = await generateSignedURL(profileImagePath, fileType);
+            const profileSignedURL = await generateSignedURL(profileImagePath, fileType);
             return handleResponse(res, 200, {
-                PROFILEPRESIGNEDURL: profileImageSigned
+                profileSignedURL
             })
         }
         return handleResponse(res, 500, errors.create_songs);

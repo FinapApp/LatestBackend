@@ -63,12 +63,10 @@ export const toggleLike = async (req: Request, res: Response) => {
             await LIKE.create({ ...query, value });
             countDelta = value ? 1 : 0;
         }
-
         if (countDelta !== 0) {
             await redis.hincrby(redisKey, "count", countDelta);
         }
         await redis.hset(redisUserKey, user, value ? 1 : 0);
-
         return handleResponse(res, 200, success.toggle_like);
     } catch (error) {
         console.error(error);

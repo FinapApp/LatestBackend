@@ -15,13 +15,12 @@ export const getAllTaggedFlicks = async (req: Request, res: Response) => {
         // const user = res.locals.userId
 
         //FOR TESTING THEIR OWN FLICKS  // REMOVE WHEN AGGREGATION IS BEING DONE
-        const TAGGEDFLICKS = await FLICKS.find({ 'media.taggedUser.user' : res.locals.userId },)
+        const taggedFlicks = await FLICKS.find({ 'media.taggedUser.user' : res.locals.userId },)
 
-        // let response = await getAllFlicksAggregation(user, req.query.params as string)
-        // if(!response){
-        //     return handleResponse(res, 304, errors.no_flicks)
-        // }
-        return handleResponse(res, 200, { TAGGEDFLICKS })
+        if (!taggedFlicks) {
+            return handleResponse(res, 304, errors.no_flicks)
+        }
+        return handleResponse(res, 200, { taggedFlicks })
     } catch (error) {
         sendErrorToDiscord("GET:get-all-tagged-flicks", error)
         return handleResponse(res, 500, errors.catch_error)

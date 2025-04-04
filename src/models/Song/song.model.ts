@@ -9,7 +9,7 @@ export interface ISongSchema extends Document {
     duration?: number;
 };
 
-const SongSchema = new Schema<ISongSchema>(
+export const SongSchema = new Schema<ISongSchema>(
     {
         staff: {
             type: Schema.Types.ObjectId,

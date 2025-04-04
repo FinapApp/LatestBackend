@@ -3,6 +3,7 @@ import { validateReportStory } from "../../validators/validators"
 import Joi from "joi"
 import { errors, handleResponse, success } from "../../utils/responseCodec"
 import { REPORT } from "../../models/reports/report.model"
+import { sendErrorToDiscord } from "../../config/discord/errorDiscord"
 
 export const reportStory = async (req: Request, res: Response) => {
     try {
@@ -24,7 +25,7 @@ export const reportStory = async (req: Request, res: Response) => {
         }
         return handleResponse(res, 304, errors.story_reported)
     } catch (error) {
-        console.log(error)
+        sendErrorToDiscord("POST:report-story", error)
         return handleResponse(res, 500, errors.catch_error)
     }
 }

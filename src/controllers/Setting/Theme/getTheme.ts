@@ -7,7 +7,7 @@ export const getTheme = async (req: Request, res: Response) => {
         const user = res.locals.userId
         const getTheme = await USERPREFERENCE.findById(user , "theme -_id")
         if (getTheme) {
-            return handleResponse(res, 200, { THEME : getTheme.theme });
+            return handleResponse(res, 200, { theme : getTheme.theme });
         } 
         return handleResponse(res, 400, errors.get_theme);
     } catch (error) {
