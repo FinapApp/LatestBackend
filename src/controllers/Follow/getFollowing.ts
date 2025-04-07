@@ -2,7 +2,7 @@ import { Request, Response } from 'express'
 import { getQueryParams } from '../../validators/validators';
 import Joi from 'joi';
 import { errors, handleResponse } from '../../utils/responseCodec';
-import { getAllFollowingUserAggregation } from '../../aggregation/getAllFollowingUserAggregation';
+import { getAllFollowingUserAggreagtion } from '../../aggregation/getAllFollowingUserAggreagtion';
 import { sendErrorToDiscord } from '../../config/discord/errorDiscord';
 
 export const getFollowing = async (req: Request, res: Response) => {
@@ -13,8 +13,8 @@ export const getFollowing = async (req: Request, res: Response) => {
         }
         let { skip = "0", userId } = req.query
         userId ??= res.locals.userId as string
-        const result = await getAllFollowingUserAggregation(userId as any, skip as any)
-        return handleResponse(res, 200, result)
+        const result = await getAllFollowingUserAggreagtion(userId as any, skip as any)
+        return handleResponse(res, 200, {followinglist : result})
     } catch (error) {
         sendErrorToDiscord("GET:following", error)
         return handleResponse(res, 500, errors.catch_error);

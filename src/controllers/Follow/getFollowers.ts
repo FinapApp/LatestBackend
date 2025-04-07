@@ -14,7 +14,7 @@ export const getFollowers = async (req: Request, res: Response) => {
         let { skip = "0", userId } = req.query
         userId ??= res.locals.userId as string
         const result = await getAllFollowerUserAggreagtion(userId as any, skip as any)
-        return handleResponse(res, 200, result)
+        return handleResponse(res, 200, {followerlist  :result})
     } catch (error) {
         sendErrorToDiscord("GET:followers", error)
         return handleResponse(res, 500, errors.catch_error);

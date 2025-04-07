@@ -3,6 +3,7 @@ import { errors, handleResponse, success } from "../../../utils/responseCodec";
 import Joi from "joi";
 import { STORY } from "../../../models/Stories/story.model";
 import { validateCreateStory } from "../../../validators/validators";
+import { sendErrorToDiscord } from "../../../config/discord/errorDiscord";
 
 export const createStory = async (req: Request, res: Response) => {
     try {
@@ -21,8 +22,12 @@ export const createStory = async (req: Request, res: Response) => {
             return handleResponse(res, 404, errors.story_uploaded);
         }
         return handleResponse(res, 200, success.story_uploaded);
-    } catch (error) {
-        console.error(error);
+    } catch (error:any) {
+        // console.error(error);
+        sendErrorToDiscord("POST:create-story", error)
+        if(error.code === 11000) {
+            return handleResponse(res, 409, errors.story_already_exists);
+        }
         return handleResponse(res, 500, errors.catch_error);
     }
 };

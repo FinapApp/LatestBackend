@@ -49,7 +49,6 @@ export const getAllFlicks = async (req: Request, res: Response) => {
             )
         );
         const mergedFeed = getFlicks.map((flick, idx) => (
-            console.log(flick._id, likeData[idx].count),
             {
                 ...flick,
                 likeCount: Number(likeData[idx]?.count || flick.likeCount || 0),

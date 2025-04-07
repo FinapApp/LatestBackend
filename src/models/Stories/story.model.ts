@@ -14,7 +14,7 @@ interface IStory extends Document {
     songStart?: number;
     songEnd?: number;
     caption?: string;
-    hashTags?: string[];
+    hashTags?: mongoose.Types.ObjectId[];
     viewCount: number;
     suspended: boolean;
     suspendedReason: string;
@@ -37,7 +37,7 @@ const StorySchema: Schema = new Schema(
         songEnd: { type: Number },
         caption: { type: String },
         viewCount: { type: Number, default: 0 },
-        hashTags: { type: [String] },
+        hashTags: { type: [Schema.Types.ObjectId] },
         suspended: { type: Boolean },
         suspendedReason: { type: String },
         expirationTime: { type: Date, required: true, default: () => new Date(Date.now() + 86400) },

@@ -150,6 +150,9 @@ export const errors = {
   },
 
   // Story-related errors
+  story_already_exists: {
+    message: "Story already exists",
+  },
   story_uploaded: {
     message: "Unable to upload story",
   },
@@ -206,6 +209,9 @@ export const errors = {
   },
 
   // Quest-related errors
+  quest_already_exists: {
+    message: "Quest already exists",
+  },
   quest_not_found: {
     message: "Quest not found",
   },

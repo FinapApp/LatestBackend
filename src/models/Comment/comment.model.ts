@@ -10,7 +10,6 @@ export type ICommentSchema = {
 };
 
 export type ITextDataSchema = {
-    type: 'user' | 'text' | 'hashtag';
     mention?: Schema.Types.ObjectId
     text?: string
     hashtag?: string
@@ -18,11 +17,6 @@ export type ITextDataSchema = {
 
 export const TextDataSchema = new Schema<ITextDataSchema>(
     {
-        type: {
-            type: String,
-            required: true,
-            enum: ['user', 'text' , 'hashtag'],
-        },
         mention: {
             type: Schema.Types.ObjectId,    // It gets the latest data from here so basically we need this.
             ref: 'user',

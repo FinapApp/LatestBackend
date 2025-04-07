@@ -187,7 +187,9 @@ export const validateComment = (body: object, params: object) => {
       type: Joi.string().valid("user", "text"),
       mention: Joi.string().regex(/^[0-9a-fA-F]{24}$/, 'object Id').optional(),
       text: Joi.string(),
-    })),
+    }).xor("mention", "text")).required().messages({
+      'array.xor': 'Either mention or text is required'
+      }),
   })
   const paramSchema = Joi.object({
     flickId: Joi.string().regex(/^[0-9a-fA-F]{24}$/, 'object Id').optional(),

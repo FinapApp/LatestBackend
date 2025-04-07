@@ -1,12 +1,13 @@
 import mongoose from "mongoose";
 import { FOLLOW } from "../models/User/userFollower.model";
 
-export const getAllFollowerUserAggreagtion = async (userId: string, skip: string = "0") => {
+export const getAllFollowingUserAggreagtion = async (userId: string, skip: string = "0") => {
     try {
         const response = await FOLLOW.aggregate([
             {
                 $match: {
-                    following: new mongoose.Types.ObjectId(userId)
+                    follower: new mongoose.Types.ObjectId(userId),
+                    approved: true
                 }
             },
             {
@@ -21,20 +22,20 @@ export const getAllFollowerUserAggreagtion = async (userId: string, skip: string
             {
                 $lookup: {
                     from: "users",
-                    localField: "follower", // who is following the user
+                    localField: "following", // who the user is following
                     foreignField: "_id",
-                    as: "followerInfo"
+                    as: "followingInfo"
                 }
             },
             {
-                $unwind: "$followerInfo"
+                $unwind: "$followingInfo"
             },
             {
                 $project: {
                     _id: 1,
-                    username: "$followerInfo.username",
-                    name: "$followerInfo.name",
-                    photo: "$followerInfo.photo"
+                    username: "$followingInfo.username",
+                    name: "$followingInfo.name",
+                    photo: "$followingInfo.photo"
                 }
             }
         ]);

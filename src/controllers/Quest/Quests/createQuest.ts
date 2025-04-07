@@ -15,9 +15,9 @@ export const createQuest = async (req: Request, res: Response) => {
         const quest = await QUESTS.create({
             _id: questId,
             user,
-            gps : {
+            gps: {
                 type: "Point",
-                coordinates: [req.body.coords.long , req.body.coords.lat]
+                coordinates: [req.body.coords.long, req.body.coords.lat]
             },
             ...req.body
         });
@@ -25,8 +25,11 @@ export const createQuest = async (req: Request, res: Response) => {
             return handleResponse(res, 404, errors.quest_not_found);
         }
         return handleResponse(res, 200, success.quest_created);
-    } catch (error) {
+    } catch (error: any) {
         console.error(error);
+        if (error.code === 11000) {
+            return handleResponse(res, 409, errors.quest_already_exists);
+        }
         return handleResponse(res, 500, errors.catch_error);
     }
 };

@@ -2,7 +2,7 @@ import { Request, Response } from 'express';
 import { validateCreateFollower } from "../../validators/validators";
 import { errors, handleResponse, success } from "../../utils/responseCodec";
 import Joi from "joi";
-import { FOLLOW  } from '../../models/User/userFollower.model';
+import { FOLLOW } from '../../models/User/userFollower.model';
 import { USER } from '../../models/User/user.model';
 import { sendErrorToDiscord } from '../../config/discord/errorDiscord';
 
@@ -12,34 +12,38 @@ export const followerToggle = async (req: Request, res: Response) => {
         if (validationError) {
             return handleResponse(res, 400, errors.validation, validationError.details);
         }
-        const { followerId } = req.params;
-        const user = res.locals.userId;
 
-        if (followerId === user) {
+        const { followerId } = req.params; // This is the ID of the person I'm trying to follow
+        const me = res.locals.userId;      // I am the one logged in
+
+        if (followerId === me) {
             return handleResponse(res, 400, errors.self_follow);
         }
-        // Try deleting first (to handle unfollow)
-        const unfollow = await FOLLOW.findOneAndDelete({ follower: user, following: followerId });
-        if (unfollow) {
-            //SEND TO MQ TO CHECK FOR THE NOTIFICATION TO BE DELETED IF I UNFOLLOW SOMEONE
+
+        // Check if already following, and unfollow
+        const existingFollow = await FOLLOW.findOneAndDelete({ follower: me, following: followerId });
+        if (existingFollow) {
+            // TODO: Send message to MQ to delete follow notification
             return handleResponse(res, 200, success.user_unfollowed);
         }
-        let checkPrivate = await USER.findById(followerId, "private");
-        let followUser
-        if (checkPrivate?.private) {
-            followUser = await FOLLOW.create({ follower: user, following: followerId, approved: false });
-        } else {
-            followUser = await FOLLOW.create({ follower: user, following: followerId });
+
+        const targetUser = await USER.findById(followerId, "private");
+        if (!targetUser) {
+            return handleResponse(res, 404, errors.user_not_found);
         }
-        // If not found, create (to handle follow)
-        if (followUser) {
-            //SEND TO MQ TO CHECK FOR THE NOTIFICATION TO BE CREATED FOR THE USER IF I FOLLOW SOMEONE
-            // NOTIFY THAT USER WITH ITS FCM TOKEN THAT SOMEONE JUST FOLLOWED THEM
-            return handleResponse(res, 200, success.user_followed);
-        }
-        return handleResponse(res, 500, errors.user_followed);
+
+        await FOLLOW.create({
+            follower: me,
+            following: followerId,
+            approved: targetUser.private ? false : true,
+        });
+
+        // TODO: Send MQ event to notify target user with FCM token
+        return handleResponse(res, 200, success.user_followed);
+
     } catch (err) {
-        sendErrorToDiscord("POST:follow", err);
+        console.error(err);
+        sendErrorToDiscord("POST:/follow", err);
         return handleResponse(res, 500, errors.catch_error);
     }
 };

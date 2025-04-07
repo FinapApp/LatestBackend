@@ -16,7 +16,6 @@ export const getAllLikes = async (req: Request, res: Response) => {
         if (type == 'flick') query.flick = id;
         if (type == 'comment') query.comment = id;
         if (type == 'quest') query.quest = id;
-        console.log(query, "query")
         const LIKELIST = await LIKE.find(query, "user -_id", {
             populate: [
                 {

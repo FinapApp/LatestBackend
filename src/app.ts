@@ -11,6 +11,8 @@ import helmet from "helmet";
 import { isAuthenticatedUser } from "./middlewares/isAuthenticatedUser";
 import BasicAuth from 'express-basic-auth'
 import { specs, swaggerUi } from "./utils/swagger";
+import mongoose from "mongoose";
+import { SongSchema } from "./models/Song/song.model";
 const redisInitalizer = redis;
 const app: Express = express();
 
@@ -53,7 +55,7 @@ if (cluster.isPrimary) {
   app.use(helmet({ contentSecurityPolicy: false }))
   app.use("/api/v1", isAuthenticatedUser, protectedRoutes);
   app.use("/api", normalRoutes);
-
+  mongoose.model("song" , SongSchema)
   const startServer = async () => {
     try {
       await connectDB();
