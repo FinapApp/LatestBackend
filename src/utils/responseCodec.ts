@@ -27,6 +27,20 @@ export const handleResponse = (
   }
 };
 export const errors = {
+// Bio-links related errors
+  bio_link_not_found: {
+    message: "Bio-link not found",
+  },
+  bio_link_not_updated: {
+    message: "Bio-link not updated",
+  },
+  bio_link_not_created: {
+    message: "Bio-link not created",
+  },
+  bio_link_not_deleted: {
+    message: "Bio-link not deleted",
+  },
+
   //HashTags
   no_hashtags: {
     message: "No hashtags found",
@@ -288,6 +302,17 @@ export const errors = {
 };
 
 export const success = {
+// Bio-links related-success
+  update_biolink : {
+    message : "Bio-link updated successfully",
+  },
+  create_biolink : {
+    message : "Bio-link created successfully",
+  },
+  delete_biolink : {
+    message : "Bio-link deleted successfully",
+  },
+
   // Two-factor authentication-related success
   update_two_factor: {
     message: "Two-factor authentication updated successfully",

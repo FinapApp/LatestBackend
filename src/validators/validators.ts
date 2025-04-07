@@ -434,6 +434,50 @@ export const validateUpdateTwoFactor = (body: object) => {
   const { error } = schema.validate(body)
   return error
 }
+
+
+export const validateCreateBioLink = (body: object) => {
+  const schema = Joi.object({
+    title: Joi.string().required(),
+    url: Joi.string().required()
+  })
+  const { error } = schema.validate(body)
+  return error
+}
+export const validateUpdateBioLink = (body: object, params: object) => {
+  const bodySchema = Joi.object({
+    title: Joi.string().required(),
+    url: Joi.string().required()
+  })
+  const paramsSchema = Joi.object({
+    bioLinkId: Joi.string().regex(/^[0-9a-fA-F]{24}$/, 'object Id').optional()
+  })
+  const combinedSchema = Joi.object({
+    body: bodySchema,
+    params: paramsSchema
+  })
+  const { error } = combinedSchema.validate({ body, params })
+  return error
+}
+
+
+export const validateBioLinkId = (params: object) => {
+  const schema = Joi.object({
+    bioLinkId: Joi.string().regex(/^[0-9a-fA-F]{24}$/, 'object Id').required()
+  })
+  const { error } = schema.validate(params)
+  return error
+}
+
+export const validateGetProfileDetail = (params: object) => {
+  const schema = Joi.object({
+    userId : Joi.string().regex(/^[0-9a-fA-F]{24}$/, 'object Id'),
+  })
+  const { error } = schema.validate(params)
+  return error
+}
+
+
 export const validateUpdateFlick = (body: object, params: object) => {
   const bodySchema = Joi.object({
     media: Joi.array().items(Joi.object({

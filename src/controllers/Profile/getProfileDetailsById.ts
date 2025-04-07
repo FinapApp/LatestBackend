@@ -3,12 +3,25 @@ import { errors, handleResponse, } from "../../utils/responseCodec";
 import { USER } from "../../models/User/user.model";
 import { sendErrorToDiscord } from "../../config/discord/errorDiscord";
 import { USERBIOLINKS } from "../../models/User/userBioLinks";
+import Joi from "joi";
+import { validateGetProfileDetail } from "../../validators/validators";
 
-export const getProfileDetail = async (req: Request, res: Response) => {
+export const getProfileDetailById = async (req: Request, res: Response) => {
     try {
-        const userId = res.locals.userId
+        const validationError: Joi.ValidationError | undefined = validateGetProfileDetail(
+            req.params
+        );
+        if (validationError) {
+            return handleResponse(
+                res,
+                400,
+                errors.validation,
+                validationError.details
+            );
+        }
+        const { userId } = req.params;
         const [getProfileDetails, bioLink] = await Promise.all([
-            USER.findById(userId, "name username followerCount followingCount flickCount description"),
+            USER.findById(userId, "name username followerCount followingCount flickCount description -_id"),
             USERBIOLINKS.find({ user: userId }, "title url")
         ]);
         if (getProfileDetails && bioLink) {

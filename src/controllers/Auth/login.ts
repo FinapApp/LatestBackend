@@ -116,7 +116,7 @@ export const login = async (req: Request, res: Response) => {
       os: deviceData.os.toString(),
       location: geoData ? `${geoData.city}, ${geoData.country_name}` : undefined,
     });
-    return handleResponse(res, 200, { accessToken, refreshToken, userPreferences: checkUserPreference});
+    return handleResponse(res, 200, { userId ,  accessToken, refreshToken, userPreferences: checkUserPreference });
   } catch (err: any) {
     sendErrorToDiscord("POST:login", err);
     return handleResponse(res, 500, errors.catch_error);

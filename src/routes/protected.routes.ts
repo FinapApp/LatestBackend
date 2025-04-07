@@ -1,9 +1,11 @@
+import { bioLinkRoutes } from "./bioLink/bioLink..routes";
 import { commentRoutes } from "./comment/comment.routes";
 import { feedbackRoutes } from "./feedback/feedback.routes";
 import { flickRoutes } from "./flicks/protected-flicks.routes";
 import { followRoutes } from "./follow/follow.routes";
 import { friendSuggestionRoutes } from "./friendSuggestion/friendSuggestion.routes";
 import { likeRoutes } from "./like/like.routes";
+import { protectedProfileRoutes } from "./profile/protectedProfile.routes";
 import { questRoutes } from "./quest/quest.routes";
 import { reportRoutes } from "./report/report.routes";
 import { settingNotificationRoutes } from "./setting/settingNotification.routes";
@@ -30,7 +32,9 @@ const routes = [
     friendSuggestionRoutes,
     settingSessionRoutes,
     settingThemeRoutes,
-    settingTwoFactorRoutes
+    settingTwoFactorRoutes,
+    bioLinkRoutes,
+    protectedProfileRoutes
 ];
 
 export default routes;
