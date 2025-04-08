@@ -1,25 +1,21 @@
 import express, { Router } from "express";
-import { getProfile } from "../../controllers/Setting/Profile/getProfileSettings";
+import { getProfileDetails } from "../../controllers/Setting/Profile/getPersonalDetails";
 import { createPresignedURLProfile } from "../../controllers/Setting/Profile/createPresignedURLProfile";
-import { updateProfile } from "../../controllers/Setting/Profile/updateProfileSetting";
+import { updatePersonalDetails } from "../../controllers/Setting/Profile/updatePersonalDetails";
 import { updatePassword } from "../../controllers/Setting/Profile/updatePassword";
-
+import { updateProfileSetting } from "../../controllers/Setting/Profile/updateProfileSetting";
+import { getProfileSetting } from "../../controllers/Setting/Profile/getProfileSetting";
 
 export const settingProfile: Router = express.Router();
 
-
-
-
-
 /**
  * @swagger
- * /v1/setting/profile:
+ * /v1/profile-picture:
  *   post:
- *     tags: 
+ *     summary: Generate a presigned URL for uploading a profile picture
+ *     tags:
  *       - Profile Setting
- *     summary: Create a presigned URL for uploading a profile photo
  *     requestBody:
- *       description: Object containing file type for the profile photo
  *       required: true
  *       content:
  *         application/json:
@@ -28,53 +24,35 @@ export const settingProfile: Router = express.Router();
  *             properties:
  *               fileType:
  *                 type: string
- *                 example: 'image/jpeg'
+ *                 description: The type of the file to be uploaded (e.g., image/jpeg, image/png)
+ *                 example: image/jpeg
  *     responses:
  *       200:
- *         description: Successfully created presigned URL
+ *         description: Successfully generated presigned URL
  *         content:
  *           application/json:
  *             schema:
  *               type: object
  *               properties:
- *                 success:
- *                   type: boolean
- *                   example: true
- *                 presignedURL:
+ *                 url:
  *                   type: string
- *                   example: 'https://example.com/presigned-url'
+ *                   description: The presigned URL for uploading the file
+ *                   example: https://example-bucket.s3.amazonaws.com/example.jpg?AWSAccessKeyId=...
  *       400:
- *         description: Invalid request
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 success:
- *                   type: boolean
- *                   example: false
- *                 message:
- *                   type: string
- *                   example: Invalid request
+ *         description: Bad request, invalid input
  *       500:
- *         description: An error occurred
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 success:
- *                   type: boolean
- *                   example: false
- *                 message:
- *                   type: string
- *                   example: An error occurred
+ *         description: Internal server error
+ */
+settingProfile.post("/profile-picture", createPresignedURLProfile);
+
+/**
+ * @swagger
+ * /v1/personal-detail:
  *   put:
- *     tags: 
+ *     summary: Update personal details
+ *     tags:
  *       - Profile Setting
- *     summary: Update user profile
  *     requestBody:
- *       description: Object containing user profile details
  *       required: true
  *       content:
  *         application/json:
@@ -83,137 +61,223 @@ export const settingProfile: Router = express.Router();
  *             properties:
  *               name:
  *                 type: string
- *                 example: 'John'
- *               surname:
+ *                 description: User's name
+ *               email:
  *                 type: string
- *                 example: 'Doe'
+ *                 format: email
+ *                 description: User's email address
  *               gender:
  *                 type: string
- *                 example: 'Male'
+ *                 description: User's gender
  *               phone:
  *                 type: string
- *                 example: '+1234567890'
+ *                 description: User's phone number in international format
  *               username:
  *                 type: string
- *                 example: 'johndoe'
+ *                 description: User's username
  *               dob:
  *                 type: string
- *                 example: '1990-01-01'
+ *                 description: User's date of birth
  *               country:
  *                 type: string
- *                 example: 'US'
+ *                 description: User's country code
  *               photo:
  *                 type: string
- *                 example: 'https://example.com/photo.jpg'
+ *                 description: URL of the user's profile photo
+ *           example:
+ *             name: "Rakshak Khandelwal"
+ *             email: "dcode.0n1@example.com"
+ *             gender: "Male"
+ *             phone: "6376877564"
+ *             username: "jarvis0013"
+ *             dob: "1999-05-13"
+ *             country: "IN"
+ *             photo: "https://pub-301c1efdf41d428f9ab043c4d4ecbac9.r2.dev/some-random-path/profile-image"
  *     responses:
  *       200:
- *         description: Successfully updated profile
+ *         description: Successfully updated personal details
  *         content:
  *           application/json:
  *             schema:
  *               type: object
  *               properties:
- *                 success:
- *                   type: boolean
- *                   example: true
  *                 message:
  *                   type: string
- *                   example: Profile updated successfully
+ *                   example: Updated successfully
  *       400:
- *         description: Invalid request
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 success:
- *                   type: boolean
- *                   example: false
- *                 message:
- *                   type: string
- *                   example: Invalid request
+ *         description: Bad request, invalid input
  *       500:
- *         description: An error occurred
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 success:
- *                   type: boolean
- *                   example: false
- *                 message:
- *                   type: string
- *                   example: An error occurred
+ *         description: Internal server error
  *   get:
- *     tags: 
+ *     summary: Get personal details
+ *     tags:
  *       - Profile Setting
- *     summary: Get user profile
  *     responses:
  *       200:
- *         description: Successfully retrieved user profile
+ *         description: Successfully retrieved personal details
  *         content:
  *           application/json:
  *             schema:
  *               type: object
  *               properties:
- *                 success:
- *                   type: boolean
- *                   example: true
- *                 data:
+ *                 name:
+ *                   type: string
+ *                   description: User's name
+ *                 email:
+ *                   type: string
+ *                   format: email
+ *                   description: User's email address
+ *                 gender:
+ *                   type: string
+ *                   description: User's gender
+ *                 phone:
+ *                   type: string
+ *                   description: User's phone number in international format
+ *                 username:
+ *                   type: string
+ *                   description: User's username
+ *                 dob:
+ *                   type: date
+ *                   description: User's date of birth
+ *                 country:
+ *                   type: string
+ *                   description: User's country code
+ *                 photo:
+ *                   type: string
+ *                   description: URL of the user's profile photo
+ *       500:
+ *         description: Internal server error
+ */
+settingProfile
+    .route("/personal-detail")
+    .put(updatePersonalDetails)
+    .get(getProfileDetails);
+
+/**
+ * @swagger
+ * /v1/setting/profile:
+ *   put:
+ *     summary: Update profile settings
+ *     tags:
+ *       - Profile Setting
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               username:
+ *                 type: string
+ *                 description: User's username
+ *               description:
+ *                 type: array
+ *                 items:
  *                   type: object
  *                   properties:
- *                     name:
+ *                     mention:
  *                       type: string
- *                       example: 'John'
- *                     surname:
+ *                       description: Mentioned user ID (ObjectId format)
+ *                       example: 507f1f77bcf86cd799439011
+ *                     text:
  *                       type: string
- *                       example: 'Doe'
- *                     gender:
- *                       type: string
- *                       example: 'Male'
- *                     phone:
- *                       type: string
- *                       example: '+1234567890'
- *                     username:
- *                       type: string
- *                       example: 'johndoe'
- *                     email:
- *                       type: string
- *                       example : 'dcode.0n1 @gmail.com'
- *                     dob:
- *                       type: string
- *                       example: '1990-01-01'
- *                     country:
- *                       type: string
- *                       example: 'US'
- *                     photo:
- *                       type: string
- *                       example: 'https://example.com/photo.jpg'
- *       500:
- *         description: An error occurred
+ *                       description: Text associated with the mention or normal text
+ *           example:
+ *             username: "Jarvis0013"
+ *             description:
+ *               - mention: "507f1f77bcf86cd799439011"
+ *                 text: "@chirag"
+ *               - mention: "507f1f77bcf86cd799439011"
+ *                 text: "@lovesh"
+ *               - text: "is great guys"
+ *     responses:
+ *       200:
+ *         description: Successfully updated profile settings
  *         content:
  *           application/json:
  *             schema:
  *               type: object
  *               properties:
- *                 success:
- *                   type: boolean
- *                   example: false
  *                 message:
  *                   type: string
- *                   example: An error occurred
+ *                   example: Profile settings updated successfully
+ *       400:
+ *         description: Bad request, invalid input
+ *       500:
+ *         description: Internal server error
+ *   get:
+ *     summary: Get profile settings
+ *     tags:
+ *       - Profile Setting
+ *     responses:
+ *       200:
+ *         description: Successfully retrieved profile settings
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 username:
+ *                   type: string
+ *                   description: User's username
+ *                 description:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *                     properties:
+ *                       mention:
+ *                         type: string
+ *                         description: Mentioned user ID (ObjectId format)
+ *                       text:
+ *                         type: string
+ *                         description: Text associated with the mention or normal text
+ *                 photo:
+ *                   type: string
+ *                   description: URL of the user's profile photo
+ *       500:
+ *         description: Internal server error
  */
+settingProfile
+    .route("/setting/profile")
+    .put(updateProfileSetting)
+    .get(getProfileSetting);
 
-settingProfile.route("/setting/profile")
-    .post(createPresignedURLProfile)
-    .put(updateProfile)
-    .get(getProfile)
-
-
-
-
-settingProfile.put("/setting/password",updatePassword)
-    
-
-
+/**
+ * @swagger
+ * /v1/setting/password:
+ *   put:
+ *     summary: Update user password
+ *     tags:
+ *       - Profile Setting
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               password:
+ *                 type: string
+ *                 description: The current password of the user
+ *                 example: currentPassword123
+ *               newPassword:
+ *                 type: string
+ *                 description: The new password to be set
+ *                 example: newPassword456
+ *     responses:
+ *       200:
+ *         description: Password updated successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: Password updated successfully
+ *       400:
+ *         description: Bad request, invalid input
+ *       500:
+ *         description: Internal server error
+ */
+settingProfile.put("/setting/password", updatePassword);

@@ -103,7 +103,7 @@ onboardingRoutes.post("/sign-up", signUp);
  *               name:
  *                 type: string
  *               dob:
- *                 type: string
+ *                 type: date
  *               country:
  *                 type: string
  *               password:

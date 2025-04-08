@@ -16,13 +16,14 @@ export type ITextDataSchema = {
 };
 
 export const TextDataSchema = new Schema<ITextDataSchema>(
-    {
+    {  
         mention: {
             type: Schema.Types.ObjectId,    // It gets the latest data from here so basically we need this.
             ref: 'user',
         },
         text: {
             type: String,
+            required : true
         },
         hashtag: {
             type: Schema.Types.ObjectId,

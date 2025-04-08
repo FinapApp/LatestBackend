@@ -122,7 +122,7 @@ export const validateVerifyOTPSignUp = (body: object) => {
     otp: Joi.string().required(),
     email: Joi.string().required(),
     name: Joi.string().required(),
-    dob: Joi.string().required(),
+    dob: Joi.string().isoDate().required(),
     country: Joi.string().required().custom((value, helpers) => {
       // Check if country exists in your predefined countries list
       if (!countries.some(e => e.code === value)) {
@@ -189,7 +189,7 @@ export const validateComment = (body: object, params: object) => {
       text: Joi.string(),
     }).xor("mention", "text")).required().messages({
       'array.xor': 'Either mention or text is required'
-      }),
+    }),
   })
   const paramSchema = Joi.object({
     flickId: Joi.string().regex(/^[0-9a-fA-F]{24}$/, 'object Id').optional(),
@@ -252,10 +252,15 @@ export const validateCreateFlick = (body: object, params: object) => {
     songEnd: Joi.number().optional(),
     thumbnailURL: Joi.string().required(),
     description: Joi.array().items(Joi.object({
-      type: Joi.string().valid("user", "text", "hashtag").required(),
       mention: Joi.string().regex(/^[0-9a-fA-F]{24}$/, 'object Id').optional(),
-      text: Joi.string().optional(),
-      hashTag: Joi.string().regex(/^[0-9a-fA-F]{24}$/, 'object Id').optional()
+      hashTag: Joi.string().regex(/^[0-9a-fA-F]{24}$/, 'object Id').optional(),
+      text: Joi.string().when(Joi.object({ mention: Joi.exist() }).unknown(), {
+        then: Joi.required(),
+        otherwise: Joi.when(Joi.object({ hashTag: Joi.exist() }).unknown(), {
+          then: Joi.required(),
+          otherwise: Joi.optional(),
+        }),
+      }),
     })).optional(),
     location: Joi.string().optional(),
     collabs: Joi.array().items(Joi.object({
@@ -473,7 +478,7 @@ export const validateBioLinkId = (params: object) => {
 
 export const validateGetProfileDetail = (params: object) => {
   const schema = Joi.object({
-    userId : Joi.string().regex(/^[0-9a-fA-F]{24}$/, 'object Id'),
+    userId: Joi.string().regex(/^[0-9a-fA-F]{24}$/, 'object Id'),
   })
   const { error } = schema.validate(params)
   return error
@@ -644,8 +649,11 @@ export const validateCreateQuestApplication = (body: object, params: object) => 
     })).required(),
     partialAllowance: Joi.boolean().required(),
     media: Joi.array().items(Joi.object({
-      url: Joi.string().required(),
-      thumbnail: Joi.string().required(),
+      url: Joi.string()
+        .pattern(new RegExp(`^${config.R2.R2_PUBLIC_URL}/.+$`))
+        .message("url must be a valid URL").required(),
+      thumbnail: Joi.string().pattern(new RegExp(`^${config.R2.R2_PUBLIC_URL}/.+$`))
+        .message("thumbnail must be a valid URL").required(),
       type: Joi.string().valid('photo', 'video', 'audio', 'pdf').required()
     })).required(),
   })
@@ -714,15 +722,7 @@ export const validateGetAllComments = (query: object) => {
   return error
 }
 
-export const validateSignedURLFlicks = (body: object) => {
-  const schema = Joi.object({
-    videoURL: Joi.string().optional(),
-    photos: Joi.array().items(Joi.string()).optional(),
-    song: Joi.string().optional(),
-  }).xor('videoURL', 'photos')
-  const { error } = schema.validate(body)
-  return error
-}
+
 
 export const validateQuestApplicantId = (params: object) => {
   const schema = Joi.object({
@@ -816,11 +816,31 @@ export const validateRefreshToken = (body: object) => {
 }
 
 
-
-
-
-
 export const validateUpdateProfile = (body: object) => {
+  const schema  = Joi.object({
+    username : Joi.string().optional(),
+    description: Joi.array().items(Joi.object({
+      mention: Joi.string().regex(/^[0-9a-fA-F]{24}$/, 'object Id').optional(),
+      hashTag: Joi.string().regex(/^[0-9a-fA-F]{24}$/, 'object Id').optional(),
+      text: Joi.string().when(Joi.object({ mention: Joi.exist() }).unknown(), {
+        then: Joi.required(),
+        otherwise: Joi.when(Joi.object({ hashTag: Joi.exist() }).unknown(), {
+          then: Joi.required(),
+          otherwise: Joi.optional(),
+        }),
+      }),
+    })).optional(),
+    photo: Joi.string()
+      .pattern(new RegExp(`^${config.R2.R2_PUBLIC_URL}/.+$`))
+      .message("photo must be a valid URL").optional(),
+  })
+  const {error} = schema.validate(body)
+  return  error
+}
+
+
+
+export const validateUpdatePersonal = (body: object) => {
   const schema = Joi.object({
     name: Joi.string().optional(),
     email: Joi.string().email().optional(),
@@ -838,7 +858,7 @@ export const validateUpdateProfile = (body: object) => {
       .messages({
         "string.pattern.base": "Invalid username format",
       }),
-    dob: Joi.string().optional(),
+    dob: Joi.string().isoDate().optional(),
     country: Joi.string().optional().custom((value, helpers) => {
       // Check if country exists in your predefined countries list
       if (!countries.some(e => e.code === value)) {
@@ -846,11 +866,15 @@ export const validateUpdateProfile = (body: object) => {
       }
       return value;
     }),
-    photo: Joi.string().optional(),
+    photo: Joi.string()
+      .pattern(new RegExp(`^${config.R2.R2_PUBLIC_URL}/.+$`))
+      .message("photo must be a valid URL").optional(),
   })
   const { error } = schema.validate(body)
   return error
 }
+
+
 
 export const validatePassword = (body: object) => {
   const schema = Joi.object({

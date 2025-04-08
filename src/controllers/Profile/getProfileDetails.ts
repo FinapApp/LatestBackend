@@ -8,7 +8,7 @@ export const getProfileDetail = async (req: Request, res: Response) => {
     try {
         const userId = res.locals.userId
         const [getProfileDetails, bioLink] = await Promise.all([
-            USER.findById(userId, "name username followerCount followingCount flickCount description"),
+            USER.findById(userId, "name username photo followerCount followingCount flickCount description"),
             USERBIOLINKS.find({ user: userId }, "title url")
         ]);
         if (getProfileDetails && bioLink) {

@@ -8,7 +8,7 @@ interface IUserSchema extends Document {
     email: string;
     phone: string;
     password: string;
-    dob: string;
+    dob: Date;
     description: ITextDataSchema[];
     country: string;
     flickCount: number; 
@@ -37,7 +37,7 @@ export const UserSchema = new Schema<IUserSchema>(
         email: { type: String, unique: true },
         phone: { type: String },
         password: { type: String },
-        dob: { type: String },
+        dob: { type: Date },
         description: { type: [TextDataSchema] },
         country: { type: String },
         balance: { type: Number, default: 0 },

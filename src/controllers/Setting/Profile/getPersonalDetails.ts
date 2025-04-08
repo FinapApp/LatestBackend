@@ -3,7 +3,7 @@ import { errors, handleResponse, } from "../../../utils/responseCodec";
 import { USER } from "../../../models/User/user.model";
 import { sendErrorToDiscord } from "../../../config/discord/errorDiscord";
 
-export const getProfile = async (req: Request, res: Response) => {
+export const getProfileDetails = async (req: Request, res: Response) => {
     try {
         const getProfileDetails = await USER.findById(res.locals.userId, "name photo email dob username gender phone country")
         if (getProfileDetails) {

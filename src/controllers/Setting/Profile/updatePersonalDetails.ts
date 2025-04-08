@@ -1,14 +1,14 @@
 import { Response, Request } from "express";
-import { validateUpdateProfile } from "../../../validators/validators";
+import { validateUpdatePersonal } from "../../../validators/validators";
 import { handleResponse, errors, success } from "../../../utils/responseCodec";
 import Joi from "joi";
 import { USER } from "../../../models/User/user.model";
 import { sendErrorToDiscord } from "../../../config/discord/errorDiscord";
 
 
-export const updateProfileSetting = async (req: Request, res: Response) => {
+export const updatePersonalDetails = async (req: Request, res: Response) => {
     try {
-        const validationError: Joi.ValidationError | undefined = validateUpdateProfile(
+        const validationError: Joi.ValidationError | undefined = validateUpdatePersonal(
             req.body
         );
         if (validationError) {

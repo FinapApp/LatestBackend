@@ -15,7 +15,7 @@ interface ForgetOTPRequest {
     name: string;
     password: string;
     phone: string;
-    dob: string
+    dob: Date;
     country: string
     username: string
 }

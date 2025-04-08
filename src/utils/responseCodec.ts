@@ -65,6 +65,9 @@ export const errors = {
   },
 
   // Profile-related errors
+  unable_to_signed_profile_image : {
+    message : "Unable to signed profile image"
+  },
   profile_not_updated: {
     message: "Unable to update profile",
   },
