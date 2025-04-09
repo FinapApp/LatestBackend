@@ -21,11 +21,11 @@ export const getProfileDetailById = async (req: Request, res: Response) => {
         }
         const { userId } = req.params;
         const [getProfileDetails, bioLink] = await Promise.all([
-            USER.findById(userId, "name username followerCount followingCount flickCount description -_id"),
+            USER.findById(userId, "name username followerCount followingCount flickCount description photo  -_id"),
             USERBIOLINKS.find({ user: userId }, "title url")
         ]);
         if (getProfileDetails && bioLink) {
-            return handleResponse(res, 200, { profileDetail: getProfileDetails, bioLinks: bioLink });
+            return handleResponse(res, 200, { profileDetail: {...getProfileDetails,  bioLink }});
         }
         return handleResponse(res, 400, errors.profile_not_found);
     } catch (error: any) {

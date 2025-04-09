@@ -3,6 +3,7 @@ import { validateUpdateTheme } from "../../../validators/validators";
 import { handleResponse, errors, success } from "../../../utils/responseCodec";
 import Joi from "joi";
 import { USERPREFERENCE } from "../../../models/User/userPreference.model";
+import { sendErrorToDiscord } from "../../../config/discord/errorDiscord";
 
 
 export const updateTheme = async (req: Request, res: Response) => {
@@ -28,7 +29,7 @@ export const updateTheme = async (req: Request, res: Response) => {
         }
         return handleResponse(res, 304, errors.update_theme);
     } catch (err: any) {
-
+        sendErrorToDiscord("PUT:theme", err);
         return handleResponse(res, 500, errors.catch_error);
     }
 };

@@ -4,7 +4,7 @@ import { createPresignedURLProfile } from "../../controllers/Setting/Profile/cre
 import { updatePersonalDetails } from "../../controllers/Setting/Profile/updatePersonalDetails";
 import { updatePassword } from "../../controllers/Setting/Profile/updatePassword";
 import { updateProfileSetting } from "../../controllers/Setting/Profile/updateProfileSetting";
-import { getProfileSetting } from "../../controllers/Setting/Profile/getProfileSetting";
+
 
 export const settingProfile: Router = express.Router();
 
@@ -205,42 +205,10 @@ settingProfile
  *         description: Bad request, invalid input
  *       500:
  *         description: Internal server error
- *   get:
- *     summary: Get profile settings
- *     tags:
- *       - Profile Setting
- *     responses:
- *       200:
- *         description: Successfully retrieved profile settings
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 username:
- *                   type: string
- *                   description: User's username
- *                 description:
- *                   type: array
- *                   items:
- *                     type: object
- *                     properties:
- *                       mention:
- *                         type: string
- *                         description: Mentioned user ID (ObjectId format)
- *                       text:
- *                         type: string
- *                         description: Text associated with the mention or normal text
- *                 photo:
- *                   type: string
- *                   description: URL of the user's profile photo
- *       500:
- *         description: Internal server error
  */
 settingProfile
     .route("/setting/profile")
     .put(updateProfileSetting)
-    .get(getProfileSetting);
 
 /**
  * @swagger

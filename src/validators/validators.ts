@@ -506,9 +506,15 @@ export const validateUpdateFlick = (body: object, params: object) => {
     songEnd: Joi.number().optional(),
     thumbnailURL: Joi.string().optional(),
     description: Joi.array().items(Joi.object({
-      type: Joi.string().valid("user", "text").optional(),
       mention: Joi.string().regex(/^[0-9a-fA-F]{24}$/, 'object Id').optional(),
-      text: Joi.string().optional()
+      hashTag: Joi.string().regex(/^[0-9a-fA-F]{24}$/, 'object Id').optional(),
+      text: Joi.string().when(Joi.object({ mention: Joi.exist() }).unknown(), {
+        then: Joi.required(),
+        otherwise: Joi.when(Joi.object({ hashTag: Joi.exist() }).unknown(), {
+          then: Joi.required(),
+          otherwise: Joi.optional(),
+        }),
+      }),
     })).optional(),
     location: Joi.string().optional(),
     collabs: Joi.array().items(Joi.object({
@@ -643,9 +649,15 @@ export const validateCreateQuestApplication = (body: object, params: object) => 
   const bodySchema = Joi.object({
     quest: Joi.string().regex(/^[0-9a-fA-F]{24}$/, 'object Id').required(),
     description: Joi.array().items(Joi.object({
-      type: Joi.string().valid("user", "text"),
       mention: Joi.string().regex(/^[0-9a-fA-F]{24}$/, 'object Id').optional(),
-      text: Joi.string().optional()
+      hashTag: Joi.string().regex(/^[0-9a-fA-F]{24}$/, 'object Id').optional(),
+      text: Joi.string().when(Joi.object({ mention: Joi.exist() }).unknown(), {
+        then: Joi.required(),
+        otherwise: Joi.when(Joi.object({ hashTag: Joi.exist() }).unknown(), {
+          then: Joi.required(),
+          otherwise: Joi.optional(),
+        }),
+      }),
     })).required(),
     partialAllowance: Joi.boolean().required(),
     media: Joi.array().items(Joi.object({
@@ -735,7 +747,17 @@ export const validateQuestApplicantId = (params: object) => {
 export const validateCreateQuestApplicant = (body: object, params: object) => {
   const bodySchema = Joi.object({
     title: Joi.string().required(),
-    description: Joi.string().required(),
+    description: Joi.array().items(Joi.object({
+      mention: Joi.string().regex(/^[0-9a-fA-F]{24}$/, 'object Id').optional(),
+      hashTag: Joi.string().regex(/^[0-9a-fA-F]{24}$/, 'object Id').optional(),
+      text: Joi.string().when(Joi.object({ mention: Joi.exist() }).unknown(), {
+        then: Joi.required(),
+        otherwise: Joi.when(Joi.object({ hashTag: Joi.exist() }).unknown(), {
+          then: Joi.required(),
+          otherwise: Joi.optional(),
+        }),
+      }),
+    })).required(),
     media: Joi.array().items(Joi.string()).optional(),
   })
   const paramsSchema = Joi.object({
