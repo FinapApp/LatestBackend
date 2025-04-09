@@ -1,67 +1,39 @@
 
 import express, { Router } from "express";
-import { getProfileDetailById } from "../../controllers/Profile/getProfileDetailsById";
+import { getProfileDetail } from "../../controllers/Profile/getProfileDetail";
+import { isAuthenticatedUserIfNot } from "../../middlewares/isAuthenticatedIUserfNot";
 
 
 
 export const unprotectedProfileRoutes: Router = express.Router();
 
-
 /**
  * @swagger
- * /profile/{userId}:
- *   tags: [Unprotected Profile]
+ * /profile:
  *   get:
- *     summary: Get unprotected profile details of a user
- *     description: Retrieve the unprotected profile details of a user by their userId.
+ *     summary: Get profile details
+ *     description: Retrieve profile details. If `userId` is not provided in the query, it will return a default response.
  *     parameters:
- *       - in: path
+ *       - in: query
  *         name: userId
- *         required: true
  *         schema:
  *           type: string
- *         description: The ID of the user
+ *         required: false
+ *         description: The ID of the user whose profile details are to be retrieved.
  *     responses:
  *       200:
- *         description: Successfully retrieved unprotected user profile details
+ *         description: Successfully retrieved profile details.
  *         content:
  *           application/json:
  *             schema:
  *               type: object
  *               properties:
- *                 profileDetail:
+ *                 success:
+ *                   type: boolean
+ *                 data:
  *                   type: object
- *                   properties:
- *                     flickCount:
- *                       type: number
- *                     followingCount:
- *                       type: number
- *                     followerCount:
- *                       type: number
- *                     _id:
- *                       type: string
- *                     username:
- *                       type: string
- *                     name:
- *                       type: string
- *                     description:
- *                       type: array
- *                       items:
- *                         type: string
- *                 bioLinks:
- *                   type: array
- *                   items:
- *                     type: object
- *                     properties:
- *                       _id:
- *                         type: string
- *                       url:
- *                         type: string
- *                       title:
- *                         type: string
- *       404:
- *         description: User not found
- *       500:
- *         description: Internal server error
+ *                   description: The profile details.
+ *       400:
+ *         description: Bad request.
  */
-unprotectedProfileRoutes.get("/profile/:userId", getProfileDetailById  )
+unprotectedProfileRoutes.get("/profile", isAuthenticatedUserIfNot, getProfileDetail)

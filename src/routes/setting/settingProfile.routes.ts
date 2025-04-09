@@ -1,9 +1,8 @@
 import express, { Router } from "express";
 import { getProfileDetails } from "../../controllers/Setting/Profile/getPersonalDetails";
 import { createPresignedURLProfile } from "../../controllers/Setting/Profile/createPresignedURLProfile";
-import { updatePersonalDetails } from "../../controllers/Setting/Profile/updatePersonalDetails";
+import { updateProfileDetails } from "../../controllers/Setting/Profile/updateProfileDetails";
 import { updatePassword } from "../../controllers/Setting/Profile/updatePassword";
-import { updateProfileSetting } from "../../controllers/Setting/Profile/updateProfileSetting";
 
 
 export const settingProfile: Router = express.Router();
@@ -84,6 +83,18 @@ settingProfile.post("/profile-picture", createPresignedURLProfile);
  *               photo:
  *                 type: string
  *                 description: URL of the user's profile photo
+ *               description:
+ *                 type: array
+ *                 items:
+ *                   type: object
+ *                   properties:
+ *                     mention:
+ *                       type: string
+ *                       description: Mentioned user ID (ObjectId format)
+ *                       example: 507f1f77bcf86cd799439011
+ *                     text:
+ *                       type: string
+ *                       description: Text associated with the mention or normal text
  *           example:
  *             name: "Rakshak Khandelwal"
  *             email: "dcode.0n1@example.com"
@@ -93,6 +104,12 @@ settingProfile.post("/profile-picture", createPresignedURLProfile);
  *             dob: "1999-05-13"
  *             country: "IN"
  *             photo: "https://pub-301c1efdf41d428f9ab043c4d4ecbac9.r2.dev/some-random-path/profile-image"
+ *             description:
+ *               - mention: "507f1f77bcf86cd799439011"
+ *                 text: "@chirag"
+ *               - mention: "507f1f77bcf86cd799439011"
+ *                 text: "@lovesh"
+ *               - text: "is great guys"
  *     responses:
  *       200:
  *         description: Successfully updated personal details
@@ -149,66 +166,10 @@ settingProfile.post("/profile-picture", createPresignedURLProfile);
  *         description: Internal server error
  */
 settingProfile
-    .route("/personal-detail")
-    .put(updatePersonalDetails)
+    .route("/profile-detail")
+    .put(updateProfileDetails)
     .get(getProfileDetails);
 
-/**
- * @swagger
- * /v1/setting/profile:
- *   put:
- *     summary: Update profile settings
- *     tags:
- *       - Profile Setting
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             properties:
- *               username:
- *                 type: string
- *                 description: User's username
- *               description:
- *                 type: array
- *                 items:
- *                   type: object
- *                   properties:
- *                     mention:
- *                       type: string
- *                       description: Mentioned user ID (ObjectId format)
- *                       example: 507f1f77bcf86cd799439011
- *                     text:
- *                       type: string
- *                       description: Text associated with the mention or normal text
- *           example:
- *             username: "Jarvis0013"
- *             description:
- *               - mention: "507f1f77bcf86cd799439011"
- *                 text: "@chirag"
- *               - mention: "507f1f77bcf86cd799439011"
- *                 text: "@lovesh"
- *               - text: "is great guys"
- *     responses:
- *       200:
- *         description: Successfully updated profile settings
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 message:
- *                   type: string
- *                   example: Profile settings updated successfully
- *       400:
- *         description: Bad request, invalid input
- *       500:
- *         description: Internal server error
- */
-settingProfile
-    .route("/setting/profile")
-    .put(updateProfileSetting)
 
 /**
  * @swagger

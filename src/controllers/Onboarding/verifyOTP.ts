@@ -48,10 +48,13 @@ export const verifyOTPAfterSignUp = async (req: Request, res: Response) => {
         }
         return handleResponse(res, 400, errors.otp_not_match)
     } catch (err: any) {
-        sendErrorToDiscord("POST:verify-otp", err)
-        if(err.code === 11000){
-            return handleResponse(res, 400, errors.retry_signup);
+        if (err.code == "11000" && err.keyValue.email) {
+            return handleResponse(res, 500, errors.email_exist);
         }
+        if (err.code == "11000" && err.keyValue.username) {
+            return handleResponse(res, 500, errors.username_exist);
+        }
+        sendErrorToDiscord("POST:verify-otp", err)
         return handleResponse(res, 500, errors.catch_error);
     }
 };

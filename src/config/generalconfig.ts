@@ -1,6 +1,11 @@
 import * as dotenv from "dotenv";
 dotenv.config();
 export const config = {
+  MELLISSEARCH: {
+    host: process.env.MELLISSEARCH_HOST!,
+    masterKey: process.env.MELLISSEARCH_MASTER_KEY!,
+    indexName: process.env.MELLISSEARCH_INDEX_NAME!,
+  },
   MONGODB: {
     URI: process.env.MONGO_URI!,
   },

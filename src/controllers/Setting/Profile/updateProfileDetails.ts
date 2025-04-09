@@ -6,7 +6,7 @@ import { USER } from "../../../models/User/user.model";
 import { sendErrorToDiscord } from "../../../config/discord/errorDiscord";
 
 
-export const updateProfileSetting = async (req: Request, res: Response) => {
+export const updateProfileDetails = async (req: Request, res: Response) => {
     try {
         const validationError: Joi.ValidationError | undefined = validateUpdateProfile(
             req.body

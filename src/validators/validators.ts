@@ -271,7 +271,6 @@ export const validateCreateFlick = (body: object, params: object) => {
       }).required()
     })).optional(),
     newHashTag: Joi.array().items(Joi.object({
-      id: Joi.string().regex(/^[0-9a-fA-F]{24}$/, 'object Id').required(),
       value: Joi.string().required()
     })).optional(),
     commentVisible: Joi.boolean().optional(),
@@ -476,11 +475,14 @@ export const validateBioLinkId = (params: object) => {
   return error
 }
 
-export const validateGetProfileDetail = (params: object) => {
+export const validateGetProfileDetail = (query : object) => {
   const schema = Joi.object({
+    // userId   : Joi.alternatives().try(
+    //   Joi.string().regex(/^[0-9a-fA-F]{24}$/, 'object Id').optional(),
+    // ),
     userId: Joi.string().regex(/^[0-9a-fA-F]{24}$/, 'object Id'),
   })
-  const { error } = schema.validate(params)
+  const { error } = schema.validate(query)
   return error
 }
 
@@ -524,7 +526,6 @@ export const validateUpdateFlick = (body: object, params: object) => {
         y: Joi.number().optional()
       }).required()
     })).optional(),
-    hashTags: Joi.array().items(Joi.string()).optional(),
     commentVisible: Joi.boolean().optional(),
     likeVisible: Joi.boolean().optional(),
   })
@@ -838,9 +839,21 @@ export const validateRefreshToken = (body: object) => {
 }
 
 
+
+
+
+
 export const validateUpdateProfile = (body: object) => {
-  const schema  = Joi.object({
-    username : Joi.string().optional(),
+  const schema = Joi.object({
+    name: Joi.string().optional(),
+    email: Joi.string().email().optional(),
+    gender: Joi.string().optional(),
+    phone: Joi.string()
+      .optional()
+      .pattern(REGEX.PHONE)
+      .messages({
+        'string.pattern.base': 'Phone number must be a valid international format',
+      }),
     description: Joi.array().items(Joi.object({
       mention: Joi.string().regex(/^[0-9a-fA-F]{24}$/, 'object Id').optional(),
       hashTag: Joi.string().regex(/^[0-9a-fA-F]{24}$/, 'object Id').optional(),
@@ -852,27 +865,6 @@ export const validateUpdateProfile = (body: object) => {
         }),
       }),
     })).optional(),
-    photo: Joi.string()
-      .pattern(new RegExp(`^${config.R2.R2_PUBLIC_URL}/.+$`))
-      .message("photo must be a valid URL").optional(),
-  })
-  const {error} = schema.validate(body)
-  return  error
-}
-
-
-
-export const validateUpdatePersonal = (body: object) => {
-  const schema = Joi.object({
-    name: Joi.string().optional(),
-    email: Joi.string().email().optional(),
-    gender: Joi.string().optional(),
-    phone: Joi.string()
-      .optional()
-      .pattern(REGEX.PHONE)
-      .messages({
-        'string.pattern.base': 'Phone number must be a valid international format',
-      }),
     username: Joi.string().optional()
       .min(4)
       .max(30)
