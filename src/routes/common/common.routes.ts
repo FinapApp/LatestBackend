@@ -2,6 +2,7 @@ import express, { Router } from "express";
 import { checkEmailExist } from "../../controllers/Onboarding/checkEmailExist";
 import { checkUserNameExist } from "../../controllers/Onboarding/checkUsernameExist";
 import { getHashTag } from "../../controllers/HashTags/getHashTags";
+import { getMentions } from "../../controllers/Users/getUsers";
 
 
 // REDIRECTION TO THE APP STORE IF NOT THIS MAYBE
@@ -220,4 +221,57 @@ commonRoutes.post("/check-email", checkEmailExist);
  */
 commonRoutes.get("/hashtag" , getHashTag)
 
-
+/**
+ * @swagger
+ * /mention:
+ *   get:
+ *     summary: Retrieve mentions
+ *     tags: 
+ *       - Common
+ *     parameters:
+ *       - in: query
+ *         name: search
+ *         schema:
+ *           type: string
+ *         required: true
+ *         description: Search term for mentions
+ *     responses:
+ *       200:
+ *         description: Successfully retrieved mentions
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 type: string
+ *             example:
+ *               - "mention1"
+ *               - "mention2"
+ *       400:
+ *         description: Bad request - Invalid query parameter
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: false
+ *                 message:
+ *                   type: string
+ *                   example: "Invalid query parameter"
+ *       500:
+ *         description: An error occurred
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: false
+ *                 message:
+ *                   type: string
+ *                   example: "An error occurred"
+ */
+commonRoutes.get("/mention" , getMentions)

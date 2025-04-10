@@ -45,9 +45,7 @@ export const toggleLike = async (req: Request, res: Response) => {
                 await redis.hset(redisKey, "count", flickDoc.likeCount || 0);
             }
         }
-
         let countDelta = 0;
-
         if (existingLike) {
             if (existingLike.value !== value) {
                 existingLike.value = value;

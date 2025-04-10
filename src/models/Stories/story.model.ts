@@ -38,6 +38,7 @@ const StorySchema: Schema = new Schema(
         caption: { type: String },
         viewCount: { type: Number, default: 0 },
         hashTags: { type: [Schema.Types.ObjectId] },
+        mention : { type: [Schema.Types.ObjectId], ref: 'user' },
         suspended: { type: Boolean },
         suspendedReason: { type: String },
         expirationTime: { type: Date, required: true, default: () => new Date(Date.now() + 86400) },

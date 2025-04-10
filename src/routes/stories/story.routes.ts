@@ -99,58 +99,75 @@ storyRoutes.route("/story")
  * @swagger
  * /v1/story/{storyId}:
  *   post:
- *     tags: 
+ *     tags:
  *       - Stories
- *     summary: Create a story with media details
+ *     summary: Create a story
+ *     parameters:
+ *       - in: path
+ *         name: storyId
+ *         required: true
+ *         schema:
+ *           type: string
  *     requestBody:
- *       description: Object containing media details for the story
+ *       description: Object containing story details
  *       required: true
  *       content:
  *         application/json:
  *           schema:
  *             type: object
- *             required:
- *               - mediaType
- *               - mediaURL
- *               - thumbnailURL
  *             properties:
  *               mediaType:
  *                 type: string
  *                 enum: ["photo", "video"]
- *                 example: "video"
+ *                 example: "photo"
  *               caption:
  *                 type: string
- *                 example: "My amazing story!"
+ *                 example: "A beautiful sunset"
  *               song:
  *                 type: string
- *                 description: "MongoDB ObjectId referencing a song"
- *                 pattern: "^[0-9a-fA-F]{24}$"
- *                 example: "60d21b4667d0d8992e610c85"
+ *                 example: "63f1a2b3c4d5e6f7a8b9c0d1"
  *               mediaURL:
  *                 type: string
- *                 description: "URL to the media file"
- *                 example: "https://example.com/media/video.mp4"
+ *                 example: "https://example.com/media.jpg"
  *               thumbnailURL:
  *                 type: string
- *                 description: "URL to the thumbnail image"
- *                 example: "https://example.com/media/thumbnail.jpg"
+ *                 example: "https://example.com/thumbnail.jpg"
  *               songStart:
  *                 type: number
- *                 description: "Start time of the song in seconds"
  *                 example: 10
  *               songEnd:
  *                 type: number
- *                 description: "End time of the song in seconds"
- *                 example: 30
+ *                 example: 20
  *               hashTags:
  *                 type: array
- *                 description: "List of hashtags associated with the story"
  *                 items:
  *                   type: string
- *                 example: ["travel", "sunset"]
+ *                   example: "63f1a2b3c4d5e6f7a8b9c0d2"
+ *               newHashTag:
+ *                 type: array
+ *                 items:
+ *                   type: object
+ *                   properties:
+ *                     id:
+ *                       type: string
+ *                       example: "63f1a2b3c4d5e6f7a8b9c0d3"
+ *                     value:
+ *                       type: string
+ *                       example: "newTag"
+ *               mention:
+ *                 type: array
+ *                 items:
+ *                   type: object
+ *                   properties:
+ *                     id:
+ *                       type: string
+ *                       example: "63f1a2b3c4d5e6f7a8b9c0d3"
+ *                     value:
+ *                       type: string
+ *                       example: "mentionedUser"
  *     responses:
  *       200:
- *         description: Successfully created the story
+ *         description: Story created successfully
  *         content:
  *           application/json:
  *             schema:
@@ -159,9 +176,9 @@ storyRoutes.route("/story")
  *                 success:
  *                   type: boolean
  *                   example: true
- *                 storyId:
+ *                 message:
  *                   type: string
- *                   example: "flickId"
+ *                   example: "Story created successfully"
  *       400:
  *         description: Invalid request
  *         content:
@@ -176,7 +193,7 @@ storyRoutes.route("/story")
  *                   type: string
  *                   example: "Invalid request parameters"
  *       500:
- *         description: Internal server error
+ *         description: An error occurred
  *         content:
  *           application/json:
  *             schema:
@@ -187,7 +204,7 @@ storyRoutes.route("/story")
  *                   example: false
  *                 message:
  *                   type: string
- *                   example: "An unexpected error occurred"
+ *                   example: "An error occurred"
  *   delete:
  *     tags:
  *       - Stories

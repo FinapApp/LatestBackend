@@ -2,11 +2,9 @@ import { Response, Request } from "express";
 import { validatePassword } from "../../../validators/validators";
 import { handleResponse, errors, success } from "../../../utils/responseCodec";
 import Joi from "joi";
-
 import { USER } from "../../../models/User/user.model";
 import { sendErrorToDiscord } from "../../../config/discord/errorDiscord";
-
-
+import bcrypt from "bcrypt";
 export const updatePassword = async (req: Request, res: Response) => {
     try {
         const validationError: Joi.ValidationError | undefined = validatePassword(
@@ -21,15 +19,18 @@ export const updatePassword = async (req: Request, res: Response) => {
             );
         }
         const { password, newPassword } = req.body;
-        const updateProfile = await USER.findByIdAndUpdate(
-            { _id: res.locals.userId, password },
-            { password: newPassword },
-            { new: true }
-        );
-        if (updateProfile) {
-            return handleResponse(res, 200, success.profile_updated);
+        const user = await USER.findById(res.locals.userId , "password")
+        if (!user) {
+            return handleResponse(res, 404, errors.user_not_found);
         }
-        return handleResponse(res, 304, errors.profile_not_updated);
+        const isMatch = await bcrypt.compare(password, user.password);
+        if (!isMatch) {
+            return handleResponse(res, 401, errors.incorrect_password);
+        }
+        const hashedPassword = await bcrypt.hash(newPassword, 10);
+        user.password = hashedPassword;
+        await user.save();
+        return handleResponse(res, 200, success.password_updated);
     } catch (err: any) {
         await sendErrorToDiscord("PUT:password", err);
         return handleResponse(res, 500, errors.catch_error);

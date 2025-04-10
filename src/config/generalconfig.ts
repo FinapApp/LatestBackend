@@ -4,7 +4,8 @@ export const config = {
   MELLISSEARCH: {
     host: process.env.MELLISSEARCH_HOST!,
     masterKey: process.env.MELLISSEARCH_MASTER_KEY!,
-    indexName: process.env.MELLISSEARCH_INDEX_NAME!,
+    // userIndex: process.env.MELLISSEARCH_USER_INDEX!,
+    // flickIndex :process.env.MELLISSEARCH_FLICK_INDEX!,  
   },
   MONGODB: {
     URI: process.env.MONGO_URI!,

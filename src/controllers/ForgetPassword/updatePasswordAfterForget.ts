@@ -27,7 +27,7 @@ export const updatePasswordAfterOTP = async (req: Request, res: Response) => {
         const getOTP = await redis.get(`FORGET-PASSWORD:${identifier}`);
         if (!getOTP) {
             return handleResponse(res, 400, errors.otp_expired);
-        }
+    }
         const filteredOTP = JSON.parse(getOTP as string)
         const updatePassword = await USER.findByIdAndUpdate(filteredOTP._id, { password }, { new: true })
         if (!updatePassword) {

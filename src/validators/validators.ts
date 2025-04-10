@@ -271,6 +271,7 @@ export const validateCreateFlick = (body: object, params: object) => {
       }).required()
     })).optional(),
     newHashTag: Joi.array().items(Joi.object({
+      id : Joi.string().regex(/^[0-9a-fA-F]{24}$/, 'object Id').required(),
       value: Joi.string().required()
     })).optional(),
     commentVisible: Joi.boolean().optional(),
@@ -569,7 +570,12 @@ export const validateCreateStory = (body: string, params: object) => {
     thumbnailURL: Joi.string().required(),
     songStart: Joi.number().optional(),
     songEnd: Joi.number().optional(),
-    hashTags: Joi.array().items(Joi.string()).optional(),
+    hashTags: Joi.array().items(Joi.string().regex(/^[0-9a-fA-F]{24}$/, 'object Id').required()).optional(),
+    newHashTag: Joi.array().items(Joi.object({
+      id : Joi.string().regex(/^[0-9a-fA-F]{24}$/, 'object Id').required(),
+      value: Joi.string().required()
+    })).optional(),
+    mention : Joi.array().items(Joi.string().regex(/^[0-9a-fA-F]{24}$/, 'object Id').required()).optional(),
   })
   const combinedSchema = Joi.object({
     body: bodySchema,

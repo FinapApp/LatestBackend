@@ -13,6 +13,7 @@ import BasicAuth from 'express-basic-auth'
 import { specs, swaggerUi } from "./utils/swagger";
 import mongoose from "mongoose";
 import { SongSchema } from "./models/Song/song.model";
+// import { connectMeilisearch } from "./config/melllisearch/mellisearch.config";
 const redisInitalizer = redis;
 const app: Express = express();
 
@@ -51,6 +52,7 @@ if (cluster.isPrimary) {
     allowedHeaders: ["Content-Type", "Authorization", "x-amz-date", "x-amz-content-sha256", "x-amz-security-token"],
     exposedHeaders: ["ETag"]
   }));
+  // connectMeilisearch()
   // app.use(cors({ credentials: true, origin: true }))
   app.use(helmet({ contentSecurityPolicy: false }))
   app.use("/api/v1", isAuthenticatedUser, protectedRoutes);

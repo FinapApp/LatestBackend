@@ -99,6 +99,9 @@ export const errors = {
   invalid_credentials: {
     message: "Invalid Credentials",
   },
+  incorrect_password: {
+    message : "Incorrect password , please try again",
+  },
   unauthorized: {
     message: "You're unauthorized to perform this action",
   },

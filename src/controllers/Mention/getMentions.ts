@@ -5,24 +5,22 @@ import { sendErrorToDiscord } from "../../config/discord/errorDiscord";
 import { validateGetHashtags } from "../../validators/validators";
 import { HASHTAGS } from "../../models/User/userHashTag.model";
 import mongoose from "mongoose";
+import { USER } from "../../models/User/user.model";
 
-export const getHashTag = async (req: Request, res: Response) => {
+export const getMentions = async (req: Request, res: Response) => {
     try {
         const validationError: Joi.ValidationError | undefined = validateGetHashtags(req.query);
         if (validationError) {
             return handleResponse(res, 400, errors.validation, validationError.details);
         }
         const { search } = req.query
-        const checkHashTags = await HASHTAGS.find({ value: { $regex: search, $options: "i" } }, "value");
-        if (checkHashTags.length > 0) {
-            return handleResponse(res, 200, { hashTags: checkHashTags })
+        const checkUsers = await USER.find({ name: { $regex: search, $options: "i" } }, "username photo name");
+        if (checkUsers.length > 0) {
+            return handleResponse(res, 200, { users: checkUsers })
         }
-        const hashTagId = new mongoose.Types.ObjectId
-        return handleResponse(res, 200, {
-            newHashTagId: hashTagId
-        });
+        return handleResponse(res, 404 , errors.user_not_found);
     } catch (error) {
-        sendErrorToDiscord("GET:get-hash-ids", error);
+        sendErrorToDiscord("GET:get-mentions", error);
         return handleResponse(res, 500, errors.catch_error);
     }
 };

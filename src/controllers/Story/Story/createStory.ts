@@ -4,6 +4,7 @@ import Joi from "joi";
 import { STORY } from "../../../models/Stories/story.model";
 import { validateCreateStory } from "../../../validators/validators";
 import { sendErrorToDiscord } from "../../../config/discord/errorDiscord";
+import { HASHTAGS } from "../../../models/User/userHashTag.model";
 
 export const createStory = async (req: Request, res: Response) => {
     try {
@@ -13,19 +14,26 @@ export const createStory = async (req: Request, res: Response) => {
         }
         const user = res.locals.userId
         const storyId = req.params.storyId;
+        const { newHashTag, ...rest } = req.body;
+        if (newHashTag) {
+            const createHashTags = await HASHTAGS.insertMany(newHashTag.map((tag: { id: string, value: string }) => ({ value: tag.value, _id: tag.id })));
+            if (!createHashTags) {
+                return handleResponse(res, 404, errors.create_hashtags);
+            }
+        }
         const story = await STORY.create({
             _id: storyId,
             user,
-            ...req.body
+            ...rest
         });
         if (!story) {
             return handleResponse(res, 404, errors.story_uploaded);
         }
         return handleResponse(res, 200, success.story_uploaded);
-    } catch (error:any) {
+    } catch (error: any) {
         // console.error(error);
         sendErrorToDiscord("POST:create-story", error)
-        if(error.code === 11000) {
+        if (error.code === 11000) {
             return handleResponse(res, 409, errors.story_already_exists);
         }
         return handleResponse(res, 500, errors.catch_error);
