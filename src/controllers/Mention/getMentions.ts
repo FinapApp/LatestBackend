@@ -12,7 +12,12 @@ export const getMentions = async (req: Request, res: Response) => {
             return handleResponse(res, 400, errors.validation, validationError.details);
         }
         const { search } = req.query
-        const checkUsers = await USER.find({ name: { $regex: search, $options: "i" } }, "username photo name");
+        const checkUsers = await USER.find({ 
+            $or: [
+            { name: { $regex: search, $options: "i" } },
+            { username: { $regex: search, $options: "i" } }
+            ] 
+        }, "username photo name");
         if (checkUsers.length > 0) {
             return handleResponse(res, 200, { users: checkUsers })
         }
