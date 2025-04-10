@@ -3,8 +3,6 @@ import Joi from "joi";
 import { errors, handleResponse } from "../../utils/responseCodec";
 import { sendErrorToDiscord } from "../../config/discord/errorDiscord";
 import { validateGetHashtags } from "../../validators/validators";
-import { HASHTAGS } from "../../models/User/userHashTag.model";
-import mongoose from "mongoose";
 import { USER } from "../../models/User/user.model";
 
 export const getMentions = async (req: Request, res: Response) => {

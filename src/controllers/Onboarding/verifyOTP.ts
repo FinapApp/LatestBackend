@@ -6,7 +6,7 @@ import { redis } from "../../config/redis/redis.config";
 import { config } from "../../config/generalconfig";
 import { USER } from "../../models/User/user.model";
 import { sendErrorToDiscord } from "../../config/discord/errorDiscord";
-import { melliClient } from "../../config/melllisearch/mellisearch.config";
+// import { melliClient } from "../../config/melllisearch/mellisearch.config";
 
 
 interface ForgetOTPRequest {

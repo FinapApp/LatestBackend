@@ -2,7 +2,7 @@ import express, { Router } from "express";
 import { checkEmailExist } from "../../controllers/Onboarding/checkEmailExist";
 import { checkUserNameExist } from "../../controllers/Onboarding/checkUsernameExist";
 import { getHashTag } from "../../controllers/HashTags/getHashTags";
-import { getMentions } from "../../controllers/Users/getUsers";
+import { getMentions } from "../../controllers/Mention/getMentions";
 
 
 // REDIRECTION TO THE APP STORE IF NOT THIS MAYBE
