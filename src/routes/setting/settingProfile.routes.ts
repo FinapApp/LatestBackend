@@ -46,7 +46,7 @@ settingProfile.post("/profile-picture", createPresignedURLProfile);
 
 /**
  * @swagger
- * /v1/personal-detail:
+ * /v1/profile-detail:
  *   put:
  *     summary: Update personal details
  *     tags:
