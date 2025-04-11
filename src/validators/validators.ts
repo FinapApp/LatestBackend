@@ -270,7 +270,7 @@ export const validateCreateFlick = (body: object, params: object) => {
         y: Joi.number().required()
       }).required()
     })).optional(),
-    newHashTag: Joi.array().items(Joi.object({
+    newHashTags: Joi.array().items(Joi.object({
       id : Joi.string().regex(/^[0-9a-fA-F]{24}$/, 'object Id').required(),
       value: Joi.string().required()
     })).optional(),
@@ -571,7 +571,7 @@ export const validateCreateStory = (body: string, params: object) => {
     songStart: Joi.number().optional(),
     songEnd: Joi.number().optional(),
     hashTags: Joi.array().items(Joi.string().regex(/^[0-9a-fA-F]{24}$/, 'object Id').required()).optional(),
-    newHashTag: Joi.array().items(Joi.object({
+    newHashTags: Joi.array().items(Joi.object({
       id : Joi.string().regex(/^[0-9a-fA-F]{24}$/, 'object Id').required(),
       value: Joi.string().required()
     })).optional(),
@@ -886,7 +886,7 @@ export const validateUpdateProfile = (body: object) => {
       }
       return value;
     }),
-    newHashTag: Joi.array().items(Joi.object({
+    newHashTags: Joi.array().items(Joi.object({
       id: Joi.string().regex(/^[0-9a-fA-F]{24}$/, 'object Id').required(),
       value: Joi.string().required()
     })).optional(),

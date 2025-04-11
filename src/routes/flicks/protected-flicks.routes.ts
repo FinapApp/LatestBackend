@@ -242,7 +242,7 @@ flickRoutes.route("/flick")
      *                         y:
      *                           type: number
      *                           example: 0.6
-     *               newHashTag:
+     *               newHashTags:
      *                 type: array
      *                 items:
      *                   type: object
@@ -405,7 +405,7 @@ flickRoutes.route("/flick")
      *                         y:
      *                           type: number
      *                           example: 0.6
-     *               newHashTag:
+     *               newHashTags:
      *                 type: array
      *                 items:
      *                   type: object

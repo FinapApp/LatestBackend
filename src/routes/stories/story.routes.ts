@@ -143,7 +143,7 @@ storyRoutes.route("/story")
  *                 items:
  *                   type: string
  *                   example: "63f1a2b3c4d5e6f7a8b9c0d2"
- *               newHashTag:
+ *               newHashTags:
  *                 type: array
  *                 items:
  *                   type: object

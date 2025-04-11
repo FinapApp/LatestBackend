@@ -14,9 +14,9 @@ export const createStory = async (req: Request, res: Response) => {
         }
         const user = res.locals.userId
         const storyId = req.params.storyId;
-        const { newHashTag, ...rest } = req.body;
-        if (newHashTag) {
-            const createHashTags = await HASHTAGS.insertMany(newHashTag.map((tag: { id: string, value: string }) => ({ value: tag.value, _id: tag.id })));
+        const { newHashTags, ...rest } = req.body;
+        if (newHashTags) {
+            const createHashTags = await HASHTAGS.insertMany(newHashTags.map((tag: { id: string, value: string }) => ({ value: tag.value, _id: tag.id })));
             if (!createHashTags) {
                 return handleResponse(res, 404, errors.create_hashtags);
             }
