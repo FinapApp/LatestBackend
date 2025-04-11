@@ -14,12 +14,12 @@ export const getHashTag = async (req: Request, res: Response) => {
         }
         const { search } = req.query
         const checkHashTags = await HASHTAGS.find({ value: { $regex: search, $options: "i" } }, "value");
-        const hashTagId = new mongoose.Types.ObjectId
+        const newHashTagId = new mongoose.Types.ObjectId
         if (checkHashTags.length > 0) {
-            return handleResponse(res, 200, { hashTagId , hashTags: checkHashTags })
+            return handleResponse(res, 200, { newHashTagId , hashTags: checkHashTags })
         }
         return handleResponse(res, 200, {
-            newHashTagId: hashTagId
+            newHashTagId
         });
     } catch (error) {
         sendErrorToDiscord("GET:get-hash-ids", error);
