@@ -4,6 +4,7 @@ import { handleResponse, errors, success } from "../../../utils/responseCodec";
 import Joi from "joi";
 import { USER } from "../../../models/User/user.model";
 import { sendErrorToDiscord } from "../../../config/discord/errorDiscord";
+import { HASHTAGS } from "../../../models/User/userHashTag.model";
 
 
 export const updateProfileDetails = async (req: Request, res: Response) => {
@@ -19,9 +20,16 @@ export const updateProfileDetails = async (req: Request, res: Response) => {
                 validationError.details
             );
         }
+        const { newHashTag, ...rest } = req.body;
+        if (newHashTag) {
+            const createHashTags = await HASHTAGS.insertMany(newHashTag.map((tag: { id: string, value: string }) => ({ value: tag.value, _id: tag.id })));
+            if (!createHashTags) {
+                return handleResponse(res, 404, errors.create_hashtags);
+            }
+        }
         const updateProfile = await USER.findByIdAndUpdate(
             res.locals.userId,
-            req.body,
+            rest,
             { new: true }
         );
         if (updateProfile) {
@@ -29,10 +37,10 @@ export const updateProfileDetails = async (req: Request, res: Response) => {
         }
         return handleResponse(res, 304, errors.profile_not_updated);
     } catch (err: any) {
-        if(err.code ==  "11000" && err.keyValue.email){
+        if (err.code == "11000" && err.keyValue.email) {
             return handleResponse(res, 500, errors.email_exist);
         }
-        if(err.code ==  "11000" && err.keyValue.username){
+        if (err.code == "11000" && err.keyValue.username) {
             return handleResponse(res, 500, errors.username_exist);
         }
         sendErrorToDiscord("PUT:profile", err);

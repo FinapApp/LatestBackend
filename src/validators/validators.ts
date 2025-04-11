@@ -886,6 +886,10 @@ export const validateUpdateProfile = (body: object) => {
       }
       return value;
     }),
+    newHashTag: Joi.array().items(Joi.object({
+      id: Joi.string().regex(/^[0-9a-fA-F]{24}$/, 'object Id').required(),
+      value: Joi.string().required()
+    })).optional(),
     photo: Joi.string()
       .pattern(new RegExp(`^${config.R2.R2_PUBLIC_URL}/.+$`))
       .message("photo must be a valid URL").optional(),
