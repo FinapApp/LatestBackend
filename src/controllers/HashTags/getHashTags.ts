@@ -14,10 +14,10 @@ export const getHashTag = async (req: Request, res: Response) => {
         }
         const { search } = req.query
         const checkHashTags = await HASHTAGS.find({ value: { $regex: search, $options: "i" } }, "value");
-        if (checkHashTags.length > 0) {
-            return handleResponse(res, 200, { hashTags: checkHashTags })
-        }
         const hashTagId = new mongoose.Types.ObjectId
+        if (checkHashTags.length > 0) {
+            return handleResponse(res, 200, { hashTagId , hashTags: checkHashTags })
+        }
         return handleResponse(res, 200, {
             newHashTagId: hashTagId
         });

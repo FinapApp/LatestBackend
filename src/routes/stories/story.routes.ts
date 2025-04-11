@@ -258,7 +258,7 @@ storyRoutes.route("/story")
  */
 
 storyRoutes.route("/story/:storyId")
-    .post(createStory)
+    .post(createStory)  
     .delete(deleteStory)
 
 
