@@ -55,11 +55,14 @@ export const verifyOTPAfterSignUp = async (req: Request, res: Response) => {
         }
         return handleResponse(res, 400, errors.otp_not_match)
     } catch (err: any) {
-        if (err.code == "11000" && err.keyValue.email) {
-            return handleResponse(res, 500, errors.email_exist);
-        }
-        if (err.code == "11000" && err.keyValue.username) {
-            return handleResponse(res, 500, errors.username_exist);
+        if (err.code === 11000) {
+            const key = err?.keyValue ? Object.keys(err.keyValue)[0] : null;
+            if (key === "email") {
+                return handleResponse(res, 500, errors.email_exist);
+            }
+            if (key === "username") {
+                return handleResponse(res, 500, errors.username_exist);
+            }
         }
         sendErrorToDiscord("POST:verify-otp", err)
         return handleResponse(res, 500, errors.catch_error);

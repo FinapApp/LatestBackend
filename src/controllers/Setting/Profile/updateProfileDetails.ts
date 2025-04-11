@@ -37,11 +37,15 @@ export const updateProfileDetails = async (req: Request, res: Response) => {
         }
         return handleResponse(res, 304, errors.profile_not_updated);
     } catch (err: any) {
-        if (err.code == "11000" && err.keyValue.email) {
-            return handleResponse(res, 500, errors.email_exist);
-        }
-        if (err.code == "11000" && err.keyValue.username) {
-            return handleResponse(res, 500, errors.username_exist);
+        if (err.code === 11000) {
+            const key = err?.keyValue ? Object.keys(err.keyValue)[0] : null;
+
+            if (key === "email") {
+                return handleResponse(res, 500, errors.email_exist);
+            }
+            if (key === "username") {
+                return handleResponse(res, 500, errors.username_exist);
+            }
         }
         sendErrorToDiscord("PUT:profile", err);
         return handleResponse(res, 500, errors.catch_error);
