@@ -26,20 +26,24 @@ gps: {
 }
 interface TaggedUser {
     user: Schema.Types.ObjectId;
-    position: {
+    text: string;
+    position?: {
         x: number;
         y: number;
     }
 }
+
+// cron to update the text for the collabs needed to be the updated one not immediately affecting anything , on 0:00 every day
 const taggedAndCollabSchema = new Schema<TaggedUser>(
     {
         user: { type: Schema.Types.ObjectId, ref: "user" },
+        text: { type: String },
         position: {
             x: { type: Number },
             y: { type: Number },
         }
     },
-    { versionKey: false, _id: true }
+    { versionKey: false, _id: false  }
 );
 
 
@@ -61,7 +65,7 @@ const MediaSchema = new Schema<IMediaSchema>(
         taggedUsers: { type: [taggedAndCollabSchema] },
         url: { type: String }
     },
-    { versionKey: false, _id: true }
+    { versionKey: false, _id: false  }
 );
 
 
@@ -93,7 +97,7 @@ export const FlickSchema = new Schema<IFlicks>(
         commentVisible: { type: Boolean, default: true },
         likeVisible: { type: Boolean, default: true },
     },
-    { timestamps: false, versionKey: false }
+    { timestamps: {createdAt : true , updatedAt : false}, versionKey: false }
 );
 
 FlickSchema.index({ gps: "2dsphere" });

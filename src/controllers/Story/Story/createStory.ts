@@ -32,6 +32,7 @@ export const createStory = async (req: Request, res: Response) => {
         return handleResponse(res, 200, success.story_uploaded);
     } catch (error: any) {
         // console.error(error);
+        console.log(error)
         sendErrorToDiscord("POST:create-story", error)
         if (error.code === 11000) {
             return handleResponse(res, 409, errors.story_already_exists);

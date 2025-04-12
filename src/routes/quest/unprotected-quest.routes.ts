@@ -50,7 +50,7 @@ export const questRoutes: Router = express.Router();
  *                   type: array
  *                   items:
  *                     type: string
- *                     example: 'mediaURL1'
+ *                     example: 'url1'
  *       400:
  *         description: Invalid request
  *         content:

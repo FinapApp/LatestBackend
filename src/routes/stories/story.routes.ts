@@ -48,7 +48,7 @@ export const storyRoutes: Router = express.Router();
  *                   example: 'flickId'
  *                 storySignedURL:
  *                   type: string
- *                   example: 'mediaURL1'
+ *                   example: 'url1'
  *                 thumbnailSignedURL:
  *                   type: string
  *                   example: 'audioUploadURL'
@@ -126,7 +126,7 @@ storyRoutes.route("/story")
  *               song:
  *                 type: string
  *                 example: "63f1a2b3c4d5e6f7a8b9c0d1"
- *               mediaURL:
+ *               url:
  *                 type: string
  *                 example: "https://example.com/media.jpg"
  *               thumbnailURL:

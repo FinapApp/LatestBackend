@@ -56,7 +56,7 @@ export const flickRoutes: Router = express.Router();
  *                   type: array
  *                   items:
  *                     type: string
- *                     example: 'mediaURL1'
+ *                     example: 'url1'
  *                 audioUploadURL:
  *                   type: string
  *                   example: 'audioUploadURL'

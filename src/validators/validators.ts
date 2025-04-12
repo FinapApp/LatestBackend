@@ -237,20 +237,33 @@ export const validateCreateFlick = (body: object, params: object) => {
       alt: Joi.string().required(),
       taggedUsers: Joi.array().items(Joi.object({
         user: Joi.string().regex(/^[0-9a-fA-F]{24}$/, 'object Id').required(),
+        text: Joi.string().required(),
         position: Joi.object({
           x: Joi.number().required(),
           y: Joi.number().required()
         }).required()
       })).optional(),
-      url: Joi.string().required()
+      url: Joi.string()
+        .pattern(new RegExp(`^${config.R2.R2_PUBLIC_URL}/.+$`))
+        .message("url must be a valid URL").required(),
     }).min(1).max(14)).required().messages({
       'array.min': 'At least one media item is required',
       'array.max': 'A maximum of 14 media items are allowed'
     }),
     song: Joi.string().regex(/^[0-9a-fA-F]{24}$/, 'object Id').optional(),
-    songStart: Joi.number().optional(),
-    songEnd: Joi.number().optional(),
-    thumbnailURL: Joi.string().required(),
+    songStart: Joi.number().when('song', {
+      is: Joi.exist(),
+      then: Joi.required(),
+      otherwise: Joi.optional(),
+    }),
+    songEnd: Joi.number().when('song', {
+      is: Joi.exist(),
+      then: Joi.required(),
+      otherwise: Joi.optional(),
+    }),
+    thumbnailURL: Joi.string()
+      .pattern(new RegExp(`^${config.R2.R2_PUBLIC_URL}/.+$`))
+      .message("thumbnailURL must be a valid URL").required(),
     description: Joi.array().items(Joi.object({
       mention: Joi.string().regex(/^[0-9a-fA-F]{24}$/, 'object Id').optional(),
       hashTag: Joi.string().regex(/^[0-9a-fA-F]{24}$/, 'object Id').optional(),
@@ -265,6 +278,7 @@ export const validateCreateFlick = (body: object, params: object) => {
     location: Joi.string().optional(),
     collabs: Joi.array().items(Joi.object({
       user: Joi.string().regex(/^[0-9a-fA-F]{24}$/, 'object Id').required(),
+      text: Joi.string().required(),
       position: Joi.object({
         x: Joi.number().required(),
         y: Joi.number().required()
@@ -497,17 +511,30 @@ export const validateUpdateFlick = (body: object, params: object) => {
       alt: Joi.string().optional(),
       taggedUsers: Joi.array().items(Joi.object({
         user: Joi.string().regex(/^[0-9a-fA-F]{24}$/, 'object Id').required(),
+        text: Joi.string().required(),
         position: Joi.object({
           x: Joi.number().required(),
           y: Joi.number().required()
         }).optional()
       })).optional(),
-      url: Joi.string().optional()
+      url: Joi.string()
+        .pattern(new RegExp(`^${config.R2.R2_PUBLIC_URL}/.+$`))
+        .message("Url must be a valid URL").required(),
     })).optional(),
     song: Joi.string().regex(/^[0-9a-fA-F]{24}$/, 'object Id').optional(),
-    songStart: Joi.number().optional(),
-    songEnd: Joi.number().optional(),
-    thumbnailURL: Joi.string().optional(),
+    songStart: Joi.number().when('song', {
+      is: Joi.exist(),
+      then: Joi.required(),
+      otherwise: Joi.optional(),
+    }),
+    songEnd: Joi.number().when('song', {
+      is: Joi.exist(),
+      then: Joi.required(),
+      otherwise: Joi.optional(),
+    }),
+    thumbnailURL: Joi.string()
+      .pattern(new RegExp(`^${config.R2.R2_PUBLIC_URL}/.+$`))
+      .message("thumbnailURL must be a valid URL").required(),
     description: Joi.array().items(Joi.object({
       mention: Joi.string().regex(/^[0-9a-fA-F]{24}$/, 'object Id').optional(),
       hashTag: Joi.string().regex(/^[0-9a-fA-F]{24}$/, 'object Id').optional(),
@@ -566,16 +593,44 @@ export const validateCreateStory = (body: string, params: object) => {
     mediaType: Joi.string().valid("photo", "video").required(),
     caption: Joi.string().optional(),
     song: Joi.string().regex(/^[0-9a-fA-F]{24}$/, 'object Id').optional(),
-    mediaURL: Joi.string().required(),
-    thumbnailURL: Joi.string().required(),
-    songStart: Joi.number().optional(),
-    songEnd: Joi.number().optional(),
-    hashTags: Joi.array().items(Joi.string().regex(/^[0-9a-fA-F]{24}$/, 'object Id').required()).optional(),
+    url: Joi.string()
+      .pattern(new RegExp(`^${config.R2.R2_PUBLIC_URL}/.+$`))
+      .message("url must be a valid URL").required(),
+    thumbnailURL: Joi.string()
+      .pattern(new RegExp(`^${config.R2.R2_PUBLIC_URL}/.+$`))
+      .message("thumbnailURL must be a valid URL").required(),
+    songStart: Joi.number().when('song', {
+      is: Joi.exist(),
+      then: Joi.required(),
+      otherwise: Joi.optional(),
+    }),
+    songEnd: Joi.number().when('song', {
+      is: Joi.exist(),
+      then: Joi.required(),
+      otherwise: Joi.optional(),
+    }),
+    hashTags: Joi.array().items(Joi.object({
+      hashtag: Joi.string().regex(/^[0-9a-fA-F]{24}$/, 'object Id').required(),
+      position: Joi.object({
+        x: Joi.number().required(),
+        y: Joi.number().required()
+      }).required(),
+      size: Joi.number().required(),
+      text: Joi.string().required()
+    })).optional(),
     newHashTags: Joi.array().items(Joi.object({
       id : Joi.string().regex(/^[0-9a-fA-F]{24}$/, 'object Id').required(),
       value: Joi.string().required()
     })).optional(),
-    mention : Joi.array().items(Joi.string().regex(/^[0-9a-fA-F]{24}$/, 'object Id').required()).optional(),
+    mention: Joi.array().items(Joi.object({
+      mention: Joi.string().regex(/^[0-9a-fA-F]{24}$/, 'object Id').required(),
+      position: Joi.object({
+        x: Joi.number().required(),
+        y: Joi.number().required()
+      }).required(),
+      size: Joi.number().required(),
+      text: Joi.string().required()
+    })).optional(),
   })
   const combinedSchema = Joi.object({
     body: bodySchema,
