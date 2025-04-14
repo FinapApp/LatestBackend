@@ -7,10 +7,6 @@ import { createStory } from "../../controllers/Story/Story/createStory";
 
 export const storyRoutes: Router = express.Router();
 
-
-
-
-
 /**
  * @swagger
  * /v1/story:

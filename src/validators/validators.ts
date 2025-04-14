@@ -508,7 +508,7 @@ export const validateUpdateFlick = (body: object, params: object) => {
       type: Joi.string().valid("photo", "video").optional(),
       duration: Joi.number().optional(),
       audio: Joi.string().regex(/^[0-9a-fA-F]{24}$/, 'object Id').optional(),
-      alt: Joi.string().optional(),
+      alt: Joi.array().items(Joi.string().required()).optional(),
       taggedUsers: Joi.array().items(Joi.object({
         user: Joi.string().regex(/^[0-9a-fA-F]{24}$/, 'object Id').required(),
         text: Joi.string().required(),
