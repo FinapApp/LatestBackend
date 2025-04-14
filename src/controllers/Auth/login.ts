@@ -81,18 +81,6 @@ export const login = async (req: Request, res: Response) => {
     } else {
       // Send OTP to phone
     }
-    // Generate tokens
-    const accessToken = jwt.sign(
-      { userId },
-      config.JWT.ACCESS_TOKEN_SECRET as string,
-      { expiresIn: config.JWT.ACCESS_TOKEN_EXPIRE_IN }
-    );
-
-    const refreshToken = jwt.sign(
-      { userId },
-      config.JWT.REFRESH_TOKEN_SECRET as string
-    );
-
     // Manage user sessions
     const checkSession = await SESSION.find({ userId }, "_id", {
       sort: { createdAt: -1 },
@@ -105,6 +93,11 @@ export const login = async (req: Request, res: Response) => {
     // Fetch IP and device data
     const geoData: any = await fetchIpGeolocation(req.ip);
     const deviceData = useragent.parse(req.headers["user-agent"]);
+    // Generate tokens
+    const refreshToken = jwt.sign(
+      { userId },
+      config.JWT.REFRESH_TOKEN_SECRET as string
+    );
     // Save session
     const sessionData: any = {
       user: userId,
@@ -124,7 +117,12 @@ export const login = async (req: Request, res: Response) => {
       sessionData.location = `${geoData.zipcode} ${geoData.city}, ${geoData.state_prov} ${geoData.country_name} ${geoData.continent_name}`;
     }
     const session = await SESSION.create(sessionData);
-    return handleResponse(res, 200, { userId, accessToken, refreshToken, sessionId: session._id, userPreferences: checkUserPreference });
+    const accessToken = jwt.sign(
+      { userId , sessionId: session._id },
+      config.JWT.ACCESS_TOKEN_SECRET as string,
+      { expiresIn: config.JWT.ACCESS_TOKEN_EXPIRE_IN }
+    );
+    return handleResponse(res, 200, {userId, accessToken, refreshToken, userPreferences: checkUserPreference });
   } catch (err: any) {
     console.log(err);
     sendErrorToDiscord("POST:login", err);

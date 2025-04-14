@@ -6,6 +6,7 @@ import { createQuestApplicant } from "../../controllers/Quest/QuestApplicants/cr
 import { createQuest } from "../../controllers/Quest/Quests/createQuest";
 import { createPresignedURLQuest } from "../../controllers/Quest/Quests/createPresignedURLQuest";
 import { deleteQuestApplication } from "../../controllers/Quest/QuestApplicants/deleteQuestApplication";
+import { updateQuest } from "../../controllers/Quest/Quests/updateQuest";
 
 export const questRoutes: Router = express.Router();
 
@@ -126,20 +127,21 @@ export const questRoutes: Router = express.Router();
 questRoutes.route("/quest")
     .post(createPresignedURLQuest)
     .get(getAllQuests);
-
 /**
  * @swagger
  * /v1/quest/{questId}:
  *   post:
  *     tags:
  *       - Quests
- *     summary: Create a quest
+ *     summary: Create a new quest
  *     parameters:
  *       - in: path
  *         name: questId
  *         required: true
  *         schema:
  *           type: string
+ *           pattern: "^[0-9a-fA-F]{24}$"
+ *         description: The unique ID of the quest
  *     requestBody:
  *       required: true
  *       content:
@@ -147,47 +149,70 @@ questRoutes.route("/quest")
  *           schema:
  *             type: object
  *             properties:
+ *               type:
+ *                 type: string
+ *                 enum: ["Exclusive", "Basic"]
+ *                 example: "Exclusive"
  *               title:
  *                 type: string
- *                 example: "Amazing Quest"
+ *                 example: "Updated Quest Title"
  *               description:
  *                 type: string
- *                 example: "This is a challenging and fun quest."
+ *                 example: "Updated Quest Description"
  *               media:
  *                 type: array
  *                 items:
- *                   type: string
- *                   format: uri
- *                   example: "https://pub-301c1efdf41d428f9ab043c4d4ecbac9.r2.dev/song/67d0b6d2f1d6bb88fde0d962/1733091882152-8653235423482524-1730755306564-8543577671062357-Screenshot%202024-10-03%20at%202.10.40%E2%80%AFAM.png"
- *               thumbnailURL:
- *                 type: string
- *                 format: uri
- *                 example: "https://pub-301c1efdf41d428f9ab043c4d4ecbac9.r2.dev/song/67d0b6d2f1d6bb88fde0d962/1733091882152-8653235423482524-1730755306564-8543577671062357-Screenshot%202024-10-03%20at%202.10.40%E2%80%AFAM.png"
+ *                   type: object
+ *                   properties:
+ *                     type:
+ *                       type: string
+ *                       enum: ["photo", "video"]
+ *                       example: "photo"
+ *                     duration:
+ *                       type: number
+ *                       example: 120
+ *                     audio:
+ *                       type: string
+ *                       pattern: "^[0-9a-fA-F]{24}$"
+ *                       example: "60b8d295f1b2c72f9c8b4567"
+ *                     alt:
+ *                       type: array
+ *                       items:
+ *                         type: string
+ *                         example: "Alternative text"
+ *                     thumbnailURL:
+ *                       type: string
+ *                       format: uri
+ *                       example: "https://example.com/thumbnail.jpg"
+ *                     url:
+ *                       type: string
+ *                       format: uri
+ *                       example: "https://example.com/media.jpg"
  *               mode:
  *                 type: string
  *                 enum: ["GoFlick", "OnFlick"]
  *                 example: "GoFlick"
  *               location:
  *                 type: string
- *                 example: "Central Park, NYC"
+ *                 example: "Updated Location"
  *               coords:
  *                 type: object
  *                 properties:
  *                   lat:
  *                     type: number
- *                     example: 40.785091
+ *                     example: 40.7128
  *                   long:
  *                     type: number
- *                     example: -73.968285
+ *                     example: -74.0060
  *               maxApplicants:
  *                 type: number
- *                 example: 10
+ *                 example: 150
  *               totalAmount:
  *                 type: number
- *                 example: 500
+ *                 example: 6000
  *     responses:
  *       200:
- *         description: Quest created
+ *         description: Quest created successfully
  *         content:
  *           application/json:
  *             schema:
@@ -196,11 +221,11 @@ questRoutes.route("/quest")
  *                 success:
  *                   type: boolean
  *                   example: true
- *                 message:
+ *                 questId:
  *                   type: string
- *                   example: "Quest created successfully"
+ *                   example: "questId"
  *       400:
- *         description: Invalid request
+ *         description: Invalid request parameters
  *         content:
  *           application/json:
  *             schema:
@@ -213,7 +238,7 @@ questRoutes.route("/quest")
  *                   type: string
  *                   example: "Invalid request parameters"
  *       500:
- *         description: An error occurred
+ *         description: An error occurred on the server
  *         content:
  *           application/json:
  *             schema:
@@ -224,7 +249,127 @@ questRoutes.route("/quest")
  *                   example: false
  *                 message:
  *                   type: string
- *                   example: "An error occurred"
+ *                   example: "An internal server error occurred"
+ *   put:
+ *     tags:
+ *       - Quests
+ *     summary: Update an existing quest
+ *     parameters:
+ *       - in: path
+ *         name: questId
+ *         required: true
+ *         schema:
+ *           type: string
+ *           pattern: "^[0-9a-fA-F]{24}$"
+ *         description: The unique ID of the quest
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               type:
+ *                 type: string
+ *                 enum: ["Exclusive", "Basic"]
+ *                 example: "Exclusive"
+ *               title:
+ *                 type: string
+ *                 example: "Updated Quest Title"
+ *               description:
+ *                 type: string
+ *                 example: "Updated Quest Description"
+ *               media:
+ *                 type: array
+ *                 items:
+ *                   type: object
+ *                   properties:
+ *                     type:
+ *                       type: string
+ *                       enum: ["photo", "video"]
+ *                       example: "photo"
+ *                     duration:
+ *                       type: number
+ *                       example: 120
+ *                     audio:
+ *                       type: string
+ *                       pattern: "^[0-9a-fA-F]{24}$"
+ *                       example: "60b8d295f1b2c72f9c8b4567"
+ *                     alt:
+ *                       type: array
+ *                       items:
+ *                         type: string
+ *                         example: "Alternative text"
+ *                     thumbnailURL:
+ *                       type: string
+ *                       format: uri
+ *                       example: "https://example.com/thumbnail.jpg"
+ *                     url:
+ *                       type: string
+ *                       format: uri
+ *                       example: "https://example.com/media.jpg"
+ *               mode:
+ *                 type: string
+ *                 enum: ["GoFlick", "OnFlick"]
+ *                 example: "GoFlick"
+ *               location:
+ *                 type: string
+ *                 example: "Updated Location"
+ *               coords:
+ *                 type: object
+ *                 properties:
+ *                   lat:
+ *                     type: number
+ *                     example: 40.7128
+ *                   long:
+ *                     type: number
+ *                     example: -74.0060
+ *               maxApplicants:
+ *                 type: number
+ *                 example: 150
+ *               totalAmount:
+ *                 type: number
+ *                 example: 6000
+ *     responses:
+ *       200:
+ *         description: Quest updated successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 questId:
+ *                   type: string
+ *                   example: "questId"
+ *       400:
+ *         description: Invalid request parameters
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: false
+ *                 message:
+ *                   type: string
+ *                   example: "Invalid request parameters"
+ *       500:
+ *         description: An error occurred on the server
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: false
+ *                 message:
+ *                   type: string
+ *                   example: "An internal server error occurred"
  *   delete:
  *     tags:
  *       - Quests
@@ -235,9 +380,11 @@ questRoutes.route("/quest")
  *         required: true
  *         schema:
  *           type: string
+ *           pattern: "^[0-9a-fA-F]{24}$"
+ *         description: The unique ID of the quest
  *     responses:
  *       200:
- *         description: Quest deleted
+ *         description: Quest deleted successfully
  *         content:
  *           application/json:
  *             schema:
@@ -250,7 +397,7 @@ questRoutes.route("/quest")
  *                   type: string
  *                   example: "Quest deleted successfully"
  *       400:
- *         description: Invalid request
+ *         description: Invalid request parameters
  *         content:
  *           application/json:
  *             schema:
@@ -263,7 +410,7 @@ questRoutes.route("/quest")
  *                   type: string
  *                   example: "Invalid request parameters"
  *       500:
- *         description: An error occurred
+ *         description: An error occurred on the server
  *         content:
  *           application/json:
  *             schema:
@@ -274,12 +421,13 @@ questRoutes.route("/quest")
  *                   example: false
  *                 message:
  *                   type: string
- *                   example: "An error occurred"
+ *                   example: "An internal server error occurred"
  */
 
 questRoutes.route("/quest/:questId")
     .post(createQuest)
-    .delete(deleteQuest);
+    .delete(deleteQuest)
+    .put(updateQuest)
 
 /**
  * @swagger

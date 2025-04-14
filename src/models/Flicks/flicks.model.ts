@@ -62,7 +62,7 @@ const MediaSchema = new Schema<IMediaSchema>(
         type: { type: String, enum: ['video', 'photo'] },
         duration: { type: Number },
         audio: { type: Schema.Types.ObjectId, ref: "audio" },
-        alt: { type: [String] }, // this this is from AI
+        alt: { type: [String] }, // this is referring to the users search for the best picks for their purpose. gets the user while searching into their metaData for the files 
         taggedUsers: { type: [taggedAndCollabSchema] },
         url: { type: String }
     },

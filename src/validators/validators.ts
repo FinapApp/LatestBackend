@@ -234,7 +234,7 @@ export const validateCreateFlick = (body: object, params: object) => {
       type: Joi.string().valid("photo", "video").required(),
       duration: Joi.number().optional(),
       audio: Joi.string().regex(/^[0-9a-fA-F]{24}$/, 'object Id').optional(),
-      alt: Joi.string().required(),
+      alt: Joi.array().items(Joi.string().required()).required(),
       taggedUsers: Joi.array().items(Joi.object({
         user: Joi.string().regex(/^[0-9a-fA-F]{24}$/, 'object Id').required(),
         text: Joi.string().required(),
@@ -673,17 +673,25 @@ export const validatePresignedQuest = (body: object) => {
 
 export const validateCreateQuest = (body: object, params: object) => {
   const bodySchema = Joi.object({
+    type : Joi.string().valid('Exclusive' ,'Basic').required(),
     title: Joi.string().required(),
     description: Joi.string().required(),
-    media: Joi.array()
-      .items(Joi.string()
+    media: Joi.array().items(Joi.object({
+      type: Joi.string().valid("photo", "video").required(),
+      duration: Joi.number().optional(),
+      audio: Joi.string().regex(/^[0-9a-fA-F]{24}$/, 'object Id').optional(),
+      alt: Joi.array().items(Joi.string().required()).required(),
+      thumbnailURL: Joi.string()
         .pattern(new RegExp(`^${config.R2.R2_PUBLIC_URL}/.+$`))
-        .message("Each media item must be a valid URL"))
-      .required(),
-    thumbnailURL: Joi.string()
-      .pattern(new RegExp(`^${config.R2.R2_PUBLIC_URL}/.+$`))
-      .message("thumbnailURL must be a valid URL")
-      .required(),
+        .message("thumbnailURL must be a valid URL")
+        .required(),
+      url: Joi.string()
+        .pattern(new RegExp(`^${config.R2.R2_PUBLIC_URL}/.+$`))
+        .message("url must be a valid URL").required(),
+    }).min(1).max(14)).required().messages({
+      'array.min': 'At least one media item is required',
+      'array.max': 'A maximum of 14 media items are allowed'
+    }),
     mode: Joi.string().valid("GoFlick", "OnFlick").required(),
     location: Joi.string().required(),
     coords: Joi.object({
@@ -693,6 +701,47 @@ export const validateCreateQuest = (body: object, params: object) => {
     maxApplicants: Joi.number().required(),
     totalAmount: Joi.number().required(),
   });
+  const paramsSchema = Joi.object({
+    questId: Joi.string().regex(/^[0-9a-fA-F]{24}$/, 'object Id').required()
+  })
+  const combinedSchema = Joi.object({
+    body: bodySchema,
+    params: paramsSchema
+  })
+  const { error } = combinedSchema.validate({ body, params })
+  return error
+}
+
+export const validateUpdateQuest =  (body: object , params: object) => {
+  const bodySchema = Joi.object({
+    type: Joi.string().valid('Exclusive', 'Basic').optional(),
+    title: Joi.string().optional(),
+    description: Joi.string().optional(),
+    media: Joi.array().items(Joi.object({
+      type: Joi.string().valid("photo", "video").optional(),
+      duration: Joi.number().optional(),
+      audio: Joi.string().regex(/^[0-9a-fA-F]{24}$/, 'object Id').optional(),
+      alt: Joi.array().items(Joi.string().optional()).optional(),
+      thumbnailURL: Joi.string()
+      .pattern(new RegExp(`^${config.R2.R2_PUBLIC_URL}/.+$`))
+      .message("thumbnailURL must be a valid URL")
+      .optional(),
+      url: Joi.string()
+      .pattern(new RegExp(`^${config.R2.R2_PUBLIC_URL}/.+$`))
+      .message("url must be a valid URL").optional(),
+    }).min(1).max(14)).optional().messages({
+      'array.min': 'At least one media item is required',
+      'array.max': 'A maximum of 14 media items are allowed'
+    }),
+    mode: Joi.string().valid("GoFlick", "OnFlick").optional(),
+    location: Joi.string().optional(),
+    coords: Joi.object({
+      lat: Joi.number().optional(),
+      long: Joi.number().optional()
+    }).optional(),
+    maxApplicants: Joi.number().optional(),
+    totalAmount: Joi.number().optional(),
+  })
   const paramsSchema = Joi.object({
     questId: Joi.string().regex(/^[0-9a-fA-F]{24}$/, 'object Id').required()
   })

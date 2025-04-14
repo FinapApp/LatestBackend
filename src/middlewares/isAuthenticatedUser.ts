@@ -26,6 +26,7 @@ export const isAuthenticatedUser: any = async (
             }
             if (data) {
                 res.locals["userId"] = data.userId;
+                res.locals["sessionId"] = data.sessionId;
                 next()
             }
         })

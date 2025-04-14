@@ -32,7 +32,7 @@ const MediaSchema = new Schema<IMediaSchema>(
         duration: { type: Number },
         audio: { type: Schema.Types.ObjectId, ref: "audio" },
         thumbnailURL : { type: String },
-        alt: { type: [String] }, 
+        alt: { type: [String] }, //this is referring to the descripton search
         url: { type: String }
     },
     { versionKey: false, _id: false  }
@@ -55,7 +55,6 @@ export const QuestSchema = new Schema<IQuests>(
                 index: "2dsphere"
             }
         },
-        thumbnailURL: { type: String },
         totalAmount: { type: Number },
         suspended: { type: Boolean, default: false },
         suspendedReason: { type: String },

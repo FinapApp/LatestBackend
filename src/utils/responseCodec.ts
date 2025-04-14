@@ -218,6 +218,9 @@ export const errors = {
   quest_already_exists: {
     message: "Quest already exists",
   },
+  update_quest: {
+    message: "Unable to update quest",
+  },
   quest_not_found: {
     message: "Quest not found",
   },
@@ -431,6 +434,9 @@ export const success = {
   // Quest-related success
   quest_created: {
     message: "Quest created successfully",
+  },
+  update_quest: {
+    message  : "Quest updated successfully",  
   },
   quest_deleted: {
     message: "Quest deleted successfully",
