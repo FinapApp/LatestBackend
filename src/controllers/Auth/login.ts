@@ -105,19 +105,28 @@ export const login = async (req: Request, res: Response) => {
     // Fetch IP and device data
     const geoData: any = await fetchIpGeolocation(req.ip);
     const deviceData = useragent.parse(req.headers["user-agent"]);
-
     // Save session
-    await SESSION.create({
+    const sessionData: any = {
       user: userId,
       refreshToken,
       fcmToken,
       ip: req.ip,
       device: deviceData.toAgent(),
       os: deviceData.os.toString(),
-      location: geoData ? `${geoData.city}, ${geoData.country_name}` : undefined,
-    });
-    return handleResponse(res, 200, { userId ,  accessToken, refreshToken, userPreferences: checkUserPreference });
+    };
+
+    // Conditionally add geo-related fields
+    if (geoData) {
+      sessionData.gps = {
+        type: "Point",
+        coordinates: [geoData.longitude, geoData.latitude],
+      };
+      sessionData.location = `${geoData.zipcode} ${geoData.city}, ${geoData.state_prov} ${geoData.country_name} ${geoData.continent_name}`;
+    }
+    const session = await SESSION.create(sessionData);
+    return handleResponse(res, 200, { userId, accessToken, refreshToken, sessionId: session._id, userPreferences: checkUserPreference });
   } catch (err: any) {
+    console.log(err);
     sendErrorToDiscord("POST:login", err);
     return handleResponse(res, 500, errors.catch_error);
   }

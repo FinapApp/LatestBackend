@@ -122,27 +122,45 @@ storyRoutes.route("/story")
  *                 example: "photo"
  *               caption:
  *                 type: string
- *                 example: "A beautiful sunset"
+ *                 example: "Enjoying the beach vibes 🌊☀️"
  *               song:
  *                 type: string
- *                 example: "63f1a2b3c4d5e6f7a8b9c0d1"
+ *                 example: "662b865ef9b7cf6e4e3a7ab9"
  *               url:
  *                 type: string
- *                 example: "https://example.com/media.jpg"
+ *                 example: "https://pub-301c1efdf41d428f9ab043c4d4ecbac9.r2.dev/url"
  *               thumbnailURL:
  *                 type: string
- *                 example: "https://example.com/thumbnail.jpg"
+ *                 example: "https://pub-301c1efdf41d428f9ab043c4d4ecbac9.r2.dev/thumbnail"
  *               songStart:
  *                 type: number
- *                 example: 10
+ *                 example: 10.5
  *               songEnd:
  *                 type: number
- *                 example: 20
+ *                 example: 20.0
  *               hashTags:
  *                 type: array
  *                 items:
- *                   type: string
- *                   example: "63f1a2b3c4d5e6f7a8b9c0d2"
+ *                   type: object
+ *                   properties:
+ *                     hashtag:
+ *                       type: string
+ *                       example: "662b865ef9b7cf6e4e3a7ab1"
+ *                     position:
+ *                       type: object
+ *                       properties:
+ *                         x:
+ *                           type: number
+ *                           example: 0.25
+ *                         y:
+ *                           type: number
+ *                           example: 0.60
+ *                     size:
+ *                       type: number
+ *                       example: 1.1
+ *                     text:
+ *                       type: string
+ *                       example: "#beachDay"
  *               newHashTags:
  *                 type: array
  *                 items:
@@ -150,21 +168,33 @@ storyRoutes.route("/story")
  *                   properties:
  *                     id:
  *                       type: string
- *                       example: "63f1a2b3c4d5e6f7a8b9c0d3"
+ *                       example: "662b865ef9b7cf6e4e3a7ab4"
  *                     value:
  *                       type: string
- *                       example: "newTag"
+ *                       example: "#relaxing"
  *               mention:
  *                 type: array
  *                 items:
  *                   type: object
  *                   properties:
- *                     id:
+ *                     mention:
  *                       type: string
- *                       example: "63f1a2b3c4d5e6f7a8b9c0d3"
- *                     value:
+ *                       example: "662b865ef9b7cf6e4e3a7ab4"
+ *                     position:
+ *                       type: object
+ *                       properties:
+ *                         x:
+ *                           type: number
+ *                           example: 0.70
+ *                         y:
+ *                           type: number
+ *                           example: 0.45
+ *                     size:
+ *                       type: number
+ *                       example: 1.0
+ *                     text:
  *                       type: string
- *                       example: "mentionedUser"
+ *                       example: "@john"
  *     responses:
  *       200:
  *         description: Story created successfully
@@ -208,7 +238,7 @@ storyRoutes.route("/story")
  *   delete:
  *     tags:
  *       - Stories
- *     summary: Delete a quest
+ *     summary: Delete a story
  *     parameters:
  *       - in: path
  *         name: storyId
@@ -217,7 +247,7 @@ storyRoutes.route("/story")
  *           type: string
  *     responses:
  *       200:
- *         description: Quest Applicant deleted
+ *         description: Story deleted successfully
  *         content:
  *           application/json:
  *             schema:

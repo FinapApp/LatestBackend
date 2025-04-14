@@ -1,4 +1,5 @@
 import mongoose, { Document, Schema } from "mongoose";
+import { IMediaSchema } from "../Flicks/flicks.model";
 
 interface IGPSLocation {
     type: string;
@@ -9,7 +10,7 @@ interface IQuests extends Document {
     user: Schema.Types.ObjectId;
     title: string;
     description: string;
-    media: string[]
+    media: IMediaSchema[];
     mode: 'Goflick' | 'OnFlick';
     location: string;
     thumbnailURL: string;
@@ -25,13 +26,26 @@ interface IQuests extends Document {
     status : 'pending' | 'completed' | 'paused';
 }
 
+const MediaSchema = new Schema<IMediaSchema>(
+    {
+        type: { type: String, enum: ['video', 'photo'] },
+        duration: { type: Number },
+        audio: { type: Schema.Types.ObjectId, ref: "audio" },
+        thumbnailURL : { type: String },
+        alt: { type: [String] }, 
+        url: { type: String }
+    },
+    { versionKey: false, _id: false  }
+);
+
+
 export const QuestSchema = new Schema<IQuests>(
     {
         type: { type: String, enum: ['Basic', 'Exclusive'] },
         user: { type: Schema.Types.ObjectId, ref: "user" },
         title: { type: String },
         description: { type: String },
-        media: { type: [String] },
+        media: { type: [MediaSchema] },
         mode: { type: String, enum: ['GoFlick', "OnFlick"] },
         location: { type: String },
         gps: {

@@ -16,7 +16,7 @@ interface IUserSchema extends Document {
     followingCount: number; 
     followerCount: number; 
     balance: number;
-    private: boolean;
+    private: boolean; // not yet formed
     deletedAt: Date;
     gender: string;
     photo: string;
@@ -44,7 +44,7 @@ export const UserSchema = new Schema<IUserSchema>(
         deletedAt: { type: Date },
         gender: { type: String },
         photo: { type: String },
-        private: { type: Boolean, default: false },
+        private: { type: Boolean, default: false }, // not to be used right now.
         warnedCount: { type: Number, default: 0 },
         flickCount: { type: Number, default: 0 },
         followingCount: { type: Number, default: 0 },

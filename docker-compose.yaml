@@ -53,6 +53,7 @@ services:
       - NODE_ENVIRONMENT=production
       - PROJECT_ENVIRONMENT=production
       - PORT=4003
+      - IP_GEOLOCATOR_KEY=6ec8f9c4b6634315b1c60020e48555a3
 
 volumes:
   mongodb_data:

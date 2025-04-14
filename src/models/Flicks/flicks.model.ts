@@ -47,11 +47,12 @@ const taggedAndCollabSchema = new Schema<TaggedUser>(
 );
 
 
-interface IMediaSchema extends Document {
+export interface IMediaSchema extends Document {
     type: 'video' | 'photo';
     duration?: number;
     audio?: Schema.Types.ObjectId;
-    alt: string;
+    alt: string[];
+    thumbnailURL? :  string;
     taggedUsers?: TaggedUser[];
     url: string;
 }
@@ -61,7 +62,7 @@ const MediaSchema = new Schema<IMediaSchema>(
         type: { type: String, enum: ['video', 'photo'] },
         duration: { type: Number },
         audio: { type: Schema.Types.ObjectId, ref: "audio" },
-        alt: { type: String }, 
+        alt: { type: [String] }, // this this is from AI
         taggedUsers: { type: [taggedAndCollabSchema] },
         url: { type: String }
     },

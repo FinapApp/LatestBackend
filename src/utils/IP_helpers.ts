@@ -4,7 +4,7 @@ export async function fetchIpGeolocation(ip: string | undefined) {
         const params = new URLSearchParams({ apiKey, ip: ip || '' })
         const res = await fetch(`https://api.ipgeolocation.io/ipgeo?${params}`)
         if (!res.ok) {
-            return
+            return 
         }
         const json = await res.json()
         return json

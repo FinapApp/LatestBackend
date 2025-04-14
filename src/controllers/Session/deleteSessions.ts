@@ -10,7 +10,7 @@ export const deleteSessions = async (req: Request, res: Response) => {
         if (validationError) {
             return handleResponse(res, 400, errors.validation, validationError.details);
         }
-        const deleteSessions = await SESSION.deleteMany({ userId: req.params.userId })
+        const deleteSessions = await SESSION.deleteMany({ userId: req.params.userId, $ne: { _id: req.params.sessionId } });
         if (deleteSessions) {
             return handleResponse(res, 200, success.session_deleted)
         }

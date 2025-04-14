@@ -27,8 +27,7 @@ export const updatePassword = async (req: Request, res: Response) => {
         if (!isMatch) {
             return handleResponse(res, 401, errors.incorrect_password);
         }
-        const hashedPassword = await bcrypt.hash(newPassword, 10);
-        user.password = hashedPassword;
+        user.password = newPassword;
         await user.save();
         return handleResponse(res, 200, success.password_updated);
     } catch (err: any) {
