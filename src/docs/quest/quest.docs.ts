@@ -491,6 +491,78 @@
 /**
  * @swagger
  * /v1/quest-applicant/{questApplicantId}:
+ *   patch:
+ *     tags:
+ *       - [Quests Applicants]
+ *     summary: Change status of a quest applicant
+ *     parameters:
+ *       - in: path
+ *         name: questApplicantId
+ *         required: true
+ *         schema:
+ *           type: string
+ *           pattern: "^[0-9a-fA-F]{24}$"
+ *         description: The ID of the quest applicant
+ *       - in: query
+ *         name: status
+ *         required: true
+ *         schema:
+ *           type: string
+ *           enum: [approved, rejected]
+ *         description: The status to update the applicant to
+ *     responses:
+ *       200:
+ *         description: Status updated successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 message:
+ *                   type: string
+ *                   example: "Status updated successfully"
+ *       400:
+ *         description: Validation error or invalid status
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: false
+ *                 message:
+ *                   type: string
+ *                   example: "Invalid status or parameters"
+ *       404:
+ *         description: Quest applicant or quest not found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: false
+ *                 message:
+ *                   type: string
+ *                   example: "Quest applicant not found"
+ *       500:
+ *         description: Server error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: false
+ *                 message:
+ *                   type: string
+ *                   example: "An internal server error occurred"
  *   post:
  *     tags:
  *       - [Quests Applicants]
@@ -648,6 +720,7 @@
  *                   type: string
  *                   example: "An error occurred"
  */
+
 
 
 /**

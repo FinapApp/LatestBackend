@@ -846,6 +846,22 @@ export const validateGetAllComments = (query: object) => {
 }
 
 
+export  const validateQuestApplicantStatus = (query: object, params: object) => {
+  const querySchema = Joi.object({
+    status: Joi.string().valid("approved", "rejected").required(),
+  })
+  const paramsSchema = Joi.object({
+    questApplicantId: Joi.string().regex(/^[0-9a-fA-F]{24}$/, 'object Id').required()
+  })
+  const combinedSchema = Joi.object({
+    query: querySchema,
+    params: paramsSchema
+  })
+  const { error } = combinedSchema.validate({ query, params })
+  return error
+}
+
+
 
 export const validateQuestApplicantId = (params: object) => {
   const schema = Joi.object({
