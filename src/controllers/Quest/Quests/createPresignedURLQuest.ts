@@ -22,9 +22,10 @@ export const createPresignedURLQuest = async (req: Request, res: Response) => {
                 fileName: string;
                 fileType: string;
             }) => generateSignedURL(`user/${userId}/quest/${questId}/${metadata.fileName}`, metadata.fileType)));
-
-            const thumbnailSignedURL = await generateSignedURL(`user/${userId}/quest/${questId}/thumbnail`);
-
+            const thumbnailSignedURL = await  Promise.all(media.map((metadata: {
+                fileName: string;
+                fileType: string;
+            }) => generateSignedURL(`user/${userId}/quest/${questId}/thumbnail/${metadata.fileName}`, metadata.fileType)));
             if (mediaSignedURL && thumbnailSignedURL) {
                 return handleResponse(res, 200, {
                     questId,
