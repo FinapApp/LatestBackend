@@ -993,7 +993,7 @@
 
 /**
  * @swagger
- * /quest-applicant/{questId}:
+ * /v1/quest-applicant/{questId}:
  *   get:
  *     tags:
  *       - [Quests Applicants]
