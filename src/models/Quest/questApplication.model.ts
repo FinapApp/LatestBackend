@@ -10,6 +10,7 @@ export interface IQuestApplication extends Document {
     status: 'pending' | 'approved' | 'rejected';
     partialAllowance: boolean;
     suspendedReason: string;
+    txnId: string;
     suspended: boolean;
 }
 
@@ -46,6 +47,7 @@ const QuestApplicationSchema: Schema<IQuestApplication> = new Schema(
         status: { type: String, enum: ['pending', 'approved', 'rejected'], default: 'pending' },
         partialAllowance: { type: Boolean, default: false },
         suspended: { type: Boolean, default: false },
+        txnId : { type: String },
         suspendedReason: { type: String }
     },
     { timestamps: true, versionKey: false }

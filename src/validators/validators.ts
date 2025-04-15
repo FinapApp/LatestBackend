@@ -855,33 +855,6 @@ export const validateQuestApplicantId = (params: object) => {
   return error
 }
 
-export const validateCreateQuestApplicant = (body: object, params: object) => {
-  const bodySchema = Joi.object({
-    title: Joi.string().required(),
-    description: Joi.array().items(Joi.object({
-      mention: Joi.string().regex(/^[0-9a-fA-F]{24}$/, 'object Id').optional(),
-      hashTag: Joi.string().regex(/^[0-9a-fA-F]{24}$/, 'object Id').optional(),
-      text: Joi.string().when(Joi.object({ mention: Joi.exist() }).unknown(), {
-        then: Joi.required(),
-        otherwise: Joi.when(Joi.object({ hashTag: Joi.exist() }).unknown(), {
-          then: Joi.required(),
-          otherwise: Joi.optional(),
-        }),
-      }),
-    })).required(),
-    media: Joi.array().items(Joi.string()).optional(),
-  })
-  const paramsSchema = Joi.object({
-    questId: Joi.string().regex(/^[0-9a-fA-F]{24}$/, 'object Id').required()
-  })
-  const combinedSchema = Joi.object({
-    body: bodySchema,
-    params: paramsSchema
-  })
-  const { error } = combinedSchema.validate({ body, params })
-  return error
-}
-
 export const validateLikeToggle = (body: object, query: object) => {
   const bodySchema = Joi.object({
     value: Joi.boolean().required()

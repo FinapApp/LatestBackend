@@ -13,8 +13,25 @@ export const changeStatusForQuestApplicant = async (req: Request, res: Response)
             return handleResponse(res, 400, errors.validation, validationError.details);
         }
         const { questApplicantId } = req.params;
+        // Step 1: Find the applicant
+        const applicant = await QUEST_APPLICATION.findById(questApplicantId, { quest: 1 });
+        if (!applicant) {
+            return handleResponse(res, 404, errors.quest_applicant_not_found);
+        }
+
+        // Step 2: Find the quest
+        const quest = await QUESTS.findById(applicant.quest , "totalApproved leftApproved maxApplicants" );
+        if (!quest) {
+            return handleResponse(res, 404, errors.quest_not_found);
+        }
+        const minApprovalNeeded = Math.ceil(quest.maxApplicants * 0.3);
+        const isEligible = quest.totalApproved >= minApprovalNeeded && quest.leftApproved > 0;
+        if (!isEligible) {
+            return handleResponse(res, 403, errors.quest_applicant_approval);
+        }
         const updateQuestApplicant = await QUEST_APPLICATION.findByIdAndUpdate(questApplicantId, { status : 'approved' }, { new: true, projection: { quest: 1 , _id: 0  } });
         if (updateQuestApplicant) {
+            // should be in the kafka
             await QUESTS.findByIdAndUpdate(updateQuestApplicant.quest, { $inc: { totalApproved: 1, leftApproved: -1 } });
             return handleResponse(res, 200, success.status_changed_flicked);
         }

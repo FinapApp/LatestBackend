@@ -10,7 +10,6 @@ export interface INotificationSchema extends Document {
   follower?: Schema.Types.ObjectId;
   song?: Schema.Types.ObjectId;
   messaging?: Schema.Types.ObjectId;
-  dataString?: string;
   title: string;
   message: string;
   category:

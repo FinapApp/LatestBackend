@@ -59,12 +59,17 @@ export const QuestSchema = new Schema<IQuests>(
         suspended: { type: Boolean, default: false },
         suspendedReason: { type: String },
         maxApplicants: { type: Number },
-        totalApproved : { type: Number }, // kafka would be used to update this
-        totalRejected : { type: Number }, // kafka would be used to update this
-        leftApproved :  { type: Number }, 
+        totalApproved : { type: Number,default : 0 }, // kafka would be used to update this
+        totalRejected : { type: Number , default : 0 }, // kafka would be used to update this
+        leftApproved :  { 
+            type: Number, 
+            default: function() { 
+                return this.maxApplicants || 0; 
+            } 
+        }, // kafka would be used to update this
         status : { type: String, enum: ['pending', 'completed' , 'paused'], default: 'pending' }
     },
-    { timestamps: false, versionKey: false }
+    { timestamps: {createdAt : true , updatedAt : false }, versionKey: false }
 );
 
 QuestSchema.index({ gps: "2dsphere" });

@@ -1,396 +1,202 @@
 
 /**
  * @swagger
- * /v1/notification-setting:
- *   get:
- *     tags: 
- *       - Notification
- *     summary: Get user notification settings
- *     responses:
- *       200:
- *         description: Successfully retrieved notification settings
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 success:
- *                   type: boolean
- *                   example: true
- *                 data:
- *                   type: object
- *                   properties:
- *                     pauseAll:
- *                       type: boolean
- *                       example: false
- *                     likes:
- *                       type: string
- *                       example: "everyone"
- *                     comments:
- *                       type: string
- *                       example: "following"
- *                     tagged:
- *                       type: string
- *                       example: "none"
- *                     addToPost:
- *                       type: string
- *                       example: "everyone"
- *                     storyReaction:
- *                       type: string
- *                       example: "following"
- *                     storyComment:
- *                       type: string
- *                       example: "none"
- *                     storyTagged:
- *                       type: string
- *                       example: "everyone"
- *                     message:
- *                       type: string
- *                       example: "following"
- *                     messageRequest:
- *                       type: string
- *                       example: "none"
- *                     messageRequestGroup:
- *                       type: string
- *                       example: "everyone"
- *                     newFollower:
- *                       type: string
- *                       example: "following"
- *                     newFollowing:
- *                       type: string
- *                       example: "none"
- *                     acceptedFollower:
- *                       type: string
- *                       example: "everyone"
- *                     suggestedFollower:
- *                       type: string
- *                       example: "following"
- *                     profileMention:
- *                       type: string
- *                       example: "none"
- *                     audioCall:
- *                       type: string
- *                       example: "everyone"
- *                     videoCall:
- *                       type: string
- *                       example: "following"
- *                     liveVideoStart:
- *                       type: string
- *                       example: "none"
- *                     liveVideoEnd:
- *                       type: string
- *                       example: "everyone"
- *                     recentlyUploaded:
- *                       type: string
- *                       example: "following"
- *                     repost:
- *                       type: string
- *                       example: "none"
- *                     audio:
- *                       type: string
- *                       example: "everyone"
- *                     mostWatched:
- *                       type: string
- *                       example: "following"
- *                     createdAQuest:
- *                       type: array
- *                       items:
- *                         type: string
- *                       example: ["all", "everyone"]
- *                     sponsoredQuest:
- *                       type: array
- *                       items:
- *                         type: string
- *                       example: ["goflick", "onflick"]
- *                     appliedForQuest:
- *                       type: string
- *                       example: "none"
- *                     likedQuest:
- *                       type: string
- *                       example: "everyone"
- *                     questUpdates:
- *                       type: string
- *                       example: "following"
- *                     creditedTxn:
- *                       type: string
- *                       example: "none"
- *                     debitedTxn:
- *                       type: string
- *                       example: "everyone"
- *                     flickstarTxn:
- *                       type: string
- *                       example: "following"
- *                     support:
- *                       type: string
- *                       example: "none"
- *                     trending:
- *                       type: string
- *                       example: "everyone"
- *                     feedback:
- *                       type: string
- *                       example: "following"
- *                     achievement:
- *                       type: string
- *                       example: "none"
- *                     newFeatures:
- *                       type: string
- *                       example: "everyone"
- *                     followingActivity:
- *                       type: string
- *                       example: "following"
- *                     engagement:
- *                       type: string
- *                       example: "none"
- *                     socialCause:
- *                       type: string
- *                       example: "everyone"
- *                     birthDay:
- *                       type: string
- *                       example: "following"
- *                     shareBirthday:
- *                       type: string
- *                       example: "none"
- *                     loginAlert:
- *                       type: string
- *                       example: "everyone"
- *       500:
- *         description: An error occurred
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 success:
- *                   type: boolean
- *                   example: false
- *                 message:
- *                   type: string
- *                   example: An error occurred
- *   put:
- *     tags: 
- *       - Notification
- *     summary: Update user notification settings
+ * /v1/profile-picture:
+ *   post:
+ *     summary: Generate a presigned URL for uploading a profile picture
+ *     tags:
+ *       - Profile Setting
  *     requestBody:
- *       description: Object containing notification settings to update
  *       required: true
  *       content:
  *         application/json:
  *           schema:
  *             type: object
  *             properties:
- *               pauseAll:
- *                 type: boolean
- *                 example: false
- *               likes:
+ *               fileType:
  *                 type: string
- *                 enum: ["everyone", "following", "none"]
- *                 example: "everyone"
- *               comments:
- *                 type: string
- *                 enum: ["everyone", "following", "none"]
- *                 example: "following"
- *               tagged:
- *                 type: string
- *                 enum: ["everyone", "following", "none"]
- *                 example: "none"
- *               addToPost:
- *                 type: string
- *                 enum: ["everyone", "following", "none"]
- *                 example: "everyone"
- *               storyReaction:
- *                 type: string
- *                 enum: ["everyone", "following", "none"]
- *                 example: "following"
- *               storyComment:
- *                 type: string
- *                 enum: ["everyone", "following", "none"]
- *                 example: "none"
- *               storyTagged:
- *                 type: string
- *                 enum: ["everyone", "following", "none"]
- *                 example: "everyone"
- *               message:
- *                 type: string
- *                 enum: ["everyone", "following", "none"]
- *                 example: "following"
- *               messageRequest:
- *                 type: string
- *                 enum: ["everyone", "following", "none"]
- *                 example: "none"
- *               messageRequestGroup:
- *                 type: string
- *                 enum: ["everyone", "following", "none"]
- *                 example: "everyone"
- *               newFollower:
- *                 type: string
- *                 enum: ["everyone", "following", "none"]
- *                 example: "following"
- *               newFollowing:
- *                 type: string
- *                 enum: ["everyone", "following", "none"]
- *                 example: "none"
- *               acceptedFollower:
- *                 type: string
- *                 enum: ["everyone", "following", "none"]
- *                 example: "everyone"
- *               suggestedFollower:
- *                 type: string
- *                 enum: ["everyone", "following", "none"]
- *                 example: "following"
- *               profileMention:
- *                 type: string
- *                 enum: ["everyone", "following", "none"]
- *                 example: "none"
- *               audioCall:
- *                 type: string
- *                 enum: ["everyone", "following", "none"]
- *                 example: "everyone"
- *               videoCall:
- *                 type: string
- *                 enum: ["everyone", "following", "none"]
- *                 example: "following"
- *               liveVideoStart:
- *                 type: string
- *                 enum: ["everyone", "following", "none"]
- *                 example: "none"
- *               liveVideoEnd:
- *                 type: string
- *                 enum: ["everyone", "following", "none"]
- *                 example: "everyone"
- *               recentlyUploaded:
- *                 type: string
- *                 enum: ["everyone", "following", "none"]
- *                 example: "following"
- *               repost:
- *                 type: string
- *                 enum: ["everyone", "following", "none"]
- *                 example: "none"
- *               audio:
- *                 type: string
- *                 enum: ["everyone", "following", "none"]
- *                 example: "everyone"
- *               mostWatched:
- *                 type: string
- *                 enum: ["everyone", "following", "none"]
- *                 example: "following"
- *               createdAQuest:
- *                 type: array
- *                 items:
- *                   type: string
- *                   enum: ["all", "everyone", "following", "goflick", "onflick", "none"]
- *                 example: ["all", "everyone"]
- *               sponsoredQuest:
- *                 type: array
- *                 items:
- *                   type: string
- *                   enum: ["all", "goflick", "onflick", "none"]
- *                 example: ["goflick", "onflick"]
- *               appliedForQuest:
- *                 type: string
- *                 enum: ["everyone", "following", "none"]
- *                 example: "none"
- *               likedQuest:
- *                 type: string
- *                 enum: ["everyone", "following", "none"]
- *                 example: "everyone"
- *               questUpdates:
- *                 type: string
- *                 enum: ["everyone", "following", "none"]
- *                 example: "following"
- *               creditedTxn:
- *                 type: string
- *                 enum: ["everyone", "following", "none"]
- *                 example: "none"
- *               debitedTxn:
- *                 type: string
- *                 enum: ["everyone", "following", "none"]
- *                 example: "everyone"
- *               flickstarTxn:
- *                 type: string
- *                 enum: ["everyone", "following", "none"]
- *                 example: "following"
- *               support:
- *                 type: string
- *                 enum: ["everyone", "following", "none"]
- *                 example: "none"
- *               trending:
- *                 type: string
- *                 enum: ["everyone", "following", "none"]
- *                 example: "everyone"
- *               feedback:
- *                 type: string
- *                 enum: ["everyone", "following", "none"]
- *                 example: "following"
- *               achievement:
- *                 type: string
- *                 enum: ["everyone", "following", "none"]
- *                 example: "none"
- *               newFeatures:
- *                 type: string
- *                 enum: ["everyone", "following", "none"]
- *                 example: "everyone"
- *               followingActivity:
- *                 type: string
- *                 enum: ["everyone", "following", "none"]
- *                 example: "following"
- *               engagement:
- *                 type: string
- *                 enum: ["everyone", "following", "none"]
- *                 example: "none"
- *               socialCause:
- *                 type: string
- *                 enum: ["everyone", "following", "none"]
- *                 example: "everyone"
- *               birthDay:
- *                 type: string
- *                 enum: ["everyone", "following", "none"]
- *                 example: "following"
- *               shareBirthday:
- *                 type: string
- *                 enum: ["everyone", "following", "none"]
- *                 example: "none"
- *               loginAlert:
- *                 type: string
- *                 enum: ["everyone", "following", "none"]
- *                 example: "everyone"
+ *                 description: The type of the file to be uploaded (e.g., image/jpeg, image/png)
+ *                 example: image/jpeg
  *     responses:
  *       200:
- *         description: Successfully updated notification settings
+ *         description: Successfully generated presigned URL
  *         content:
  *           application/json:
  *             schema:
  *               type: object
  *               properties:
- *                 success:
- *                   type: boolean
- *                   example: true
- *                 message:
+ *                 url:
  *                   type: string
- *                   example: Notification settings updated successfully
+ *                   description: The presigned URL for uploading the file
+ *                   example: https://example-bucket.s3.amazonaws.com/example.jpg?AWSAccessKeyId=...
  *       400:
- *         description: Invalid request
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 success:
- *                   type: boolean
- *                   example: false
- *                 message:
- *                   type: string
- *                   example: Invalid request
+ *         description: Bad request, invalid input
  *       500:
- *         description: An error occurred
+ *         description: Internal server error
+ */
+
+
+
+
+/**
+ * @swagger
+ * /v1/profile-detail:
+ *   put:
+ *     summary: Update personal details
+ *     tags:
+ *       - Profile Setting
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               name:
+ *                 type: string
+ *                 description: User's name
+ *               email:
+ *                 type: string
+ *                 format: email
+ *                 description: User's email address
+ *               gender:
+ *                 type: string
+ *                 description: User's gender
+ *               phone:
+ *                 type: string
+ *                 description: User's phone number in international format
+ *               username:
+ *                 type: string
+ *                 description: User's username
+ *               dob:
+ *                 type: string
+ *                 description: User's date of birth
+ *               country:
+ *                 type: string
+ *                 description: User's country code
+ *               photo:
+ *                 type: string
+ *                 description: URL of the user's profile photo
+ *               description:
+ *                 type: array
+ *                 items:
+ *                   type: object
+ *                   properties:
+ *                     mention:
+ *                       type: string
+ *                       description: Mentioned user ID (ObjectId format)
+ *                       example: 507f1f77bcf86cd799439011
+ *                     text:
+ *                       type: string
+ *                       description: Text associated with the mention or normal text
+ *           example:
+ *             name: "Rakshak Khandelwal"
+ *             email: "dcode.0n1@example.com"
+ *             gender: "Male"
+ *             phone: "6376877564"
+ *             username: "jarvis0013"
+ *             dob: "1999-05-13"
+ *             country: "IN"
+ *             photo: "https://pub-301c1efdf41d428f9ab043c4d4ecbac9.r2.dev/some-random-path/profile-image"
+ *             description:
+ *               - mention: "507f1f77bcf86cd799439011"
+ *                 text: "@chirag"
+ *               - mention: "507f1f77bcf86cd799439011"
+ *                 text: "@lovesh"
+ *               - text: "is great guys"
+ *     responses:
+ *       200:
+ *         description: Successfully updated personal details
  *         content:
  *           application/json:
  *             schema:
  *               type: object
  *               properties:
- *                 success:
- *                   type: boolean
- *                   example: false
  *                 message:
  *                   type: string
- *                   example: An error occurred
+ *                   example: Updated successfully
+ *       400:
+ *         description: Bad request, invalid input
+ *       500:
+ *         description: Internal server error
+ *   get:
+ *     summary: Get personal details
+ *     tags:
+ *       - Profile Setting
+ *     responses:
+ *       200:
+ *         description: Successfully retrieved personal details
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 name:
+ *                   type: string
+ *                   description: User's name
+ *                 email:
+ *                   type: string
+ *                   format: email
+ *                   description: User's email address
+ *                 gender:
+ *                   type: string
+ *                   description: User's gender
+ *                 phone:
+ *                   type: string
+ *                   description: User's phone number in international format
+ *                 username:
+ *                   type: string
+ *                   description: User's username
+ *                 dob:
+ *                   type: date
+ *                   description: User's date of birth
+ *                 country:
+ *                   type: string
+ *                   description: User's country code
+ *                 photo:
+ *                   type: string
+ *                   description: URL of the user's profile photo
+ *       500:
+ *         description: Internal server error
+ */
+
+
+
+/**
+ * @swagger
+ * /v1/setting/password:
+ *   put:
+ *     summary: Update user password
+ *     tags:
+ *       - Profile Setting
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               password:
+ *                 type: string
+ *                 description: The current password of the user
+ *                 example: currentPassword123
+ *               newPassword:
+ *                 type: string
+ *                 description: The new password to be set
+ *                 example: newPassword456
+ *     responses:
+ *       200:
+ *         description: Password updated successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: Password updated successfully
+ *       400:
+ *         description: Bad request, invalid input
+ *       500:
+ *         description: Internal server error
  */

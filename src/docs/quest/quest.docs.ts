@@ -916,3 +916,74 @@
  *                   type: string
  *                   example: "An error occurred"
  */
+
+
+/**
+ * @swagger
+ * /quest-applicant/{questId}:
+ *   get:
+ *     tags:
+ *       - [Quests Applicants]
+ *     summary: Get all quest applicants for a specific quest
+ *     parameters:
+ *       - in: path
+ *         name: questId
+ *         required: true
+ *         schema:
+ *           type: string
+ *           pattern: "^[0-9a-fA-F]{24}$"
+ *         description: The unique ID of the quest
+ *     responses:
+ *       200:
+ *         description: A list of quest applicants
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 applicants:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *                     properties:
+ *                       id:
+ *                         type: string
+ *                         example: "applicantId"
+ *                       name:
+ *                         type: string
+ *                         example: "John Doe"
+ *                       media:
+ *                         type: array
+ *                         items:
+ *                           type: string
+ *                           example: "https://example.com/media.jpg"
+ *       400:
+ *         description: Invalid quest ID
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: false
+ *                 message:
+ *                   type: string
+ *                   example: "Invalid quest ID"
+ *       500:
+ *         description: An error occurred on the server
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: false
+ *                 message:
+ *                   type: string
+ *                   example: "An internal server error occurred"
+ */

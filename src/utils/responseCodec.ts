@@ -224,6 +224,9 @@ export const errors = {
   quest_not_found: {
     message: "Quest not found",
   },
+  quest_not_approved: {
+    message: "Quest not approved",
+  },
   create_quest: {
     message: "Unable to create quest",
   },
@@ -233,6 +236,17 @@ export const errors = {
   create_quest_applicants: {
     message: "Unable to create quest applicants",
   },
+  quest_applicant_not_found: {
+    message: "Quest applicant not found",
+  },
+  quest_applicant_not_updated: {
+    message: "Quest applicant not updated",
+  },
+  quest_applicant_approval: {
+    message : "Unable to approve quest applicant",
+  },
+  
+
 
   // Authentication-related errors
   no_token: {
