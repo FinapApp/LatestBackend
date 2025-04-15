@@ -25,7 +25,7 @@ export const updateQuest = async (req: Request, res: Response) => {
         if (updateQuest) {
             return handleResponse(res, 200, success.update_quest);
         }
-        return handleResponse(res, 304, errors.update_quest);
+        return handleResponse(res, 400, errors.update_quest);
     } catch (err: any) {
         sendErrorToDiscord("PUT:update-quest", err);
         return handleResponse(res, 500, errors.catch_error);

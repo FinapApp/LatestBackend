@@ -688,10 +688,10 @@ export const validateCreateQuest = (body: object, params: object) => {
       url: Joi.string()
         .pattern(new RegExp(`^${config.R2.R2_PUBLIC_URL}/.+$`))
         .message("url must be a valid URL").required(),
-    }).min(1).max(14)).required().messages({
+    }).min(1).max(14)).optional().messages({
       'array.min': 'At least one media item is required',
       'array.max': 'A maximum of 14 media items are allowed'
-    }),
+    }).optional(),
     mode: Joi.string().valid("GoFlick", "OnFlick").required(),
     location: Joi.string().required(),
     coords: Joi.object({
