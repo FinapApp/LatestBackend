@@ -5,7 +5,12 @@ import { sendErrorToDiscord } from "../../../config/discord/errorDiscord";
 
 export const getAllQuests = async (req: Request, res: Response) => {
     try {
-        const data = await QUESTS.find({});
+        const data = await QUESTS.find({} , "-_a" , {
+            populate : {
+                path : "user",
+                select : "name photo"
+            }
+        });
         if (data) {
             return handleResponse(res,
                 200,
