@@ -1,14 +1,15 @@
 import mongoose, { Document, Schema } from "mongoose";
 import { ITextDataSchema, TextDataSchema } from "../Comment/comment.model";
+
 interface IFlicks extends Document {
     user: Schema.Types.ObjectId;
     originFlicks: Schema.Types.ObjectId;
     collabs: TaggedUser[];
     media: IMediaSchema[];
     location: string;
-gps: {
+    gps: {
         type: string;
-        coordinates: [number , number];
+        coordinates: [number, number];
     };
     thumbnailURL: string;
     description: ITextDataSchema[];
@@ -43,7 +44,7 @@ const taggedAndCollabSchema = new Schema<TaggedUser>(
             y: { type: Number },
         }
     },
-    { versionKey: false, _id: false  }
+    { versionKey: false, _id: false }
 );
 
 
@@ -52,7 +53,7 @@ export interface IMediaSchema extends Document {
     duration?: number;
     audio?: Schema.Types.ObjectId;
     alt: string[];
-    thumbnailURL? :  string;
+    thumbnailURL?: string;
     taggedUsers?: TaggedUser[];
     url: string;
 }
@@ -66,7 +67,7 @@ const MediaSchema = new Schema<IMediaSchema>(
         taggedUsers: { type: [taggedAndCollabSchema] },
         url: { type: String }
     },
-    { versionKey: false, _id: false  }
+    { versionKey: false, _id: false }
 );
 
 
@@ -90,15 +91,15 @@ export const FlickSchema = new Schema<IFlicks>(
         song: { type: Schema.Types.ObjectId, ref: 'song' },
         songStart: { type: Number },
         songEnd: { type: Number },
-        repostCount: { type: Number, default : 0 },
-        commentCount : { type: Number, default: 0 },
-        likeCount : { type: Number, default: 0 },
+        repostCount: { type: Number, default: 0 },
+        commentCount: { type: Number, default: 0 },
+        likeCount: { type: Number, default: 0 },
         suspended: { type: Boolean, default: false },
         suspendedReason: { type: String },
         commentVisible: { type: Boolean, default: true },
         likeVisible: { type: Boolean, default: true },
     },
-    { timestamps: {createdAt : true , updatedAt : false}, versionKey: false }
+    { timestamps: { createdAt: true, updatedAt: false }, versionKey: false }
 );
 
 FlickSchema.index({ gps: "2dsphere" });

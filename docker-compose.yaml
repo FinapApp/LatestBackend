@@ -45,8 +45,8 @@ services:
       - R2_REGION=auto
       - R2_BUCKET=test
       - R2_PUBLIC_URL=https://pub-301c1efdf41d428f9ab043c4d4ecbac9.r2.dev
-      - GMAIL_USER=krakshak@flickstar.net
-      - GMAIL_PASSWORD=eeagyulnzsqkutzg
+      - GMAIL_USER=noreply@flickstar.net
+      - GMAIL_PASSWORD=kD2QxSkxQjeJ
       - MASTER_OTP=123456
       - COOKIE_SECRET="Flickstar-Secret"
       - APP_VERSION=01
