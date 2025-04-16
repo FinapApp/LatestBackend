@@ -24,6 +24,7 @@ interface IQuests extends Document {
     totalApproved : number;
     totalRejected : number;
     leftApproved :  number;
+    avgAmountPerPerson: number;
     status : 'pending' | 'completed' | 'paused';
 }
 
@@ -69,6 +70,9 @@ export const QuestSchema = new Schema<IQuests>(
                 return this.maxApplicants || 0; 
             } 
         }, // kafka would be used to update this
+        avgAmountPerPerson: { type: Number, default: function () {
+            return this.totalAmount / (this.maxApplicants || 1); // this is the total amount divided by the max applicants
+        }}, // this is the total amount divided by the max applicants
         status : { type: String, enum: ['pending', 'completed' , 'paused'], default: 'pending' }
     },
     { timestamps: {createdAt : true , updatedAt : false }, versionKey: false }
