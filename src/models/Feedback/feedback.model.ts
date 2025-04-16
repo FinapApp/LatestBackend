@@ -2,7 +2,7 @@ import { Schema, Types, model } from 'mongoose'
 
 interface IFeedback extends Document {
   _id: string;
-  admin: Types.ObjectId;
+  staff: Types.ObjectId;
   user: Types.ObjectId;
   message: IMessage[];
   rating: number;
@@ -10,13 +10,13 @@ interface IFeedback extends Document {
 }
 
 interface IMessage {
-  sentBy: 'user' | 'admin';
+  sentBy: 'user' | 'staff';
   message: string;
 }
 
 const MessageSchema = new Schema<IMessage>(
   {
-    sentBy: { type: String, enum: ['user', 'admin'] },
+    sentBy: { type: String, enum: ['user', 'staff'] },
     message: { type: String },
   },
   { timestamps: { createdAt: true, updatedAt: false }, _id: true }
@@ -25,9 +25,9 @@ const MessageSchema = new Schema<IMessage>(
 
 let FeedbackSchema = new Schema<IFeedback>(
   {
-    admin: {
+    staff: {
       type: Schema.Types.ObjectId,
-    ref: 'admin',
+      ref: 'staff',
     },
     user: {
       type: Schema.Types.ObjectId,

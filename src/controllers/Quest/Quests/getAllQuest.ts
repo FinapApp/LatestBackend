@@ -1,10 +1,10 @@
 import { Request, Response } from "express";
 import { errors, handleResponse } from "../../../utils/responseCodec";
 import { QUESTS } from "../../../models/Quest/quest.model";
-import { sendErrorToDiscord } from "../../../config/discord/errorDiscord";
-import { QUEST_APPLICATION } from "../../../models/Quest/questApplication.model";
+// import { sendErrorToDiscord } from "../../../config/discord/errorDiscord";
 import Joi from "joi";
 import { validateGetQuests } from "../../../validators/validators";
+import { Types } from "mongoose";
 
 export const getAllQuests = async (req: Request, res: Response) => {
     try {
@@ -12,52 +12,153 @@ export const getAllQuests = async (req: Request, res: Response) => {
         if (validationError) {
             return handleResponse(res, 400, errors.validation, validationError.details);
         }
-        const { sort, low, high, mode } = req.query;
-        const buildQuery: any = {
-            populate: {
-                path: "user",
-                select: "name photo username"
-            }
-        };
-        if(sort){
-            if (sort == "date-asc" || sort == "date-desc") {
-                buildQuery.sort = { createdAt: sort == "date-asc" ? 1 : -1 };
-            }
-            if(sort == "amount-desc" || sort == "amount-asc"){
-                buildQuery.sort = { totalAmount: sort == "amount-asc" ? 1 : -1 };
-            }
-        }
-        const query  =  {} as any
-        if(low && high) {
-            query.$and = [
-                { totalAmount: { $gte: Number(low) } },
-                { totalAmount: { $lte: Number(high) } }
-            ];
-        }
-        if (mode) {
-            query.mode = mode == "go" ? "GoFlick" :"OnFlick"
-        }
-        const data = await QUESTS.find(query, "-_a", buildQuery)
-        const userApplications = await QUEST_APPLICATION.find({ user: res.locals.userId }, "-_id");
-        const appliedQuestIds = new Set(userApplications.map(app => app.quest.toString()));
 
-        // Merge info: mark each quest with `hasApplied: true/false`
-        const mergedData = data.map(quest => {
-            const questId = (quest._id as string); // Explicitly cast _id to string
-            return {
-                ...quest.toObject(),
-                hasApplied: appliedQuestIds.has(questId.toString()),
-            };
-        });
-        if (data) {
-            return handleResponse(res,
-                200,
-                { quests: mergedData }
-            );
+        const { sort, low, high, mode, type } = req.query;
+        const userId = res.locals.userId;
+        const pipeline: any[] = [];
+        // Handle mode filter
+        if (mode) {
+            pipeline.push({
+                $match: {
+                    mode: mode === 'go' ? 'GoFlick' : 'OnFlick'
+                }
+            });
         }
-        return handleResponse(res, 404, errors.quest_not_found);
+
+        // Handle amount range filter
+        if (low && high) {
+            pipeline.push({
+                $match: {
+                    totalAmount: {
+                        $gte: Number(low),
+                        $lte: Number(high)
+                    }
+                }
+            });
+        }
+
+        // Handle type filter
+        switch (type) {
+            case 'sponsored':
+                pipeline.push({ $match: { staff: { $exists: true } } });
+                break;
+            case 'self':
+                pipeline.push({ $match: { user: new Types.ObjectId(userId) } });
+                break;
+            case 'applied':
+                pipeline.push(
+                    {
+                        $lookup: {
+                            from: "questapplications",
+                            let: { questId: "$_id" },
+                            pipeline: [
+                                {
+                                    $match: {
+                                        $expr: {
+                                            $and: [
+                                                { $eq: ["$quest", "$$questId"] },
+                                                { $eq: ["$user", new Types.ObjectId(userId)] }
+                                            ]
+                                        }
+                                    }
+                                }
+                            ],
+                            as: "applications"
+                        }
+                    },
+                    { $match: { applications: { $ne: [] } } },
+                    { $unset: "applications" }
+                );
+                break;
+        }
+
+        // Lookup user details
+        pipeline.push(
+            {
+                $lookup: {
+                    from: "users",
+                    localField: "user",
+                    foreignField: "_id",
+                    as: "user"
+                }
+            },
+            { $unwind: "$user" },
+            {
+                $project: {
+                    "user._id": 1,
+                    "user.name": 1,
+                    "user.photo": 1,
+                    "user.username": 1,
+                    // Include other necessary quest fields
+                    title: 1,
+                    description: 1,
+                    totalAmount: 1,
+                    mode: 1,
+                    totalApproved: 1,
+                    totalRejected: 1,
+                    leftApproved: 1,
+                    status: 1,
+                    createdAt: 1,
+                    // Exclude version key if needed
+                }
+            }
+        );
+
+        // Check if user has applied to the quest
+        pipeline.push(
+            {
+                $lookup: {
+                    from: "questapplications",
+                    let: { questId: "$_id" },
+                    pipeline: [
+                        {
+                            $match: {
+                                $expr: {
+                                    $and: [
+                                        { $eq: ["$quest", "$$questId"] },
+                                        { $eq: ["$user", new Types.ObjectId(userId)] }
+                                    ]
+                                }
+                            }
+                        }
+                    ],
+                    as: "userApplications"
+                }
+            },
+            {
+                $addFields: {
+                    hasApplied: { $gt: [{ $size: "$userApplications" }, 0] }
+                }
+            },
+            { $unset: "userApplications" }
+        );
+
+        // Apply sorting
+        if (sort) {
+            let sortCriteria: any = {};
+            switch (sort) {
+                case 'date-asc':
+                    sortCriteria.createdAt = 1;
+                    break;
+                case 'date-desc':
+                    sortCriteria.createdAt = -1;
+                    break;
+                case 'amount-asc':
+                    sortCriteria.totalAmount = 1;
+                    break;
+                case 'amount-desc':
+                    sortCriteria.totalAmount = -1;
+                    break;
+            }
+            pipeline.push({ $sort: sortCriteria });
+        }
+
+        const data = await QUESTS.aggregate(pipeline);
+
+        return handleResponse(res, 200, { quests: data });
     } catch (err: any) {
-        sendErrorToDiscord("GET:all-quests", err);
+        console.error(err);
+        // sendErrorToDiscord("GET:all-quests", err);
         return handleResponse(res, 500, errors.catch_error);
     }
 };

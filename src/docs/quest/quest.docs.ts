@@ -97,6 +97,12 @@
  *           type: string
  *           enum: [go, on]
  *         description: Mode of the quest
+ *       - in: query
+ *         name: type
+ *         schema:
+ *           type: string
+ *           enum: [sponsored, self, applied]
+ *         description: Type of the quest
  *     responses:
  *       200:
  *         description: A list of quests

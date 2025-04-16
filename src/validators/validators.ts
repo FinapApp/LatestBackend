@@ -851,7 +851,9 @@ export const validateGetQuests = (query: object) => {
     low: Joi.string().optional(),
     high: Joi.string().optional(),
     mode: Joi.string().valid("go", "on").optional(),
+    type : Joi.string().valid("sponsored" , "self" , "applied")
   }).and('low', 'high'); 
+
   const { error } = schema.validate(query)
   return error
 }

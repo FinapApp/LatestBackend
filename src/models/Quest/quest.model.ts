@@ -9,6 +9,7 @@ interface IGPSLocation {
 interface IQuests extends Document {
     user: Schema.Types.ObjectId;
     title: string;
+    staff : Schema.Types.ObjectId;
     description: string;
     media: IMediaSchema[];
     mode: 'Goflick' | 'OnFlick';
@@ -42,6 +43,7 @@ const MediaSchema = new Schema<IMediaSchema>(
 export const QuestSchema = new Schema<IQuests>(
     {
         type: { type: String, enum: ['Basic', 'Exclusive'] },
+        staff : {type :  Schema.Types.ObjectId , ref : "staff"},
         user: { type: Schema.Types.ObjectId, ref: "user" },
         title: { type: String },
         description: { type: String },
