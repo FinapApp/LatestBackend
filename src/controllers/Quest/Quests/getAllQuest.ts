@@ -26,17 +26,20 @@ export const getAllQuests = async (req: Request, res: Response) => {
         }
 
         // Handle amount range filter
-        if (low && high) {
+        if (low || high) {
+            const amountCondition: any = {};
+            if (low) {
+                amountCondition.$gte = Number(low);
+            }
+            if (high) {
+                amountCondition.$lte = Number(high);
+            }
             pipeline.push({
                 $match: {
-                    totalAmount: {
-                        $gte: Number(low),
-                        $lte: Number(high)
-                    }
+                    totalAmount: amountCondition
                 }
             });
         }
-
         // Handle type filter
         switch (type) {
             case 'sponsored':
