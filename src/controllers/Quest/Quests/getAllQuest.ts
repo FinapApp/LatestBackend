@@ -24,8 +24,6 @@ export const getAllQuests = async (req: Request, res: Response) => {
                 }
             });
         }
-
-        // Handle amount range filter
         if (low || high) {
             const amountCondition: any = {};
             if (low) {
@@ -143,18 +141,47 @@ export const getAllQuests = async (req: Request, res: Response) => {
             switch (sort) {
                 case 'date-asc':
                     sortCriteria.createdAt = 1;
+                    pipeline.push({ $sort: sortCriteria });
                     break;
                 case 'date-desc':
                     sortCriteria.createdAt = -1;
+                    pipeline.push({ $sort: sortCriteria });
                     break;
                 case 'amount-asc':
-                    sortCriteria.totalAmount = 1;
+                    pipeline.push(
+                        {
+                            $addFields: {
+                                amountPerApplicant: {
+                                    $cond: [
+                                        { $eq: ["$maxApplicants", 0] },
+                                        0,
+                                        { $divide: ["$totalAmount", "$maxApplicants"] }
+                                    ]
+                                }
+                            }
+                        },
+                        { $sort: { amountPerApplicant: 1 } },
+                        { $unset: "amountPerApplicant" }
+                    );
                     break;
                 case 'amount-desc':
-                    sortCriteria.totalAmount = -1;
+                    pipeline.push(
+                        {
+                            $addFields: {
+                                amountPerApplicant: {
+                                    $cond: [
+                                        { $eq: ["$maxApplicants", 0] },
+                                        0,
+                                        { $divide: ["$totalAmount", "$maxApplicants"] }
+                                    ]
+                                }
+                            }
+                        },
+                        { $sort: { amountPerApplicant: -1 } },
+                        { $unset: "amountPerApplicant" }
+                    );
                     break;
             }
-            pipeline.push({ $sort: sortCriteria });
         }
 
         const data = await QUESTS.aggregate(pipeline);
