@@ -25,18 +25,28 @@ export const getAllQuests = async (req: Request, res: Response) => {
             });
         }
         if (low || high) {
-            const amountCondition: any = {};
-            if (low) {
-                amountCondition.$gte = Number(low);
-            }
-            if (high) {
-                amountCondition.$lte = Number(high);
-            }
-            pipeline.push({
-                $match: {
-                    totalAmount: amountCondition
-                }
-            });
+            const min = low ? Number(low) : Number.MIN_SAFE_INTEGER;
+            const max = high ? Number(high) : Number.MAX_SAFE_INTEGER;
+
+            pipeline.push(
+                {
+                    $addFields: {
+                        amountPerApplicant: {
+                            $cond: [
+                                { $eq: ["$maxApplicants", 0] },
+                                0,
+                                { $divide: ["$totalAmount", "$maxApplicants"] }
+                            ]
+                        }
+                    }
+                },
+                {
+                    $match: {
+                        amountPerApplicant: { $gte: min, $lte: max }
+                    }
+                },
+                { $unset: "amountPerApplicant" } 
+            );
         }
         // Handle type filter
         switch (type) {
