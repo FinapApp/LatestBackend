@@ -26,16 +26,21 @@ export const changeQuestApplicantStatus = async (req: Request, res: Response) =>
         if (!quest) {
             return handleResponse(res, 404, errors.quest_not_found);
         }
+        const minApprovalNeeded = Math.ceil(quest.maxApplicants * 0.3);
 
         if (status === "approved") {
-            const minApprovalNeeded = Math.ceil(quest.maxApplicants * 0.3);
-            const isEligible = quest.totalApproved >= minApprovalNeeded && quest.leftApproved > 0;
-
-            if (!isEligible) {
-                return handleResponse(res, 403, errors.quest_applicant_approval);
+            if (quest.leftApproved <= 0) {
+                return handleResponse(res, 403, errors.quest_applicant_approval); // No slots left
             }
         }
 
+        if (status === "rejected") {
+            if (quest.totalApproved < minApprovalNeeded) {
+                return handleResponse(res, 403, {
+                    message: `You must approve at least ${minApprovalNeeded} applicants before rejecting others.`
+                });
+            }
+        }
         const updateQuestApplicant = await QUEST_APPLICATION.findByIdAndUpdate(
             questApplicantId,
             { status },

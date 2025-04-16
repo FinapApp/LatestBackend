@@ -74,6 +74,29 @@
  *     tags:
  *       - Quests
  *     summary: Get all quests
+ *     parameters:
+ *       - in: query
+ *         name: sort
+ *         schema:
+ *           type: string
+ *           enum: [date-asc, date-desc, amount-asc, amount-desc]
+ *         description: Sort order for the quests
+ *       - in: query
+ *         name: low
+ *         schema:
+ *           type: string
+ *         description: Lower bound for filtering
+ *       - in: query
+ *         name: high
+ *         schema:
+ *           type: string
+ *         description: Upper bound for filtering
+ *       - in: query
+ *         name: mode
+ *         schema:
+ *           type: string
+ *           enum: [go, on]
+ *         description: Mode of the quest
  *     responses:
  *       200:
  *         description: A list of quests

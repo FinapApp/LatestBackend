@@ -285,7 +285,7 @@ export const validateCreateFlick = (body: object, params: object) => {
       }).required()
     })).optional(),
     newHashTags: Joi.array().items(Joi.object({
-      id : Joi.string().regex(/^[0-9a-fA-F]{24}$/, 'object Id').required(),
+      id: Joi.string().regex(/^[0-9a-fA-F]{24}$/, 'object Id').required(),
       value: Joi.string().required()
     })).optional(),
     commentVisible: Joi.boolean().optional(),
@@ -490,7 +490,7 @@ export const validateBioLinkId = (params: object) => {
   return error
 }
 
-export const validateGetProfileDetail = (query : object) => {
+export const validateGetProfileDetail = (query: object) => {
   const schema = Joi.object({
     // userId   : Joi.alternatives().try(
     //   Joi.string().regex(/^[0-9a-fA-F]{24}$/, 'object Id').optional(),
@@ -619,7 +619,7 @@ export const validateCreateStory = (body: string, params: object) => {
       text: Joi.string().required()
     })).optional(),
     newHashTags: Joi.array().items(Joi.object({
-      id : Joi.string().regex(/^[0-9a-fA-F]{24}$/, 'object Id').required(),
+      id: Joi.string().regex(/^[0-9a-fA-F]{24}$/, 'object Id').required(),
       value: Joi.string().required()
     })).optional(),
     mention: Joi.array().items(Joi.object({
@@ -673,7 +673,7 @@ export const validatePresignedQuest = (body: object) => {
 
 export const validateCreateQuest = (body: object, params: object) => {
   const bodySchema = Joi.object({
-    type : Joi.string().valid('Exclusive' ,'Basic').required(),
+    type: Joi.string().valid('Exclusive', 'Basic').required(),
     title: Joi.string().required(),
     description: Joi.string().required(),
     media: Joi.array().items(Joi.object({
@@ -712,7 +712,7 @@ export const validateCreateQuest = (body: object, params: object) => {
   return error
 }
 
-export const validateUpdateQuest =  (body: object , params: object) => {
+export const validateUpdateQuest = (body: object, params: object) => {
   const bodySchema = Joi.object({
     type: Joi.string().valid('Exclusive', 'Basic').optional(),
     title: Joi.string().optional(),
@@ -723,12 +723,12 @@ export const validateUpdateQuest =  (body: object , params: object) => {
       audio: Joi.string().regex(/^[0-9a-fA-F]{24}$/, 'object Id').optional(),
       alt: Joi.array().items(Joi.string().optional()).optional(),
       thumbnailURL: Joi.string()
-      .pattern(new RegExp(`^${config.R2.R2_PUBLIC_URL}/.+$`))
-      .message("thumbnailURL must be a valid URL")
-      .optional(),
+        .pattern(new RegExp(`^${config.R2.R2_PUBLIC_URL}/.+$`))
+        .message("thumbnailURL must be a valid URL")
+        .optional(),
       url: Joi.string()
-      .pattern(new RegExp(`^${config.R2.R2_PUBLIC_URL}/.+$`))
-      .message("url must be a valid URL").optional(),
+        .pattern(new RegExp(`^${config.R2.R2_PUBLIC_URL}/.+$`))
+        .message("url must be a valid URL").optional(),
     }).min(1).max(14)).optional().messages({
       'array.min': 'At least one media item is required',
       'array.max': 'A maximum of 14 media items are allowed'
@@ -845,8 +845,19 @@ export const validateGetAllComments = (query: object) => {
   return error
 }
 
+export const validateGetQuests = (query: object) => {
+  const schema = Joi.object({
+    sort: Joi.string().valid("date-asc", "date-desc", "amount-asc", "amount-desc").optional(),
+    low: Joi.string().optional(),
+    high: Joi.string().optional(),
+    mode: Joi.string().valid("go", "on").optional(),
+  }).and('low', 'high'); 
+  const { error } = schema.validate(query)
+  return error
+}
 
-export  const validateQuestApplicantStatus = (query: object, params: object) => {
+
+export const validateQuestApplicantStatus = (query: object, params: object) => {
   const querySchema = Joi.object({
     status: Joi.string().valid("approved", "rejected").required(),
   })

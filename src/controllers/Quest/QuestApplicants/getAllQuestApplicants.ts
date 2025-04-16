@@ -16,7 +16,7 @@ export const getAllQuestApplicant = async (req: Request, res: Response) => {
         }, "-_a", {
             populate: {
                 path: "user",
-                select: "name photo"
+                select: "name photo username"
             }
         });
         if (data) {
