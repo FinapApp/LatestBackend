@@ -18,6 +18,7 @@ services:
     volumes:
       - redis_data:/data
 
+
   app:
     build:
       context: .

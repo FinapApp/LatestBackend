@@ -6,7 +6,7 @@ import { redis } from "../../config/redis/redis.config";
 import { config } from "../../config/generalconfig";
 import { USER } from "../../models/User/user.model";
 import { sendErrorToDiscord } from "../../config/discord/errorDiscord";
-import { melliClient } from "../../config/melllisearch/mellisearch.config";
+// import { melliClient } from "../../config/melllisearch/mellisearch.config";
 
 
 interface ForgetOTPRequest {
@@ -45,13 +45,13 @@ export const verifyOTPAfterSignUp = async (req: Request, res: Response) => {
             if (!userCreate) {
                 return handleResponse(res, 400, errors.unable_to_create_user);
             }
-            await melliClient.index("users").addDocuments([
-                {
-                    userId: userCreate._id.toString(),
-                    email,
-                    ...rest
-                }
-            ])
+            // await melliClient.index("users").addDocuments([
+            //     {
+            //         userId: userCreate._id.toString(),
+            //         email,
+            //         ...rest
+            //     }
+            // ])
             return handleResponse(res, 200, success.account_created);
         }
         return handleResponse(res, 400, errors.otp_not_match)

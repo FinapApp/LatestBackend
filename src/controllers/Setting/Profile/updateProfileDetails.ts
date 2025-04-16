@@ -5,7 +5,7 @@ import Joi from "joi";
 import { USER } from "../../../models/User/user.model";
 import { sendErrorToDiscord } from "../../../config/discord/errorDiscord";
 import { HASHTAGS } from "../../../models/User/userHashTag.model";
-import { melliClient } from "../../../config/melllisearch/mellisearch.config";
+// import { melliClient } from "../../../config/melllisearch/mellisearch.config";
 
 
 export const updateProfileDetails = async (req: Request, res: Response) => {
@@ -35,12 +35,12 @@ export const updateProfileDetails = async (req: Request, res: Response) => {
             { new: true }
         );
         if (updateProfile) {
-            await melliClient.index("users").addDocuments([
-                {
-                    userId: userId.toString(),
-                    ...rest
-                }
-            ])
+            // await melliClient.index("users").addDocuments([
+            //     {
+            //         userId: userId.toString(),
+            //         ...rest
+            //     }
+            // ])
             return handleResponse(res, 200, success.profile_updated);
         }
         return handleResponse(res, 304, errors.profile_not_updated);
