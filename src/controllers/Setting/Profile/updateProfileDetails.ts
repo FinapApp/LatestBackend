@@ -5,6 +5,7 @@ import Joi from "joi";
 import { USER } from "../../../models/User/user.model";
 import { sendErrorToDiscord } from "../../../config/discord/errorDiscord";
 import { HASHTAGS } from "../../../models/User/userHashTag.model";
+import { melliClient } from "../../../config/melllisearch/mellisearch.config";
 
 
 export const updateProfileDetails = async (req: Request, res: Response) => {
@@ -27,12 +28,19 @@ export const updateProfileDetails = async (req: Request, res: Response) => {
                 return handleResponse(res, 404, errors.create_hashtags);
             }
         }
+        const userId = res.locals.userId;
         const updateProfile = await USER.findByIdAndUpdate(
-            res.locals.userId,
+            userId,
             rest,
             { new: true }
         );
         if (updateProfile) {
+            await melliClient.index("users").addDocuments([
+                {
+                    userId: userId.toString(),
+                    ...rest
+                }
+            ])
             return handleResponse(res, 200, success.profile_updated);
         }
         return handleResponse(res, 304, errors.profile_not_updated);

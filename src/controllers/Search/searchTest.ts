@@ -1,27 +1,38 @@
-import { melliClient } from "../../config/melllisearch/mellisearch.config"
+import { melliClient, userIndex } from "../../config/melllisearch/mellisearch.config"
 import { Request, Response } from "express"
 import { errors, handleResponse } from "../../utils/responseCodec"
 
 export const searchTest = async (req: Request, res: Response) => {
     try {
-        melliClient.index("users").search(req.body.search, {
-            limit: 10,
-            offset: 0,
-            attributesToHighlight: ['username', 'name', 'description'],
-            attributesToCrop: ['username', 'name', 'description'],
-            cropLength: 50,
-            highlightPreTag: '<mark>',
-            highlightPostTag: '</mark>',
-            filter: 'followerCount > 10',
-            sort: ['followerCount:desc']
-        }).then((result) => {
-            console.log(result)
-            return handleResponse(res, 200, result)
+        const [userSearch, flickSearch] = await Promise.all([
+           userIndex.search(req.body.search, {
+                limit: 5,
+                offset: 0,
+                attributesToRetrieve: ["userId", "name", "username", "photo"],
+                // filter: 'followerCount > 10', //  for new user removal on search
+                sort: ['followerCount:desc']
+            }),
+            melliClient.index("flicks").search(req.body.search, {
+                limit: 5,
+                offset: 0,
+                attributesToRetrieve: ["userId", "name", "username", "photo"],
+            })
+        ])
+        const result = {
+            userSearch: userSearch.hits.map((user) => ({
+                userId: user.userId,
+                name: user.name,
+                username: user.username,
+                photo: user.photo,
+            })),
+            flickSearch: flickSearch.hits.map((flick) => ({
+                userId: flick.userId,
+                name: flick.name,
+                username: flick.username,
+                photo: flick.photo,
+            }))
         }
-        ).catch((err) => {
-            console.log(err)
-            return handleResponse(res, 500, errors.catch_error)
-        })
+        return handleResponse(res, 200, result)
     } catch (err) {
         console.log(err)
         return handleResponse(res, 500, errors.catch_error)

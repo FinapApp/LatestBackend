@@ -13,6 +13,7 @@ const routes = [
     flickRoutes,
     commonRoutes,
     unprotectedProfileRoutes
+    
 ];
 
 export default routes;

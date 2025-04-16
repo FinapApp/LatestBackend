@@ -97,6 +97,7 @@ export const getAllQuests = async (req: Request, res: Response) => {
                     totalApproved: 1,
                     totalRejected: 1,
                     leftApproved: 1,
+                    maxApplicants: 1,
                     status: 1,
                     createdAt: 1,
                     // Exclude version key if needed

@@ -26,6 +26,7 @@ export const signUp = async (req: Request, res: Response) => {
         await redis.set(`OTP:${email}`, JSON.stringify({ OTP }), "EX", config.REDIS_EXPIRE_IN);  // when in resend otp we often dont have to search back again and again and cache could do the thing.
         return handleResponse(res, 200, success.otp_sent);
     } catch (err: any) {
+        console.log(err);
         sendErrorToDiscord("POST:signup", err)
         return handleResponse(res, 500, errors.catch_error);
     }

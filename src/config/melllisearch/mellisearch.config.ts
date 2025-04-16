@@ -7,27 +7,47 @@ export const melliClient = new MeiliSearch({
     apiKey: config.MELLISSEARCH.masterKey,
 });
 
-const userIndex = "users";
+const INDEXES = {
+    USERS: 'users',
+    FLICKS: 'flicks',
+    HASHTAG: 'hashtag',
+    QUESTS: 'quests',
+    SONGS: 'songs',
+};
+
+const PRIMARY_KEYS = {
+    [INDEXES.USERS]: 'userId',
+    [INDEXES.FLICKS]: 'flickId',
+    [INDEXES.HASHTAG]: 'hashtagId',
+    [INDEXES.QUESTS]: 'questId',
+    [INDEXES.SONGS]: 'songId',
+};
+
+const setupIndex = async (indexName: string) => {
+    try {
+        await melliClient.getIndex(indexName);
+    } catch {
+        const task = await melliClient.createIndex(indexName, {
+            primaryKey: PRIMARY_KEYS[indexName],
+        });
+        await melliClient.waitForTask(task.taskUid);
+    }
+};
+
+
+export const userIndex = melliClient.index('users');
+export const flicksIndex = melliClient.index('flicks');
+export const hashtagIndex = melliClient.index('hashtag');
+export const questsIndex = melliClient.index('quests');
+export const songsIndex = melliClient.index('songs');
 
 export const connectMeilisearch = async () => {
     try {
-        await melliClient.createIndex(userIndex, { primaryKey: 'userId' })
-        await melliClient.index('users' ).updateSearchableAttributes([
-            'username', 'name', 'description'
-        ]);
-
-        await melliClient.index('users').updateSortableAttributes([
-            'followerCount'
-        ]);
-
-        await melliClient.index('flicks').updateSearchableAttributes([
-            'description', 'altText', 'taggedUserNames', 'username', 'name'
-        ]);
-
-        await melliClient.index('flicks').updateSortableAttributes([
-            'likeCount', 'commentCount', 'repostCount'
-        ]);
-        console.log('Meilisearch connected successfully')
+        let  result  =  await Promise.allSettled(Object.keys(INDEXES).map(setupIndex));
+        if (result.some((res) => res.status === 'rejected')) {
+            throw new Error('Failed to setup Meilisearch indexes');
+        }
+        console.log('Meilisearch indexes setup successfully');
     } catch (err: any) {
         throw new Error(`Failed to connect to meilisearch ${err}`);
     }

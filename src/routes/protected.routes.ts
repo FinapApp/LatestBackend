@@ -7,6 +7,7 @@ import { friendSuggestionRoutes } from "./friendSuggestion/friendSuggestion.rout
 import { likeRoutes } from "./like/like.routes";
 import { questRoutes } from "./quest/quest.routes";
 import { reportRoutes } from "./report/report.routes";
+import { searchRoutes } from "./search/search.routes";
 import { settingNotificationRoutes } from "./setting/settingNotification.routes";
 import { settingProfile } from "./setting/settingProfile.routes";
 import { settingSessionRoutes } from "./setting/settingSession.routes";
@@ -33,6 +34,7 @@ const routes = [
     settingThemeRoutes,
     settingTwoFactorRoutes,
     bioLinkRoutes,
+    searchRoutes
 ];
 
 export default routes;
