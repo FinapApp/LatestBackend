@@ -694,6 +694,14 @@ export const validateCreateQuest = (body: object, params: object) => {
     }).optional(),
     mode: Joi.string().valid("GoFlick", "OnFlick").required(),
     location: Joi.string().required(),
+    country: Joi.string().required().custom((value, helpers) => {
+      // Check if country exists in your predefined countries list
+      if (!countries.some(e => e.code === value)) {
+        return helpers.error("any.invalid", { message: "Country is not valid" });
+      }
+      return value;
+    }
+    ),
     coords: Joi.object({
       lat: Joi.number().required(),
       long: Joi.number().required()
@@ -735,6 +743,14 @@ export const validateUpdateQuest = (body: object, params: object) => {
     }),
     mode: Joi.string().valid("GoFlick", "OnFlick").optional(),
     location: Joi.string().optional(),
+    country: Joi.string().optional().custom((value, helpers) => {
+      // Check if country exists in your predefined countries list
+      if (!countries.some(e => e.code === value)) {
+        return helpers.error("any.invalid", { message: "Country is not valid" });
+      }
+      return value;
+    }
+    ),
     coords: Joi.object({
       lat: Joi.number().optional(),
       long: Joi.number().optional()
@@ -759,6 +775,40 @@ export const validateCreateQuestApplication = (body: object, params: object) => 
   })
   const bodySchema = Joi.object({
     quest: Joi.string().regex(/^[0-9a-fA-F]{24}$/, 'object Id').required(),
+    description: Joi.array().items(Joi.object({
+      mention: Joi.string().regex(/^[0-9a-fA-F]{24}$/, 'object Id').optional(),
+      hashTag: Joi.string().regex(/^[0-9a-fA-F]{24}$/, 'object Id').optional(),
+      text: Joi.string().when(Joi.object({ mention: Joi.exist() }).unknown(), {
+        then: Joi.required(),
+        otherwise: Joi.when(Joi.object({ hashTag: Joi.exist() }).unknown(), {
+          then: Joi.required(),
+          otherwise: Joi.optional(),
+        }),
+      }),
+    })).required(),
+    partialAllowance: Joi.boolean().required(),
+    media: Joi.array().items(Joi.object({
+      url: Joi.string()
+        .pattern(new RegExp(`^${config.R2.R2_PUBLIC_URL}/.+$`))
+        .message("url must be a valid URL").required(),
+      thumbnail: Joi.string().pattern(new RegExp(`^${config.R2.R2_PUBLIC_URL}/.+$`))
+        .message("thumbnail must be a valid URL").required(),
+      type: Joi.string().valid('photo', 'video', 'audio', 'pdf').required()
+    })).required(),
+  })
+  const combinedSchema = Joi.object({
+    body: bodySchema,
+    params: paramsSchema
+  })
+  const { error } = combinedSchema.validate({ body, params })
+  return error
+}
+
+export  const validateUpdateQuestApplicant = (body: object, params: object) => {
+  const paramsSchema = Joi.object({
+    questApplicantId: Joi.string().regex(/^[0-9a-fA-F]{24}$/, 'object Id').required()
+  })
+  const bodySchema = Joi.object({
     description: Joi.array().items(Joi.object({
       mention: Joi.string().regex(/^[0-9a-fA-F]{24}$/, 'object Id').optional(),
       hashTag: Joi.string().regex(/^[0-9a-fA-F]{24}$/, 'object Id').optional(),
@@ -848,15 +898,41 @@ export const validateGetAllComments = (query: object) => {
 export const validateGetQuests = (query: object) => {
   const schema = Joi.object({
     sort: Joi.string().valid("date-asc", "date-desc", "amount-asc", "amount-desc").optional(),
+    lat: Joi.string().optional(),
+    long: Joi.string().optional(),
     low: Joi.string().optional(),
     high: Joi.string().optional(),
     mode: Joi.string().valid("go", "on").optional(),
+    country: Joi.string().optional().custom((value, helpers) => {
+      // Check if country exists in your predefined countries list
+      if (!countries.some(e => e.code === value)) {
+        return helpers.error("any.invalid", { message: "Country is not valid" });
+      }
+      return value;
+    }),
     type : Joi.string().valid("sponsored" , "self" , "applied")
-  }); 
+  }).and("lat", "long").messages({
+    "object.and": "lat and long must be provided together",
+  })
   const { error } = schema.validate(query)
   return error
 }
 
+
+export const validateQuestApplicantStatusBatch = (query: object, body: object) => {
+  const querySchema = Joi.object({
+    status: Joi.string().valid("approved", "rejected").required(),
+  })
+  const bodySchema = Joi.object({
+    questApplicantIds: Joi.array().items(Joi.string().regex(/^[0-9a-fA-F]{24}$/, 'object Id').required())
+  })
+  const combinedSchema = Joi.object({
+    query: querySchema,
+    body: bodySchema
+  })
+  const { error } = combinedSchema.validate({ query, body })
+  return error
+}
 
 export const validateQuestApplicantStatus = (query: object, params: object) => {
   const querySchema = Joi.object({

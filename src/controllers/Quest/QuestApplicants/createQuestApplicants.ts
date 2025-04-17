@@ -2,7 +2,7 @@ import { Request, Response } from 'express';
 import { validateCreateQuestApplication } from "../../../validators/validators";
 import { errors, handleResponse, success } from "../../../utils/responseCodec";
 import Joi from "joi";
-import { QUEST_APPLICATION } from '../../../models/Quest/questApplication.model';
+import { QUEST_APPLICANT } from '../../../models/Quest/questApplicant.model';
 import { sendErrorToDiscord } from '../../../config/discord/errorDiscord';
 import { QUESTS } from '../../../models/Quest/quest.model';
 
@@ -29,7 +29,7 @@ export const createQuestApplicant = async (req: Request, res: Response) => {
         const leftApproved = questData.leftApproved;
         const maxAllowedThisBatch = leftApproved + Math.ceil(leftApproved * 0.3);
 
-        const currentApplicantCount = await QUEST_APPLICATION.countDocuments({
+        const currentApplicantCount = await QUEST_APPLICANT.countDocuments({
             quest,
             status: "pending"
         });
@@ -40,7 +40,7 @@ export const createQuestApplicant = async (req: Request, res: Response) => {
             return handleResponse(res, 400, errors.max_applicants);
         }
 
-        const createQuestApplicants = await QUEST_APPLICATION.create({
+        const createQuestApplicants = await QUEST_APPLICANT.create({
             _id: questApplicantId,
             user,
             ...req.body

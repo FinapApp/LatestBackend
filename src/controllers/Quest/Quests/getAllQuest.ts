@@ -1,22 +1,40 @@
 import { Request, Response } from "express";
 import { errors, handleResponse } from "../../../utils/responseCodec";
 import { QUESTS } from "../../../models/Quest/quest.model";
-// import { sendErrorToDiscord } from "../../../config/discord/errorDiscord";
+import { sendErrorToDiscord } from "../../../config/discord/errorDiscord";
 import Joi from "joi";
 import { validateGetQuests } from "../../../validators/validators";
 import { Types } from "mongoose";
-
 export const getAllQuests = async (req: Request, res: Response) => {
     try {
         const validationError: Joi.ValidationError | undefined = validateGetQuests(req.query);
         if (validationError) {
             return handleResponse(res, 400, errors.validation, validationError.details);
         }
-
-        const { sort, low, high, mode, type } = req.query;
+        const { sort, low, high, mode, type, long, lat, country } = req.query;
         const userId = res.locals.userId;
         const pipeline: any[] = [];
-        // Handle mode filter
+        if(country) {
+            pipeline.push({
+                $match: {
+                    country: country
+                }
+            })
+        }
+        if (long && lat) {
+            pipeline.unshift({
+                $geoNear: {
+                    near: {
+                        type: "Point",
+                        coordinates: [Number(long), Number(lat)]
+                    },
+                    key: "gps",
+                    distanceField: "distanceinKM",
+                    distanceMultiplier: 0.001,
+                    spherical: true
+                }
+            });
+        }
         if (mode) {
             pipeline.push({
                 $match: {
@@ -38,14 +56,31 @@ export const getAllQuests = async (req: Request, res: Response) => {
                 }
             });
         }
-        // Handle type filter
         switch (type) {
             case 'sponsored':
                 pipeline.push({ $match: { staff: { $exists: true } } });
                 break;
             case 'self':
-                pipeline.push({ $match: { user: new Types.ObjectId(userId) } });
-                break;
+                pipeline.push(
+                    { $match: { user: new Types.ObjectId(userId) } },
+                    {
+                        $lookup: {
+                            from: "questapplications",
+                            localField: "_id",
+                            foreignField: "quest",
+                            as: "applicants"
+                        }
+                    },
+                    {
+                        $addFields: {
+                            applicantCount: { $size: "$applicants" }
+                        }
+                    },
+                    {
+                        $unset: "applicants"
+                    }
+                );
+                break
             case 'applied':
                 pipeline.push(
                     {
@@ -68,12 +103,29 @@ export const getAllQuests = async (req: Request, res: Response) => {
                         }
                     },
                     { $match: { applications: { $ne: [] } } },
+                    {
+                        $addFields: {
+                            totalEarnings: {
+                                $sum: {
+                                    $map: {
+                                        input: {
+                                            $filter: {
+                                                input: "$applications",
+                                                as: "app",
+                                                cond: { $eq: ["$$app.status", "approved"] }
+                                            }
+                                        },
+                                        as: "approvedApp",
+                                        in: "$$approvedApp.txnAmount"
+                                    }
+                                }
+                            }
+                        }
+                    },
                     { $unset: "applications" }
                 );
                 break;
         }
-
-        // Lookup user details
         pipeline.push(
             {
                 $lookup: {
@@ -90,23 +142,31 @@ export const getAllQuests = async (req: Request, res: Response) => {
                     "user.name": 1,
                     "user.photo": 1,
                     "user.username": 1,
-                    // Include other necessary quest fields
                     title: 1,
                     description: 1,
                     totalAmount: 1,
                     mode: 1,
+                    location: 1,
+                    distanceinKM: 1, 
+                    thumbnailURLs: {
+                        $map: {
+                            input: "$media",
+                            as: "m",
+                            in: "$$m.thumbnailURL"
+                        }
+                    },
                     totalApproved: 1,
                     totalRejected: 1,
                     leftApproved: 1,
                     maxApplicants: 1,
                     status: 1,
                     createdAt: 1,
-                    // Exclude version key if needed
+                    hasApplied: 1, 
+                    applicantCount: 1, 
+                    totalEarnings: 1 
                 }
             }
         );
-
-        // Check if user has applied to the quest
         pipeline.push(
             {
                 $lookup: {
@@ -134,8 +194,6 @@ export const getAllQuests = async (req: Request, res: Response) => {
             },
             { $unset: "userApplications" }
         );
-
-        // Apply sorting
         if (sort) {
             let sortCriteria: any = {};
             switch (sort) {
@@ -157,13 +215,11 @@ export const getAllQuests = async (req: Request, res: Response) => {
                     break;
             }
         }
-
         const data = await QUESTS.aggregate(pipeline);
-
         return handleResponse(res, 200, { quests: data });
     } catch (err: any) {
         console.error(err);
-        // sendErrorToDiscord("GET:all-quests", err);
+        sendErrorToDiscord("GET:all-quests", err);
         return handleResponse(res, 500, errors.catch_error);
     }
 };

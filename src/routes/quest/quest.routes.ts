@@ -9,6 +9,9 @@ import { deleteQuestApplication } from "../../controllers/Quest/QuestApplicants/
 import { updateQuest } from "../../controllers/Quest/Quests/updateQuest";
 import { getAllQuestApplicant } from "../../controllers/Quest/QuestApplicants/getAllQuestApplicants";
 import { changeQuestApplicantStatus } from "../../controllers/Quest/QuestApplicants/changeQuestApplicantStatus";
+import { getQuest } from "../../controllers/Quest/Quests/getQuest";
+import { getQuestApplicant } from "../../controllers/Quest/QuestApplicants/getQuestApplicant";
+import { updateQuestApplicant } from "../../controllers/Quest/QuestApplicants/updateQuestApplicant";
 
 export const questRoutes: Router = express.Router();
 
@@ -18,6 +21,7 @@ questRoutes.route("/quest")
 
 
 questRoutes.route("/quest/:questId")
+    .get(getQuest)
     .post(createQuest)
     .delete(deleteQuest)
     .put(updateQuest)
@@ -27,11 +31,13 @@ questRoutes.route("/quest-applicant")
     .post(createPresignedURLQuestApplication)
 
 
-questRoutes.get("/quest-applicant/:questId", getAllQuestApplicant);
+questRoutes.get("/quest/:questId/applicant", getAllQuestApplicant);
 
 questRoutes.route("/quest-applicant/:questApplicantId")
+    .get(getQuestApplicant)
     .post(createQuestApplicant)
     .delete(deleteQuestApplication)
     .patch(changeQuestApplicantStatus)
+    .put(updateQuestApplicant)
 
 

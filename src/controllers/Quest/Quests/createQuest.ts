@@ -12,14 +12,15 @@ export const createQuest = async (req: Request, res: Response) => {
         }
         const user = res.locals.userId
         const questId = req.params.questId;
+        const  { coords , ...rest } = req.body;
         const quest = await QUESTS.create({
             _id: questId,
             user,
             gps: {
                 type: "Point",
-                coordinates: [req.body.coords.long, req.body.coords.lat]
+                coordinates: [coords.long, coords.lat]
             },
-            ...req.body
+            ...rest
         });
         if (!quest) {
             return handleResponse(res, 404, errors.quest_not_found);

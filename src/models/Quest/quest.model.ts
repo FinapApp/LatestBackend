@@ -19,6 +19,7 @@ interface IQuests extends Document {
     totalAmount: number;
     suspended: boolean;
     suspendedReason: string;
+    country: string;
     type: 'Basic' | 'Exclusive'
     maxApplicants: number;
     totalApproved : number;
@@ -51,6 +52,7 @@ export const QuestSchema = new Schema<IQuests>(
         media: { type: [MediaSchema] },
         mode: { type: String, enum: ['GoFlick', "OnFlick"] },
         location: { type: String },
+        country : {type : String},
         gps: {
             type: { type: String, enum: ["Point"] },
             coordinates: {

@@ -1,7 +1,7 @@
 import { Request, Response } from "express";
 import { errors, handleResponse } from "../../../utils/responseCodec";
 import { sendErrorToDiscord } from "../../../config/discord/errorDiscord";
-import { QUEST_APPLICATION } from "../../../models/Quest/questApplication.model";
+import { QUEST_APPLICANT } from "../../../models/Quest/questApplicant.model";
 import { validateQuestId } from "../../../validators/validators";
 import Joi from "joi";
 
@@ -11,7 +11,7 @@ export const getAllQuestApplicant = async (req: Request, res: Response) => {
         if (validationError) {
             return handleResponse(res, 400, errors.validation, validationError.details);
         }
-        const data = await QUEST_APPLICATION.find({
+        const data = await QUEST_APPLICANT.find({
             quest: req.params.questId
         }, "-_a", {
             populate: {
@@ -25,7 +25,7 @@ export const getAllQuestApplicant = async (req: Request, res: Response) => {
                 { quests: data }
             );
         }
-        return handleResponse(res, 404, { message: "No Quests Applicant foundFound" });
+        return handleResponse(res, 404, errors.quest_applicant_not_found);
     } catch (err: any) {
         sendErrorToDiscord("GET:all-quests-applicant", err);
         return handleResponse(res, 500, { message: "Internal Server Error" });

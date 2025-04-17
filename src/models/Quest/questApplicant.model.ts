@@ -2,7 +2,7 @@
 import mongoose, { Types, Schema } from "mongoose";
 import { ITextDataSchema, TextDataSchema } from "../Comment/comment.model";
 
-export interface IQuestApplication extends Document {
+export interface IQuestApplicant extends Document {
     user: Types.ObjectId;
     quest: Types.ObjectId;
     description?: ITextDataSchema[];
@@ -11,6 +11,7 @@ export interface IQuestApplication extends Document {
     partialAllowance: boolean;
     suspendedReason: string;
     txnId: string;
+    txnAmount: number;
     suspended: boolean;
 }
 
@@ -38,7 +39,7 @@ const MediaSchema = new Schema<Media>(
 
 
 
-const QuestApplicationSchema: Schema<IQuestApplication> = new Schema(
+const QuestApplicantSchema: Schema<IQuestApplicant> = new Schema(
     {
         user: { type: Schema.Types.ObjectId, ref: 'user', required: true },
         quest: { type: Schema.Types.ObjectId, ref: 'quest', required: true },
@@ -48,6 +49,7 @@ const QuestApplicationSchema: Schema<IQuestApplication> = new Schema(
         partialAllowance: { type: Boolean, default: false },
         suspended: { type: Boolean, default: false },
         txnId : { type: String },
+        txnAmount : { type: Number },
         suspendedReason: { type: String }
     },
     { timestamps: true, versionKey: false }
@@ -56,4 +58,4 @@ const QuestApplicationSchema: Schema<IQuestApplication> = new Schema(
 
 // right after the approval has being made the quest shifts to the flicks and making this quest owner as the collabs for it.
 
-export const QUEST_APPLICATION = mongoose.model<IQuestApplication>('questapplication', QuestApplicationSchema);
+export const QUEST_APPLICANT = mongoose.model<IQuestApplicant>('questapplication', QuestApplicantSchema);

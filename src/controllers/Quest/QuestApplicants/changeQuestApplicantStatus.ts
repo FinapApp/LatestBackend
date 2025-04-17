@@ -2,7 +2,7 @@ import { Request, Response } from "express";
 import { errors, handleResponse, success } from "../../../utils/responseCodec";
 import Joi from "joi";
 import { sendErrorToDiscord } from "../../../config/discord/errorDiscord";
-import { QUEST_APPLICATION } from "../../../models/Quest/questApplication.model";
+import { QUEST_APPLICANT } from "../../../models/Quest/questApplicant.model";
 import { validateQuestApplicantStatus } from "../../../validators/validators";
 import { QUESTS } from "../../../models/Quest/quest.model";
 
@@ -16,7 +16,7 @@ export const changeQuestApplicantStatus = async (req: Request, res: Response) =>
         const { questApplicantId } = req.params;
         const { status } = req.query;
         // Step 1: Find the applicant
-        const applicant = await QUEST_APPLICATION.findById(questApplicantId, { quest: 1 });
+        const applicant = await QUEST_APPLICANT.findById(questApplicantId, { quest: 1 });
         if (!applicant) {
             return handleResponse(res, 404, errors.quest_applicant_not_found);
         }
@@ -41,7 +41,7 @@ export const changeQuestApplicantStatus = async (req: Request, res: Response) =>
                 });
             }
         }
-        const updateQuestApplicant = await QUEST_APPLICATION.findByIdAndUpdate(
+        const updateQuestApplicant = await QUEST_APPLICANT.findByIdAndUpdate(
             questApplicantId,
             { status },
             { new: true, projection: { quest: 1, _id: 0 } }
@@ -54,7 +54,6 @@ export const changeQuestApplicantStatus = async (req: Request, res: Response) =>
                 updateQuery.$inc.leftApproved = -1;
             } else if (status === "rejected") {
                 updateQuery.$inc.totalRejected = 1;
-                updateQuery.$inc.leftApproved = -1;
             }
             await QUESTS.findByIdAndUpdate(updateQuestApplicant.quest, updateQuery);
             return handleResponse(res, 200, success.status_changed_flicked);
