@@ -162,7 +162,8 @@ export const getAllQuests = async (req: Request, res: Response) => {
                     status: 1,
                     createdAt: 1,
                     hasApplied: 1, 
-                    applicantCount: 1, 
+                    applicantCount: 1,
+                    avgAmountPerPerson: 1 ,  
                     totalEarnings: 1 
                 }
             }
