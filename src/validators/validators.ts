@@ -700,12 +700,12 @@ export const validateCreateQuest = (body: object, params: object) => {
         return helpers.error("any.invalid", { message: "Country is not valid" });
       }
       return value;
-    }
-    ),
-    coords: Joi.object({
-      lat: Joi.number().required(),
-      long: Joi.number().required()
-    }).required(),  // Ensure `coords` is required
+        }
+        ),
+        coords: Joi.object({
+      lat: Joi.number().min(-90).max(90).required(),
+      long: Joi.number().min(-180).max(180).required() 
+        }).required(),
     maxApplicants: Joi.number().required(),
     totalAmount: Joi.number().required(),
   });
@@ -752,8 +752,8 @@ export const validateUpdateQuest = (body: object, params: object) => {
     }
     ),
     coords: Joi.object({
-      lat: Joi.number().optional(),
-      long: Joi.number().optional()
+      lat: Joi.number().min(-90).max(90).required(),
+      long: Joi.number().min(-180).max(180).required()
     }).optional(),
     maxApplicants: Joi.number().optional(),
     totalAmount: Joi.number().optional(),
@@ -910,7 +910,7 @@ export const validateGetQuests = (query: object) => {
       }
       return value;
     }),
-    type : Joi.string().valid("sponsored" , "self" , "applied")
+    type : Joi.string().valid("sponsored" , "self" , "applied" , "favorite")
   }).and("lat", "long").messages({
     "object.and": "lat and long must be provided together",
   })
