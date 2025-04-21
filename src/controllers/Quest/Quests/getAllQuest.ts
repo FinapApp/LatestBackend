@@ -188,7 +188,7 @@ export const getAllQuests = async (req: Request, res: Response) => {
                     status: 1,
                     createdAt: 1,
                     hasApplied: 1, 
-                    hasLiked: 1,
+                    isFavorite: 1,
                     applicantCount: 1,
                     avgAmountPerPerson: 1 ,  
                     totalEarnings: 1 
@@ -217,7 +217,7 @@ export const getAllQuests = async (req: Request, res: Response) => {
             },
             {
                 $addFields: {
-                    hasLiked: { $gt: [{ $size: "$userFavorites" }, 0] }
+                    isFavorite: { $gt: [{ $size: "$userFavorites" }, 0] }
                 }
             },
             { $unset: "userFavorites" }
