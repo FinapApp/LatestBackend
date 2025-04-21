@@ -11,7 +11,7 @@ const QuestFavoriteSchema: Schema<IQuestFav> = new Schema(
         user: { type: Schema.Types.ObjectId, ref: 'user', required: true },
         quest: { type: Schema.Types.ObjectId, ref: 'quest', required: true },
     },
-    { timestamps: true, versionKey: false }
+    { timestamps: {createdAt : true , updatedAt : false}, versionKey: false }
 );
 
 

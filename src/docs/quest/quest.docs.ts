@@ -101,7 +101,7 @@
  *         name: type
  *         schema:
  *           type: string
- *           enum: [sponsored, self, applied]
+ *           enum: [sponsored, self, applied ,favorite]
  *         description: Type of the quest
  *       - in: query
  *         name: lat
