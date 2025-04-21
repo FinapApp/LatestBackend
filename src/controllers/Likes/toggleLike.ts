@@ -11,6 +11,7 @@ interface QueryParams {
     type: 'quest' | 'comment' | 'flick';
 }
 import { LIKE } from "../../models/Likes/likes.model";
+import { QUEST_FAV } from "../../models/Quest/questFavorite.model";
 
 
 const buildLikeQuery = (user: string, id: string, type: 'quest' | 'comment' | 'flick') => {
@@ -43,6 +44,14 @@ export const toggleLike = async (req: Request, res: Response) => {
             const flickDoc = await FLICKS.findById(id).select("likeCount");
             if (flickDoc) {
                 await redis.hset(redisKey, "count", flickDoc.likeCount || 0);
+            }
+        }
+        if(type ===  "quest"){
+            const questLike = await QUEST_FAV.findOne({ user, quest: id });
+            if(!questLike){
+                await QUEST_FAV.create({ user, quest: id });
+            }else{
+                await questLike.deleteOne();
             }
         }
         let countDelta = 0;

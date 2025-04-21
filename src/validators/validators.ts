@@ -786,7 +786,7 @@ export const validateCreateQuestApplication = (body: object, params: object) => 
         }),
       }),
     })).required(),
-    partialAllowance: Joi.boolean().required(),
+    partialAllowance: Joi.boolean().optional(),
     media: Joi.array().items(Joi.object({
       url: Joi.string()
         .pattern(new RegExp(`^${config.R2.R2_PUBLIC_URL}/.+$`))

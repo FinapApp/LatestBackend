@@ -12,7 +12,7 @@ export const getQuest = async (req: Request, res: Response) => {
             return handleResponse(res, 400, errors.validation, validationError.details);
         }
         const { questId } = req.params
-        const questdetails = await QUESTS.findById(questId).populate('user', 'username photo')
+        const questdetails = await QUESTS.findById(questId).populate('user', 'username photo name')
         return handleResponse(res, 200, { questdetails })
     } catch (error) {
         sendErrorToDiscord("GET:get-comment", error)

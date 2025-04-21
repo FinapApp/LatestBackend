@@ -5,6 +5,7 @@ import { sendErrorToDiscord } from "../../../config/discord/errorDiscord";
 import Joi from "joi";
 import { validateGetQuests } from "../../../validators/validators";
 import { Types } from "mongoose";
+
 export const getAllQuests = async (req: Request, res: Response) => {
     try {
         const validationError: Joi.ValidationError | undefined = validateGetQuests(req.query);
@@ -57,6 +58,31 @@ export const getAllQuests = async (req: Request, res: Response) => {
             });
         }
         switch (type) {
+            case 'favorite':
+                pipeline.push(
+                    {
+                        $lookup: {
+                            from: "questfavs",
+                            let: { questId: "$_id" },
+                            pipeline: [
+                                {
+                                    $match: {
+                                        $expr: {
+                                            $and: [
+                                                { $eq: ["$quest", "$$questId"] },
+                                                { $eq: ["$user", new Types.ObjectId(userId)] }
+                                            ]
+                                        }
+                                    }
+                                }
+                            ],
+                            as: "userFavorites"
+                        }
+                    },
+                    { $match: { userFavorites: { $ne: [] } } },
+                    { $unset: "userFavorites" }
+                );
+                break;
             case 'sponsored':
                 pipeline.push({ $match: { staff: { $exists: true } } });
                 break;
@@ -162,11 +188,39 @@ export const getAllQuests = async (req: Request, res: Response) => {
                     status: 1,
                     createdAt: 1,
                     hasApplied: 1, 
+                    hasLiked: 1,
                     applicantCount: 1,
                     avgAmountPerPerson: 1 ,  
                     totalEarnings: 1 
                 }
             }
+        );
+        pipeline.push(
+            {
+                $lookup: {
+                    from: "questfavs", 
+                    let: { questId: "$_id" },
+                    pipeline: [
+                        {
+                            $match: {
+                                $expr: {
+                                    $and: [
+                                        { $eq: ["$quest", "$$questId"] },
+                                        { $eq: ["$user", new Types.ObjectId(userId)] }
+                                    ]
+                                }
+                            }
+                        }
+                    ],
+                    as: "userFavorites"
+                }
+            },
+            {
+                $addFields: {
+                    hasLiked: { $gt: [{ $size: "$userFavorites" }, 0] }
+                }
+            },
+            { $unset: "userFavorites" }
         );
         pipeline.push(
             {
