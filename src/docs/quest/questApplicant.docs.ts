@@ -2,6 +2,91 @@
 /**
  * @swagger
  * /v1/quest/{questId}/applicant:
+ *   put:
+ *     tags:
+ *       - Quests Applicants
+ *     summary: Update the status of multiple quest applicants
+ *     parameters:
+ *       - in: query
+ *         name: status
+ *         required: true
+ *         schema:
+ *           type: string
+ *           enum: [approved, rejected]
+ *         description: The status to update the applicants to
+ *       - in: path
+ *         name: questId
+ *         required: true
+ *         schema:
+ *           type: string
+ *           pattern: "^[0-9a-fA-F]{24}$"
+ *         description: The unique ID of the quest
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               questApplicantIds:
+ *                 type: array
+ *                 items:
+ *                   type: string
+ *                   pattern: "^[0-9a-fA-F]{24}$"
+ *                 description: List of quest applicant IDs to update
+ *     responses:
+ *       200:
+ *         description: Status updated successfully for the provided quest applicants
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 message:
+ *                   type: string
+ *                   example: "Status updated successfully"
+ *       400:
+ *         description: Validation error or invalid request
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: false
+ *                 message:
+ *                   type: string
+ *                   example: "Invalid request parameters"
+ *       404:
+ *         description: One or more quest applicants not found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: false
+ *                 message:
+ *                   type: string
+ *                   example: "One or more quest applicants not found"
+ *       500:
+ *         description: Server error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: false
+ *                 message:
+ *                   type: string
+ *                   example: "An internal server error occurred"
  *   get:
  *     tags:
  *       - Quests Applicants
@@ -76,7 +161,7 @@
  * /v1/quest-applicant:
  *   post:
  *     tags:
- *       - [Quests Applicants]
+ *       - Quests Applicants
  *     summary: Create a presigned URL for a quest
  *     requestBody:
  *       description: Object containing media details for the flick

@@ -11,8 +11,8 @@ export const getQuestApplicant = async (req: Request, res: Response) => {
         if (validationError) {
             return handleResponse(res, 400, errors.validation, validationError.details);
         }
-        const { questId } = req.params
-        const questdetails = await QUEST_APPLICANT.findById(questId).populate('user', 'username photo')
+        const { questApplicantId } = req.params
+        const questdetails = await QUEST_APPLICANT.findById(questApplicantId).populate('user', 'username photo name')
         return handleResponse(res, 200, { questdetails })
     } catch (error) {
         sendErrorToDiscord("GET:get-comment", error)

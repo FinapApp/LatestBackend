@@ -18,16 +18,16 @@ export const updateQuestApplicant = async (req: Request, res: Response) => {
                 validationError.details
             );
         }
-        const updateQuest = await   QUEST_APPLICANT.findByIdAndUpdate(
-            req.params.questId,
+        const updateQuest = await QUEST_APPLICANT.findByIdAndUpdate(
+            req.params.questApplicantId,
             req.body
         );
         if (updateQuest) {
-            return handleResponse(res, 200, success.update_quest);
+            return handleResponse(res, 200, success.quest_applicant_updated);
         }
-        return handleResponse(res, 400, errors.update_quest);
+        return handleResponse(res, 400, errors.update_quest_applicants);
     } catch (err: any) {
-        sendErrorToDiscord("PUT:update-quest", err);
+        sendErrorToDiscord("PUT:update-quest-applicant", err);
         return handleResponse(res, 500, errors.catch_error);
     }
 };

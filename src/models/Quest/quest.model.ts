@@ -22,6 +22,7 @@ interface IQuests extends Document {
     country: string;
     type: 'Basic' | 'Exclusive'
     maxApplicants: number;
+    applicantCount : number; // this is the number of applicants that have applied for this quest
     totalApproved : number;
     totalRejected : number;
     leftApproved :  number;
@@ -64,6 +65,7 @@ export const QuestSchema = new Schema<IQuests>(
         suspended: { type: Boolean, default: false },
         suspendedReason: { type: String },
         maxApplicants: { type: Number },
+        applicantCount : { type: Number, default: 0 }, // this is the number of applicants that have applied for this quest
         totalApproved : { type: Number,default : 0 }, // kafka would be used to update this
         totalRejected : { type: Number , default : 0 }, // kafka would be used to update this
         leftApproved :  { 

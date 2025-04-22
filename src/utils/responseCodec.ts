@@ -218,6 +218,9 @@ export const errors = {
   quest_already_exists: {
     message: "Quest already exists",
   },
+  update_quest_applicants: {
+    message: "Unable to update quest applicants",
+  },
   update_quest: {
     message: "Unable to update quest",
   },
@@ -457,6 +460,9 @@ export const success = {
   },
   create_quest_applicants: {
     message: "Quest applicants created successfully",
+  },
+  quest_applicant_updated: {
+    message: "Quest applicant updated successfully",
   },
 
   // Authentication-related success

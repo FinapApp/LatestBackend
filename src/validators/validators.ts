@@ -924,7 +924,7 @@ export const validateQuestApplicantStatusBatch = (query: object, body: object) =
     status: Joi.string().valid("approved", "rejected").required(),
   })
   const bodySchema = Joi.object({
-    questApplicantIds: Joi.array().items(Joi.string().regex(/^[0-9a-fA-F]{24}$/, 'object Id').required())
+    questApplicantIds: Joi.array().items(Joi.string().regex(/^[0-9a-fA-F]{24}$/, 'object Id').required()).required()
   })
   const combinedSchema = Joi.object({
     query: querySchema,

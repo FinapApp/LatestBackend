@@ -16,42 +16,40 @@ export const createQuestApplicant = async (req: Request, res: Response) => {
         const questApplicantId = req.params.questApplicantId;
         const user = res.locals.userId;
         const { quest } = req.body;
-
-        const questData = await QUESTS.findById(quest, "status leftApproved");
-        if (!questData) {
-            return handleResponse(res, 404, errors.quest_not_found);
-        }
-
+        const questData = await QUESTS.findById(quest, "status leftApproved applicantCount");
+        if (!questData) return handleResponse(res, 404, errors.quest_not_found);
         if (questData.status !== "pending") {
             return handleResponse(res, 403, errors.quest_not_approved);
         }
-
-        const leftApproved = questData.leftApproved;
-        const maxAllowedThisBatch = leftApproved + Math.ceil(leftApproved * 0.3);
-
-        const currentApplicantCount = await QUEST_APPLICANT.countDocuments({
+        const { leftApproved } = questData;
+        const maxPendingThreshold = leftApproved + Math.ceil(leftApproved * 0.3); // buffer of 30%
+        const currentPendingApplicants = await QUEST_APPLICANT.countDocuments({
             quest,
             status: "pending"
         });
 
-        if (currentApplicantCount >= maxAllowedThisBatch) {
-            // Optional: pause quest
+        if (currentPendingApplicants >= maxPendingThreshold) {
             await QUESTS.findByIdAndUpdate(quest, { status: "paused" });
-            return handleResponse(res, 400, errors.max_applicants);
+            return handleResponse(res, 400, {
+                ...errors.max_applicants,
+                message: `Pending applicant limit reached. Quest paused automatically.`
+            });
         }
 
-        const createQuestApplicants = await QUEST_APPLICANT.create({
+        const createdApplicant = await QUEST_APPLICANT.create({
             _id: questApplicantId,
             user,
             ...req.body
         });
 
-        if (!createQuestApplicants) {
+        if (!createdApplicant) {
             return handleResponse(res, 500, errors.create_quest_applicants);
         }
 
-        return handleResponse(res, 201, success.create_quest_applicants);
+        // increment total applicant count (denormalized field)
+        await QUESTS.findByIdAndUpdate(quest, { $inc: { applicantCount: 1, leftApproved: -1 } });
 
+        return handleResponse(res, 201, success.create_quest_applicants);
     } catch (err) {
         sendErrorToDiscord("create-quest-applicant", err);
         return handleResponse(res, 500, errors.catch_error);

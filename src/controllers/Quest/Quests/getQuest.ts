@@ -1,5 +1,5 @@
 import { Request, Response } from 'express'
-import {  validateQuestId } from '../../../validators/validators'
+import { validateQuestId } from '../../../validators/validators'
 import { errors, handleResponse } from '../../../utils/responseCodec'
 import Joi from 'joi'
 import { sendErrorToDiscord } from '../../../config/discord/errorDiscord'
@@ -9,7 +9,7 @@ import { Types } from 'mongoose'
 
 export const getQuest = async (req: Request, res: Response) => {
     try {
-       const validationError: Joi.ValidationError | undefined = validateQuestId(req.params);
+        const validationError: Joi.ValidationError | undefined = validateQuestId(req.params);
         if (validationError) {
             return handleResponse(res, 400, errors.validation, validationError.details);
         }
@@ -32,7 +32,7 @@ export const getQuest = async (req: Request, res: Response) => {
                                 _id: 1,
                                 username: 1,
                                 photo: 1,
-                                name : 1,
+                                name: 1,
                             }
                         }
                     ]

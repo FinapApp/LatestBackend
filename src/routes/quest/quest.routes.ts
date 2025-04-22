@@ -12,6 +12,7 @@ import { changeQuestApplicantStatus } from "../../controllers/Quest/QuestApplica
 import { getQuest } from "../../controllers/Quest/Quests/getQuest";
 import { getQuestApplicant } from "../../controllers/Quest/QuestApplicants/getQuestApplicant";
 import { updateQuestApplicant } from "../../controllers/Quest/QuestApplicants/updateQuestApplicant";
+import { bulkChangeStatus } from "../../controllers/Quest/QuestApplicants/bulkChangeStatus";
 
 export const questRoutes: Router = express.Router();
 
@@ -31,7 +32,9 @@ questRoutes.route("/quest-applicant")
     .post(createPresignedURLQuestApplication)
 
 
-questRoutes.get("/quest/:questId/applicant", getAllQuestApplicant);
+questRoutes.route("/quest/:questId/applicant")
+    .get(getAllQuestApplicant)
+    .put(bulkChangeStatus)
 
 questRoutes.route("/quest-applicant/:questApplicantId")
     .get(getQuestApplicant)
