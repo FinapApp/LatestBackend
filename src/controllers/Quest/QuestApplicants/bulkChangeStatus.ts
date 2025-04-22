@@ -22,7 +22,6 @@ export const bulkChangeStatus = async (req: Request, res: Response) => {
             approvalCount: number,
             applicantIds: string[]
         }>();
-        console.log("====> questMap", questMap)
         for (const app of applicants) {
             const questId = app.quest._id.toString();
             if (!questMap.has(questId)) {
@@ -44,10 +43,7 @@ export const bulkChangeStatus = async (req: Request, res: Response) => {
                 const projectedRejections = totalRejected + entry.applicantIds.length;
 
                 const rejectionRate = projectedRejections / applicantCount;
-                console.log("====?  I was here")
-                console.log("Projected Rejection Rate: ", rejectionRate)
-                console.log("Projected Rejections: ", projectedRejections)
-                console.log("Total Rejected: ", totalRejected)
+              
 
                 if (rejectionRate > 0.3) {
                     return handleResponse(res, 403, {
