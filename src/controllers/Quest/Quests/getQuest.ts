@@ -13,7 +13,6 @@ export const getQuest = async (req: Request, res: Response) => {
         if (validationError) {
             return handleResponse(res, 400, errors.validation, validationError.details);
         }
-
         const { questId } = req.params;
         const userId = res.locals.userId;
         const questObjectId = new Types.ObjectId(questId);

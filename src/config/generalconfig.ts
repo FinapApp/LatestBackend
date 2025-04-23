@@ -3,7 +3,7 @@ dotenv.config();
 export const config = {
   MELLISSEARCH: {
     host: process.env.MELLISSEARCH_HOST!,
-    masterKey: process.env.MELLISSEARCH_MASTER_KEY!,
+    masterKey: process.env.MEILI_MASTER_KEY!,
     // userIndex: process.env.MELLISSEARCH_USER_INDEX!,
     // flickIndex :process.env.MELLISSEARCH_FLICK_INDEX!,  
   },

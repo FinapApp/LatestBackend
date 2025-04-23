@@ -12,13 +12,16 @@ export const getAllQuests = async (req: Request, res: Response) => {
         if (validationError) {
             return handleResponse(res, 400, errors.validation, validationError.details);
         }
-        const { sort, low, high, mode, type, long, lat, country } = req.query;
+        let { sort, low, high, mode, type, long, lat, country, page } = req.query;
         const userId = res.locals.userId;
         const pipeline: any[] = [];
-        if(country) {
+        const limit = 10;
+        const skip = ((Number(page) || 1) - 1) * limit;
+        if (country && typeof country === 'string') {
+            country = country.split(",") as string[];
             pipeline.push({
                 $match: {
-                    country: country
+                    country: { $in: country }
                 }
             })
         }
@@ -173,7 +176,7 @@ export const getAllQuests = async (req: Request, res: Response) => {
                     totalAmount: 1,
                     mode: 1,
                     location: 1,
-                    distanceinKM: 1, 
+                    distanceinKM: 1,
                     thumbnailURLs: {
                         $map: {
                             input: "$media",
@@ -187,18 +190,18 @@ export const getAllQuests = async (req: Request, res: Response) => {
                     maxApplicants: 1,
                     status: 1,
                     createdAt: 1,
-                    hasApplied: 1, 
+                    hasApplied: 1,
                     isFavorite: 1,
                     applicantCount: 1,
-                    avgAmountPerPerson: 1 ,  
-                    totalEarnings: 1 
+                    avgAmountPerPerson: 1,
+                    totalEarnings: 1
                 }
             }
         );
         pipeline.push(
             {
                 $lookup: {
-                    from: "questfavs", 
+                    from: "questfavs",
                     let: { questId: "$_id" },
                     pipeline: [
                         {
@@ -270,8 +273,26 @@ export const getAllQuests = async (req: Request, res: Response) => {
                     break;
             }
         }
+        pipeline.push({
+            $facet: {
+                results: [
+                    { $skip: skip },
+                    { $limit: limit }
+                ],
+                totalCount: [
+                    { $count: "count" }
+                ]
+            }
+        });
         const data = await QUESTS.aggregate(pipeline);
-        return handleResponse(res, 200, { quests: data });
+        const quests = data[0]?.results || [];
+        const total = data[0]?.totalCount[0]?.count || 0;
+        return handleResponse(res, 200, {
+            quests,
+            totalDocuments: total,
+            page: Number(page) || 1,
+            totalPages: Math.ceil(total / limit)
+        });
     } catch (err: any) {
         console.error(err);
         sendErrorToDiscord("GET:all-quests", err);

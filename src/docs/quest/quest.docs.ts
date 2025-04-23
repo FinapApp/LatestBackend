@@ -117,6 +117,11 @@
  *         name: country
  *         schema:
  *           type: string
+ *         description: Country for filtering seperate by comma
+ *       - in: query
+ *         name: page
+ *         schema:
+ *           type: number
  *         description: Country for filtering
  *     responses:
  *       200:

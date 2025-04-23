@@ -1,5 +1,5 @@
 import mongoose, { Document, Schema } from "mongoose";
-import bcrypt from "bcrypt";
+import bcrypt from "bcryptjs";
 import { ITextDataSchema, TextDataSchema } from "../Comment/comment.model";
 
 interface IUserSchema extends Document {

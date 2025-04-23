@@ -4,6 +4,7 @@ import { validateFlickId } from "../../validators/validators";
 import { errors, handleResponse, success } from "../../utils/responseCodec";
 import { FLICKS } from "../../models/Flicks/flicks.model";
 import { sendErrorToDiscord } from "../../config/discord/errorDiscord";
+import { getIndex } from "../../config/melllisearch/mellisearch.config";
 
 export const deleteFlick = async (req: Request, res: Response) => {
     try {
@@ -13,6 +14,8 @@ export const deleteFlick = async (req: Request, res: Response) => {
         }
         const deleteFlick = await FLICKS.findByIdAndDelete(req.params.flickId)
         if (deleteFlick) {
+            const flickIndex = getIndex("FLICKS");
+            await flickIndex.deleteDocument(req.params.flickId)
             // if we delete the reel we need to delete the associated likes , comments on it as well , in case of notifing it we can do that as well.
             return handleResponse(res, 200, success.flick_deleted)
         }

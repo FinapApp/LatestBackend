@@ -5,6 +5,7 @@ import { STORY } from "../../../models/Stories/story.model";
 import { validateCreateStory } from "../../../validators/validators";
 import { sendErrorToDiscord } from "../../../config/discord/errorDiscord";
 import { HASHTAGS } from "../../../models/User/userHashTag.model";
+import { getIndex } from "../../../config/melllisearch/mellisearch.config";
 
 export const createStory = async (req: Request, res: Response) => {
     try {
@@ -17,6 +18,8 @@ export const createStory = async (req: Request, res: Response) => {
         const { newHashTags, ...rest } = req.body;
         if (newHashTags) {
             const createHashTags = await HASHTAGS.insertMany(newHashTags.map((tag: { id: string, value: string }) => ({ value: tag.value, _id: tag.id })));
+            const hashTagIndex = getIndex("HASHTAG");
+            await hashTagIndex.addDocuments(newHashTags.map((tag: { id: string, value: string }) => ({ hashtagId: tag.id, value: tag.value, count: 1 })));
             if (!createHashTags) {
                 return handleResponse(res, 404, errors.create_hashtags);
             }

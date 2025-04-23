@@ -554,6 +554,10 @@ export const validateUpdateFlick = (body: object, params: object) => {
         y: Joi.number().optional()
       }).required()
     })).optional(),
+    newHashTags: Joi.array().items(Joi.object({
+      id: Joi.string().regex(/^[0-9a-fA-F]{24}$/, 'object Id').required(),
+      value: Joi.string().required()
+    })).optional(),
     commentVisible: Joi.boolean().optional(),
     likeVisible: Joi.boolean().optional(),
   })
@@ -700,12 +704,12 @@ export const validateCreateQuest = (body: object, params: object) => {
         return helpers.error("any.invalid", { message: "Country is not valid" });
       }
       return value;
-        }
-        ),
-        coords: Joi.object({
+    }
+    ),
+    coords: Joi.object({
       lat: Joi.number().min(-90).max(90).required(),
-      long: Joi.number().min(-180).max(180).required() 
-        }).required(),
+      long: Joi.number().min(-180).max(180).required()
+    }).required(),
     maxApplicants: Joi.number().required(),
     totalAmount: Joi.number().required(),
   });
@@ -719,6 +723,27 @@ export const validateCreateQuest = (body: object, params: object) => {
   const { error } = combinedSchema.validate({ body, params })
   return error
 }
+
+
+export const validateGetSearch = (query:object) => {
+const querySchema = Joi.object({
+q: Joi.string().max(30).required().messages({
+  'string.max': 'Search query must be less than or equal to 30 characters',
+  'any.required': 'Search query is required'
+}),
+limit : Joi.number().integer().min(1).max(10).messages({
+  'number.min': 'Limit must be at least 1',
+  'number.max': 'Limit must be at most 10',
+}).optional(),
+page : Joi.number().integer().min(1).optional(),
+type : Joi.string().valid('user', 'flick', 'hashtag' , 'quest' ,'song' ).optional(),
+});
+const { error } = querySchema.validate(query);
+return error;
+}
+
+
+
 
 export const validateUpdateQuest = (body: object, params: object) => {
   const bodySchema = Joi.object({
@@ -804,7 +829,7 @@ export const validateCreateQuestApplication = (body: object, params: object) => 
   return error
 }
 
-export  const validateUpdateQuestApplicant = (body: object, params: object) => {
+export const validateUpdateQuestApplicant = (body: object, params: object) => {
   const paramsSchema = Joi.object({
     questApplicantId: Joi.string().regex(/^[0-9a-fA-F]{24}$/, 'object Id').required()
   })
@@ -879,6 +904,21 @@ export const validateQuestId = (params: object) => {
   return error
 }
 
+export const validateGetQuestApplicants = (params: object, query: object) => {
+  const paramsSchema = Joi.object({
+    questId: Joi.string().regex(/^[0-9a-fA-F]{24}$/, 'object Id').required()
+  })
+  const querySchema = Joi.object({
+    page: Joi.number().min(1).optional(),
+  })
+  const combinedSchema = Joi.object({
+    params: paramsSchema,
+    query: querySchema
+  })
+  const { error } = combinedSchema.validate({ params, query })
+  return error
+}
+
 export const validateGetAllFlicks = (query: object) => {
   const schema = Joi.object({
     skip: Joi.string().optional(),
@@ -902,15 +942,18 @@ export const validateGetQuests = (query: object) => {
     long: Joi.string().optional(),
     low: Joi.string().optional(),
     high: Joi.string().optional(),
+    page: Joi.number().optional(),
     mode: Joi.string().valid("go", "on").optional(),
     country: Joi.string().optional().custom((value, helpers) => {
       // Check if country exists in your predefined countries list
-      if (!countries.some(e => e.code === value)) {
-        return helpers.error("any.invalid", { message: "Country is not valid" });
+      const countryCodes = value.split(",");
+      const invalid = countryCodes.filter((code: string) => !countries.some(c => c.code === code.trim()));
+      if (invalid.length > 0) {
+        return helpers.error("any.invalid", { message: `Invalid country code(s): ${invalid.join(", ")}` });
       }
-      return value;
+      return countryCodes;
     }),
-    type : Joi.string().valid("sponsored" , "self" , "applied" , "favorite")
+    type: Joi.string().valid("sponsored", "self", "applied", "favorite")
   }).and("lat", "long").messages({
     "object.and": "lat and long must be provided together",
   })

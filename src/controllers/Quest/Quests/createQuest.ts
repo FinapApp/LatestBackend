@@ -3,6 +3,7 @@ import { errors, handleResponse, success } from "../../../utils/responseCodec";
 import Joi from "joi";
 import { validateCreateQuest } from "../../../validators/validators";
 import { QUESTS } from "../../../models/Quest/quest.model";
+import { getIndex } from "../../../config/melllisearch/mellisearch.config";
 
 export const createQuest = async (req: Request, res: Response) => {
     try {
@@ -12,7 +13,7 @@ export const createQuest = async (req: Request, res: Response) => {
         }
         const user = res.locals.userId
         const questId = req.params.questId;
-        const  { coords , ...rest } = req.body;
+        const { coords, ...rest } = req.body;
         const quest = await QUESTS.create({
             _id: questId,
             user,
@@ -21,11 +22,17 @@ export const createQuest = async (req: Request, res: Response) => {
                 coordinates: [coords.long, coords.lat]
             },
             ...rest
-        });
-        if (!quest) {
-            return handleResponse(res, 404, errors.quest_not_found);
+        } );
+        if (quest) {
+            const questIndex = getIndex("QUESTS");
+            await questIndex.addDocuments([{
+                userId: user,
+                questId,
+                ...quest.toObject()
+            }]);
+            return handleResponse(res, 200, success.quest_created);
         }
-        return handleResponse(res, 200, success.quest_created);
+        return handleResponse(res, 404, errors.quest_not_found);
     } catch (error: any) {
         console.error(error);
         if (error.code === 11000) {

@@ -1,9 +1,9 @@
 import express, { Router } from "express";
-import { searchTest } from "../../controllers/Search/searchTest";
+import { search } from "../../controllers/Search/search";
 
 
 
 // REDIRECTION TO THE APP STORE IF NOT THIS MAYBE
 export const searchRoutes : Router = express.Router();
 
-searchRoutes.post("/search", searchTest)
+searchRoutes.post("/search", search)

@@ -39,7 +39,6 @@ export const changeQuestApplicantStatus = async (req: Request, res: Response) =>
                 });
             }
         }
-
         // ✅ Approval check
         if (status === "approved" && quest.leftApproved <= 0) {
             return handleResponse(res, 403, errors.quest_applicant_approval);

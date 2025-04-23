@@ -15,11 +15,9 @@ export const followerToggle = async (req: Request, res: Response) => {
 
         const { followerId } = req.params; // This is the ID of the person I'm trying to follow
         const me = res.locals.userId;      // I am the one logged in
-
         if (followerId === me) {
             return handleResponse(res, 400, errors.self_follow);
         }
-
         // Check if already following, and unfollow
         const existingFollow = await FOLLOW.findOneAndDelete({ follower: me, following: followerId });
         if (existingFollow) {

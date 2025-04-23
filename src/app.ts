@@ -14,8 +14,7 @@ import { specs, swaggerUi } from "./utils/swagger";
 import mongoose from "mongoose";
 import { SongSchema } from "./models/Song/song.model";
 import { StaffSchema } from "./models/Staff/staff.model";
-// import { connectMeilisearch } from "./config/melllisearch/mellisearch.config";
-const redisInitalizer = redis;
+import { connectMeilisearch } from "./config/melllisearch/mellisearch.config";
 const app: Express = express();
 
 // SWAGGER
@@ -40,8 +39,6 @@ if (cluster.isPrimary) {
   for (let i = 0; i < 1; i++) {
     cluster.fork();
   }
-  // kafkaConnecter()
-  app.set("redis", redisInitalizer);
   cluster.on("exit", (worker, code, signal) => {
     console.log(`worker ${worker.process.pid} died`);
   });
@@ -53,13 +50,22 @@ if (cluster.isPrimary) {
     allowedHeaders: ["Content-Type", "Authorization", "x-amz-date", "x-amz-content-sha256", "x-amz-security-token"],
     exposedHeaders: ["ETag"]
   }));
-  // connectMeilisearch()
+
+  // REDIS CONNECTER
+  app.set("redis", redis);
+
+  // KAFKA CONNECTER
+  // kafkaConnecter()
+
+  // MELLISEARCH CONNECTER
+  connectMeilisearch()
+
   // app.use(cors({ credentials: true, origin: true }))
   app.use(helmet({ contentSecurityPolicy: false }))
   app.use("/api/v1", isAuthenticatedUser, protectedRoutes);
   app.use("/api", normalRoutes);
-  mongoose.model("song" , SongSchema)
-  mongoose.model("staff" , StaffSchema)
+  mongoose.model("song", SongSchema)
+  mongoose.model("staff", StaffSchema)
   const startServer = async () => {
     try {
       await connectDB();

@@ -8,7 +8,7 @@ import { USER } from "../../models/User/user.model";
 import { SESSION } from "../../models/User/userSession.model";
 import { fetchIpGeolocation } from "../../utils/IP_helpers";
 import useragent from "useragent";
-import bcrypt from "bcrypt";
+import bcrypt from "bcryptjs";
 import { USERPREFERENCE } from "../../models/User/userPreference.model";
 import { sendErrorToDiscord } from "../../config/discord/errorDiscord";
 

@@ -4,6 +4,7 @@ import { handleResponse, errors, success } from "../../../utils/responseCodec";
 import Joi from "joi";
 import { sendErrorToDiscord } from "../../../config/discord/errorDiscord";
 import { QUESTS } from "../../../models/Quest/quest.model";
+import { getIndex } from "../../../config/melllisearch/mellisearch.config";
 
 export const updateQuest = async (req: Request, res: Response) => {
     try {
@@ -18,11 +19,28 @@ export const updateQuest = async (req: Request, res: Response) => {
                 validationError.details
             );
         }
+        const user = res.locals.userId;
+        const questId = req.params.questId;
+        const { coords, ...rest } = req.body;
+
+        if (coords) {
+            rest.gps = {
+                type: "Point",
+                coordinates: [coords.long, coords.lat],
+            };
+        }
         const updateQuest = await QUESTS.findByIdAndUpdate(
-            req.params.questId,
-            req.body
+            questId,
+            ...rest
         );
         if (updateQuest) {
+            const questIndex = getIndex("QUESTS");
+            await questIndex.addDocuments({
+                userId: user,
+                questId,
+                coords,
+                ...rest,
+            });
             return handleResponse(res, 200, success.update_quest);
         }
         return handleResponse(res, 400, errors.update_quest);

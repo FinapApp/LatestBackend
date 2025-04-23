@@ -4,7 +4,7 @@ import { handleResponse, errors, success } from "../../../utils/responseCodec";
 import Joi from "joi";
 import { USER } from "../../../models/User/user.model";
 import { sendErrorToDiscord } from "../../../config/discord/errorDiscord";
-import bcrypt from "bcrypt";
+import bcrypt from "bcryptjs";
 export const updatePassword = async (req: Request, res: Response) => {
     try {
         const validationError: Joi.ValidationError | undefined = validatePassword(

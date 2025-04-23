@@ -85,3 +85,6 @@ export const QuestSchema = new Schema<IQuests>(
 QuestSchema.index({ gps: "2dsphere" });
 
 export const QUESTS = mongoose.model<IQuests>("quest", QuestSchema);
+
+
+

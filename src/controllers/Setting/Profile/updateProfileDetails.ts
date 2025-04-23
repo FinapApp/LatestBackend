@@ -5,7 +5,7 @@ import Joi from "joi";
 import { USER } from "../../../models/User/user.model";
 import { sendErrorToDiscord } from "../../../config/discord/errorDiscord";
 import { HASHTAGS } from "../../../models/User/userHashTag.model";
-// import { melliClient } from "../../../config/melllisearch/mellisearch.config";
+import { getIndex } from "../../../config/melllisearch/mellisearch.config";
 
 
 export const updateProfileDetails = async (req: Request, res: Response) => {
@@ -24,6 +24,8 @@ export const updateProfileDetails = async (req: Request, res: Response) => {
         const { newHashTags, ...rest } = req.body;
         if (newHashTags) {
             const createHashTags = await HASHTAGS.insertMany(newHashTags.map((tag: { id: string, value: string }) => ({ value: tag.value, _id: tag.id })));
+            const hashTagIndex = getIndex("HASHTAG");
+            await hashTagIndex.addDocuments(newHashTags.map((tag: { id: string, value: string }) => ({ hashtagId: tag.id, value: tag.value ,count: 1})));
             if (!createHashTags) {
                 return handleResponse(res, 404, errors.create_hashtags);
             }
@@ -35,12 +37,13 @@ export const updateProfileDetails = async (req: Request, res: Response) => {
             { new: true }
         );
         if (updateProfile) {
-            // await melliClient.index("users").addDocuments([
-            //     {
-            //         userId: userId.toString(),
-            //         ...rest
-            //     }
-            // ])
+            const userIndex = getIndex("USERS");
+            await userIndex.addDocuments([
+                {
+                    userId,
+                    ...rest
+                }
+            ])
             return handleResponse(res, 200, success.profile_updated);
         }
         return handleResponse(res, 304, errors.profile_not_updated);
