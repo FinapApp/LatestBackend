@@ -31,8 +31,8 @@ export const updateFlick = async (req: Request, res: Response) => {
         }
         const flickId = req.params.flickId;
         const userId = res.locals.userId;
-        const updateFlick = await FLICKS.findByIdAndUpdate(
-            flickId,
+        const updateFlick = await FLICKS.findOneAndUpdate(
+            {_id : flickId , user : userId},
             req.body
         );
         if (updateFlick) {

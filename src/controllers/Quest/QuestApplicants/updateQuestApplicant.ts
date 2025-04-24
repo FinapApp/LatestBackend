@@ -18,8 +18,8 @@ export const updateQuestApplicant = async (req: Request, res: Response) => {
                 validationError.details
             );
         }
-        const updateQuest = await QUEST_APPLICANT.findByIdAndUpdate(
-            req.params.questApplicantId,
+        const updateQuest = await QUEST_APPLICANT.findOneAndUpdate(
+            {_id : req.params.questApplicantId , user : res.locals.userId},
             req.body
         );
         if (updateQuest) {

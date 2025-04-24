@@ -29,8 +29,8 @@ export const updateQuest = async (req: Request, res: Response) => {
                 coordinates: [coords.long, coords.lat],
             };
         }
-        const updateQuest = await QUESTS.findByIdAndUpdate(
-            questId,
+        const updateQuest = await QUESTS.findOneAndUpdate(
+            { _id: questId, user },
             { ...rest }
         );
         if (updateQuest) {
