@@ -4,6 +4,6 @@ import { search } from "../../controllers/Search/search";
 
 
 // REDIRECTION TO THE APP STORE IF NOT THIS MAYBE
-export const searchRoutes : Router = express.Router();
+export const searchRoutes: Router = express.Router();
 
-searchRoutes.post("/search", search)
+searchRoutes.get("/search", search)

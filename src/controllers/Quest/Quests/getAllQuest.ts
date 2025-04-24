@@ -12,11 +12,11 @@ export const getAllQuests = async (req: Request, res: Response) => {
         if (validationError) {
             return handleResponse(res, 400, errors.validation, validationError.details);
         }
-        let { sort, low, high, mode, type, long, lat, country, page } = req.query;
+        let { sort, low, high, mode, type, long, lat, country, page, limit = 10 } = req.query;
         const userId = res.locals.userId;
         const pipeline: any[] = [];
-        const limit = 10;
-        const skip = ((Number(page) || 1) - 1) * limit;
+        limit  = Number(limit);
+        const skip = ((Number(page) || 1) - 1) * limit
         if (country && typeof country === 'string') {
             country = country.split(",") as string[];
             pipeline.push({

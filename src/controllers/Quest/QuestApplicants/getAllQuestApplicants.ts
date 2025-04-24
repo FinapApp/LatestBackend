@@ -2,7 +2,7 @@ import { Request, Response } from "express";
 import { errors, handleResponse } from "../../../utils/responseCodec";
 import { sendErrorToDiscord } from "../../../config/discord/errorDiscord";
 import { QUEST_APPLICANT } from "../../../models/Quest/questApplicant.model";
-import { validateGetQuestApplicants} from "../../../validators/validators";
+import { validateGetQuestApplicants } from "../../../validators/validators";
 import Joi from "joi";
 import { Types } from "mongoose";
 
@@ -12,8 +12,8 @@ export const getAllQuestApplicant = async (req: Request, res: Response) => {
         if (validationError) {
             return handleResponse(res, 400, errors.validation, validationError.details);
         }
-        const { page = 1 } = req.query;
-        const limit = 10;
+        let { page = 1, limit = 10 } = req.query;
+        limit = Number(limit);
         const skip = (Number(page) - 1) * limit;
         const pipeline: any[] = [
             {
@@ -58,7 +58,6 @@ export const getAllQuestApplicant = async (req: Request, res: Response) => {
         const result = await QUEST_APPLICANT.aggregate(pipeline);
         const applicants = result[0]?.results || [];
         const total = result[0]?.totalCount[0]?.count || 0;
-
         return handleResponse(res, 200, {
             applicants,
             totalDocuments: total,

@@ -25,16 +25,30 @@ export const validateLogin = (body: object) => {
   const { error } = schema.validate(body);
   return error;
 };
-export const validateGetters = (query: object) => {
+
+export const validateGetFlicks = (query: object) => {
   const schema = Joi.object({
-    search: Joi.string().optional(),
-    skip: Joi.string().optional(),
-    sort: Joi.string().optional(),
-    order: Joi.string().valid('asc', 'desc').optional()
+    type: Joi.string().valid("tagged" , "self").optional(),
+    limit: Joi.number().integer().min(1).max(15).optional(),
+    page: Joi.number().integer().min(1).optional(),
+  });
+  const { error } = schema.validate(query);
+  return error;
+}
+
+export const validateGetFeedback = (query :  object) => {
+  const schema  = Joi.object({
+    type: Joi.string().valid("pending" , "resolved").optional(),
+    rating : Joi.number().integer().min(1).max(5).optional(),
+    limit: Joi.number().integer().min(1).max(15).optional(),
+    page: Joi.number().integer().min(1).optional(),
   })
-  const { error } = schema.validate(query)
+  const {error} = schema.validate(query)
   return error
 }
+
+
+
 export const validateForgetPassword = (body: object) => {
   const schema = Joi.object({
     email: Joi.string().email().optional(),
@@ -55,6 +69,7 @@ export const validateForgetPassword = (body: object) => {
   const { error } = schema.validate(body);
   return error;
 }
+
 export const validateOTPForgetPassword = (body: object) => {
   const schema = Joi.object({
     otp: Joi.string().required(),
@@ -910,6 +925,7 @@ export const validateGetQuestApplicants = (params: object, query: object) => {
   })
   const querySchema = Joi.object({
     page: Joi.number().min(1).optional(),
+    limit : Joi.number().min(1).optional(),
   })
   const combinedSchema = Joi.object({
     params: paramsSchema,
@@ -919,21 +935,8 @@ export const validateGetQuestApplicants = (params: object, query: object) => {
   return error
 }
 
-export const validateGetAllFlicks = (query: object) => {
-  const schema = Joi.object({
-    skip: Joi.string().optional(),
-  })
-  const { error } = schema.validate(query)
-  return error
-}
 
-export const validateGetAllComments = (query: object) => {
-  const schema = Joi.object({
-    skip: Joi.string().optional()
-  })
-  const { error } = schema.validate(query)
-  return error
-}
+
 
 export const validateGetQuests = (query: object) => {
   const schema = Joi.object({
@@ -942,6 +945,7 @@ export const validateGetQuests = (query: object) => {
     long: Joi.string().optional(),
     low: Joi.string().optional(),
     high: Joi.string().optional(),
+    limit : Joi.string().optional(),
     page: Joi.number().optional(),
     mode: Joi.string().valid("go", "on").optional(),
     country: Joi.string().optional().custom((value, helpers) => {
