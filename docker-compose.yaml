@@ -38,11 +38,6 @@ services:
       MEILI_MASTER_KEY: finapus
     volumes:
       - meili_data:/meili_data
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:7700/health"]
-      interval: 5s
-      timeout: 2s
-      retries: 10
 
   app:
     build:
@@ -54,7 +49,7 @@ services:
       - "4003:4003"
     depends_on:
       meilisearch:
-        condition: service_healthy
+        condition: service_started
       mongodb:
         condition: service_started
       redis:

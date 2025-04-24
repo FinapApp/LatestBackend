@@ -31,7 +31,7 @@ export const updateQuest = async (req: Request, res: Response) => {
         }
         const updateQuest = await QUESTS.findByIdAndUpdate(
             questId,
-            ...rest
+            { ...rest }
         );
         if (updateQuest) {
             const questIndex = getIndex("QUESTS");
@@ -45,6 +45,7 @@ export const updateQuest = async (req: Request, res: Response) => {
         }
         return handleResponse(res, 400, errors.update_quest);
     } catch (err: any) {
+        console.log(err)
         sendErrorToDiscord("PUT:update-quest", err);
         return handleResponse(res, 500, errors.catch_error);
     }

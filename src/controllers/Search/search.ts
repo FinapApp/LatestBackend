@@ -22,12 +22,7 @@ export const search = async (req: Request, res: Response) => {
                     offset,
                     attributesToRetrieve: ["userId", "name", "username", "photo"]
                 });
-                result.userSearch = data.hits.map((user: any) => ({
-                    userId: user.userId,
-                    name: user.name,
-                    username: user.username,
-                    photo: user.photo
-                }));
+                result.userSearch = data
                 break;
             }
             case "flick": {
@@ -37,12 +32,7 @@ export const search = async (req: Request, res: Response) => {
                     offset,
                     attributesToRetrieve: ["userId", "flickId", "thumbnailURL", "description"]
                 });
-                result.flickSearch = data.hits.map((flick: any) => ({
-                    userId: flick.userId,
-                    flickId: flick.flickId,
-                    thumbnailURL: flick.thumbnailURL,
-                    description: flick.description
-                }));
+                result.flickSearch = data
                 break;
             }
             case "hashtag": {
@@ -52,11 +42,7 @@ export const search = async (req: Request, res: Response) => {
                     offset,
                     attributesToRetrieve: ["hashtagId", "value", "count"]
                 });
-                result.hashTagSearch = data.hits.map((hashtag: any) => ({
-                    hashtagId: hashtag.hashtagId,
-                    value: hashtag.value,
-                    count: hashtag.count
-                }));
+                result.hashTagSearch = data
                 break;
             }
             case "quest": {
@@ -65,12 +51,7 @@ export const search = async (req: Request, res: Response) => {
                     limit,
                     attributesToRetrieve: ["userId", "questId", "description", "thumbnailURL"]
                 });
-                result.questSearch = data.hits.map((quest: any) => ({
-                    userId: quest.userId,
-                    questId: quest.questId,
-                    description: quest.description,
-                    thumbnailURL: quest.thumbnailURL
-                }));
+                result.questSearch = data
                 break;
             }
             case "song": {
@@ -80,12 +61,7 @@ export const search = async (req: Request, res: Response) => {
                     offset,
                     attributesToRetrieve: ["songId", "title", "artist", "thumbnailURL"]
                 });
-                result.songSearch = data.hits.map((song: any) => ({
-                    songId: song.songId,
-                    title: song.title,
-                    artist: song.artist,
-                    thumbnailURL: song.thumbnailURL
-                }));
+                result.songSearch = data
                 break;
             }
             default: {
@@ -113,7 +89,12 @@ export const search = async (req: Request, res: Response) => {
                     })
                 ]);
 
-                result.userSearch = userSearch;
+                result.userSearch = userSearch.hits.map((u: any) => ({
+                    userId: u.userId,
+                    name: u.name,
+                    username: u.username,
+                    photo: u.photo
+                }));
                 result.flickSearch = flickSearch.hits.map((f: any) => ({
                     userId: f.userId,
                     flickId: f.flickId,
