@@ -34,6 +34,7 @@ export const getAllQuestApplicant = async (req: Request, res: Response) => {
                 $project: {
                     _id: 1,
                     status: 1,
+                    description: 1,
                     createdAt: 1,
                     "user._id": 1,
                     "user.name": 1,
