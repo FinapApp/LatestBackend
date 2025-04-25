@@ -3,6 +3,7 @@ import { Request, Response } from "express"
 import { errors, handleResponse } from "../../utils/responseCodec"
 import Joi from "joi";
 import { validateGetSearch } from "../../validators/validators";
+import { FOLLOW } from "../../models/User/userFollower.model";
 
 export const search = async (req: Request, res: Response) => {
     try {
@@ -22,7 +23,17 @@ export const search = async (req: Request, res: Response) => {
                     offset,
                     attributesToRetrieve: ["userId", "name", "username", "photo"]
                 });
-                result.userSearch = data
+                const userIds = data.hits.map((user: any) => user.userId);
+                const checkFollowing = await FOLLOW.find({
+                    user: res.locals.userId,
+                    following: { $in: userIds }
+                }).lean(); 
+                const followingSet = new Set(checkFollowing.map(f => f.following));
+                const usersWithFollowStatus = data.hits.map((user: any) => ({
+                    ...user,
+                    isFollowing: followingSet.has(user.userId)
+                }));
+                result.userSearch = usersWithFollowStatus;
                 break;
             }
             case "flick": {
@@ -30,9 +41,9 @@ export const search = async (req: Request, res: Response) => {
                 const data = await index.search(q, {
                     limit,
                     offset,
-                    attributesToRetrieve: ["userId", "flickId", "thumbnailURL", "description"]
+                    attributesToRetrieve: ["userId", "flickId", "thumbnailURL", "description", "user"]
                 });
-                result.flickSearch = data
+                result.flickSearch = data.hits
                 break;
             }
             case "hashtag": {
@@ -42,16 +53,16 @@ export const search = async (req: Request, res: Response) => {
                     offset,
                     attributesToRetrieve: ["hashtagId", "value", "count"]
                 });
-                result.hashTagSearch = data
+                result.hashTagSearch = data.hits
                 break;
             }
             case "quest": {
                 const index = getIndex("QUESTS");
                 const data = await index.search(q, {
                     limit,
-                    attributesToRetrieve: ["userId", "questId", "description", "thumbnailURL"]
+                    attributesToRetrieve: ["userId", "questId", "description", "thumbnailURLs", "avgAmountPerPerson", "createdAt", "mode", "title", "user"]
                 });
-                result.questSearch = data
+                result.questSearch = data.hits
                 break;
             }
             case "song": {
@@ -61,7 +72,7 @@ export const search = async (req: Request, res: Response) => {
                     offset,
                     attributesToRetrieve: ["songId", "title", "artist", "thumbnailURL"]
                 });
-                result.songSearch = data
+                result.songSearch = data.hits
                 break;
             }
             default: {
@@ -73,7 +84,7 @@ export const search = async (req: Request, res: Response) => {
                     }),
                     getIndex("FLICKS").search(q, {
                         limit,
-                        attributesToRetrieve: ["userId", "flickId", "thumbnailURL", "description"]
+                        attributesToRetrieve: ["userId", "flickId", "thumbnailURL", "description", "user"]
                     }),
                     getIndex("HASHTAG").search(q, {
                         limit,
@@ -81,7 +92,7 @@ export const search = async (req: Request, res: Response) => {
                     }),
                     getIndex("QUESTS").search(q, {
                         limit,
-                        attributesToRetrieve: ["userId", "questId", "description", "thumbnailURL"]
+                        attributesToRetrieve: ["userId", "questId", "description", "thumbnailURLs", "avgAmountPerPerson", "createdAt", "mode", "title", "user"]
                     }),
                     getIndex("SONGS").search(q, {
                         limit,
@@ -89,34 +100,11 @@ export const search = async (req: Request, res: Response) => {
                     })
                 ]);
 
-                result.userSearch = userSearch.hits.map((u: any) => ({
-                    userId: u.userId,
-                    name: u.name,
-                    username: u.username,
-                    photo: u.photo
-                }));
-                result.flickSearch = flickSearch.hits.map((f: any) => ({
-                    userId: f.userId,
-                    flickId: f.flickId,
-                    thumbnailURL: f.thumbnailURL,
-                    description: f.description
-                }));
-                result.hashTagSearch = hashTagSearch.hits.map((h: any) => ({
-                    hashtagId: h.hashtagId,
-                    value: h.value
-                }));
-                result.questSearch = questSearch.hits.map((q: any) => ({
-                    userId: q.userId,
-                    questId: q.questId,
-                    description: q.description,
-                    thumbnailURL: q.thumbnailURL
-                }));
-                result.songSearch = songSearch.hits.map((s: any) => ({
-                    songId: s.songId,
-                    title: s.title,
-                    artist: s.artist,
-                    thumbnailURL: s.thumbnailURL
-                }));
+                result.userSearch = userSearch.hits
+                result.flickSearch = flickSearch.hits
+                result.hashTagSearch = hashTagSearch.hits
+                result.questSearch = questSearch.hits;
+                result.songSearch = songSearch.hits
             }
         }
         return handleResponse(res, 200, result)

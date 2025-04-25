@@ -264,7 +264,7 @@ export const validateCreateFlick = (body: object, params: object) => {
     }).min(1).max(14)).required().messages({
       'array.min': 'At least one media item is required',
       'array.max': 'A maximum of 14 media items are allowed'
-    }),
+    }).required(),
     song: Joi.string().regex(/^[0-9a-fA-F]{24}$/, 'object Id').optional(),
     songStart: Joi.number().when('song', {
       is: Joi.exist(),
@@ -710,7 +710,7 @@ export const validateCreateQuest = (body: object, params: object) => {
     }).min(1).max(14)).optional().messages({
       'array.min': 'At least one media item is required',
       'array.max': 'A maximum of 14 media items are allowed'
-    }).optional(),
+    }).required(),
     mode: Joi.string().valid("GoFlick", "OnFlick").required(),
     location: Joi.string().required(),
     country: Joi.string().required().custom((value, helpers) => {
@@ -746,13 +746,15 @@ q: Joi.string().max(30).required().messages({
   'string.max': 'Search query must be less than or equal to 30 characters',
   'any.required': 'Search query is required'
 }),
-limit : Joi.number().integer().min(1).max(10).messages({
+limit : Joi.number().integer().min(1).max(15).messages({
   'number.min': 'Limit must be at least 1',
   'number.max': 'Limit must be at most 10',
 }).optional(),
 page : Joi.number().integer().min(1).optional(),
 type : Joi.string().valid('user', 'flick', 'hashtag' , 'quest' ,'song' ).optional(),
-});
+}).and("type", "limit").messages({
+  "object.and": "type and limit must be provided together",
+})
 const { error } = querySchema.validate(query);
 return error;
 }

@@ -11,24 +11,27 @@ export const createQuest = async (req: Request, res: Response) => {
         if (validationError) {
             return handleResponse(res, 400, errors.validation, validationError.details);
         }
-        const user = res.locals.userId
+        const userId = res.locals.userId
         const questId = req.params.questId;
         const { coords, ...rest } = req.body;
         const quest = await QUESTS.create({
             _id: questId,
-            user,
+            user:   userId,
             gps: {
                 type: "Point",
                 coordinates: [coords.long, coords.lat]
             },
             ...rest
-        } );
+        });
         if (quest) {
             const questIndex = getIndex("QUESTS");
+            const userDetails = await quest.populate("user", "username photo name")
             await questIndex.addDocuments([{
-                userId: user,
+                userId,
                 questId,
-                ...quest.toObject()
+                thumbnailURLs : quest.media.map((data) => data?.thumbnailURL),
+                ...quest.toObject(),
+                user : userDetails.user,
             }]);
             return handleResponse(res, 200, success.quest_created);
         }

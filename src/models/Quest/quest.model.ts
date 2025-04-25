@@ -14,7 +14,6 @@ interface IQuests extends Document {
     media: IMediaSchema[];
     mode: 'Goflick' | 'OnFlick';
     location: string;
-    thumbnailURL: string;
     gps: IGPSLocation;
     totalAmount: number;
     suspended: boolean;

@@ -14,7 +14,7 @@ export type ITextDataSchema = {
     text?: string
     hashtag?: string
 };
-// stickers  --> @prashant was here  #rocking
+
 
 
 export const TextDataSchema = new Schema<ITextDataSchema>(

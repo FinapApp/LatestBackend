@@ -15,18 +15,12 @@ export const getAllQuests = async (req: Request, res: Response) => {
         let { sort, low, high, mode, type, long, lat, country, page, limit = 10 } = req.query;
         const userId = res.locals.userId;
         const pipeline: any[] = [];
-        limit  = Number(limit);
-        const skip = ((Number(page) || 1) - 1) * limit
-        if (country && typeof country === 'string') {
-            country = country.split(",") as string[];
-            pipeline.push({
-                $match: {
-                    country: { $in: country }
-                }
-            })
-        }
+        limit = Number(limit);
+        const skip = ((Number(page) || 1) - 1) * limit;
+
+        // Geolocation stage
         if (long && lat) {
-            pipeline.unshift({
+            pipeline.push({
                 $geoNear: {
                     near: {
                         type: "Point",
@@ -39,6 +33,18 @@ export const getAllQuests = async (req: Request, res: Response) => {
                 }
             });
         }
+
+        // Country filter
+        if (country && typeof country === 'string') {
+            country = country.split(",") as string[];
+            pipeline.push({
+                $match: {
+                    country: { $in: country }
+                }
+            });
+        }
+
+        // Mode filter
         if (mode) {
             pipeline.push({
                 $match: {
@@ -46,20 +52,20 @@ export const getAllQuests = async (req: Request, res: Response) => {
                 }
             });
         }
+
+        // Amount range filter
         if (low || high) {
             const amountCondition: any = {};
-            if (low) {
-                amountCondition.$gte = Number(low);
-            }
-            if (high) {
-                amountCondition.$lte = Number(high);
-            }
+            if (low) amountCondition.$gte = Number(low);
+            if (high) amountCondition.$lte = Number(high);
             pipeline.push({
                 $match: {
                     avgAmountPerPerson: amountCondition
                 }
             });
         }
+
+        // Type-specific filters
         switch (type) {
             case 'favorite':
                 pipeline.push(
@@ -90,26 +96,8 @@ export const getAllQuests = async (req: Request, res: Response) => {
                 pipeline.push({ $match: { staff: { $exists: true } } });
                 break;
             case 'self':
-                pipeline.push(
-                    { $match: { user: new Types.ObjectId(userId) } },
-                    {
-                        $lookup: {
-                            from: "questapplications",
-                            localField: "_id",
-                            foreignField: "quest",
-                            as: "applicants"
-                        }
-                    },
-                    {
-                        $addFields: {
-                            applicantCount: { $size: "$applicants" }
-                        }
-                    },
-                    {
-                        $unset: "applicants"
-                    }
-                );
-                break
+                pipeline.push({ $match: { user: new Types.ObjectId(userId) } });
+                break;
             case 'applied':
                 pipeline.push(
                     {
@@ -132,30 +120,36 @@ export const getAllQuests = async (req: Request, res: Response) => {
                         }
                     },
                     { $match: { applications: { $ne: [] } } },
-                    {
-                        $addFields: {
-                            totalEarnings: {
-                                $sum: {
-                                    $map: {
-                                        input: {
-                                            $filter: {
-                                                input: "$applications",
-                                                as: "app",
-                                                cond: { $eq: ["$$app.status", "approved"] }
-                                            }
-                                        },
-                                        as: "approvedApp",
-                                        in: "$$approvedApp.txnAmount"
-                                    }
-                                }
-                            }
-                        }
-                    },
                     { $unset: "applications" }
                 );
                 break;
         }
-        pipeline.push(
+
+        // Sorting
+        if (sort) {
+            let sortCriteria: any = {};
+            switch (sort) {
+                case 'date-asc':
+                    sortCriteria.createdAt = 1;
+                    break;
+                case 'date-desc':
+                    sortCriteria.createdAt = -1;
+                    break;
+                case 'amount-asc':
+                    sortCriteria.avgAmountPerPerson = 1;
+                    break;
+                case 'amount-desc':
+                    sortCriteria.avgAmountPerPerson = -1;
+                    break;
+            }
+            pipeline.push({ $sort: sortCriteria });
+        }
+
+        // Results sub-pipeline for data enrichment
+        const resultsSubPipeline: any[] = [
+            { $skip: skip },
+            { $limit: limit },
+            // Common data enrichment
             {
                 $lookup: {
                     from: "users",
@@ -190,15 +184,10 @@ export const getAllQuests = async (req: Request, res: Response) => {
                     maxApplicants: 1,
                     status: 1,
                     createdAt: 1,
-                    hasApplied: 1,
-                    isFavorite: 1,
-                    applicantCount: 1,
-                    avgAmountPerPerson: 1,
-                    totalEarnings: 1
+                    avgAmountPerPerson: 1
                 }
-            }
-        );
-        pipeline.push(
+            },
+            // Check if favorite
             {
                 $lookup: {
                     from: "questfavs",
@@ -223,9 +212,8 @@ export const getAllQuests = async (req: Request, res: Response) => {
                     isFavorite: { $gt: [{ $size: "$userFavorites" }, 0] }
                 }
             },
-            { $unset: "userFavorites" }
-        );
-        pipeline.push(
+            { $unset: "userFavorites" },
+            // Check if applied
             {
                 $lookup: {
                     from: "questapplications",
@@ -251,39 +239,70 @@ export const getAllQuests = async (req: Request, res: Response) => {
                 }
             },
             { $unset: "userApplications" }
-        );
-        if (sort) {
-            let sortCriteria: any = {};
-            switch (sort) {
-                case 'date-asc':
-                    sortCriteria.createdAt = 1;
-                    pipeline.push({ $sort: sortCriteria });
-                    break;
-                case 'date-desc':
-                    sortCriteria.createdAt = -1;
-                    pipeline.push({ $sort: sortCriteria });
-                    break;
-                case 'amount-asc':
-                    sortCriteria.avgAmountPerPerson = 1;
-                    pipeline.push({ $sort: sortCriteria });
-                    break;
-                case 'amount-desc':
-                    sortCriteria.avgAmountPerPerson = -1;
-                    pipeline.push({ $sort: sortCriteria });
-                    break;
-            }
+        ];
+
+        // Type-specific data enrichment in results
+        switch (type) {
+            case 'self':
+                resultsSubPipeline.push(
+                    {
+                        $lookup: {
+                            from: "questapplications",
+                            localField: "_id",
+                            foreignField: "quest",
+                            as: "applicants"
+                        }
+                    },
+                    {
+                        $addFields: {
+                            applicantCount: { $size: "$applicants" }
+                        }
+                    },
+                    { $unset: "applicants" }
+                );
+                break;
+            case 'applied':
+                resultsSubPipeline.push(
+                    {
+                        $lookup: {
+                            from: "questapplications",
+                            let: { questId: "$_id" },
+                            pipeline: [
+                                {
+                                    $match: {
+                                        $expr: {
+                                            $and: [
+                                                { $eq: ["$quest", "$$questId"] },
+                                                { $eq: ["$user", new Types.ObjectId(userId)] },
+                                                { $eq: ["$status", "approved"] }
+                                            ]
+                                        }
+                                    }
+                                }
+                            ],
+                            as: "approvedApplications"
+                        }
+                    },
+                    {
+                        $addFields: {
+                            totalEarnings: { $sum: "$approvedApplications.txnAmount" }
+                        }
+                    },
+                    { $unset: "approvedApplications" }
+                );
+                break;
         }
+
+        // Facet for results and total count
         pipeline.push({
             $facet: {
-                results: [
-                    { $skip: skip },
-                    { $limit: limit }
-                ],
+                results: resultsSubPipeline,
                 totalCount: [
                     { $count: "count" }
                 ]
             }
         });
+
         const data = await QUESTS.aggregate(pipeline);
         const quests = data[0]?.results || [];
         const total = data[0]?.totalCount[0]?.count || 0;
@@ -294,7 +313,6 @@ export const getAllQuests = async (req: Request, res: Response) => {
             totalPages: Math.ceil(total / limit)
         });
     } catch (err: any) {
-        console.error(err);
         sendErrorToDiscord("GET:all-quests", err);
         return handleResponse(res, 500, errors.catch_error);
     }

@@ -41,14 +41,16 @@ export const createFlick = async (req: Request, res: Response) => {
                 user,
                 ...rest
             }
-        ) as { _id: string }; // Explicitly define the type of flick
+        ) 
         if (flick) {
             const flickIndex = getIndex("FLICKS");
+            const userDetails = await flick.populate("user", "username photo name")
             await flickIndex.addDocuments([
                 {
                     userId: user,
-                    flickId: flick._id.toString(),
-                    ...rest
+                    flickId,
+                    ...flick.toObject(),
+                    user: userDetails.user,
                 }
             ])
             return handleResponse(res, 200, success.flick_uploaded);
