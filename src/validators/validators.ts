@@ -549,7 +549,7 @@ export const validateUpdateFlick = (body: object, params: object) => {
     }),
     thumbnailURL: Joi.string()
       .pattern(new RegExp(`^${config.R2.R2_PUBLIC_URL}/.+$`))
-      .message("thumbnailURL must be a valid URL").required(),
+      .message("thumbnailURL must be a valid URL").optional(),
     description: Joi.array().items(Joi.object({
       mention: Joi.string().regex(/^[0-9a-fA-F]{24}$/, 'object Id').optional(),
       hashTag: Joi.string().regex(/^[0-9a-fA-F]{24}$/, 'object Id').optional(),
