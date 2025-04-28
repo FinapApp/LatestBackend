@@ -13,8 +13,7 @@ export const getAllFlicks = async (req: Request, res: Response) => {
         if (validationError) {
             return handleResponse(res, 400, errors.validation, validationError.details);
         }
-
-        const userId = res.locals.userId;
+        const userId = new mongoose.Types.ObjectId(res.locals.userId);
         let { type, limit = 10, page = 1 } = req.query as {
             type?: string;
             limit?: number;
@@ -30,18 +29,16 @@ export const getAllFlicks = async (req: Request, res: Response) => {
         const matchStage: any = {};
         if (type === 'tagged') {
             matchStage.$or = [
-                { "media.taggedUsers.user": new mongoose.Types.ObjectId(userId) },
-                { "description.mention": new mongoose.Types.ObjectId(userId) }
-            ];
+                { "media.taggedUsers.user": userId },
+                { "description.mention": userId },
+            ]
         } else if (type === 'self') {
-            matchStage.user = new mongoose.Types.ObjectId(userId);
+            matchStage.user = userId;
         }
 
         if (Object.keys(matchStage).length > 0) {
             pipeline.push({ $match: matchStage });
         }
-
-        // 2. Populate user info
         pipeline.push(
             {
                 $lookup: {
@@ -49,14 +46,37 @@ export const getAllFlicks = async (req: Request, res: Response) => {
                     localField: 'user',
                     foreignField: '_id',
                     as: 'user',
-                    pipeline: [{ $project: { _id: 1, name: 1, username: 1, photo: 1 } }]
+                    pipeline: [
+                        {
+                            $lookup: {
+                                from: 'userfollowers', // Fixed collection name
+                                let: { flickUserId: '$_id' }, // Use user's _id from users collection
+                                pipeline: [
+                                    {
+                                        $match: {
+                                            $expr: {
+                                                $and: [
+                                                    { $eq: ['$follower', userId] }, // Current user is follower
+                                                    { $eq: ['$following', '$$flickUserId'] } // Flick's user is being followed
+                                                ]
+                                            }
+                                        }
+                                    }
+                                ],
+                                as: 'followCheck'
+                            }
+                        },
+                        {
+                            $addFields: {
+                                isFollower: { $gt: [{ $size: '$followCheck' }, 0] }
+                            }
+                        },
+                        { $unset: 'followCheck' },
+                        { $project: { _id: 1, name: 1, username: 1, photo: 1, isFollower: 1 } }
+                    ]
                 }
             },
-            { $unwind: '$user' }
-        );
-
-        // 3. Populate media audio
-        pipeline.push(
+            { $unwind: '$user' },
             {
                 $unwind: {
                     path: '$media',
@@ -73,21 +93,50 @@ export const getAllFlicks = async (req: Request, res: Response) => {
             },
             {
                 $addFields: {
-                    'media.audio': { $first: '$mediaAudio' }
+                    'media.audio': { $arrayElemAt: ['$mediaAudio', 0] }
                 }
             },
             {
                 $lookup: {
                     from: 'users',
-                    localField: 'media.taggedUsers.user',
-                    foreignField: '_id',
-                    as: 'taggedUsers',
-                    pipeline: [{ $project: { _id: 1, name: 1, username: 1, photo: 1 } }]
+                    let: { taggedUsers: '$media.taggedUsers.user' },
+                    pipeline: [
+                        { $match: { $expr: { $in: ['$_id', '$$taggedUsers'] } } },
+                        { $project: { _id: 1, name: 1, username: 1, photo: 1 } }
+                    ],
+                    as: 'mediaTaggedUsers'
                 }
             },
             {
                 $addFields: {
-                    'media.taggedUsers.user': { $first: '$taggedUsers' }
+                    'media.taggedUsers': {
+                        $map: {
+                            input: '$media.taggedUsers',
+                            as: 'tagged',
+                            in: {
+                                text: '$$tagged.text',
+                                position: '$$tagged.position',
+                                user: {
+                                    $arrayElemAt: [
+                                        {
+                                            $filter: {
+                                                input: '$mediaTaggedUsers',
+                                                as: 'userDoc',
+                                                cond: { $eq: ['$$userDoc._id', '$$tagged.user'] }
+                                            }
+                                        },
+                                        0
+                                    ]
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            {
+                $project: {
+                    mediaAudio: 0,
+                    mediaTaggedUsers: 0
                 }
             },
             {
@@ -103,70 +152,33 @@ export const getAllFlicks = async (req: Request, res: Response) => {
                         $mergeObjects: ['$doc', { media: '$media' }]
                     }
                 }
-            }
-        );
-        // 5. Lookup collab users
-        pipeline.push(
-            {
-                $unwind: {
-                    path: '$collabs',
-                    preserveNullAndEmptyArrays: true
-                }
             },
             {
                 $lookup: {
-                    from: 'users',
-                    localField: 'collabs.user',
-                    foreignField: '_id',
-                    as: 'collabs',
-                    pipeline: [{ $project: { _id: 1, name: 1, username: 1, photo: 1 } }]
-                }
-            },
-        );
-        // 6. Lookup description mentions
-        pipeline.push(
-            {
-                $unwind: {
-                    path: '$media',
-                    preserveNullAndEmptyArrays: true
-                }
-            },
-            {
-                $lookup: {
-                    from: 'users',
-                    localField: 'description.mention',
-                    foreignField: '_id',
-                    as: 'description.mentionInfo',
+                    from: 'likes',
+                    let: { flickId: "$_id" },
                     pipeline: [
-                        { $project: { _id: 1, name: 1, username: 1, photo: 1 } }
-                    ]
+                        {
+                            $match: {
+                                $expr: {
+                                    $and: [
+                                        { $eq: ["$flick", "$$flickId"] },
+                                        { $eq: ["$user", userId] }
+                                    ]
+                                }
+                            }
+                        }
+                    ],
+                    as: "userLiked"
                 }
             },
             {
                 $addFields: {
-                    'description.mention': '$description.mentionInfo'
+                    isLiked: { $gt: [{ $size: "$userLiked" }, 0] }
                 }
             },
-            {
-                $unset: 'description.mentionInfo'
-            },
-            {
-                $group: {
-                    _id: '$_id',
-                    doc: { $first: '$$ROOT' },
-                    description: { $push: '$description' }
-                }
-            },
-            {
-                $replaceRoot: {
-                    newRoot: {
-                        $mergeObjects: ['$doc', { media: '$media' }]
-                    }
-                }
-            }
+            { $unset: "userLiked" },
         );
-
-        // 7. Final facet for pagination + total count
         pipeline.push({
             $facet: {
                 results: [
@@ -183,11 +195,9 @@ export const getAllFlicks = async (req: Request, res: Response) => {
 
         const flicks = aggregationResult[0]?.results || [];
         const totalCount = aggregationResult[0]?.totalCount[0]?.count || 0;
-
         if (!flicks.length) {
             return handleResponse(res, 404, errors.no_flicks);
         }
-
         // 8. Fetch like & comment counts from Redis
         const [likeData, commentData] = await Promise.all([
             Promise.all(flicks.map((flick: any) => redis.hgetall(`flick:likes:${flick._id}`))),

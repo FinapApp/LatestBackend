@@ -28,22 +28,24 @@ export const validateLogin = (body: object) => {
 
 export const validateGetFlicks = (query: object) => {
   const schema = Joi.object({
-    type: Joi.string().valid("tagged" , "self").optional(),
+    type: Joi.string().valid("tagged", "self").optional(),
     limit: Joi.number().integer().min(1).max(15).optional(),
     page: Joi.number().integer().min(1).optional(),
+  }).and("limit", "page").messages({
+    "object.and": "Limit and page must be provided together",
   });
   const { error } = schema.validate(query);
   return error;
 }
 
-export const validateGetFeedback = (query :  object) => {
-  const schema  = Joi.object({
-    type: Joi.string().valid("pending" , "resolved").optional(),
-    rating : Joi.number().integer().min(1).max(5).optional(),
+export const validateGetFeedback = (query: object) => {
+  const schema = Joi.object({
+    type: Joi.string().valid("pending", "resolved").optional(),
+    rating: Joi.number().integer().min(1).max(5).optional(),
     limit: Joi.number().integer().min(1).max(15).optional(),
     page: Joi.number().integer().min(1).optional(),
   })
-  const {error} = schema.validate(query)
+  const { error } = schema.validate(query)
   return error
 }
 
@@ -291,14 +293,6 @@ export const validateCreateFlick = (body: object, params: object) => {
       }),
     })).optional(),
     location: Joi.string().optional(),
-    collabs: Joi.array().items(Joi.object({
-      user: Joi.string().regex(/^[0-9a-fA-F]{24}$/, 'object Id').required(),
-      text: Joi.string().required(),
-      position: Joi.object({
-        x: Joi.number().required(),
-        y: Joi.number().required()
-      }).required()
-    })).optional(),
     newHashTags: Joi.array().items(Joi.object({
       id: Joi.string().regex(/^[0-9a-fA-F]{24}$/, 'object Id').required(),
       value: Joi.string().required()
@@ -323,11 +317,27 @@ export const validateGetHashtags = (query: object) => {
   return error
 }
 
-export const validateFlickId = (params: object) => {
+export const validateFlickId = (params: object ) => {
   const schema = Joi.object({
     flickId: Joi.string().regex(/^[0-9a-fA-F]{24}$/, 'object Id').required()
   })
   const { error } = schema.validate(params)
+  return error
+}
+
+export const validateGetComments = (params: object, query: object) => {
+  const paramsSchema = Joi.object({
+    flickId: Joi.string().regex(/^[0-9a-fA-F]{24}$/, 'object Id').required()
+  })
+  const querySchema = Joi.object({
+    limit: Joi.number().integer().min(1).max(15).optional(),
+    page: Joi.number().integer().min(1).optional(),
+  })
+  const combinedSchema = Joi.object({
+    params: paramsSchema,
+    query: querySchema
+  })
+  const { error } = combinedSchema.validate({ params, query })
   return error
 }
 
@@ -472,6 +482,42 @@ export const validateUpdateTwoFactor = (body: object) => {
 }
 
 
+export const validateCreateUserSearchHistory = (body: object) => {
+  const schema = Joi.object({
+    history: Joi.array().items(Joi.object({
+      text: Joi.string().min(1).max(30).required(),
+      flick: Joi.string().regex(/^[0-9a-fA-F]{24}$/, 'object Id').optional(),
+      userSearched: Joi.string().regex(/^[0-9a-fA-F]{24}$/, 'object Id').optional(),
+      quest: Joi.string().regex(/^[0-9a-fA-F]{24}$/, 'object Id').optional(),
+      song: Joi.string().regex(/^[0-9a-fA-F]{24}$/, 'object Id').optional(),
+      hashTag: Joi.string().regex(/^[0-9a-fA-F]{24}$/, 'object Id').optional(),
+      createdAt: Joi.date().required(),
+    }).xor("flick", "quest", "song", "hashTag", "userSearched")).required().messages({
+      'array.base': 'Search history must be an array',
+      'object.base': 'Each item in the array must be an object',
+      'object.xor': 'Either flick, quest, song, hashTag or userSearched is required',
+      'object.required': 'Each item in the array must contain the required fields',
+      'object.string.base': 'Text must be a string',
+      'object.string.min': 'Text must be at least 1 character long',
+      'object.string.max': 'Text must be at most 30 characters long',
+      'object.date.base': 'CreatedAt must be a date'
+    })
+  })
+  const { error } = schema.validate(body)
+  return error
+}
+
+
+
+
+export const validateUserSearchId = (params: object) => {
+  const schema = Joi.object({
+    searchId: Joi.string().regex(/^[0-9a-fA-F]{24}$/, 'object Id').required()
+  })
+  const { error } = schema.validate(params)
+  return error
+}
+
 export const validateCreateBioLink = (body: object) => {
   const schema = Joi.object({
     title: Joi.string().required(),
@@ -480,6 +526,7 @@ export const validateCreateBioLink = (body: object) => {
   const { error } = schema.validate(body)
   return error
 }
+
 export const validateUpdateBioLink = (body: object, params: object) => {
   const bodySchema = Joi.object({
     title: Joi.string().required(),
@@ -562,13 +609,6 @@ export const validateUpdateFlick = (body: object, params: object) => {
       }),
     })).optional(),
     location: Joi.string().optional(),
-    collabs: Joi.array().items(Joi.object({
-      user: Joi.string().regex(/^[0-9a-fA-F]{24}$/, 'object Id').required(),
-      position: Joi.object({
-        x: Joi.number().optional(),
-        y: Joi.number().optional()
-      }).required()
-    })).optional(),
     newHashTags: Joi.array().items(Joi.object({
       id: Joi.string().regex(/^[0-9a-fA-F]{24}$/, 'object Id').required(),
       value: Joi.string().required()
@@ -740,23 +780,32 @@ export const validateCreateQuest = (body: object, params: object) => {
 }
 
 
-export const validateGetSearch = (query:object) => {
-const querySchema = Joi.object({
-q: Joi.string().max(30).required().messages({
-  'string.max': 'Search query must be less than or equal to 30 characters',
-  'any.required': 'Search query is required'
-}),
-limit : Joi.number().integer().min(1).max(15).messages({
-  'number.min': 'Limit must be at least 1',
-  'number.max': 'Limit must be at most 10',
-}).optional(),
-page : Joi.number().integer().min(1).optional(),
-type : Joi.string().valid('user', 'flick', 'hashtag' , 'quest' ,'song' ).optional(),
-}).and("type", "limit").messages({
-  "object.and": "type and limit must be provided together",
-})
-const { error } = querySchema.validate(query);
-return error;
+export const validateGetSearchHistory = (query: object) => {
+  const schema = Joi.object({
+    limit: Joi.number().integer().min(1).max(15).optional(),
+    page: Joi.number().integer().min(1).optional(),
+  })
+  const { error } = schema.validate(query)
+  return error
+}
+
+export const validateGetSearch = (query: object) => {
+  const querySchema = Joi.object({
+    q: Joi.string().max(30).required().messages({
+      'string.max': 'Search query must be less than or equal to 30 characters',
+      'any.required': 'Search query is required'
+    }),
+    limit: Joi.number().integer().min(1).max(15).messages({
+      'number.min': 'Limit must be at least 1',
+      'number.max': 'Limit must be at most 10',
+    }).optional(),
+    page: Joi.number().integer().min(1).optional(),
+    type: Joi.string().valid('user', 'flick', 'hashtag', 'quest', 'song').optional(),
+  }).and("type", "limit").messages({
+    "object.and": "type and limit must be provided together",
+  })
+  const { error } = querySchema.validate(query);
+  return error;
 }
 
 
@@ -927,7 +976,7 @@ export const validateGetQuestApplicants = (params: object, query: object) => {
   })
   const querySchema = Joi.object({
     page: Joi.number().min(1).optional(),
-    limit : Joi.number().min(1).optional(),
+    limit: Joi.number().min(1).optional(),
   })
   const combinedSchema = Joi.object({
     params: paramsSchema,
@@ -947,7 +996,7 @@ export const validateGetQuests = (query: object) => {
     long: Joi.string().optional(),
     low: Joi.string().optional(),
     high: Joi.string().optional(),
-    limit : Joi.string().optional(),
+    limit: Joi.string().optional(),
     page: Joi.number().optional(),
     mode: Joi.string().valid("go", "on").optional(),
     country: Joi.string().optional().custom((value, helpers) => {

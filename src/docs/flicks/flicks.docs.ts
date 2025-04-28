@@ -214,23 +214,6 @@
      *               location:
      *                 type: string
      *                 example: "Los Angeles, CA"
-     *               collabs:
-     *                 type: array
-     *                 items:
-     *                   type: object
-     *                   properties:
-     *                     user:
-     *                       type: string
-     *                       example: "60c72b2f9b1e8a5f4c8e7d20"
-     *                     position:
-     *                       type: object
-     *                       properties:
-     *                         x:
-     *                           type: number
-     *                           example: 0.3
-     *                         y:
-     *                           type: number
-     *                           example: 0.6
      *               newHashTags:
      *                 type: array
      *                 items:
@@ -377,23 +360,6 @@
      *               location:
      *                 type: string
      *                 example: "Los Angeles, CA"
-     *               collabs:
-     *                 type: array
-     *                 items:
-     *                   type: object
-     *                   properties:
-     *                     user:
-     *                       type: string
-     *                       example: "60c72b2f9b1e8a5f4c8e7d20"
-     *                     position:
-     *                       type: object
-     *                       properties:
-     *                         x:
-     *                           type: number
-     *                           example: 0.3
-     *                         y:
-     *                           type: number
-     *                           example: 0.6
      *               newHashTags:
      *                 type: array
      *                 items:

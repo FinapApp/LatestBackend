@@ -27,6 +27,19 @@ export const handleResponse = (
   }
 };
 export const errors = {
+  // Search-related errors
+  search_history_not_found: {
+    message: "Search history not found",
+  },
+  search_history_not_updated: {
+    message: "Search history not updated",
+  },
+  search_history_not_deleted: {
+    message: "Search history not deleted",
+  },
+  search_history_created: {
+    message: "Search history created",
+  },
 // Bio-links related errors
   bio_link_not_found: {
     message: "Bio-link not found",
@@ -334,6 +347,16 @@ export const errors = {
 };
 
 export const success = {
+// Search-related success
+  search_history_created: {
+    message: "Search history created successfully",
+  },
+  search_history_deleted: {
+    message: "Search history deleted successfully",
+  },
+  search_history_updated: {
+    message: "Search history updated successfully",
+  },
 // Bio-links related-success
   update_biolink : {
     message : "Bio-link updated successfully",

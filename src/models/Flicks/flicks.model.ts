@@ -4,7 +4,6 @@ import { ITextDataSchema, TextDataSchema } from "../Comment/comment.model";
 interface IFlicks extends Document {
     user: Schema.Types.ObjectId;
     originFlicks: Schema.Types.ObjectId;
-    collabs: TaggedUser[];
     media: IMediaSchema[];
     location: string;
     gps: {
@@ -25,6 +24,7 @@ interface IFlicks extends Document {
     commentCount: number;
     likeCount: number;
 }
+
 interface TaggedUser {
     user: Schema.Types.ObjectId;
     text: string;
@@ -33,9 +33,8 @@ interface TaggedUser {
         y: number;
     }
 }
-
 // cron to update the text for the collabs needed to be the updated one not immediately affecting anything , on 0:00 every day
-const taggedAndCollabSchema = new Schema<TaggedUser>(
+const taggedSchema = new Schema<TaggedUser>(
     {
         user: { type: Schema.Types.ObjectId, ref: "user" },
         text: { type: String },
@@ -64,7 +63,7 @@ const MediaSchema = new Schema<IMediaSchema>(
         duration: { type: Number },
         audio: { type: Schema.Types.ObjectId, ref: "audio" },
         alt: { type: [String] }, // this is referring to the users search for the best picks for their purpose. gets the user while searching into their metaData for the files 
-        taggedUsers: { type: [taggedAndCollabSchema] },
+        taggedUsers: { type: [taggedSchema] },
         url: { type: String }
     },
     { versionKey: false, _id: false }
@@ -75,7 +74,6 @@ export const FlickSchema = new Schema<IFlicks>(
     {
         user: { type: Schema.Types.ObjectId, ref: "user" },
         originFlicks: { type: Schema.Types.ObjectId, ref: "flick" },
-        collabs: { type: [taggedAndCollabSchema] },
         media: { type: [MediaSchema] },
         location: { type: String },
         gps: {

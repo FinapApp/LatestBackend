@@ -144,7 +144,6 @@ export const getAllQuests = async (req: Request, res: Response) => {
             }
             pipeline.push({ $sort: sortCriteria });
         }
-
         // Results sub-pipeline for data enrichment
         const resultsSubPipeline: any[] = [
             { $skip: skip },
@@ -292,7 +291,6 @@ export const getAllQuests = async (req: Request, res: Response) => {
                 );
                 break;
         }
-
         // Facet for results and total count
         pipeline.push({
             $facet: {
