@@ -22,7 +22,7 @@ export const createPresignedURLFlick = async (req: Request, res: Response) => {
             if (mediaFiles) {
                 mediaSignedURL = await Promise.all(mediaFiles.map((x: { fileName: string, fileType: string }) => generateSignedURL(`${user}/flick/${flickId}/videos/${x.fileName}`, x.fileType)));
             }
-            thumbnailSignedUrl = await generateSignedURL(`/user/${user}/flick/${flickId}/thumbnail`);
+            thumbnailSignedUrl = await generateSignedURL(`/user/${user}/flick/${flickId}/thumbnail.jpeg`, "image/jpeg");
             if (audioName) {
                 const audioPath = `/user/${user}/flick/audio/${flickId}/${audioName}`;
                 audioSignedURL = await generateSignedURL(audioPath, audioFileType);
