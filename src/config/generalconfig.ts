@@ -41,4 +41,5 @@ export const config = {
   PORT: process.env.PORT!,
   ITEMS_PER_PAGE: 10,
   IP_GEOLOCATOR_KEY: process.env.IP_GEOLOCATOR_KEY!,
+  DISCORD_WEBHOOK_URL: process.env.DISCORD_WEBHOOK_URL!,
 }

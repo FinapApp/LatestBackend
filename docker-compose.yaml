@@ -80,7 +80,8 @@ services:
       - PORT=4003
       - IP_GEOLOCATOR_KEY=6ec8f9c4b6634315b1c60020e48555a3
       - MEILI_MASTER_KEY=finapus
-      - MELLISSEARCH_HOST=http://meilisearch:7700  # <-- Change this line
+      - MELLISSEARCH_HOST=http://meilisearch:7700  
+      - DISCORD_WEBHOOK_URL=https://discord.com/api/webhooks/1366616138586525817/0alnapdFbCVPgnfZVdRTPeSRWtymxvgm6I03iOFszWvrVvkHA09nnTGzWy1KqHTrrhMN
 
 volumes:
   mongodb_data:
