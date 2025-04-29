@@ -68,11 +68,11 @@ export const getAllFlicks = async (req: Request, res: Response) => {
                         },
                         {
                             $addFields: {
-                                isFollower: { $gt: [{ $size: '$followCheck' }, 0] }
+                                isFollowing: { $gt: [{ $size: '$followCheck' }, 0] }
                             }
                         },
                         { $unset: 'followCheck' },
-                        { $project: { _id: 1, name: 1, username: 1, photo: 1, isFollower: 1 } }
+                        { $project: { _id: 1, name: 1, username: 1, photo: 1, isFollowing: 1 } }
                     ]
                 }
             },
