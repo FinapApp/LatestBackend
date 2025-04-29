@@ -12,7 +12,9 @@ export const getFollowers = async (req: Request, res: Response) => {
             return handleResponse(res, 400, errors.validation, validationError.details);
         }
         let { skip = "0", userId } = req.query
+        console.log(userId)
         userId ??= res.locals.userId as string
+        console.log(userId)
         const result = await getAllFollowerUserAggreagtion(userId as any, skip as any)
         return handleResponse(res, 200, {followerlist  :result})
     } catch (error) {

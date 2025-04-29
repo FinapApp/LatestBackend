@@ -32,7 +32,7 @@ export const getAllFollowingUserAggreagtion = async (userId: string, skip: strin
             },
             {
                 $project: {
-                    _id: 1,
+                    _id: "$followingInfo._id",
                     username: "$followingInfo.username",
                     name: "$followingInfo.name",
                     photo: "$followingInfo.photo"

@@ -31,7 +31,7 @@ export const getAllFollowerUserAggreagtion = async (userId: string, skip: string
             },
             {
                 $project: {
-                    _id: 1,
+                    _id: "$followerInfo._id",
                     username: "$followerInfo.username",
                     name: "$followerInfo.name",
                     photo: "$followerInfo.photo"
