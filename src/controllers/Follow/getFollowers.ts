@@ -11,12 +11,12 @@ export const getFollowers = async (req: Request, res: Response) => {
         if (validationError) {
             return handleResponse(res, 400, errors.validation, validationError.details);
         }
-        let { skip = "0", userId } = req.query
-        console.log(userId)
+        let { page, userId , limit=10} = req.query  as any
+        limit= Number(limit);
+        const skip = ((Number(page) || 1) - 1) * limit;
         userId ??= res.locals.userId as string
-        console.log(userId)
-        const result = await getAllFollowerUserAggreagtion(userId as any, skip as any)
-        return handleResponse(res, 200, {followerlist  :result})
+        const result = await getAllFollowerUserAggreagtion(userId, skip, limit )
+        return handleResponse(res, 200, result)
     } catch (error) {
         sendErrorToDiscord("GET:followers", error)
         return handleResponse(res, 500, errors.catch_error);

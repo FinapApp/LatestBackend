@@ -456,8 +456,11 @@ export const validateCreateFollower = (params: object) => {
 
 export const getQueryParams = (query: object) => {
   const schema = Joi.object({
-    skip: Joi.string().optional(),
+    limit: Joi.number().integer().min(1).max(15).optional(),
+    page: Joi.number().integer().min(1).optional(),
     userId: Joi.string().regex(/^[0-9a-fA-F]{24}$/, 'object Id').optional(),
+  }).and("limit", "page").messages({
+    "object.and": "Limit and page must be provided together",
   })
   const { error } = schema.validate(query)
   return error

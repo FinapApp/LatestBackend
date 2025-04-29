@@ -1,7 +1,7 @@
 import mongoose from "mongoose";
 import { FOLLOW } from "../models/User/userFollower.model";
 
-export const getAllFollowerUserAggreagtion = async (userId: string, skip: string = "0") => {
+export const getAllFollowerUserAggreagtion = async (userId: string, skip: number, limit: number) => {
     try {
         const response = await FOLLOW.aggregate([
             {
@@ -10,35 +10,45 @@ export const getAllFollowerUserAggreagtion = async (userId: string, skip: string
                 }
             },
             {
-                $sort: { createdAt: -1 }
-            },
-            {
-                $skip: +skip
-            },
-            {
-                $limit: 10
-            },
-            {
-                $lookup: {
-                    from: "users",
-                    localField: "follower", // who is following the user
-                    foreignField: "_id",
-                    as: "followerInfo"
-                }
-            },
-            {
-                $unwind: "$followerInfo"
-            },
-            {
-                $project: {
-                    _id: "$followerInfo._id",
-                    username: "$followerInfo.username",
-                    name: "$followerInfo.name",
-                    photo: "$followerInfo.photo"
+                $facet: {
+                    results: [
+                        { $sort: { createdAt: -1 } },
+                        { $skip: skip },
+                        { $limit: limit },
+                        {
+                            $lookup: {
+                                from: "users",
+                                localField: "follower",
+                                foreignField: "_id",
+                                as: "followerInfo"
+                            }
+                        },
+                        { $unwind: "$followerInfo" },
+                        {
+                            $project: {
+                                _id: "$followerInfo._id",
+                                username: "$followerInfo.username",
+                                name: "$followerInfo.name",
+                                photo: "$followerInfo.photo"
+                            }
+                        }
+                    ],
+                    totalCount: [
+                        { $count: "count" }
+                    ]
                 }
             }
         ]);
-        return response;
+
+        const followers = response[0]?.results || [];
+        const total = response[0]?.totalCount[0]?.count || 0;
+
+        return {
+            followers,
+            totalDocuments: total,
+            totalPages: Math.ceil(total / limit),
+            currentPage: Math.floor(skip / limit) + 1
+        };
     } catch (error: any) {
         throw error;
     }
