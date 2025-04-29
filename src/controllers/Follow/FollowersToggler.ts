@@ -11,19 +11,27 @@ export const followerToggle = async (req: Request, res: Response) => {
         if (validationError) {
             return handleResponse(res, 400, errors.validation, validationError.details);
         }
-        const { followerId } = req.params; 
-        const me = res.locals.userId;      
+        const { followerId } = req.params;
+        const me = res.locals.userId;
         if (followerId === me) {
             return handleResponse(res, 400, errors.self_follow);
         }
         const existingFollow = await FOLLOW.findOneAndDelete({ follower: me, following: followerId }) as any;
         if (existingFollow) {
+            await Promise.all([
+                USER.findByIdAndUpdate(me, { $inc: { followingCount: -1 } }, { new: true }),
+                USER.findByIdAndUpdate(followerId, { $inc: { followerCount: -1 } }, { new: true })
+            ])
             return handleResponse(res, 200, success.user_unfollowed);
         }
         const targetUser = await USER.findById(followerId, "private");
         if (!targetUser) {
             return handleResponse(res, 404, errors.user_not_found);
         }
+        await Promise.all([
+            USER.findByIdAndUpdate(me, { $inc: { followingCount: 1 } }, { new: true }),
+            USER.findByIdAndUpdate(followerId, { $inc: { followerCount: 1 } }, { new: true })
+        ])
         await FOLLOW.create({
             follower: me,
             following: followerId,
