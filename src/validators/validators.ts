@@ -485,32 +485,47 @@ export const validateUpdateTwoFactor = (body: object) => {
 }
 
 
+
 export const validateCreateUserSearchHistory = (body: object) => {
+  const objectId = Joi.string().regex(/^[0-9a-fA-F]{24}$/, 'object Id');
+
+  const historyItemSchema = Joi.object({
+    text: Joi.string().min(1).max(30).required(),
+    createdAt: Joi.date().required(),
+    flick: objectId.optional(),
+    quest: objectId.optional(),
+    song: objectId.optional(),
+    hashTag: objectId.optional(),
+    userSearched: objectId.optional(),
+  }).custom((value, helpers) => {
+    const keys = ['flick', 'quest', 'song', 'hashTag', 'userSearched'];
+    const present = keys.filter(key => value[key]);
+
+    if (present.length > 1) {
+      return helpers.error('any.custom', { message: 'Only one of flick, quest, song, hashTag, or userSearched is allowed' });
+    }
+
+    return value;
+  }, 'Custom validation for single reference field')
+    .messages({
+      'any.custom': '{{#message}}',
+      'string.base': 'Text must be a string',
+      'string.min': 'Text must be at least 1 character long',
+      'string.max': 'Text must be at most 30 characters long',
+      'date.base': 'CreatedAt must be a valid date',
+    });
+
   const schema = Joi.object({
-    history: Joi.array().items(Joi.object({
-      text: Joi.string().min(1).max(30).required(),
-      flick: Joi.string().regex(/^[0-9a-fA-F]{24}$/, 'object Id').optional(),
-      userSearched: Joi.string().regex(/^[0-9a-fA-F]{24}$/, 'object Id').optional(),
-      quest: Joi.string().regex(/^[0-9a-fA-F]{24}$/, 'object Id').optional(),
-      song: Joi.string().regex(/^[0-9a-fA-F]{24}$/, 'object Id').optional(),
-      hashTag: Joi.string().regex(/^[0-9a-fA-F]{24}$/, 'object Id').optional(),
-      createdAt: Joi.date().required(),
-    }).xor("flick", "quest", "song", "hashTag", "userSearched")).required().messages({
-      'array.base': 'Search history must be an array',
-      'object.base': 'Each item in the array must be an object',
-      'object.xor': 'Either flick, quest, song, hashTag or userSearched is required',
-      'object.required': 'Each item in the array must contain the required fields',
-      'object.string.base': 'Text must be a string',
-      'object.string.min': 'Text must be at least 1 character long',
-      'object.string.max': 'Text must be at most 30 characters long',
-      'object.date.base': 'CreatedAt must be a date'
-    })
-  })
-  const { error } = schema.validate(body)
-  return error
-}
+    history: Joi.array().items(historyItemSchema).required()
+      .messages({
+        'array.base': 'Search history must be an array',
+        'any.required': 'History field is required'
+      })
+  });
 
-
+  const { error } = schema.validate(body, { abortEarly: false });
+  return error;
+};
 
 
 export const validateUserSearchId = (params: object) => {
