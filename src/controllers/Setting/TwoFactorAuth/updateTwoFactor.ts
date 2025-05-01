@@ -21,6 +21,7 @@ export const updateTwoFactorAuth = async (req: Request, res: Response) => {
         const updateTwoFactor = await USERPREFERENCE.findByIdAndUpdate(
             res.locals.userId,
             req.body,
+            { new: true, upsert: true }
         );
         if (updateTwoFactor) {
             return handleResponse(res, 200, success.update_two_factor);

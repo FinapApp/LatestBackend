@@ -7,6 +7,6 @@ export const settingTwoFactorRoutes: Router = express.Router();
 
 
 
-settingTwoFactorRoutes.route("/setting/twoFactor")
+settingTwoFactorRoutes.route("/setting/two-factor-auth")
     .put(updateTwoFactorAuth)
     .get(getTwoFactorAuth)
