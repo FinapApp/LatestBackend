@@ -13,7 +13,6 @@ export const SongSchema = new Schema<ISongSchema>(
     {
         staff: {
             type: Schema.Types.ObjectId,
-            required: true,
             ref: 'staff',
         },
         name: {
