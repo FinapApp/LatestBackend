@@ -11,7 +11,6 @@ export const deleteUserSearchHistory = async (req: Request, res: Response) => {
         if (validationError) {
             return handleResponse(res, 400, errors.validation, validationError.details);
         }
-        
         const deleteSearchHistory = await SEARCHHISTORY.findByIdAndDelete(req.params.searchId)
         if (deleteSearchHistory) {
             return handleResponse(res, 200, success.search_history_deleted)

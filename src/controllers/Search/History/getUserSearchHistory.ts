@@ -18,7 +18,6 @@ export const getUserSearchHistory = async (req: Request, res: Response) => {
         };
         limit = Number(limit);
         const skip = ((Number(page) || 1) - 1) * limit;
-        console.log("skip", skip);
         const userId = res.locals.userId;
         const searchHistory = await SEARCHHISTORY.find({ user: userId }).populate([{
             path: "userSearched",

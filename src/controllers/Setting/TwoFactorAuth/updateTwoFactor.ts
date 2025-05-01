@@ -18,16 +18,15 @@ export const updateTwoFactorAuth = async (req: Request, res: Response) => {
                 validationError.details
             );
         }
-        const updateReel = await USERPREFERENCE.findByIdAndUpdate(
+        const updateTwoFactor = await USERPREFERENCE.findByIdAndUpdate(
             res.locals.userId,
             req.body,
         );
-        if (updateReel) {
+        if (updateTwoFactor) {
             return handleResponse(res, 200, success.update_two_factor);
         }
-        return handleResponse(res, 304, errors.update_two_factor);
+        return handleResponse(res, 400, errors.update_two_factor);
     } catch (err: any) {
-
         return handleResponse(res, 500, errors.catch_error);
     }
 };

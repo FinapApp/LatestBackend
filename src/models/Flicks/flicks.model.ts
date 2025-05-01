@@ -102,3 +102,4 @@ export const FlickSchema = new Schema<IFlicks>(
 
 FlickSchema.index({ gps: "2dsphere" });
 export const FLICKS = mongoose.model<IFlicks>("flick", FlickSchema);
+
