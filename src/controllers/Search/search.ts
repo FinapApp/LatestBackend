@@ -96,7 +96,7 @@ export const search = async (req: Request, res: Response) => {
                     }),
                     getIndex("SONGS").search(q, {
                         limit,
-                        attributesToRetrieve: ["songId", "title", "artist", "thumbnailURL"]
+                        attributesToRetrieve: ["songId", "name", "duration", "icon" , "used" , "url"]
                     })
                 ]);
 
