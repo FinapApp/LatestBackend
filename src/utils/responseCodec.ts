@@ -27,6 +27,11 @@ export const handleResponse = (
   }
 };
 export const errors = {
+// Song-related errors
+  song_not_uploaded: {
+    message: "Song not uploaded",
+  },
+
   // Search-related errors
   search_history_not_found: {
     message: "Search history not found",
@@ -40,7 +45,7 @@ export const errors = {
   search_history_created: {
     message: "Search history created",
   },
-// Bio-links related errors
+  // Bio-links related errors
   bio_link_not_found: {
     message: "Bio-link not found",
   },
@@ -61,7 +66,7 @@ export const errors = {
   create_hashtags: {
     message: "Unable to create hashtags",
   },
-// Two-factor authentication-related errors
+  // Two-factor authentication-related errors
   update_two_factor: {
     message: "Unable to update two-factor authentication",
   },
@@ -78,8 +83,8 @@ export const errors = {
   },
 
   // Profile-related errors
-  unable_to_signed_profile_image : {
-    message : "Unable to signed profile image"
+  unable_to_signed_profile_image: {
+    message: "Unable to signed profile image"
   },
   profile_not_updated: {
     message: "Unable to update profile",
@@ -113,7 +118,7 @@ export const errors = {
     message: "Invalid Credentials",
   },
   incorrect_password: {
-    message : "Incorrect password , please try again",
+    message: "Incorrect password , please try again",
   },
   unauthorized: {
     message: "You're unauthorized to perform this action",
@@ -220,10 +225,10 @@ export const errors = {
   },
 
   // Theme-related errors 
-  update_theme :  {
+  update_theme: {
     message: "Unable to update theme",
   },
-  get_theme :  {
+  get_theme: {
     message: "Unable to get theme",
   },
 
@@ -259,9 +264,9 @@ export const errors = {
     message: "Quest applicant not updated",
   },
   quest_applicant_approval: {
-    message : "Unable to approve quest applicant",
+    message: "Unable to approve quest applicant",
   },
-  
+
 
 
   // Authentication-related errors
@@ -347,7 +352,7 @@ export const errors = {
 };
 
 export const success = {
-// Search-related success
+  // Search-related success
   search_history_created: {
     message: "Search history created successfully",
   },
@@ -357,15 +362,15 @@ export const success = {
   search_history_updated: {
     message: "Search history updated successfully",
   },
-// Bio-links related-success
-  update_biolink : {
-    message : "Bio-link updated successfully",
+  // Bio-links related-success
+  update_biolink: {
+    message: "Bio-link updated successfully",
   },
-  create_biolink : {
-    message : "Bio-link created successfully",
+  create_biolink: {
+    message: "Bio-link created successfully",
   },
-  delete_biolink : {
-    message : "Bio-link deleted successfully",
+  delete_biolink: {
+    message: "Bio-link deleted successfully",
   },
 
   // Two-factor authentication-related success
@@ -468,7 +473,7 @@ export const success = {
     message: "Feedback created successfully",
   },
   //Theme Setting
-  update_theme :  {
+  update_theme: {
     message: "Theme updated successfully",
   },
   // Quest-related success
@@ -476,7 +481,7 @@ export const success = {
     message: "Quest created successfully",
   },
   update_quest: {
-    message  : "Quest updated successfully",  
+    message: "Quest updated successfully",
   },
   quest_deleted: {
     message: "Quest deleted successfully",

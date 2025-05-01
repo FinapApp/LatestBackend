@@ -325,6 +325,17 @@ export const validateFlickId = (params: object ) => {
   return error
 }
 
+export const  validateCreateSong  = (body: object) => {
+  const schema = Joi.object({
+    name: Joi.string().required(),
+    url: Joi.string().pattern(new RegExp(`^${config.R2.R2_PUBLIC_URL}/.+$`)).message("url must be a valid URL").required(),
+    icon: Joi.string().pattern(new RegExp(`^${config.R2.R2_PUBLIC_URL}/.+$`)).message("icon must be a valid URL").required(),
+    duration: Joi.number().optional()
+  })
+  const { error } = schema.validate(body)
+  return error
+}
+
 export const validateGetComments = (params: object, query: object) => {
   const paramsSchema = Joi.object({
     flickId: Joi.string().regex(/^[0-9a-fA-F]{24}$/, 'object Id').required()

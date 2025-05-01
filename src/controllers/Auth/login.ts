@@ -123,7 +123,7 @@ export const login = async (req: Request, res: Response) => {
       config.JWT.ACCESS_TOKEN_SECRET as string,
       { expiresIn: config.JWT.ACCESS_TOKEN_EXPIRE_IN }
     );
-    return handleResponse(res, 200, {userId, accessToken, refreshToken, userPreferences: checkUserPreference , paymentId : stripeAccountId });
+    return handleResponse(res, 200, {accessToken, refreshToken, userPreferences: checkUserPreference , paymentId : stripeAccountId });
   } catch (err: any) {
     console.log(err);
     sendErrorToDiscord("POST:login", err);
