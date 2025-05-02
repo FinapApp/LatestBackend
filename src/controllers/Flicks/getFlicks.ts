@@ -76,6 +76,23 @@ export const getAllFlicks = async (req: Request, res: Response) => {
                     ]
                 }
             },
+            {
+                $lookup: {
+                    from: 'songs',
+                    localField: 'song',
+                    foreignField: '_id',
+                    as: 'song',
+                    pipeline: [
+                        { $project: { _id: 1, name: 1, url: 1, icon: 1, used: 1, duration: 1 } }
+                    ]
+                }
+            },
+            {
+                $unwind: {
+                    path: '$song',
+                    preserveNullAndEmptyArrays: true
+                }
+            },
             { $unwind: '$user' },
             {
                 $unwind: {
@@ -85,10 +102,10 @@ export const getAllFlicks = async (req: Request, res: Response) => {
             },
             {
                 $lookup: {
-                    from: 'audios',
-                    localField: 'media.audio',
+                    from: 'quests',
+                    localField: 'quest',
                     foreignField: '_id',
-                    as: 'mediaAudio'
+                    as: 'quest'
                 }
             },
             {
