@@ -820,7 +820,7 @@ export const validateGetSearchHistory = (query: object) => {
 
 export const validateGetSearch = (query: object) => {
   const querySchema = Joi.object({
-    q: Joi.string().max(30).required().messages({
+    q: Joi.string().max(30).optional().messages({
       'string.max': 'Search query must be less than or equal to 30 characters',
       'any.required': 'Search query is required'
     }),
