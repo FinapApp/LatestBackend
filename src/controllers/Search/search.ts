@@ -1,6 +1,6 @@
-import { getIndex } from "../../config/melllisearch/mellisearch.config"
-import { Request, Response } from "express"
-import { errors, handleResponse } from "../../utils/responseCodec"
+import { getIndex } from "../../config/melllisearch/mellisearch.config";
+import { Request, Response } from "express";
+import { errors, handleResponse } from "../../utils/responseCodec";
 import Joi from "joi";
 import { validateGetSearch } from "../../validators/validators";
 import { FOLLOW } from "../../models/User/userFollower.model";
@@ -11,10 +11,27 @@ export const search = async (req: Request, res: Response) => {
         if (validationError) {
             return handleResponse(res, 400, errors.validation, validationError.details);
         }
-        let { q="", page = 1, type, limit = 5 } = req.query as { q: string; page?: string | number; type?: string, limit?: string | number };
-        limit = Number(limit)
-        const offset = ((Number(page) || 1) - 1) * limit;
+
+        let { q = "", page = 1, type, limit = 5 } = req.query as {
+            q: string;
+            page?: string | number;
+            type?: string;
+            limit?: string | number;
+        };
+
+        limit = Number(limit);
+        page = Number(page) || 1;
+        const offset = (page - 1) * limit;
+
+        const buildResult = (key: string, hits: any[], total: number) => ({
+            [key]: hits,
+            total,
+            page,
+            totalPages: Math.ceil(total / limit) || 1
+        });
+
         const result: any = {};
+
         switch (type) {
             case "user": {
                 const index = getIndex("USERS");
@@ -23,19 +40,23 @@ export const search = async (req: Request, res: Response) => {
                     offset,
                     attributesToRetrieve: ["userId", "name", "username", "photo"]
                 });
+
                 const userIds = data.hits.map((user: any) => user.userId);
                 const checkFollowing = await FOLLOW.find({
                     user: res.locals.userId,
                     following: { $in: userIds }
-                }).lean(); 
+                }).lean();
+
                 const followingSet = new Set(checkFollowing.map(f => f.following));
                 const usersWithFollowStatus = data.hits.map((user: any) => ({
                     ...user,
                     isFollowing: followingSet.has(user.userId)
                 }));
-                result.userSearch = usersWithFollowStatus;
+
+                Object.assign(result, buildResult("users", usersWithFollowStatus, data.estimatedTotalHits));
                 break;
             }
+
             case "flick": {
                 const index = getIndex("FLICKS");
                 const data = await index.search(q, {
@@ -43,9 +64,10 @@ export const search = async (req: Request, res: Response) => {
                     offset,
                     attributesToRetrieve: ["userId", "flickId", "thumbnailURL", "description", "user"]
                 });
-                result.flickSearch = data.hits
+                Object.assign(result, buildResult("flicks", data.hits, data.estimatedTotalHits));
                 break;
             }
+
             case "hashtag": {
                 const index = getIndex("HASHTAG");
                 const data = await index.search(q, {
@@ -53,18 +75,24 @@ export const search = async (req: Request, res: Response) => {
                     offset,
                     attributesToRetrieve: ["hashtagId", "value", "count"]
                 });
-                result.hashTagSearch = data.hits
+                Object.assign(result, buildResult("hashtags", data.hits, data.estimatedTotalHits));
                 break;
             }
+
             case "quest": {
                 const index = getIndex("QUESTS");
                 const data = await index.search(q, {
                     limit,
-                    attributesToRetrieve: ["userId", "questId", "description", "thumbnailURLs", "avgAmountPerPerson", "createdAt", "mode", "title", "user"]
+                    offset,
+                    attributesToRetrieve: [
+                        "userId", "questId", "description", "thumbnailURLs",
+                        "avgAmountPerPerson", "createdAt", "mode", "title", "user"
+                    ]
                 });
-                result.questSearch = data.hits
+                Object.assign(result, buildResult("quests", data.hits, data.estimatedTotalHits));
                 break;
             }
+
             case "song": {
                 const index = getIndex("SONGS");
                 const data = await index.search(q, {
@@ -72,11 +100,11 @@ export const search = async (req: Request, res: Response) => {
                     offset,
                     attributesToRetrieve: ["songId", "name", "duration", "icon", "used", "url"]
                 });
-                result.songSearch = data.hits
+                Object.assign(result, buildResult("songs", data.hits, data.estimatedTotalHits));
                 break;
             }
+
             default: {
-                // Global search (no type filter)
                 const [userSearch, flickSearch, hashTagSearch, questSearch, songSearch] = await Promise.all([
                     getIndex("USERS").search(q, {
                         limit,
@@ -92,24 +120,29 @@ export const search = async (req: Request, res: Response) => {
                     }),
                     getIndex("QUESTS").search(q, {
                         limit,
-                        attributesToRetrieve: ["userId", "questId", "description", "thumbnailURLs", "avgAmountPerPerson", "createdAt", "mode", "title", "user"]
+                        attributesToRetrieve: [
+                            "userId", "questId", "description", "thumbnailURLs",
+                            "avgAmountPerPerson", "createdAt", "mode", "title", "user"
+                        ]
                     }),
                     getIndex("SONGS").search(q, {
                         limit,
-                        attributesToRetrieve: ["songId", "name", "duration", "icon" , "used" , "url"]
+                        attributesToRetrieve: ["songId", "name", "duration", "icon", "used", "url"]
                     })
                 ]);
 
-                result.userSearch = userSearch.hits
-                result.flickSearch = flickSearch.hits
-                result.hashTagSearch = hashTagSearch.hits
-                result.questSearch = questSearch.hits;
-                result.songSearch = songSearch.hits
+                result.users = userSearch.hits;
+                result.flicks = flickSearch.hits;
+                result.hashtags = hashTagSearch.hits;
+                result.quests = questSearch.hits;
+                result.songs = songSearch.hits;
+                break;
             }
         }
-        return handleResponse(res, 200, result)
+
+        return handleResponse(res, 200, result);
     } catch (err) {
-        console.log(err)
-        return handleResponse(res, 500, errors.catch_error)
+        console.error(err);
+        return handleResponse(res, 500, errors.catch_error);
     }
-}
+};
