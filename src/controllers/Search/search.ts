@@ -70,7 +70,7 @@ export const search = async (req: Request, res: Response) => {
                 const data = await index.search(q, {
                     limit,
                     offset,
-                    attributesToRetrieve: ["songId", "title", "artist", "thumbnailURL"]
+                    attributesToRetrieve: ["songId", "name", "duration", "icon", "used", "url"]
                 });
                 result.songSearch = data.hits
                 break;
