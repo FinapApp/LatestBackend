@@ -11,7 +11,7 @@ export const search = async (req: Request, res: Response) => {
         if (validationError) {
             return handleResponse(res, 400, errors.validation, validationError.details);
         }
-        let { q, page = 1, type, limit = 5 } = req.query as { q: string; page?: string | number; type?: string, limit?: string | number };
+        let { q="", page = 1, type, limit = 5 } = req.query as { q: string; page?: string | number; type?: string, limit?: string | number };
         limit = Number(limit)
         const offset = ((Number(page) || 1) - 1) * limit;
         const result: any = {};
