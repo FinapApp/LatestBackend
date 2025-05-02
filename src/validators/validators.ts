@@ -309,9 +309,13 @@ export const validateCreateFlick = (body: object, params: object) => {
 }
 
 
-export const validateGetHashtags = (query: object) => {
+export const validateGetUsersAndHashtags = (query: object) => {
   const schema = Joi.object({
-    search: Joi.string().required()
+    q: Joi.string().required(),
+    limit: Joi.number().integer().min(1).max(15).optional(),
+    page: Joi.number().integer().min(1).optional(),
+  }).and("limit", "page").messages({
+    "object.and": "Limit and page must be provided together",
   })
   const { error } = schema.validate(query)
   return error
