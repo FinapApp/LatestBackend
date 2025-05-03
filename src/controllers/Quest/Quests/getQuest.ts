@@ -1,11 +1,10 @@
-import { Request, Response } from 'express'
-import { validateQuestId } from '../../../validators/validators'
-import { errors, handleResponse } from '../../../utils/responseCodec'
-import Joi from 'joi'
-import { sendErrorToDiscord } from '../../../config/discord/errorDiscord'
-import { QUESTS } from '../../../models/Quest/quest.model'
-import { Types } from 'mongoose'
-
+import { Request, Response } from 'express';
+import { validateQuestId } from '../../../validators/validators';
+import { errors, handleResponse } from '../../../utils/responseCodec';
+import Joi from 'joi';
+import { sendErrorToDiscord } from '../../../config/discord/errorDiscord';
+import { QUESTS } from '../../../models/Quest/quest.model';
+import { Types } from 'mongoose';
 
 export const getQuest = async (req: Request, res: Response) => {
     try {
@@ -13,10 +12,12 @@ export const getQuest = async (req: Request, res: Response) => {
         if (validationError) {
             return handleResponse(res, 400, errors.validation, validationError.details);
         }
+
         const { questId } = req.params;
         const userId = res.locals.userId;
         const questObjectId = new Types.ObjectId(questId);
         const userObjectId = new Types.ObjectId(userId);
+
         const pipeline: any[] = [
             { $match: { _id: questObjectId } },
             {
@@ -45,24 +46,50 @@ export const getQuest = async (req: Request, res: Response) => {
                     pipeline: [
                         {
                             $match: {
-                                $expr: {
-                                    $and: [
-                                        { $eq: ["$quest", "$$questId"] },
-                                        { $eq: ["$user", userObjectId] }
-                                    ]
+                                $expr: { $eq: ["$quest", "$$questId"] }
+                            }
+                        },
+                        {
+                            $facet: {
+                                totalFavorites: [{ $count: "count" }],
+                                userFavorite: [
+                                    {
+                                        $match: {
+                                            $expr: {
+                                                $eq: ["$user", userObjectId]
+                                            }
+                                        }
+                                    }
+                                ]
+                            }
+                        },
+                        {
+                            $addFields: {
+                                favoriteCount: {
+                                    $ifNull: [{ $arrayElemAt: ["$totalFavorites.count", 0] }, 0]
+                                },
+                                isFavorite: {
+                                    $gt: [{ $size: "$userFavorite" }, 0]
                                 }
+                            }
+                        },
+                        {
+                            $project: {
+                                favoriteCount: 1,
+                                isFavorite: 1
                             }
                         }
                     ],
-                    as: "userFavorites"
+                    as: "favoriteMeta"
                 }
             },
             {
                 $addFields: {
-                    isFavorite: { $gt: [{ $size: "$userFavorites" }, 0] }
+                    favoriteCount: { $arrayElemAt: ["$favoriteMeta.favoriteCount", 0] },
+                    isFavorite: { $arrayElemAt: ["$favoriteMeta.isFavorite", 0] }
                 }
             },
-            { $unset: "userFavorites" },
+            { $unset: "favoriteMeta" },
             {
                 $addFields: {
                     isOwner: { $eq: ["$user._id", userObjectId] }
