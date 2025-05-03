@@ -33,7 +33,8 @@ export const updateFlick = async (req: Request, res: Response) => {
         const userId = res.locals.userId;
         const updateFlick = await FLICKS.findOneAndUpdate(
             {_id : flickId , user : userId},
-            req.body
+            ...rest,
+            { new: true }
         );
         if (updateFlick) {
             const flickIndex = getIndex("FLICKS");
@@ -41,7 +42,7 @@ export const updateFlick = async (req: Request, res: Response) => {
                 {
                     userId,
                     flickId,
-                    ...rest
+                    ...updateFlick.toObject(),
                 }
             ])
             return handleResponse(res, 200, success.flick_updated);

@@ -31,16 +31,18 @@ export const updateQuest = async (req: Request, res: Response) => {
         }
         const updateQuest = await QUESTS.findOneAndUpdate(
             { _id: questId, user },
-            { ...rest }
+            {...rest},
+            { new: true }
         );
         if (updateQuest) {
             const questIndex = getIndex("QUESTS");
-            await questIndex.addDocuments({
-                userId: user,
-                questId,
-                coords,
-                ...rest,
-            });
+            await questIndex.addDocuments([
+                {
+                    questId,
+                    coords,
+                    ...updateQuest.toObject(),
+                },
+            ]);
             return handleResponse(res, 200, success.update_quest);
         }
         return handleResponse(res, 400, errors.update_quest);

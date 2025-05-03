@@ -41,7 +41,7 @@ export const updateProfileDetails = async (req: Request, res: Response) => {
             await userIndex.addDocuments([
                 {
                     userId,
-                    ...rest
+                    ...updateProfile.toObject(),
                 }
             ])
             return handleResponse(res, 200, success.profile_updated);

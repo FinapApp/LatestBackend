@@ -105,15 +105,15 @@ export const search = async (req: Request, res: Response) => {
             }
 
             default: {
-                const [userSearch, flickSearch, hashTagSearch, questSearch, songSearch] = await Promise.all([
+                const [userSearch,  hashTagSearch, questSearch, songSearch] = await Promise.all([
                     getIndex("USERS").search(q, {
                         limit,
                         attributesToRetrieve: ["userId", "name", "username", "photo"]
                     }),
-                    getIndex("FLICKS").search(q, {
-                        limit,
-                        attributesToRetrieve: ["userId", "flickId", "thumbnailURL", "description", "user"]
-                    }),
+                    // getIndex("FLICKS").search(q, {
+                    //     limit,
+                    //     attributesToRetrieve: ["userId", "flickId", "thumbnailURL", "description", "user"]
+                    // }),
                     getIndex("HASHTAG").search(q, {
                         limit,
                         attributesToRetrieve: ["hashtagId", "value", "count"]
@@ -132,7 +132,7 @@ export const search = async (req: Request, res: Response) => {
                 ]);
 
                 result.users = userSearch.hits;
-                result.flicks = flickSearch.hits;
+                // result.flicks = flickSearch.hits;
                 result.hashtags = hashTagSearch.hits;
                 result.quests = questSearch.hits;
                 result.songs = songSearch.hits;
