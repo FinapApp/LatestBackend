@@ -37,24 +37,18 @@ export const getProfileDetail = async (req: Request, res: Response) => {
         if (!getProfileDetails) {
             return handleResponse(res, 400, errors.profile_not_found);
         }
-
-        let isFollowing = false;
+        const profileDetail: any = {
+            ...getProfileDetails,
+            bioLink,
+        };
         if (requestedUserId && requestedUserId !== currentUserId) {
             const followDoc = await FOLLOW.findOne({
-                user: currentUserId,
+                follower: currentUserId,
                 following: requestedUserId
             }).lean();
-            isFollowing = !!followDoc;
+            profileDetail.isFollowing = !!followDoc;
         }
-
-        return handleResponse(res, 200, {
-            profileDetail: {
-                ...getProfileDetails,
-                bioLink,
-                isFollowing
-            }
-        });
-
+        return handleResponse(res, 200, { profileDetail });
     } catch (error: any) {
         sendErrorToDiscord('GET:profile', error);
         return handleResponse(res, 500, errors.catch_error);
