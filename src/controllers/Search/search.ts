@@ -12,11 +12,12 @@ export const search = async (req: Request, res: Response) => {
             return handleResponse(res, 400, errors.validation, validationError.details);
         }
 
-        let { q = "", page = 1, type, limit = 5 } = req.query as {
+        let { q = "", page = 1, type, limit = 5 , userId} = req.query as {
             q: string;
             page?: string | number;
             type?: string;
             limit?: string | number;
+            userId?: string;
         };
 
         limit = Number(limit);
@@ -54,6 +55,84 @@ export const search = async (req: Request, res: Response) => {
                 }));
 
                 Object.assign(result, buildResult("users", usersWithFollowStatus, data.estimatedTotalHits));
+                break;
+            }
+            case "following": {
+                const targetUserId = userId || res.locals.userId;
+
+                // Get the list of followings
+                const followings = await FOLLOW.find({ follower: targetUserId }).lean();
+                const followingIds = followings.map(f => f.following);
+
+                // Search Meilisearch USERS index
+                const index = getIndex("USERS");
+                const data = await index.search(q, {
+                    limit: 1000, // pull large set to filter manually
+                    attributesToRetrieve: ["userId", "name", "username", "photo"]
+                });
+
+                // Filter Meilisearch results to only those the user is following
+                const filteredHits = data.hits.filter((user: any) =>
+                    followingIds.includes(user.userId)
+                );
+
+                // Check if current user (res.locals.userId) is also following them
+                const filteredUserIds = filteredHits.map((u: any) => u.userId);
+                const currentUserFollows = await FOLLOW.find({
+                    follower: res.locals.userId,
+                    following: { $in: filteredUserIds }
+                }).lean();
+
+                const isFollowingSet = new Set(currentUserFollows.map(f => f.following));
+
+                // Annotate `isFollowing`
+                const paginatedHits = filteredHits
+                    .slice(offset, offset + limit)
+                    .map((user: any) => ({
+                        ...user,
+                        isFollowing: isFollowingSet.has(user.userId)
+                    }));
+
+                Object.assign(result, buildResult("following", paginatedHits, filteredHits.length));
+                break;
+            }
+                case "follower": {
+                const targetUserId = userId || res.locals.userId;
+
+                // Step 1: Get all users who follow the target user
+                const followers = await FOLLOW.find({ following: targetUserId }).lean();
+                const followerIds = followers.map(f => f.follower);
+
+                // Step 2: Search USERS index with query q
+                const index = getIndex("USERS");
+                const data = await index.search(q, {
+                    limit: 1000, // Pull large set to filter manually
+                    attributesToRetrieve: ["userId", "name", "username", "photo"]
+                });
+
+                // Step 3: Filter search results to only followers
+                const filteredHits = data.hits.filter((user: any) =>
+                    followerIds.includes(user.userId)
+                );
+
+                // Step 4: Annotate if *you* (current user) follow them
+                const filteredUserIds = filteredHits.map((u: any) => u.userId);
+                const currentUserFollows = await FOLLOW.find({
+                    follower: res.locals.userId,
+                    following: { $in: filteredUserIds }
+                }).lean();
+
+                const isFollowingSet = new Set(currentUserFollows.map(f => f.following));
+
+                // Step 5: Apply pagination and return
+                const paginatedHits = filteredHits
+                    .slice(offset, offset + limit)
+                    .map((user: any) => ({
+                        ...user,
+                        isFollowing: isFollowingSet.has(user.userId)
+                    }));
+
+                Object.assign(result, buildResult("follower", paginatedHits, filteredHits.length));
                 break;
             }
 

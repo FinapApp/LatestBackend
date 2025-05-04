@@ -11,7 +11,7 @@ export const getFollowers = async (req: Request, res: Response) => {
         if (validationError) {
             return handleResponse(res, 400, errors.validation, validationError.details);
         }
-        let { page, userId , limit=10} = req.query  as any
+        let { page, userId , limit=10 } = req.query  as any
         limit= Number(limit);
         const skip = ((Number(page) || 1) - 1) * limit;
         userId ??= res.locals.userId as string

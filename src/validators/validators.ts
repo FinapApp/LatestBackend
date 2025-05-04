@@ -321,7 +321,7 @@ export const validateGetUsersAndHashtags = (query: object) => {
   return error
 }
 
-export const validateFlickId = (params: object ) => {
+export const validateFlickId = (params: object) => {
   const schema = Joi.object({
     flickId: Joi.string().regex(/^[0-9a-fA-F]{24}$/, 'object Id').required()
   })
@@ -329,7 +329,7 @@ export const validateFlickId = (params: object ) => {
   return error
 }
 
-export const  validateCreateSong  = (body: object) => {
+export const validateCreateSong = (body: object) => {
   const schema = Joi.object({
     name: Joi.string().required(),
     url: Joi.string().pattern(new RegExp(`^${config.R2.R2_PUBLIC_URL}/.+$`)).message("url must be a valid URL").required(),
@@ -461,11 +461,18 @@ export const validateCreateFeedback = (body: object) => {
   return error
 }
 
-export const validateCreateFollower = (params: object) => {
-  const schema = Joi.object({
-    followerId: Joi.string().regex(/^[0-9a-fA-F]{24}$/, 'object Id').required()
+export const validateFollowerId = (params: object, query: object) => {
+  const paramSchema = Joi.object({
+    followerId: Joi.string().regex(/^[0-9a-fA-F]{24}$/, 'object Id').required(),
   })
-  const { error } = schema.validate(params)
+  const querySchema = Joi.object({
+    type: Joi.string().valid("remove").optional(),
+  })
+  const combinedSchema = Joi.object({
+    params: paramSchema,
+    query: querySchema
+  })
+  const { error } = combinedSchema.validate({ params, query })
   return error
 }
 
@@ -474,6 +481,7 @@ export const getQueryParams = (query: object) => {
     limit: Joi.number().integer().min(1).max(15).optional(),
     page: Joi.number().integer().min(1).optional(),
     userId: Joi.string().regex(/^[0-9a-fA-F]{24}$/, 'object Id').optional(),
+    q: Joi.string().optional(),
   }).and("limit", "page").messages({
     "object.and": "Limit and page must be provided together",
   })
@@ -833,7 +841,8 @@ export const validateGetSearch = (query: object) => {
       'number.max': 'Limit must be at most 10',
     }).optional(),
     page: Joi.number().integer().min(1).optional(),
-    type: Joi.string().valid('user', 'flick', 'hashtag', 'quest', 'song').optional(),
+    type: Joi.string().valid('user', 'flick', 'hashtag', 'quest', 'song' , 'follower' , 'following').optional(),
+    userId: Joi.string().regex(/^[0-9a-fA-F]{24}$/, 'object Id').optional(),
   }).and("type", "limit").messages({
     "object.and": "type and limit must be provided together",
   })

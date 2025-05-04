@@ -27,8 +27,8 @@ export const getAllQuests = async (req: Request, res: Response) => {
                         coordinates: [Number(long), Number(lat)]
                     },
                     key: "gps",
-                    distanceField: "distanceinKM",
-                    distanceMultiplier: 0.001,
+                    distanceField: "distanceInMiles",
+                    distanceMultiplier: 0.000621371, 
                     spherical: true
                 }
             });

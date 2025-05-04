@@ -132,8 +132,14 @@ export const errors = {
   user_unfollowed: {
     message: "Unable to unfollow user",
   },
+  follow_not_found: {
+    message: "User not followed",
+  },
   self_follow: {
     message: "You can't follow yourself",
+  },
+  follower_removed: {
+    message: "Follower removed",
   },
 
   // Session-related errors
@@ -401,6 +407,9 @@ export const success = {
   },
   user_unfollowed: {
     message: "User unfollowed successfully",
+  },
+  follower_removed: {
+    message: "Follower removed successfully",
   },
   user_reported: {
     message: "User reported successfully",

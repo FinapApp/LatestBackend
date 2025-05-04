@@ -5,6 +5,7 @@ import { sendErrorToDiscord } from "../../config/discord/errorDiscord";
 import { USERBIOLINKS } from "../../models/User/userBioLinks";
 import Joi from "joi";
 import { validateGetProfileDetail } from "../../validators/validators";
+import { FOLLOW } from "../../models/User/userFollower.model";
 
 export const getProfileDetail = async (req: Request, res: Response) => {
     try {
@@ -19,16 +20,41 @@ export const getProfileDetail = async (req: Request, res: Response) => {
                 validationError.details
             );
         }
-        let { userId } = req.query as { userId?: string };
-        userId = userId || res.locals.userId;
+
+        const requestedUserId = (req.query as { userId?: string }).userId;
+        const currentUserId = res.locals.userId;
+        const userId = requestedUserId || currentUserId;
+
         const [getProfileDetails, bioLink] = await Promise.all([
-            USER.findById(userId, "name username followerCount followingCount flickCount description photo  -_id" , {lean : true}),
-            USERBIOLINKS.find({ user: userId }, "title url")
+            USER.findById(
+                userId,
+                "name username followerCount followingCount flickCount description photo -_id",
+                { lean: true }
+            ),
+            USERBIOLINKS.find({ user: userId }, "title url").lean()
         ]);
-        if (getProfileDetails && bioLink) {
-            return handleResponse(res, 200, { profileDetail: { ...getProfileDetails, bioLink } });
+
+        if (!getProfileDetails) {
+            return handleResponse(res, 400, errors.profile_not_found);
         }
-        return handleResponse(res, 400, errors.profile_not_found);
+
+        let isFollowing = false;
+        if (requestedUserId && requestedUserId !== currentUserId) {
+            const followDoc = await FOLLOW.findOne({
+                user: currentUserId,
+                following: requestedUserId
+            }).lean();
+            isFollowing = !!followDoc;
+        }
+
+        return handleResponse(res, 200, {
+            profileDetail: {
+                ...getProfileDetails,
+                bioLink,
+                isFollowing
+            }
+        });
+
     } catch (error: any) {
         sendErrorToDiscord('GET:profile', error);
         return handleResponse(res, 500, errors.catch_error);
