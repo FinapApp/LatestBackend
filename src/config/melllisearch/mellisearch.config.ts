@@ -22,6 +22,15 @@ const PRIMARY_KEYS: Record<keyof typeof INDEXES, string> = {
     SONGS: 'songId',
 };
 
+// Define filterable attributes for each index
+const FILTERABLE_ATTRIBUTES: Record<keyof typeof INDEXES, string[]> = {
+    USERS: ['userId', 'username'],
+    FLICKS: ['flickId', 'userId'],
+    HASHTAG: ['hashtagId'],
+    QUESTS: ['questId', 'userId', 'mode'],
+    SONGS: ['songId'],
+};
+
 // Internal cache of index instances
 const indexCache: Partial<Record<keyof typeof INDEXES, Index>> = {};
 
@@ -39,8 +48,20 @@ const setupIndex = async (key: keyof typeof INDEXES) => {
         await melliClient.waitForTask(task.taskUid);
     }
 
+    // Get the index instance
+    const index = melliClient.index(indexName);
+
+    // Configure filterable attributes
+    try {
+        await index.updateFilterableAttributes(FILTERABLE_ATTRIBUTES[key]);
+        console.log(`✅ Configured filterable attributes for ${indexName}`);
+    } catch (error) {
+        console.error(`❌ Failed to configure filterable attributes for ${indexName}:`, error);
+        // Continue even if this fails - client-side filtering will be used as fallback
+    }
+
     // Cache the index for later use
-    indexCache[key] = melliClient.index(indexName);
+    indexCache[key] = index;
 };
 
 // Init all indexes at startup
@@ -66,4 +87,17 @@ export const getIndex = (key: keyof typeof INDEXES): Index => {
     const index = indexCache[key];
     if (!index) throw new Error(`Index "${key}" not initialized. Did you forget to call connectMeilisearch()?`);
     return index;
+};
+
+// Optional: Function to verify settings
+export const verifyMeilisearchSettings = async () => {
+    for (const [key, indexName] of Object.entries(INDEXES)) {
+        const index = getIndex(key as keyof typeof INDEXES);
+        try {
+            const settings = await index.getFilterableAttributes();
+            console.log(`ℹ️ ${indexName} filterable attributes:`, settings);
+        } catch (error) {
+            console.error(`❌ Failed to verify settings for ${indexName}:`, error);
+        }
+    }
 };
