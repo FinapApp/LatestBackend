@@ -169,7 +169,7 @@ export const search = async (req: Request, res: Response) => {
                 const data = await index.search(q, {
                     limit,
                     offset,
-                    attributesToRetrieve: ["songId", "name", "duration", "icon", "used", "url"]
+                    attributesToRetrieve: ["songId", "name", "duration", "icon", "used", "url", "artist"]
                 });
                 Object.assign(result, buildResult("songs", data.hits, data.estimatedTotalHits));
                 break;
@@ -198,7 +198,7 @@ export const search = async (req: Request, res: Response) => {
                     }),
                     getIndex("SONGS").search(q, {
                         limit,
-                        attributesToRetrieve: ["songId", "name", "duration", "icon", "used", "url"]
+                        attributesToRetrieve: ["songId", "name", "duration", "icon", "used", "url" , "artist"]
                     })
                 ]);
 

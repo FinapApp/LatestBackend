@@ -94,7 +94,7 @@ export const getAllStoriesAggregation = async (userId: string) => {
                             $project: {
                                 _id: 1, createdAt: 1, mediaType: 1, mediaUrl: 1, thumbnail: 1, caption: 1, hashTags: 1,
                                 user: { _id: 1, username: 1, photo: 1 },
-                                song: { name: 1, url: 1, icon: 1, duration: 1 },
+                                song: { name: 1, url: 1, icon: 1, duration: 1 , artist: 1 },
                                 viewsCount: 1
                             }
                         }

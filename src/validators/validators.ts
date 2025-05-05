@@ -334,6 +334,7 @@ export const validateCreateSong = (body: object) => {
     name: Joi.string().required(),
     url: Joi.string().pattern(new RegExp(`^${config.R2.R2_PUBLIC_URL}/.+$`)).message("url must be a valid URL").required(),
     icon: Joi.string().pattern(new RegExp(`^${config.R2.R2_PUBLIC_URL}/.+$`)).message("icon must be a valid URL").required(),
+    artist: Joi.string().optional(),
     duration: Joi.number().optional()
   })
   const { error } = schema.validate(body)

@@ -33,7 +33,7 @@ interface IUserSchema extends Document {
 
 export const UserSchema = new Schema<IUserSchema>(
     {
-        username: { type: String, unique: true },
+        username: { type: String, unique: true , lowercase: true },
         name: { type: String },
         email: { type: String, unique: true },
         phone: { type: String },

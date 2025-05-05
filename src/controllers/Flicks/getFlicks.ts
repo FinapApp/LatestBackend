@@ -25,7 +25,7 @@ export const getAllFlicks = async (req: Request, res: Response) => {
 
         const pipeline: any[] = [];
 
-        // 1. Match based on type
+        
         const matchStage: any = {};
         if (type === 'tagged') {
             matchStage.$or = [
@@ -49,15 +49,15 @@ export const getAllFlicks = async (req: Request, res: Response) => {
                     pipeline: [
                         {
                             $lookup: {
-                                from: 'userfollowers', // Fixed collection name
-                                let: { flickUserId: '$_id' }, // Use user's _id from users collection
+                                from: 'userfollowers', 
+                                let: { flickUserId: '$_id' }, 
                                 pipeline: [
                                     {
                                         $match: {
                                             $expr: {
                                                 $and: [
-                                                    { $eq: ['$follower', userId] }, // Current user is follower
-                                                    { $eq: ['$following', '$$flickUserId'] } // Flick's user is being followed
+                                                    { $eq: ['$follower', userId] }, 
+                                                    { $eq: ['$following', '$$flickUserId'] } 
                                                 ]
                                             }
                                         }
@@ -83,7 +83,7 @@ export const getAllFlicks = async (req: Request, res: Response) => {
                     foreignField: '_id',
                     as: 'song',
                     pipeline: [
-                        { $project: { _id: 1, name: 1, url: 1, icon: 1, used: 1, duration: 1 } }
+                        { $project: { _id: 1, name: 1, url: 1, icon: 1, used: 1, duration: 1 ,artist : 1 } }
                     ]
                 }
             },
@@ -215,7 +215,7 @@ export const getAllFlicks = async (req: Request, res: Response) => {
         if (!flicks.length) {
             return handleResponse(res, 404, errors.no_flicks);
         }
-        // 8. Fetch like & comment counts from Redis
+        
         const [likeData, commentData] = await Promise.all([
             Promise.all(flicks.map((flick: any) => redis.hgetall(`flick:likes:${flick._id}`))),
             Promise.all(flicks.map((flick: any) => redis.hgetall(`flick:comments:${flick._id}`)))

@@ -85,7 +85,7 @@ export const getAllStory = async (req: Request, res: Response) => {
                     foreignField: "_id",
                     as: "song",
                     pipeline: [
-                        { $project: { _id: 1, name: 1, artist: 1, coverUrl: 1 } }
+                        { $project: { _id: 1, name: 1, artist: 1, url: 1, icon: 1, used: 1, duration: 1 } }
                     ]
                 }
             },

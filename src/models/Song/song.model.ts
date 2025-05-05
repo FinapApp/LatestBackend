@@ -1,12 +1,13 @@
 import { Schema, model, Types } from 'mongoose';
 
 export interface ISongSchema extends Document {
-    staff: Types.ObjectId;
+    staff?: Types.ObjectId;
     name: string;
+    artist: string;
     url: string;
     icon: string;
     used: number;
-    duration?: number;
+    duration: number;
 };
 
 export const SongSchema = new Schema<ISongSchema>(
@@ -18,6 +19,9 @@ export const SongSchema = new Schema<ISongSchema>(
         name: {
             type: String,
             required: true,
+        },
+        artist: {
+            type: String,
         },
         url: {
             type: String,

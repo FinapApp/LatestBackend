@@ -30,7 +30,7 @@ export const getAllFlicksAggregation = async (userId: string, skip: string = "0"
                     localField: "song",
                     foreignField: "_id",
                     as: "song",
-                    pipeline: [{ $project: { name: 1, url: 1, icon: 1, duration: 1 } }]
+                    pipeline: [{ $project: { name: 1, url: 1, icon: 1, duration: 1 ,artist: 1 } }]
                 }
             },
             // Lookup for user details with optimized follower check
