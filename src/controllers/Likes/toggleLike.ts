@@ -52,7 +52,6 @@ export const toggleLike = async (req: Request, res: Response) => {
                 await questLike.deleteOne();
             }
         }
-
         if (existingLike) {
             await existingLike.deleteOne();
             await redis.hincrby(redisKey, "count", -1);

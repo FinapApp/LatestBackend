@@ -39,7 +39,8 @@ export const search = async (req: Request, res: Response) => {
                 const data = await index.search(q, {
                     limit,
                     offset,
-                    attributesToRetrieve: ["userId", "name", "username", "photo"]
+                    attributesToRetrieve: ["userId", "name", "username", "photo"],
+                    filter: [`userId != ${JSON.stringify(res.locals.userId)}`] 
                 });
 
                 const userIds = data.hits.map((user: any) => user.userId);
@@ -133,9 +134,17 @@ export const search = async (req: Request, res: Response) => {
                 const data = await index.search(q, {
                     limit,
                     offset,
-                    attributesToRetrieve: ["userId", "flickId", "thumbnailURL", "description", "user"]
+                    attributesToRetrieve: ["userId", "flickId", "thumbnailURL", "media" ,"description", "user"]
                 });
-                Object.assign(result, buildResult("flicks", data.hits, data.estimatedTotalHits));
+                let filteredFlick = data.hits.map(flick => {
+                    const mediaType  = flick.media?.[0]?.type || null;
+                    const { media, ...rest } = flick;
+                    return {
+                        ...rest,
+                        mediaType
+                    };
+                });
+                Object.assign(result, buildResult("flicks", filteredFlick, data.estimatedTotalHits));
                 break;
             }
 

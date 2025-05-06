@@ -46,7 +46,7 @@ if (cluster.isPrimary) {
   app.use(express.json());
   app.use(cors({
     origin: "*",
-    methods: ["GET", "PUT", "POST", "DELETE", "OPTIONS"],
+    methods: ["GET", "PUT", "POST", "DELETE", "PATCH", "OPTIONS"],
     allowedHeaders: ["Content-Type", "Authorization", "x-amz-date", "x-amz-content-sha256", "x-amz-security-token"],
     exposedHeaders: ["ETag"]
   }));
