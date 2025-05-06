@@ -1,5 +1,5 @@
 import { Request, Response } from "express"
-import { validateComment } from "../../../validators/validators"
+import { validateCreateReply } from "../../../validators/validators"
 import Joi from "joi"
 import { COMMENT } from "../../../models/Comment/comment.model"
 import { errors, handleResponse, success } from "../../../utils/responseCodec"
@@ -7,7 +7,7 @@ import { sendErrorToDiscord } from "../../../config/discord/errorDiscord"
 
 export const createReplyComment = async (req: Request, res: Response) => {
     try {
-        const validationError: Joi.ValidationError | undefined = validateComment(req.body, req.params);
+        const validationError: Joi.ValidationError | undefined = validateCreateReply(req.body, req.params);
         if (validationError) {
             return handleResponse(res, 400, errors.validation, validationError.details);
         }

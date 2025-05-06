@@ -24,7 +24,7 @@ const LikeSchema = new Schema<ILikeSchema>(
       ref: 'quest',
     },
     value: {
-      type: "boolean",
+      type: Boolean,
       default: true
     },
     comment: {

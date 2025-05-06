@@ -201,15 +201,19 @@ export const validateUpdateReplyComment = (body: object, params: object) => {
 export const validateComment = (body: object, params: object) => {
   const bodySchema = Joi.object({
     comment: Joi.array().items(Joi.object({
-      type: Joi.string().valid("user", "text"),
       mention: Joi.string().regex(/^[0-9a-fA-F]{24}$/, 'object Id').optional(),
-      text: Joi.string(),
-    }).xor("mention", "text")).required().messages({
-      'array.xor': 'Either mention or text is required'
-    }),
+      hashTag: Joi.string().regex(/^[0-9a-fA-F]{24}$/, 'object Id').optional(),
+      text: Joi.string().when(Joi.object({ mention: Joi.exist() }).unknown(), {
+        then: Joi.required(),
+        otherwise: Joi.when(Joi.object({ hashTag: Joi.exist() }).unknown(), {
+          then: Joi.required(),
+          otherwise: Joi.optional(),
+        }),
+      }),
+    })).required(),
   })
   const paramSchema = Joi.object({
-    flickId: Joi.string().regex(/^[0-9a-fA-F]{24}$/, 'object Id').optional(),
+    flickId: Joi.string().regex(/^[0-9a-fA-F]{24}$/, 'object Id').required(),
   })
   const combinedSchema = Joi.object({
     body: bodySchema,
@@ -219,11 +223,58 @@ export const validateComment = (body: object, params: object) => {
   return error
 }
 
+export const validateCreateReply = (body: object, params: object) => {
+  const bodySchema = Joi.object({
+    comment: Joi.array().items(Joi.object({
+      mention: Joi.string().regex(/^[0-9a-fA-F]{24}$/, 'object Id').optional(),
+      hashTag: Joi.string().regex(/^[0-9a-fA-F]{24}$/, 'object Id').optional(),
+      text: Joi.string().when(Joi.object({ mention: Joi.exist() }).unknown(), {
+        then: Joi.required(),
+        otherwise: Joi.when(Joi.object({ hashTag: Joi.exist() }).unknown(), {
+          then: Joi.required(),
+          otherwise: Joi.optional(),
+        }),
+      }),
+    })).required(),
+  })
+  const paramSchema = Joi.object({
+    flickId: Joi.string().regex(/^[0-9a-fA-F]{24}$/, 'object Id').required(),
+    commentId : Joi.string().regex(/^[0-9a-fA-F]{24}$/, 'object Id').required()
+  })
+  const combinedSchema = Joi.object({
+    body: bodySchema,
+    params: paramSchema
+  })
+  const { error } = combinedSchema.validate({ body, params })
+  return error
+}
+
+
 export const validateCommentId = (params: object) => {
   const schema = Joi.object({
     commentId: Joi.string().regex(/^[0-9a-fA-F]{24}$/, 'object Id').required()
   })
   const { error } = schema.validate(params)
+  return error
+}
+
+
+export const validateGetChildComment = (params: object, query: object) => {
+  const paramSchema = Joi.object({
+    commentId: Joi.string().regex(/^[0-9a-fA-F]{24}$/, 'object Id').required(),
+    flickId: Joi.string().regex(/^[0-9a-fA-F]{24}$/, 'object Id').required()
+  })
+  const querySchema = Joi.object({
+    page: Joi.number().integer().min(1).optional(),
+    limit: Joi.number().integer().min(1).max(15).optional()
+  }).and("limit", "page").messages({
+    "object.and": "Limit and page must be provided together",
+  })
+  const combinedSchema = Joi.object({
+    params: paramSchema,
+    query: querySchema
+  })
+  const { error } = combinedSchema.validate({ params, query })
   return error
 }
 
@@ -842,7 +893,7 @@ export const validateGetSearch = (query: object) => {
       'number.max': 'Limit must be at most 10',
     }).optional(),
     page: Joi.number().integer().min(1).optional(),
-    type: Joi.string().valid('user', 'flick', 'hashtag', 'quest', 'song' , 'follower' , 'following').optional(),
+    type: Joi.string().valid('user', 'flick', 'hashtag', 'quest', 'song', 'follower', 'following').optional(),
     userId: Joi.string().regex(/^[0-9a-fA-F]{24}$/, 'object Id').optional(),
   }).and("type", "limit").messages({
     "object.and": "type and limit must be provided together",
