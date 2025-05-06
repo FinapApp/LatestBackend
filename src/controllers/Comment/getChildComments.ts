@@ -43,7 +43,6 @@ export const getChildComments = async (req: Request, res: Response) => {
                         {
                             $match: {
                                 $expr: { $eq: ['$comment', '$$commentId'] },
-                                value: true
                             }
                         },
                         {

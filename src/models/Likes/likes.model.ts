@@ -1,7 +1,6 @@
 import { Schema, model, Types } from 'mongoose';
 
 export interface ILikeSchema extends Document {
-  value: boolean;
   user: Types.ObjectId;
   flick?: Types.ObjectId;
   comment?: Types.ObjectId;
@@ -22,10 +21,6 @@ const LikeSchema = new Schema<ILikeSchema>(
     quest : {
       type: Schema.Types.ObjectId,
       ref: 'quest',
-    },
-    value: {
-      type: Boolean,
-      default: true
     },
     comment: {
       type: Schema.Types.ObjectId,

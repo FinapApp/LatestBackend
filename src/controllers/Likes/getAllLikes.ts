@@ -12,7 +12,7 @@ export const getAllLikes = async (req: Request, res: Response) => {
             return handleResponse(res, 400, errors.validation, validationError.details);
         }
         const { id, type }: { id: string, type: 'quest' | 'comment' | 'flick' } = req.query as { id: string, type: 'quest' | 'comment' | 'flick' };
-        let query: { value: boolean, quest?: string, flick?: string, comment?: string } = { value: true };
+        let query: { quest?: string, flick?: string, comment?: string } = {};
         if (type == 'flick') query.flick = id;
         if (type == 'comment') query.comment = id;
         if (type == 'quest') query.quest = id;
@@ -30,7 +30,7 @@ export const getAllLikes = async (req: Request, res: Response) => {
         if (!LIKELIST) {
             return handleResponse(res, 404, errors.comment_not_found)
         }
-        return handleResponse(res, 200, { likeList : LIKELIST })
+        return handleResponse(res, 200, { likeList: LIKELIST })
     } catch (error) {
         sendErrorToDiscord("get-comments", error)
         return handleResponse(res, 500, errors.catch_error)

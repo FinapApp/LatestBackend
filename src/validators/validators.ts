@@ -1151,19 +1151,12 @@ export const validateQuestApplicantId = (params: object) => {
   return error
 }
 
-export const validateLikeToggle = (body: object, query: object) => {
-  const bodySchema = Joi.object({
-    value: Joi.boolean().required()
-  })
-  const querySchema = Joi.object({
+export const validateLikeToggle = (query: object) => {
+  const schema = Joi.object({
     id: Joi.string().regex(/^[0-9a-fA-F]{24}$/, 'object Id').required(),
     type: Joi.string().valid("flick", "comment", "quest").required(),
   })
-  const combinedSchema = Joi.object({
-    body: bodySchema,
-    query: querySchema
-  })
-  const { error } = combinedSchema.validate({ body, query })
+  const { error } = schema.validate(query)
   return error
 }
 

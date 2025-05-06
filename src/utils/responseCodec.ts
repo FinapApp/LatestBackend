@@ -300,7 +300,7 @@ export const errors = {
   identifier_not_found: {
     message: "Identifier not found",
   },
-
+  
   // OTP-related errors
   otp_expired: {
     message: "OTP has expired",

@@ -2,17 +2,15 @@ import { Request, Response } from "express";
 import { validateLikeToggle } from "../../validators/validators";
 import Joi from "joi";
 import { errors, handleResponse, success } from "../../utils/responseCodec";
-// import { LIKE, } from "../../models/Likes/likes.model";
 import { FLICKS } from "../../models/Flicks/flicks.model";
 import { redis } from "../../config/redis/redis.config";
+import { LIKE } from "../../models/Likes/likes.model";
+import { QUEST_FAV } from "../../models/Quest/questFavorite.model";
 
 interface QueryParams {
     id: string;
     type: 'quest' | 'comment' | 'flick';
 }
-import { LIKE } from "../../models/Likes/likes.model";
-import { QUEST_FAV } from "../../models/Quest/questFavorite.model";
-
 
 const buildLikeQuery = (user: string, id: string, type: 'quest' | 'comment' | 'flick') => {
     const query: any = { user };
@@ -24,13 +22,12 @@ const buildLikeQuery = (user: string, id: string, type: 'quest' | 'comment' | 'f
 
 export const toggleLike = async (req: Request, res: Response) => {
     try {
-        const validationError: Joi.ValidationError | undefined = validateLikeToggle(req.body, req.query);
+        const validationError: Joi.ValidationError | undefined = validateLikeToggle(req.query);
         if (validationError) {
             return handleResponse(res, 400, errors.validation, validationError.details);
         }
 
         const user = res.locals.userId;
-        const { value } = req.body; // boolean
         const { id, type }: QueryParams = req.query as any;
 
         const query = buildLikeQuery(user, id, type);
@@ -39,41 +36,32 @@ export const toggleLike = async (req: Request, res: Response) => {
         const redisKey = `${type}:likes:${id}`;
         const redisUserKey = `${redisKey}:users`;
 
-        // Ensure Redis is initialized with DB likeCount
+        // Initialize Redis like count from DB if needed
         if (!(await redis.exists(redisKey)) && type === 'flick') {
             const flickDoc = await FLICKS.findById(id).select("likeCount");
             if (flickDoc) {
                 await redis.hset(redisKey, "count", flickDoc.likeCount || 0);
             }
         }
-        if(type ===  "quest"){
+
+        if (type === "quest") {
             const questLike = await QUEST_FAV.findOne({ user, quest: id });
-            if(!questLike){
+            if (!questLike) {
                 await QUEST_FAV.create({ user, quest: id });
-            }else{
+            } else {
                 await questLike.deleteOne();
             }
         }
-        let countDelta = 0;
+
         if (existingLike) {
-            if (existingLike.value !== value) {
-                existingLike.value = value;
-                await existingLike.save();
-                countDelta = value ? 1 : -1;
-            } else {
-                // If trying to re-toggle the same value, treat as delete
-                await existingLike.deleteOne();
-                countDelta = value ? -1 : 0;
-            }
+            await existingLike.deleteOne();
+            await redis.hincrby(redisKey, "count", -1);
+            await redis.hdel(redisUserKey, user);
         } else {
-            // Create new like
-            await LIKE.create({ ...query, value });
-            countDelta = value ? 1 : 0;
+            await LIKE.create(query);
+            await redis.hincrby(redisKey, "count", 1);
+            await redis.hset(redisUserKey, user, 1);
         }
-        if (countDelta !== 0) {
-            await redis.hincrby(redisKey, "count", countDelta);
-        }
-        await redis.hset(redisUserKey, user, value ? 1 : 0);
         return handleResponse(res, 200, success.toggle_like);
     } catch (error) {
         console.error(error);

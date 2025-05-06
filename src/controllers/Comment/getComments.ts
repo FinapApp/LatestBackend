@@ -52,8 +52,7 @@ export const getComments = async (req: Request, res: Response) => {
                                 pipeline: [
                                     {
                                         $match: {
-                                            $expr: { $eq: ['$comment', '$$commentId'] },
-                                            value: true
+                                            $expr: { $eq: ['$comment', '$$commentId'] }
                                         }
                                     },
                                     {
@@ -183,7 +182,6 @@ export const getComments = async (req: Request, res: Response) => {
                         {
                             $match: {
                                 $expr: { $eq: ["$comment", "$$commentId"] },
-                                value: true
                             }
                         },
                         {
