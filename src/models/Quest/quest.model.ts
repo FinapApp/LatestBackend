@@ -21,10 +21,10 @@ interface IQuests extends Document {
     country: string;
     type: 'Basic' | 'Exclusive'
     maxApplicants: number;
-    applicantCount : number; // this is the number of applicants that have applied for this quest
-    totalApproved : number;
-    totalRejected : number;
-    leftApproved :  number;
+    applicantCount : number; // number of people applying to my  quest
+    totalApproved : number; // number of people approved
+    totalRejected : number; // number of people rejected
+    leftApproved: number; // number of people left to be approved
     avgAmountPerPerson: number;
     status : 'pending' | 'completed' | 'paused';
 }

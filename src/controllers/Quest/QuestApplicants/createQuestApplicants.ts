@@ -16,19 +16,34 @@ export const createQuestApplicant = async (req: Request, res: Response) => {
         const questApplicantId = req.params.questApplicantId;
         const user = res.locals.userId;
         const { quest } = req.body;
-        const questData = await QUESTS.findById(quest, "status leftApproved applicantCount");
-        if (!questData) return handleResponse(res, 404, errors.quest_not_found);
+
+        // Parallel DB operations
+        const [questData, existingApplication, pendingCount] = await Promise.all([
+            QUESTS.findById(quest, "status leftApproved applicantCount user"),
+            QUEST_APPLICANT.findOne({ user, quest }, "status"),
+            QUEST_APPLICANT.countDocuments({ quest, status: "pending" })
+        ]);
+
+        if (!questData) {
+            return handleResponse(res, 404, errors.quest_not_found);
+        }
+        if (String(questData.user) === String(user)) {
+            return handleResponse(res, 403, errors.cannot_apply_to_own_quest);
+        }
         if (questData.status !== "pending") {
             return handleResponse(res, 403, errors.quest_not_approved);
         }
-        const { leftApproved } = questData;
-        const maxPendingThreshold = leftApproved + Math.ceil(leftApproved * 0.3); // buffer of 30%
-        const currentPendingApplicants = await QUEST_APPLICANT.countDocuments({
-            quest,
-            status: "pending"
-        });
 
-        if (currentPendingApplicants >= maxPendingThreshold) {
+        if (existingApplication) {
+            return handleResponse(res, 403, errors.quest_already_applied);
+        }
+
+        const { leftApproved } = questData;
+        const maxPendingThreshold = leftApproved + Math.ceil(leftApproved * 0.3);
+
+        // Handle over-threshold logic
+        if (pendingCount >= maxPendingThreshold) {
+            // Pause quest and exit
             await QUESTS.findByIdAndUpdate(quest, { status: "paused" });
             return handleResponse(res, 400, {
                 ...errors.max_applicants,
@@ -36,18 +51,19 @@ export const createQuestApplicant = async (req: Request, res: Response) => {
             });
         }
 
-        const createdApplicant = await QUEST_APPLICANT.create({
-            _id: questApplicantId,
-            user,
-            ...req.body
-        });
+        // Create applicant & increment count in parallel
+        const [createdApplicant] = await Promise.all([
+            QUEST_APPLICANT.create({
+                _id: questApplicantId,
+                user,
+                ...req.body
+            }),
+            QUESTS.findByIdAndUpdate(quest, { $inc: { applicantCount: 1 } })
+        ]);
 
         if (!createdApplicant) {
             return handleResponse(res, 500, errors.create_quest_applicants);
         }
-
-        // increment total applicant count (denormalized field)
-        await QUESTS.findByIdAndUpdate(quest, { $inc: { applicantCount: 1, leftApproved: -1 } });
 
         return handleResponse(res, 201, success.create_quest_applicants);
     } catch (err) {

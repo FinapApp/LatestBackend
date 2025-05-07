@@ -11,12 +11,18 @@ export const deleteQuestApplication = async (req: Request, res: Response) => {
         if (validationError) {
             return handleResponse(res, 400, errors.validation, validationError.details);
         }
-        const deleteQuestApplication = await QUEST_APPLICANT.findByIdAndDelete(req.params.questApplicantId);
+        const user = res.locals.userId;
+        const check = await QUEST_APPLICANT.findOne({_id :req.params.questApplicantId , user}, "status")
+        if (!check) return handleResponse(res, 404, errors.quest_applicant_not_found)
+        if (check.status == "approved") {
+            return handleResponse(res, 403, errors.unable_to_delete_quest_after_approval);
+        }
+        const deleteQuestApplication = await QUEST_APPLICANT.findOneAndDelete({ _id: req.params.questApplicantId, user }, { new: true });
         if (deleteQuestApplication) {
             // if we delete the reel we need to delete the associated likes , comments on it as well , in case of notifing it we can do that as well.
             await QUESTS.findByIdAndUpdate(deleteQuestApplication.quest, {
                 $inc: {
-                    totalApproved: -1,
+                    applicantCount: -1,
                     leftApproved: 1
                 }
             })

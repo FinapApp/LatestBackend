@@ -18,8 +18,17 @@ export const updateQuestApplicant = async (req: Request, res: Response) => {
                 validationError.details
             );
         }
+        const user = res.locals.userId;
+        const check = await QUEST_APPLICANT.findOne({ _id: req.params.questApplicantId, user }, "status")
+        if (!check) return handleResponse(res, 404, errors.quest_applicant_not_found)
+        if (check.status == "approved") {
+            return handleResponse(res, 403, errors.unable_to_update_quest_after_approval);
+        }
         const updateQuest = await QUEST_APPLICANT.findOneAndUpdate(
-            {_id : req.params.questApplicantId , user : res.locals.userId},
+            {
+                _id: req.params.questApplicantId,
+                user
+            },
             req.body
         );
         if (updateQuest) {

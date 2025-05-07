@@ -14,7 +14,13 @@ export const getAllQuests = async (req: Request, res: Response) => {
         }
         let { sort, low, high, mode, type, long, lat, country, page, limit = 10 } = req.query;
         const userId = res.locals.userId;
-        const pipeline: any[] = [];
+        const pipeline: any[] = [
+            {
+                $match: {
+                    status: { $ne: "paused" }
+                }
+            }
+        ];
         limit = Number(limit);
         const skip = ((Number(page) || 1) - 1) * limit;
 

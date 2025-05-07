@@ -239,6 +239,18 @@ export const errors = {
   },
 
   // Quest-related errors
+  cannot_apply_to_own_quest: {
+    message: "You cannot apply to your own quest",
+  },
+  quest_already_applied: {
+    message: "Already applied for this quest",
+  },
+  unable_to_delete_quest_after_approval: {
+    message: "Unable to delete quest after approval",
+  },
+  unable_to_update_quest_after_approval: {
+    message: "Unable to update quest after approval",
+  },
   quest_already_exists: {
     message: "Quest already exists",
   },
