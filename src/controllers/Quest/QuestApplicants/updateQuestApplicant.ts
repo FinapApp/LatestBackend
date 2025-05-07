@@ -29,7 +29,8 @@ export const updateQuestApplicant = async (req: Request, res: Response) => {
                 _id: req.params.questApplicantId,
                 user
             },
-            req.body
+            req.body,
+            { new: true }
         );
         if (updateQuest) {
             return handleResponse(res, 200, success.quest_applicant_updated);

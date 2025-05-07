@@ -10,7 +10,7 @@ export const deleteQuest = async (req: Request, res: Response) => {
         if (validationError) {
             return handleResponse(res, 400, errors.validation, validationError.details);
         }
-        const deleteQuest = await QUESTS.findOneAndUpdate({ _id: req.params.questId, user: res.locals.userId }, { new: true });
+        const deleteQuest = await QUESTS.findOneAndDelete({ _id: req.params.questId, user: res.locals.userId }, { new: true });
         if (deleteQuest) {
             // if we delete the reel we need to delete the associated likes , comments on it as well , in case of notifing it we can do that as well.
             return handleResponse(res, 200, success.quest_deleted)

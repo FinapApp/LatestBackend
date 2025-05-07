@@ -19,7 +19,6 @@ export const changeQuestApplicantStatus = async (req: Request, res: Response) =>
         // Step 1: Find the applicant
         const applicant = await QUEST_APPLICANT.findById(questApplicantId, { status: 1, quest: 1 });
         if (!applicant) return handleResponse(res, 404, errors.quest_applicant_not_found);
-
         if (applicant.status !== "pending") {
             return handleResponse(res, 400, {
                 message: `Applicant is already ${applicant.status}. Only pending applicants can be updated.`,
