@@ -1,9 +1,14 @@
 import mongoose from "mongoose";
 import { FOLLOW } from "../models/User/userFollower.model";
 
-export const getAllFollowingUserAggreagtion = async (userId: string, skip: number, limit: number) => {
+export const getAllFollowingUserAggreagtion = async (
+    userId: string,
+    skip: number,
+    limit: number,
+    viewerId?: string
+) => {
     try {
-        const response = await FOLLOW.aggregate([
+        const pipeline: any[] = [
             {
                 $match: {
                     follower: new mongoose.Types.ObjectId(userId),
@@ -11,30 +16,68 @@ export const getAllFollowingUserAggreagtion = async (userId: string, skip: numbe
                 }
             },
             {
-                $facet: {
-                    results: [
-                        { $sort: { createdAt: -1 } },
-                        { $skip: skip },
-                        { $limit: limit },
+                $sort: { createdAt: -1 }
+            },
+            { $skip: skip },
+            { $limit: limit },
+            {
+                $lookup: {
+                    from: "users",
+                    localField: "following",
+                    foreignField: "_id",
+                    as: "followingInfo"
+                }
+            },
+            { $unwind: "$followingInfo" }
+        ];
+
+        // Add isFollowing check if viewerId is different
+        if (viewerId && viewerId !== userId) {
+            pipeline.push({
+                $lookup: {
+                    from: "userfollowers",
+                    let: { targetId: "$followingInfo._id" },
+                    pipeline: [
                         {
-                            $lookup: {
-                                from: "users",
-                                localField: "following",
-                                foreignField: "_id",
-                                as: "followingInfo"
-                            }
-                        },
-                        { $unwind: "$followingInfo" },
-                        {
-                            $project: {
-                                _id: "$followingInfo._id",
-                                username: "$followingInfo.username",
-                                name: "$followingInfo.name",
-                                photo: "$followingInfo.photo"
+                            $match: {
+                                $expr: {
+                                    $and: [
+                                        { $eq: ["$follower", new mongoose.Types.ObjectId(viewerId)] },
+                                        { $eq: ["$following", "$$targetId"] },
+                                        { $eq: ["$approved", true] }
+                                    ]
+                                }
                             }
                         }
                     ],
+                    as: "viewerFollows"
+                }
+            });
+        }
+
+        pipeline.push({
+            $project: {
+                _id: "$followingInfo._id",
+                username: "$followingInfo.username",
+                name: "$followingInfo.name",
+                photo: "$followingInfo.photo",
+                ...(viewerId && viewerId !== userId && {
+                    isFollowing: { $gt: [{ $size: "$viewerFollows" }, 0] }
+                })
+            }
+        });
+
+        const response = await FOLLOW.aggregate([
+            {
+                $facet: {
+                    results: pipeline,
                     totalCount: [
+                        {
+                            $match: {
+                                follower: new mongoose.Types.ObjectId(userId),
+                                approved: true
+                            }
+                        },
                         { $count: "count" }
                     ]
                 }

@@ -25,11 +25,32 @@ export const getAllFollowerUserAggreagtion = async (userId: string, skip: number
                         },
                         { $unwind: "$followerInfo" },
                         {
+                            $lookup: {
+                                from: "userfollowers", // Name of the collection used by FOLLOW model
+                                let: { followerId: "$followerInfo._id" },
+                                pipeline: [
+                                    {
+                                        $match: {
+                                            $expr: {
+                                                $and: [
+                                                    { $eq: ["$follower", new mongoose.Types.ObjectId(userId)] },
+                                                    { $eq: ["$following", "$$followerId"] },
+                                                    { $eq: ["$approved", true] }
+                                                ]
+                                            }
+                                        }
+                                    }
+                                ],
+                                as: "isFollowingInfo"
+                            }
+                        },
+                        {
                             $project: {
                                 _id: "$followerInfo._id",
                                 username: "$followerInfo.username",
                                 name: "$followerInfo.name",
-                                photo: "$followerInfo.photo"
+                                photo: "$followerInfo.photo",
+                                isFollowing: { $gt: [{ $size: "$isFollowingInfo" }, 0] }
                             }
                         }
                     ],

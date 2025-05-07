@@ -4,6 +4,7 @@ import { errors, handleResponse } from "../../utils/responseCodec";
 import Joi from "joi";
 import { validateGetSearch } from "../../validators/validators";
 import { FOLLOW } from "../../models/User/userFollower.model";
+import { QUEST_FAV } from "../../models/Quest/questFavorite.model";
 
 export const search = async (req: Request, res: Response) => {
     try {
@@ -12,7 +13,7 @@ export const search = async (req: Request, res: Response) => {
             return handleResponse(res, 400, errors.validation, validationError.details);
         }
 
-        let { q = "", page = 1, type, limit = 5 , userId} = req.query as {
+        let { q = "", page = 1, type, limit = 5, userId } = req.query as {
             q: string;
             page?: string | number;
             type?: string;
@@ -40,7 +41,7 @@ export const search = async (req: Request, res: Response) => {
                     limit,
                     offset,
                     attributesToRetrieve: ["userId", "name", "username", "photo"],
-                    filter: [`userId != ${JSON.stringify(res.locals.userId)}`] 
+                    filter: [`userId != ${JSON.stringify(res.locals.userId)}`]
                 });
 
                 const userIds = data.hits.map((user: any) => user.userId);
@@ -134,14 +135,13 @@ export const search = async (req: Request, res: Response) => {
                 const data = await index.search(q, {
                     limit,
                     offset,
-                    attributesToRetrieve: ["userId", "flickId", "thumbnailURL", "media" ,"description", "user"]
+                    attributesToRetrieve: ["userId", "flickId", "thumbnailURL", "media", "description", "user"]
                 });
                 let filteredFlick = data.hits.map(flick => {
-                    const mediaType  = flick.media?.[0]?.type || null;
                     const { media, ...rest } = flick;
                     return {
                         ...rest,
-                        mediaType
+                        media,
                     };
                 });
                 Object.assign(result, buildResult("flicks", filteredFlick, data.estimatedTotalHits));
@@ -161,18 +161,43 @@ export const search = async (req: Request, res: Response) => {
 
             case "quest": {
                 const index = getIndex("QUESTS");
+
                 const data = await index.search(q, {
                     limit,
                     offset,
                     attributesToRetrieve: [
-                        "userId", "questId", "description", "thumbnailURLs",
+                        "userId", "questId", "description", 
+                        "media",
                         "avgAmountPerPerson", "createdAt", "mode", "title", "user"
                     ]
                 });
-                Object.assign(result, buildResult("quests", data.hits, data.estimatedTotalHits));
+
+                // Preload quest IDs once
+                const questIds = data.hits.map((quest: any) => quest.questId);
+
+                // Fetch favorites in parallel
+                const [questFavorite] = await Promise.all([
+                    QUEST_FAV.find({
+                        user: res.locals.userId,
+                        quest: { $in: questIds }
+                    }).lean()
+                ]);
+
+                // Use Set for O(1) lookups
+                const questFavoriteSet = new Set(questFavorite.map(q => q.quest));
+
+                // Process quests in one pass
+                const quests = data.hits.map((quest: any) => {
+                    const isFavorite = questFavoriteSet.has(quest.questId);
+                    return {
+                        ...quest,
+                        isFavorite,
+                        thumbnailURLs: undefined
+                    };
+                });
+                Object.assign(result, buildResult("quests", quests, data.estimatedTotalHits));
                 break;
             }
-
             case "song": {
                 const index = getIndex("SONGS");
                 const data = await index.search(q, {
@@ -185,10 +210,11 @@ export const search = async (req: Request, res: Response) => {
             }
 
             default: {
-                const [userSearch,  hashTagSearch, questSearch, songSearch] = await Promise.all([
+                const [userSearch, hashTagSearch, questSearch, songSearch] = await Promise.all([
                     getIndex("USERS").search(q, {
                         limit,
-                        attributesToRetrieve: ["userId", "name", "username", "photo"]
+                        attributesToRetrieve: ["userId", "name", "username", "photo"],
+                        filter: [`userId != ${JSON.stringify(res.locals.userId)}`]
                     }),
                     // getIndex("FLICKS").search(q, {
                     //     limit,
@@ -201,13 +227,13 @@ export const search = async (req: Request, res: Response) => {
                     getIndex("QUESTS").search(q, {
                         limit,
                         attributesToRetrieve: [
-                            "userId", "questId", "description", "thumbnailURLs",
+                            "userId", "questId", "description", "media",
                             "avgAmountPerPerson", "createdAt", "mode", "title", "user"
                         ]
                     }),
                     getIndex("SONGS").search(q, {
                         limit,
-                        attributesToRetrieve: ["songId", "name", "duration", "icon", "used", "url" , "artist"]
+                        attributesToRetrieve: ["songId", "name", "duration", "icon", "used", "url", "artist"]
                     })
                 ]);
 

@@ -11,15 +11,19 @@ export const getFollowing = async (req: Request, res: Response) => {
         if (validationError) {
             return handleResponse(res, 400, errors.validation, validationError.details);
         }
-        let { page, userId, limit=10 } = req.query as any
+
+        let { page, userId, limit = 10 } = req.query as any;
         limit = Number(limit);
         const skip = ((Number(page) || 1) - 1) * limit;
-        userId ??= res.locals.userId as string
-        const result = await getAllFollowingUserAggreagtion(userId, skip , limit)
-        return handleResponse(res, 200, result)
+
+        const targetUserId = userId || res.locals.userId as string;
+        const viewerId = userId && userId !== res.locals.userId ? res.locals.userId : undefined;
+
+        const result = await getAllFollowingUserAggreagtion(targetUserId, skip, limit, viewerId);
+        return handleResponse(res, 200, result);
     } catch (error) {
-        console.log(error)
-        sendErrorToDiscord("GET:following", error)
+        console.log(error);
+        sendErrorToDiscord("GET:following", error);
         return handleResponse(res, 500, errors.catch_error);
     }
-}
+};
