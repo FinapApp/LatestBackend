@@ -18,9 +18,10 @@ export const updateComment = async (req: Request, res: Response) => {
                 validationError.details
             );
         }
-        const updateComment = await COMMENT.findByIdAndUpdate(
-            req.params.commentId,
-            req.body
+        const updateComment = await COMMENT.findOneAndUpdate(
+            { _id: req.params.commentId, user: res.locals.userId },
+            req.body,
+            { new: true }
         );
         if (updateComment) {
             return handleResponse(res, 200, success.update_comment);

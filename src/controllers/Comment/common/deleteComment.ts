@@ -5,13 +5,13 @@ import { validateCommentId } from "../../../validators/validators";
 import { errors, handleResponse, success } from "../../../utils/responseCodec";
 import { sendErrorToDiscord } from "../../../config/discord/errorDiscord";
 
-export const deleteComment = async (req: Request, res: Response)  => {
+export const deleteComment = async (req: Request, res: Response) => {
     try {
         const validationError: Joi.ValidationError | undefined = validateCommentId(req.params);
         if (validationError) {
             return handleResponse(res, 400, errors.validation, validationError.details);
         }
-        const deleteComment = await COMMENT.findByIdAndDelete(req.params.commentId)
+        const deleteComment = await COMMENT.findOneAndDelete({ _id: req.params.commentId, user: res.locals.userId })
         if (deleteComment) {
             // deleteThoseComment as well that as the same commentId as parentComment in the comment model
             return handleResponse(res, 200, success.comment_deleted)

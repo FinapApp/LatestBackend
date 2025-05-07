@@ -12,7 +12,8 @@ export const deleteFlick = async (req: Request, res: Response) => {
         if (validationError) {
             return handleResponse(res, 400, errors.validation, validationError.details);
         }
-        const deleteFlick = await FLICKS.findByIdAndDelete(req.params.flickId)
+        const user = res.locals.userId
+        const deleteFlick = await FLICKS.findOneAndDelete({ _id: req.params.flickId, user })
         if (deleteFlick) {
             const flickIndex = getIndex("FLICKS");
             await flickIndex.deleteDocument(req.params.flickId)
