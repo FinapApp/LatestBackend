@@ -17,7 +17,7 @@ const options = {
     servers: [
       {
         url: process.env.PROJECT_ENVIRONMENT === 'production'
-          ? "http://4.213.171.49:4003/api"
+          ? process.env.SWAGGER_HOSTED_URL!
           : "http://localhost:4003/api", 
         description: process.env.PROJECT_ENVIRONMENT === 'production'
           ? "Production Server"
