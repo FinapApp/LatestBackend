@@ -7,6 +7,7 @@ import { AUDIO } from "../../models/Audio/audio.model";
 import { sendErrorToDiscord } from "../../config/discord/errorDiscord";
 import { HASHTAGS } from "../../models/User/userHashTag.model";
 import { getIndex } from "../../config/melllisearch/mellisearch.config";
+import { USER } from "../../models/User/user.model";
 
 export const createFlick = async (req: Request, res: Response) => {
     try {
@@ -29,7 +30,7 @@ export const createFlick = async (req: Request, res: Response) => {
         if (newHashTags) {
             const createHashTags = await HASHTAGS.insertMany(newHashTags.map((tag: { id: string, value: string }) => ({ value: tag.value, _id: tag.id })));
             const hashTagIndex = getIndex("HASHTAG");
-            await hashTagIndex.addDocuments(newHashTags.map((tag: { id: string, value: string }) => ({ hashtagId: tag.id, value: tag.value ,  count: 1 })));
+            await hashTagIndex.addDocuments(newHashTags.map((tag: { id: string, value: string }) => ({ hashtagId: tag.id, value: tag.value, count: 1 })));
             if (!createHashTags) {
                 return handleResponse(res, 404, errors.create_hashtags);
             }
@@ -41,7 +42,7 @@ export const createFlick = async (req: Request, res: Response) => {
                 user,
                 ...rest
             }
-        ) 
+        )
         if (flick) {
             const flickIndex = getIndex("FLICKS");
             const userDetails = await flick.populate("user", "username photo name")
@@ -53,6 +54,8 @@ export const createFlick = async (req: Request, res: Response) => {
                     user: userDetails.user,
                 }
             ])
+            USER.findByIdAndUpdate(user, { $inc: { flickCount: 1 } }, { new: true })
+                .catch(err => sendErrorToDiscord("POST:create-flick:flickCount", err));
             return handleResponse(res, 200, success.flick_uploaded);
         }
         return handleResponse(res, 404, errors.flick_not_found);

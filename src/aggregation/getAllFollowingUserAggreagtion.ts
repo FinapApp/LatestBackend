@@ -8,16 +8,15 @@ export const getAllFollowingUserAggreagtion = async (
     viewerId?: string
 ) => {
     try {
-        const pipeline: any[] = [
-            {
-                $match: {
-                    follower: new mongoose.Types.ObjectId(userId),
-                    approved: true
-                }
-            },
-            {
-                $sort: { createdAt: -1 }
-            },
+        const matchStage = {
+            $match: {
+                follower: new mongoose.Types.ObjectId(userId),
+                approved: true
+            }
+        };
+
+        const resultsPipeline: any[] = [
+            { $sort: { createdAt: -1 } },
             { $skip: skip },
             { $limit: limit },
             {
@@ -31,9 +30,8 @@ export const getAllFollowingUserAggreagtion = async (
             { $unwind: "$followingInfo" }
         ];
 
-        // Add isFollowing check if viewerId is different
         if (viewerId && viewerId !== userId) {
-            pipeline.push({
+            resultsPipeline.push({
                 $lookup: {
                     from: "userfollowers",
                     let: { targetId: "$followingInfo._id" },
@@ -55,7 +53,7 @@ export const getAllFollowingUserAggreagtion = async (
             });
         }
 
-        pipeline.push({
+        resultsPipeline.push({
             $project: {
                 _id: "$followingInfo._id",
                 username: "$followingInfo.username",
@@ -68,24 +66,17 @@ export const getAllFollowingUserAggreagtion = async (
         });
 
         const response = await FOLLOW.aggregate([
+            matchStage,
             {
                 $facet: {
-                    results: pipeline,
-                    totalCount: [
-                        {
-                            $match: {
-                                follower: new mongoose.Types.ObjectId(userId),
-                                approved: true
-                            }
-                        },
-                        { $count: "count" }
-                    ]
+                    results: resultsPipeline,
+                    totalCount: [{ $count: "count" }]
                 }
             }
         ]);
 
         const following = response[0]?.results || [];
-        const total = response[0]?.totalCount[0]?.count || 0;
+        const total = response[0]?.totalCount?.[0]?.count || 0;
 
         return {
             following,

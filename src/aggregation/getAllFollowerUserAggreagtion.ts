@@ -6,7 +6,8 @@ export const getAllFollowerUserAggreagtion = async (userId: string, skip: number
         const response = await FOLLOW.aggregate([
             {
                 $match: {
-                    following: new mongoose.Types.ObjectId(userId)
+                    following: new mongoose.Types.ObjectId(userId),
+                    approved: true
                 }
             },
             {
@@ -26,7 +27,7 @@ export const getAllFollowerUserAggreagtion = async (userId: string, skip: number
                         { $unwind: "$followerInfo" },
                         {
                             $lookup: {
-                                from: "userfollowers", // Name of the collection used by FOLLOW model
+                                from: "userfollowers",
                                 let: { followerId: "$followerInfo._id" },
                                 pipeline: [
                                     {
@@ -62,7 +63,7 @@ export const getAllFollowerUserAggreagtion = async (userId: string, skip: number
         ]);
 
         const followers = response[0]?.results || [];
-        const total = response[0]?.totalCount[0]?.count || 0;
+        const total = response[0]?.totalCount?.[0]?.count || 0;
 
         return {
             followers,
