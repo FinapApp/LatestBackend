@@ -56,7 +56,7 @@ services:
         condition: service_started
     environment:
       - REDIS_URI=redis://redis:6379/
-      - MONGO_URI=mongodb://mongodb:27017/finapp-dev
+      - MONGO_URI=mongodb://mongodb:27017/flickstar-dev
       - REDIS_EXPIRE_IN=900
       - REDIS_EXPIRE_IN_STATIC=86400
       - JWT_EXPIRE_IN=1d
