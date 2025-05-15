@@ -82,7 +82,7 @@ services:
       - MEILI_MASTER_KEY=finapus
       - MELLISSEARCH_HOST=http://meilisearch:7700  
       - DISCORD_WEBHOOK_URL=https://discord.com/api/webhooks/1366616138586525817/0alnapdFbCVPgnfZVdRTPeSRWtymxvgm6I03iOFszWvrVvkHA09nnTGzWy1KqHTrrhMN
-      - SWAGGER_HOSTED_URL="http://135.235.193.1:4003/api"
+      - SWAGGER_HOSTED_URL=http://135.235.193.1:4003/api
 
 volumes:
   mongodb_data:
