@@ -3,7 +3,7 @@ import Joi from "joi";
 import { validateBioLinkId } from "../../validators/validators";
 import { errors, handleResponse, success } from "../../utils/responseCodec";
 import { sendErrorToDiscord } from "../../config/discord/errorDiscord";
-import { USERBIOLINKS } from "../../models/User/userBioLinks";
+import { USERBIOLINKS } from "../../models/User/userBioLinks.model";
 
 export const deleteBioLink = async (req: Request, res: Response) => {
     try {

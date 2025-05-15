@@ -13,27 +13,29 @@ export const getAllFlicks = async (req: Request, res: Response) => {
         if (validationError) {
             return handleResponse(res, 400, errors.validation, validationError.details);
         }
-        const userId = new mongoose.Types.ObjectId(res.locals.userId);
-        let { type, limit = 10, page = 1 } = req.query as {
+        const user = new mongoose.Types.ObjectId(res.locals.user);
+        let { type, limit = 10, page = 1, userId } = req.query as {
             type?: string;
             limit?: number;
             page?: number;
+            userId?: string;
         };
 
         limit = Number(limit);
         const skip = ((Number(page) || 1) - 1) * limit;
 
         const pipeline: any[] = [];
-
-        
         const matchStage: any = {};
         if (type === 'tagged') {
             matchStage.$or = [
-                { "media.taggedUsers.user": userId },
-                { "description.mention": userId },
+                { "media.taggedUsers.user": user },
+                { "description.mention": user },
             ]
         } else if (type === 'self') {
-            matchStage.user = userId;
+            matchStage.user = user;
+        }
+        if(type == "user"){
+            matchStage.user = new mongoose.Types.ObjectId(userId as string);
         }
 
         if (Object.keys(matchStage).length > 0) {
@@ -50,14 +52,14 @@ export const getAllFlicks = async (req: Request, res: Response) => {
                         {
                             $lookup: {
                                 from: 'userfollowers', 
-                                let: { flickUserId: '$_id' }, 
+                                let: { flickuser: '$_id' }, 
                                 pipeline: [
                                     {
                                         $match: {
                                             $expr: {
                                                 $and: [
-                                                    { $eq: ['$follower', userId] }, 
-                                                    { $eq: ['$following', '$$flickUserId'] } 
+                                                    { $eq: ['$follower', user] }, 
+                                                    { $eq: ['$following', '$$flickuser'] } 
                                                 ]
                                             }
                                         }
@@ -180,7 +182,7 @@ export const getAllFlicks = async (req: Request, res: Response) => {
                                 $expr: {
                                     $and: [
                                         { $eq: ["$flick", "$$flickId"] },
-                                        { $eq: ["$user", userId] }
+                                        { $eq: ["$user", user] }
                                     ]
                                 }
                             }

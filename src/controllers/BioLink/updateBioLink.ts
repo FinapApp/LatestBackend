@@ -3,7 +3,7 @@ import { validateUpdateBioLink } from "../../validators/validators";
 import { handleResponse, errors, success } from "../../utils/responseCodec";
 import Joi from "joi";
 import { sendErrorToDiscord } from "../../config/discord/errorDiscord";
-import { USERBIOLINKS } from "../../models/User/userBioLinks";
+import { USERBIOLINKS } from "../../models/User/userBioLinks.model";
 
 export const updateBioLink = async (req: Request, res: Response) => {
     try {

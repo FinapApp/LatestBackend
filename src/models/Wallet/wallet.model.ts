@@ -2,7 +2,7 @@ import { Schema, model } from 'mongoose';
 
 
 export interface IWalletSchema extends Document {
-    userId: Schema.Types.ObjectId;
+    user: Schema.Types.ObjectId;
     balance: number; // total balance
     // balance = availableBalance + reservedBalance
     reservedBalance : number; // balance - availableBalance
@@ -11,7 +11,7 @@ export interface IWalletSchema extends Document {
 
 const WalletSchema = new Schema<IWalletSchema>(
     {
-        userId: {
+        user: {
             type: Schema.Types.ObjectId,
             ref: 'user',
             required: true,

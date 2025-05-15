@@ -12,15 +12,9 @@ export const getAllQuests = async (req: Request, res: Response) => {
         if (validationError) {
             return handleResponse(res, 400, errors.validation, validationError.details);
         }
-        let { sort, low, high, mode, type, long, lat, country, page, limit = 10 } = req.query;
-        const userId = res.locals.userId;
-        const pipeline: any[] = [
-            {
-                $match: {
-                    status: { $ne: "paused" }
-                }
-            }
-        ];
+        let { sort, low, high, mode, type, long, lat, country, page, limit = 10, userId } = req.query;
+        userId ??= res.locals.userId as any
+        const pipeline: any[] = [];
         limit = Number(limit);
         const skip = ((Number(page) || 1) - 1) * limit;
 
@@ -34,11 +28,15 @@ export const getAllQuests = async (req: Request, res: Response) => {
                     },
                     key: "gps",
                     distanceField: "distanceInMiles",
-                    distanceMultiplier: 0.000621371, 
+                    distanceMultiplier: 0.000621371,
                     spherical: true
                 }
             });
         }
+
+        pipeline.push({
+            $match: { status: { $ne: "paused" } }
+        });
 
         // Country filter
         if (country && typeof country === 'string') {
@@ -85,7 +83,7 @@ export const getAllQuests = async (req: Request, res: Response) => {
                                         $expr: {
                                             $and: [
                                                 { $eq: ["$quest", "$$questId"] },
-                                                { $eq: ["$user", new Types.ObjectId(userId)] }
+                                                { $eq: ["$user", new Types.ObjectId(userId as string)] }
                                             ]
                                         }
                                     }
@@ -101,8 +99,14 @@ export const getAllQuests = async (req: Request, res: Response) => {
             case 'sponsored':
                 pipeline.push({ $match: { staff: { $exists: true } } });
                 break;
+            case 'user':
+                if (!userId) {
+                    return handleResponse(res, 400, errors.validation, [{ message: "userId is required for type=user" }]);
+                }
+                pipeline.push({ $match: { user: new Types.ObjectId(userId as string) } });
+                break;
             case 'self':
-                pipeline.push({ $match: { user: new Types.ObjectId(userId) } });
+                pipeline.push({ $match: { user: new Types.ObjectId(userId as string) } });
                 break;
             case 'applied':
                 pipeline.push(
@@ -116,7 +120,7 @@ export const getAllQuests = async (req: Request, res: Response) => {
                                         $expr: {
                                             $and: [
                                                 { $eq: ["$quest", "$$questId"] },
-                                                { $eq: ["$user", new Types.ObjectId(userId)] }
+                                                { $eq: ["$user", new Types.ObjectId(userId as string)] }
                                             ]
                                         }
                                     }
@@ -203,7 +207,7 @@ export const getAllQuests = async (req: Request, res: Response) => {
                                 $expr: {
                                     $and: [
                                         { $eq: ["$quest", "$$questId"] },
-                                        { $eq: ["$user", new Types.ObjectId(userId)] }
+                                        { $eq: ["$user", new Types.ObjectId(userId as string)] }
                                     ]
                                 }
                             }
@@ -229,7 +233,7 @@ export const getAllQuests = async (req: Request, res: Response) => {
                                 $expr: {
                                     $and: [
                                         { $eq: ["$quest", "$$questId"] },
-                                        { $eq: ["$user", new Types.ObjectId(userId)] }
+                                        { $eq: ["$user", new Types.ObjectId(userId as string)] }
                                     ]
                                 }
                             }
@@ -266,6 +270,24 @@ export const getAllQuests = async (req: Request, res: Response) => {
                     { $unset: "applicants" }
                 );
                 break;
+            case 'user':
+                resultsSubPipeline.push(
+                    {
+                        $lookup: {
+                            from: "questapplications",
+                            localField: "_id",
+                            foreignField: "quest",
+                            as: "applicants"
+                        }
+                    },
+                    {
+                        $addFields: {
+                            applicantCount: { $size: "$applicants" }
+                        }
+                    },
+                    { $unset: "applicants" }
+                );
+                break;
             case 'applied':
                 resultsSubPipeline.push(
                     {
@@ -278,7 +300,7 @@ export const getAllQuests = async (req: Request, res: Response) => {
                                         $expr: {
                                             $and: [
                                                 { $eq: ["$quest", "$$questId"] },
-                                                { $eq: ["$user", new Types.ObjectId(userId)] },
+                                                { $eq: ["$user", new Types.ObjectId(userId as string)] },
                                                 { $eq: ["$status", "approved"] }
                                             ]
                                         }

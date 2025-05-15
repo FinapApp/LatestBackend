@@ -2,7 +2,7 @@ import { Request, Response } from "express";
 import { errors, handleResponse, } from "../../utils/responseCodec";
 import { USER } from "../../models/User/user.model";
 import { sendErrorToDiscord } from "../../config/discord/errorDiscord";
-import { USERBIOLINKS } from "../../models/User/userBioLinks";
+import { USERBIOLINKS } from "../../models/User/userBioLinks.model";
 import Joi from "joi";
 import { validateGetProfileDetail } from "../../validators/validators";
 import { FOLLOW } from "../../models/User/userFollower.model";

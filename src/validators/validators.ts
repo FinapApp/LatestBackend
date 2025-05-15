@@ -27,16 +27,28 @@ export const validateLogin = (body: object) => {
 };
 
 export const validateGetFlicks = (query: object) => {
-  const schema = Joi.object({
-    type: Joi.string().valid("tagged", "self").optional(),
+  const baseSchema = Joi.object({
+    type: Joi.string().valid("tagged", "self", "user").optional(),
     limit: Joi.number().integer().min(1).max(15).optional(),
     page: Joi.number().integer().min(1).optional(),
-  }).and("limit", "page").messages({
-    "object.and": "Limit and page must be provided together",
+  })
+    .and("limit", "page")
+    .messages({
+      "object.and": "Limit and page must be provided together",
+    });
+  const extendedSchema = baseSchema.when(Joi.object({ type: Joi.valid("user") }).unknown(), {
+    then: Joi.object({
+      userId: Joi.string().required().regex(/^[0-9a-fA-F]{24}$/).label("userId"),
+    }),
+    otherwise: Joi.object({
+      userId: Joi.string().optional().regex(/^[0-9a-fA-F]{24}$/).label("userId"),
+    }),
   });
-  const { error } = schema.validate(query);
+
+  const { error } = extendedSchema.validate(query);
   return error;
-}
+};
+
 
 export const validateGetFeedback = (query: object) => {
   const schema = Joi.object({
@@ -657,6 +669,7 @@ export const validateGetProfileDetail = (query: object) => {
 }
 
 
+
 export const validateUpdateFlick = (body: object, params: object) => {
   const bodySchema = Joi.object({
     media: Joi.array().items(Joi.object({
@@ -1092,6 +1105,11 @@ export const validateGetQuests = (query: object) => {
     high: Joi.string().optional(),
     limit: Joi.string().optional(),
     page: Joi.number().optional(),
+    userId: Joi.string().regex(/^[0-9a-fA-F]{24}$/, 'object Id').when('type', {
+      is: 'user',
+      then: Joi.required(),
+      otherwise: Joi.optional()
+    }),
     mode: Joi.string().valid("go", "on").optional(),
     country: Joi.string().optional().custom((value, helpers) => {
       // Check if country exists in your predefined countries list
@@ -1102,7 +1120,7 @@ export const validateGetQuests = (query: object) => {
       }
       return countryCodes;
     }),
-    type: Joi.string().valid("sponsored", "self", "applied", "favorite")
+    type: Joi.string().valid("sponsored", "self", "applied", "favorite" , "user")
   }).and("lat", "long").messages({
     "object.and": "lat and long must be provided together",
   })

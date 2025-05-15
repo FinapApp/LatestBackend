@@ -20,6 +20,8 @@ export const deleteFlick = async (req: Request, res: Response) => {
                 .catch(err => sendErrorToDiscord("POST:create-flick:flickCount", err));
             const flickIndex = getIndex("FLICKS");
             await flickIndex.deleteDocument(req.params.flickId)
+            USER.findByIdAndUpdate(user, { $inc: { flickCount: -1 } }, { new: true })
+                .catch(err => sendErrorToDiscord("DELETE:delete-flick:flickCount", err));
             // if we delete the reel we need to delete the associated likes , comments on it as well , in case of notifing it we can do that as well.
             return handleResponse(res, 200, success.flick_deleted)
         }

@@ -27,6 +27,11 @@ export const handleResponse = (
   }
 };
 export const errors = {
+
+  //Deactivate Account
+  deactivate_account: {
+    message: "Unable to deactivate account",
+  },
 // Song-related errors
   song_not_uploaded: {
     message: "Song not uploaded",
@@ -370,6 +375,14 @@ export const errors = {
 };
 
 export const success = {
+  // Delete Account
+  delete_account: {
+    message: "Account deleted successfully",
+  },
+  //Deactivate Account
+  deactivate_account: {
+    message: "Account deactivated successfully",
+  },
   // Search-related success
   search_history_created: {
     message: "Search history created successfully",

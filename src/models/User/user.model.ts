@@ -27,6 +27,7 @@ interface IUserSchema extends Document {
     suspended: boolean,
     stripeAccountId :  string;
     suspensionReason: string,
+    isDeactivated: boolean,
     deactivationReason: string[],
     twoFactor: boolean
 }
@@ -52,6 +53,7 @@ export const UserSchema = new Schema<IUserSchema>(
         followerCount: { type: Number, default: 0 },
         suspended: { type: Boolean, default: false },
         stripeAccountId: { type: String },
+        isDeactivated: {type :  Boolean} ,
         deactivationReason: { type: [String] },
         suspensionReason: { type: String },
     },

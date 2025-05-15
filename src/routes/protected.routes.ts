@@ -1,5 +1,6 @@
 import { bioLinkRoutes } from "./bioLink/bioLink..routes";
 import { commentRoutes } from "./comment/comment.routes";
+import { deactivationDeleteRoutes } from "./deactivateDelete.routes";
 import { feedbackRoutes } from "./feedback/feedback.routes";
 import { flickRoutes } from "./flicks/protected-flicks.routes";
 import { followRoutes } from "./follow/follow.routes";
@@ -34,7 +35,8 @@ const routes = [
     settingThemeRoutes,
     settingTwoFactorRoutes,
     bioLinkRoutes,
-    searchRoutes
+    searchRoutes,
+    deactivationDeleteRoutes
 ];
 
 export default routes;

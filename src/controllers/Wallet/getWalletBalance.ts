@@ -6,8 +6,8 @@ import { Request, Response } from "express"
 export const getWalletBalance = async (req: Request, res: Response) => {
     try {
         const checkBalance = await WALLET.findOneAndUpdate(
-            { userId: res.locals.userId },
-            { $setOnInsert: { userId: res.locals.userId, balance: 0 } },
+            { user: res.locals.userId },
+            { $setOnInsert: { user: res.locals.userId, balance: 0 } },
             { upsert: true, new: true }
         );
         if (checkBalance) {
