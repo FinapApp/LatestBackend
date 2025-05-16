@@ -16,8 +16,6 @@ export const deleteFlick = async (req: Request, res: Response) => {
         const user = res.locals.userId
         const deleteFlick = await FLICKS.findOneAndDelete({ _id: req.params.flickId, user })
         if (deleteFlick) {
-            USER.findByIdAndUpdate(user, { $inc: { flickCount: -1 } }, { new: true })
-                .catch(err => sendErrorToDiscord("POST:create-flick:flickCount", err));
             const flickIndex = getIndex("FLICKS");
             await flickIndex.deleteDocument(req.params.flickId)
             USER.findByIdAndUpdate(user, { $inc: { flickCount: -1 } }, { new: true })
