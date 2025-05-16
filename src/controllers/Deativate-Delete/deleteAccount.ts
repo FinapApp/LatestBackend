@@ -16,6 +16,7 @@ import { USERPREFERENCE } from "../../models/User/userPreference.model";
 import { USERBIOLINKS } from "../../models/User/userBioLinks.model";
 import { SESSION } from "../../models/User/userSession.model";
 import { WALLET } from "../../models/Wallet/wallet.model";
+import { getIndex } from "../../config/melllisearch/mellisearch.config";
 
 export const deleteAccount = async (req: Request, res: Response) => {
     const userId = res.locals.userId;
@@ -65,13 +66,18 @@ export const deleteAccount = async (req: Request, res: Response) => {
             REPORT.deleteMany({ user: userId }),
             SEARCHHISTORY.deleteMany({ user: userId }),
             STORY.deleteMany({ user: userId }),
-            STORYVIEW   .deleteMany({ user: userId }),
+            STORYVIEW.deleteMany({ user: userId }),
             USERPREFERENCE.findOneAndDelete({ user: userId }),
             USERBIOLINKS.deleteMany({ user: userId }),
             SESSION.deleteMany({ user: userId }),
             WALLET.findOneAndDelete({ userId: userId }),
         ]);
-
+        await Promise.all([
+            getIndex("FLICKS").deleteDocuments([userId]),
+            getIndex("QUESTS").deleteDocuments([userId]),
+            getIndex("USERS").deleteDocuments([userId]),
+            getIndex("FLICKS").deleteDocuments([userId]),
+        ])
         return handleResponse(res, 200, success.delete_account);
 
     } catch (error: any) {

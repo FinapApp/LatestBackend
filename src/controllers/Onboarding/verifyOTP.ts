@@ -41,22 +41,29 @@ export const verifyOTPAfterSignUp = async (req: Request, res: Response) => {
         }
         const { OTP } = JSON.parse(checkData)
         if (otp === OTP || otp === config.MASTER_OTP) {
-            const userCreate = await USER.create({ email, ...rest }) as { _id: string };
+            const userCreate = await USER.create({ email, ...rest }) as { _id: string, toObject: () => Record<string, any> };
             if (!userCreate) {
                 return handleResponse(res, 400, errors.unable_to_create_user);
             }
+            // REMOVE OTP FROM REDIS // cannot create the user if otp is not removed
+            // await redis.del(`OTP:${email}`);
+            console.log(userCreate)
+            const rawUser = userCreate.toObject();
+            const { _id, password, ...safeUser } = rawUser;
             const userIndex = getIndex("USERS");
             await userIndex.addDocuments([
                 {
-                    userId: userCreate._id.toString(),
+                    userId: _id.toString(), // Must match Meilisearch primary key
                     email,
-                    ...rest
+                    ...safeUser,
+                    dob: new Date(safeUser.dob).toISOString() // Serialize if Date
                 }
             ])
             return handleResponse(res, 200, success.account_created);
         }
         return handleResponse(res, 400, errors.otp_not_match)
     } catch (err: any) {
+        console.log(err)
         if (err.code === 11000) {
             const key = err?.keyValue ? Object.keys(err.keyValue)[0] : null;
             if (key === "email") {

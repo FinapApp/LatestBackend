@@ -5,6 +5,7 @@ import Joi from "joi";
 import { validateGetSearch } from "../../validators/validators";
 import { FOLLOW } from "../../models/User/userFollower.model";
 import { QUEST_FAV } from "../../models/Quest/questFavorite.model";
+// import { USER } from "../../models/User/user.model";
 
 export const search = async (req: Request, res: Response) => {
     try {
@@ -42,26 +43,25 @@ export const search = async (req: Request, res: Response) => {
                     offset,
                     attributesToRetrieve: ["userId", "name", "username", "photo"],
                     filter: [
-                        `userId != ${JSON.stringify(res.locals.userId)}`,
+                        `userId != "${res.locals.userId}"`,
                         `isDeactivated != true`
                     ]
                 });
 
-                const userIds = data.hits.map((user: any) => user.userId);
-                const checkFollowing = await FOLLOW.find({
-                    user: res.locals.userId,
-                    following: { $in: userIds }
+                const currentUserFollows = await FOLLOW.find({
+                    follower: res.locals.userId,
+                    following: { $in: data.hits.map((u: any) => u.userId) }
                 }).lean();
 
-                const followingSet = new Set(checkFollowing.map(f => f.following));
                 const usersWithFollowStatus = data.hits.map((user: any) => ({
                     ...user,
-                    isFollowing: followingSet.has(user.userId)
+                    isFollowing: currentUserFollows.some(f => f.following.toString() === user.userId.toString())
                 }));
 
                 Object.assign(result, buildResult("users", usersWithFollowStatus, data.estimatedTotalHits));
                 break;
             }
+
 
             case "following": {
                 const targetUserId = userId || res.locals.userId;
@@ -120,17 +120,15 @@ export const search = async (req: Request, res: Response) => {
                     ],
                     attributesToRetrieve: ["userId", "name", "username", "photo"]
                 });
-
                 const currentUserFollows = await FOLLOW.find({
                     follower: { $in: data.hits.map((u: any) => u.userId) },
-                    following: res.locals.userId 
+                    following: res.locals.userId
                 }).lean();
-
+                console.log(currentUserFollows)
                 const usersWithFollowStatus = data.hits.map((user: any) => ({
                     ...user,
                     isFollowing: currentUserFollows.some(f => f.following === user.userId)
                 }));
-
                 Object.assign(result, buildResult("follower", usersWithFollowStatus, data.estimatedTotalHits));
                 break;
             }
@@ -162,7 +160,7 @@ export const search = async (req: Request, res: Response) => {
                     offset,
                     attributesToRetrieve: ["hashtagId", "value", "count"]
                 });
-                Object.assign(result, buildResult("hashtags", data.hits, data.estimatedTotalHits));
+                Object.assign(result, buildResult("hashtag", data.hits, data.estimatedTotalHits));
                 break;
             }
 
@@ -221,7 +219,7 @@ export const search = async (req: Request, res: Response) => {
                         attributesToRetrieve: ["userId", "name", "username", "photo"],
                         filter: [
                             `userId != ${JSON.stringify(res.locals.userId)}`,
-                            `isDeactivated != true`
+                            // `isDeactivated != true`
                         ]
                     }),
                     getIndex("HASHTAG").search(q, {
