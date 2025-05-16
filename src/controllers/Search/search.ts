@@ -41,7 +41,10 @@ export const search = async (req: Request, res: Response) => {
                     limit,
                     offset,
                     attributesToRetrieve: ["userId", "name", "username", "photo"],
-                    filter: [`userId != ${JSON.stringify(res.locals.userId)}`]
+                    filter: [
+                        `userId != ${JSON.stringify(res.locals.userId)}`,
+                        `isDeactivated != true`
+                    ]
                 });
 
                 const userIds = data.hits.map((user: any) => user.userId);
@@ -59,10 +62,10 @@ export const search = async (req: Request, res: Response) => {
                 Object.assign(result, buildResult("users", usersWithFollowStatus, data.estimatedTotalHits));
                 break;
             }
+
             case "following": {
                 const targetUserId = userId || res.locals.userId;
 
-                // 1. Get IDs of users the target follows
                 const followings = await FOLLOW.find({ follower: targetUserId }).lean();
                 const followingIds = followings.map(f => f.following);
 
@@ -71,16 +74,17 @@ export const search = async (req: Request, res: Response) => {
                     break;
                 }
 
-                // 2. Search ONLY those users
                 const index = getIndex("USERS");
                 const data = await index.search(q, {
                     limit,
                     offset,
-                    filter: [`userId IN [${followingIds.join(',')}]`], // Only search followed users
+                    filter: [
+                        `userId IN [${followingIds.join(',')}]`,
+                        `isDeactivated != true`
+                    ],
                     attributesToRetrieve: ["userId", "name", "username", "photo"]
                 });
 
-                // 3. Check if current user follows them
                 const currentUserFollows = await FOLLOW.find({
                     follower: res.locals.userId,
                     following: { $in: data.hits.map((u: any) => u.userId) }
@@ -98,7 +102,6 @@ export const search = async (req: Request, res: Response) => {
             case "follower": {
                 const targetUserId = userId || res.locals.userId;
 
-                // 1. Get IDs of users who follow the target
                 const followers = await FOLLOW.find({ following: targetUserId }).lean();
                 const followerIds = followers.map(f => f.follower);
 
@@ -107,16 +110,17 @@ export const search = async (req: Request, res: Response) => {
                     break;
                 }
 
-                // 2. Search ONLY those users
                 const index = getIndex("USERS");
                 const data = await index.search(q, {
                     limit,
                     offset,
-                    filter: [`userId IN [${followerIds.join(',')}]`], // Only search followers
+                    filter: [
+                        `userId IN [${followerIds.join(',')}]`,
+                        `isDeactivated != true`
+                    ],
                     attributesToRetrieve: ["userId", "name", "username", "photo"]
                 });
 
-                // 3. Check if current user follows them
                 const currentUserFollows = await FOLLOW.find({
                     follower: res.locals.userId,
                     following: { $in: data.hits.map((u: any) => u.userId) }
@@ -130,6 +134,7 @@ export const search = async (req: Request, res: Response) => {
                 Object.assign(result, buildResult("follower", usersWithFollowStatus, data.estimatedTotalHits));
                 break;
             }
+
             case "flick": {
                 const index = getIndex("FLICKS");
                 const data = await index.search(q, {
@@ -137,6 +142,7 @@ export const search = async (req: Request, res: Response) => {
                     offset,
                     attributesToRetrieve: ["userId", "flickId", "thumbnailURL", "media", "description", "user"]
                 });
+
                 let filteredFlick = data.hits.map(flick => {
                     const { media, ...rest } = flick;
                     return {
@@ -144,6 +150,7 @@ export const search = async (req: Request, res: Response) => {
                         media,
                     };
                 });
+
                 Object.assign(result, buildResult("flicks", filteredFlick, data.estimatedTotalHits));
                 break;
             }
@@ -166,16 +173,14 @@ export const search = async (req: Request, res: Response) => {
                     limit,
                     offset,
                     attributesToRetrieve: [
-                        "userId", "questId", "description", 
-                        "media",
-                        "avgAmountPerPerson", "createdAt", "mode", "title", "user"
+                        "userId", "questId", "description",
+                        "media", "avgAmountPerPerson", "createdAt",
+                        "mode", "title", "user"
                     ]
                 });
 
-                // Preload quest IDs once
                 const questIds = data.hits.map((quest: any) => quest.questId);
 
-                // Fetch favorites in parallel
                 const [questFavorite] = await Promise.all([
                     QUEST_FAV.find({
                         user: res.locals.userId,
@@ -183,10 +188,8 @@ export const search = async (req: Request, res: Response) => {
                     }).lean()
                 ]);
 
-                // Use Set for O(1) lookups
                 const questFavoriteSet = new Set(questFavorite.map(q => q.quest));
 
-                // Process quests in one pass
                 const quests = data.hits.map((quest: any) => {
                     const isFavorite = questFavoriteSet.has(quest.questId);
                     return {
@@ -195,9 +198,11 @@ export const search = async (req: Request, res: Response) => {
                         thumbnailURLs: undefined
                     };
                 });
+
                 Object.assign(result, buildResult("quests", quests, data.estimatedTotalHits));
                 break;
             }
+
             case "song": {
                 const index = getIndex("SONGS");
                 const data = await index.search(q, {
@@ -214,12 +219,11 @@ export const search = async (req: Request, res: Response) => {
                     getIndex("USERS").search(q, {
                         limit,
                         attributesToRetrieve: ["userId", "name", "username", "photo"],
-                        filter: [`userId != ${JSON.stringify(res.locals.userId)}`]
+                        filter: [
+                            `userId != ${JSON.stringify(res.locals.userId)}`,
+                            `isDeactivated != true`
+                        ]
                     }),
-                    // getIndex("FLICKS").search(q, {
-                    //     limit,
-                    //     attributesToRetrieve: ["userId", "flickId", "thumbnailURL", "description", "user"]
-                    // }),
                     getIndex("HASHTAG").search(q, {
                         limit,
                         attributesToRetrieve: ["hashtagId", "value", "count"]
@@ -238,7 +242,6 @@ export const search = async (req: Request, res: Response) => {
                 ]);
 
                 result.users = userSearch.hits;
-                // result.flicks = flickSearch.hits;
                 result.hashtags = hashTagSearch.hits;
                 result.quests = questSearch.hits;
                 result.songs = songSearch.hits;

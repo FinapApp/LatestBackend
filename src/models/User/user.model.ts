@@ -53,7 +53,7 @@ export const UserSchema = new Schema<IUserSchema>(
         followerCount: { type: Number, default: 0 },
         suspended: { type: Boolean, default: false },
         stripeAccountId: { type: String },
-        isDeactivated: {type :  Boolean} ,
+        isDeactivated: {type :  Boolean , default: false}, 
         deactivationReason: { type: [String] },
         suspensionReason: { type: String },
     },

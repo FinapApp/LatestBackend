@@ -40,17 +40,27 @@ export const getAllFlicks = async (req: Request, res: Response) => {
         }
 
         if (Object.keys(matchStage).length > 0) {
-            pipeline.push({ $match: matchStage });
+            pipeline.push(
+                { $match: matchStage },
+                { $sort: { createdAt: -1 } });
         }
 
         pipeline.push(
             {
                 $lookup: {
                     from: 'users',
-                    localField: 'user',
-                    foreignField: '_id',
-                    as: 'user',
+                    let: { userId: '$user' },
                     pipeline: [
+                        {
+                            $match: {
+                                $expr: {
+                                    $and: [
+                                        { $eq: ['$_id', '$$userId'] },
+                                        { $ne: ['$isDeactivated', true] }
+                                    ]
+                                }
+                            }
+                        },
                         {
                             $lookup: {
                                 from: 'userfollowers',
@@ -77,8 +87,15 @@ export const getAllFlicks = async (req: Request, res: Response) => {
                         },
                         { $unset: 'followCheck' },
                         { $project: { _id: 1, name: 1, username: 1, photo: 1, isFollowing: 1 } }
-                    ]
+                    ],
+                    as: 'user'
                 }
+            },
+            {
+                $unwind: '$user'
+            },
+            {
+                $match: { user: { $ne: null } } // ✅ Skip flicks with no valid (i.e., deactivated) user
             },
             {
                 $lookup: {
@@ -92,7 +109,6 @@ export const getAllFlicks = async (req: Request, res: Response) => {
                 }
             },
             { $unwind: { path: '$song', preserveNullAndEmptyArrays: true } },
-            { $unwind: '$user' },
             { $unwind: { path: '$media', preserveNullAndEmptyArrays: true } },
             {
                 $lookup: {

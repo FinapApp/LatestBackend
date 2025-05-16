@@ -253,7 +253,7 @@ export const validateCreateReply = (body: object, params: object) => {
   })
   const paramSchema = Joi.object({
     flickId: Joi.string().regex(/^[0-9a-fA-F]{24}$/, 'object Id').required(),
-    commentId : Joi.string().regex(/^[0-9a-fA-F]{24}$/, 'object Id').required()
+    commentId: Joi.string().regex(/^[0-9a-fA-F]{24}$/, 'object Id').required()
   })
   const combinedSchema = Joi.object({
     body: bodySchema,
@@ -1122,7 +1122,7 @@ export const validateGetQuests = (query: object) => {
       }
       return countryCodes;
     }),
-    type: Joi.string().valid("sponsored", "self", "applied", "favorite" , "user")
+    type: Joi.string().valid("sponsored", "self", "applied", "favorite", "user")
   }).and("lat", "long").messages({
     "object.and": "lat and long must be provided together",
   })
@@ -1233,6 +1233,13 @@ export const validateRefreshToken = (body: object) => {
 
 
 
+export const validateDeactivateAccount = (body: object) => {
+  const schema = Joi.object({
+    deactivationReason: Joi.string().min(2).max(200).required(),
+  })
+  const { error } = schema.validate(body)
+  return error
+}
 
 
 export const validateUpdateProfile = (body: object) => {

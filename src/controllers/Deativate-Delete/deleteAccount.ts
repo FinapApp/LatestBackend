@@ -19,7 +19,6 @@ import { WALLET } from "../../models/Wallet/wallet.model";
 
 export const deleteAccount = async (req: Request, res: Response) => {
     const userId = res.locals.userId;
-
     try {
         // Fetch follow relations
         const follows = await FOLLOW.find({
