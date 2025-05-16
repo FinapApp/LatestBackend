@@ -26,28 +26,30 @@ export const validateLogin = (body: object) => {
   return error;
 };
 
+
 export const validateGetFlicks = (query: object) => {
-  const baseSchema = Joi.object({
+  const schema = Joi.object({
     type: Joi.string().valid("tagged", "self", "user").optional(),
     limit: Joi.number().integer().min(1).max(15).optional(),
     page: Joi.number().integer().min(1).optional(),
+    userId: Joi.string()
+      .regex(/^[0-9a-fA-F]{24}$/)
+      .when("type", {
+        is: "user",
+        then: Joi.required().label("userId"),
+        otherwise: Joi.optional().label("userId"),
+      }),
   })
     .and("limit", "page")
     .messages({
       "object.and": "Limit and page must be provided together",
+      "string.pattern.base": `"userId" must be a valid MongoDB ObjectId`,
     });
-  const extendedSchema = baseSchema.when(Joi.object({ type: Joi.valid("user") }).unknown(), {
-    then: Joi.object({
-      userId: Joi.string().required().regex(/^[0-9a-fA-F]{24}$/).label("userId"),
-    }),
-    otherwise: Joi.object({
-      userId: Joi.string().optional().regex(/^[0-9a-fA-F]{24}$/).label("userId"),
-    }),
-  });
 
-  const { error } = extendedSchema.validate(query);
+  const { error } = schema.validate(query);
   return error;
 };
+
 
 
 export const validateGetFeedback = (query: object) => {
