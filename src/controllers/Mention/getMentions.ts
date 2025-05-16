@@ -18,6 +18,9 @@ import { validateGetUsersAndHashtags } from "../../validators/validators";
             const data = await index.search(q, {
                 limit,
                 offset,
+                filter: [
+                    `isDeactivated != true`
+                ],
                 attributesToRetrieve: ["userId", "name", "username", "photo"]
             });
             if (data.hits.length > 0) {

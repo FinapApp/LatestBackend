@@ -28,6 +28,9 @@ export const handleResponse = (
 };
 export const errors = {
 
+  user_deactivated: {
+    message : "User is deactivated",
+  },
   //Deactivate Account
   deactivate_account: {
     message: "Unable to deactivate account",

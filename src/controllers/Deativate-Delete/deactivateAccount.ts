@@ -8,7 +8,6 @@ import Joi from "joi";
 
 export const deactivateAccount = async (req: Request, res: Response) => {
     try {
-
         const validationError: Joi.ValidationError | undefined = validateDeactivateAccount(
             req.body
         );

@@ -27,7 +27,13 @@ export const getAllFollowingUserAggreagtion = async (
                     as: "followingInfo"
                 }
             },
-            { $unwind: "$followingInfo" }
+            { $unwind: "$followingInfo" },
+            {
+                // Exclude deactivated users
+                $match: {
+                    "followingInfo.isDeactivated": { $ne: true }
+                }
+            }
         ];
 
         if (viewerId && viewerId !== userId) {
@@ -70,7 +76,23 @@ export const getAllFollowingUserAggreagtion = async (
             {
                 $facet: {
                     results: resultsPipeline,
-                    totalCount: [{ $count: "count" }]
+                    totalCount: [
+                        {
+                            $lookup: {
+                                from: "users",
+                                localField: "following",
+                                foreignField: "_id",
+                                as: "followingInfo"
+                            }
+                        },
+                        { $unwind: "$followingInfo" },
+                        {
+                            $match: {
+                                "followingInfo.isDeactivated": { $ne: true }
+                            }
+                        },
+                        { $count: "count" }
+                    ]
                 }
             }
         ]);

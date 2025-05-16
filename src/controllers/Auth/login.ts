@@ -35,6 +35,7 @@ interface User {
   password: string;
   stripeAccountId?: string;
   _id: string;
+  isDeactivated: boolean;
 }
 
 
@@ -63,7 +64,7 @@ export const login = async (req: Request, res: Response) => {
     // Asked for regex in the frontend to indentify whether to give email or phone or username
     const checkUser = await USER.findOne(
       query,
-      "_id password stripeAccountId"
+      "_id password stripeAccountId isDeactivated"
     ) as User;
     if (!checkUser) {
       return handleResponse(res, 400, errors.invalid_credentials);
@@ -118,6 +119,10 @@ export const login = async (req: Request, res: Response) => {
     }
     const session = await SESSION.create(sessionData);
     const stripeAccountId = checkUser.stripeAccountId;
+    if (checkUser.isDeactivated) {
+      checkUser.isDeactivated = false;
+      (checkUser as any).save();
+    }
     const accessToken = jwt.sign(
       { userId , sessionId: session._id , stripeAccountId },
       config.JWT.ACCESS_TOKEN_SECRET as string,

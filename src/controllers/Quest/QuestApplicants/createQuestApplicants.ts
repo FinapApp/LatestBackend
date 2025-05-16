@@ -64,7 +64,6 @@ export const createQuestApplicant = async (req: Request, res: Response) => {
         if (!createdApplicant) {
             return handleResponse(res, 500, errors.create_quest_applicants);
         }
-
         return handleResponse(res, 201, success.create_quest_applicants);
     } catch (err) {
         sendErrorToDiscord("create-quest-applicant", err);

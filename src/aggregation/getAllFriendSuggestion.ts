@@ -3,9 +3,9 @@ import { USER } from "../models/User/user.model";
 
 export const getAllFriendSuggestionAggregation = async (userId: string) => {
     try {
-        const myUserId = new mongoose.Types.ObjectId(userId); 
+        const myUserId = new mongoose.Types.ObjectId(userId);
         const suggestedUsers = await USER.aggregate([
-            { $match: { _id: { $ne: myUserId } } },
+            { $match: { _id: { $ne: myUserId }, isDeactivated: { $ne: true } } },
             {
                 $lookup: {
                     from: 'userfollowers',

@@ -18,16 +18,52 @@ export const getComments = async (req: Request, res: Response) => {
         limit = Number(limit);
         const skip = ((Number(page) || 1) - 1) * limit;
         const userId = res.locals.userId;
-        const totalCount = await COMMENT.countDocuments({
-            flick: new mongoose.Types.ObjectId(flickId),
-            parentComment: null
-        });
+
+        const totalCount = await COMMENT.aggregate([
+            {
+                $match: {
+                    flick: new mongoose.Types.ObjectId(flickId),
+                    parentComment: null
+                }
+            },
+            {
+                $lookup: {
+                    from: 'users',
+                    localField: 'user',
+                    foreignField: '_id',
+                    as: 'userData'
+                }
+            },
+            { $unwind: '$userData' },
+            {
+                $match: {
+                    'userData.isDeactivated': { $ne: true }
+                }
+            },
+            { $count: 'count' }
+        ]);
+
+        const total = totalCount[0]?.count || 0;
 
         const comments = await COMMENT.aggregate([
             {
                 $match: {
                     flick: new mongoose.Types.ObjectId(flickId),
                     parentComment: null
+                }
+            },
+            {
+                $lookup: {
+                    from: 'users',
+                    localField: 'user',
+                    foreignField: '_id',
+                    as: 'userData'
+                }
+            },
+            { $unwind: '$userData' },
+            {
+                $match: {
+                    'userData.isDeactivated': { $ne: true }
                 }
             },
             { $sort: { createdAt: -1 } },
@@ -98,6 +134,11 @@ export const getComments = async (req: Request, res: Response) => {
                         },
                         { $unwind: { path: '$userData', preserveNullAndEmptyArrays: true } },
                         {
+                            $match: {
+                                'userData.isDeactivated': { $ne: true }
+                            }
+                        },
+                        {
                             $addFields: {
                                 user: {
                                     $cond: {
@@ -150,38 +191,23 @@ export const getComments = async (req: Request, res: Response) => {
                 }
             },
             {
-                $lookup: {
-                    from: 'users',
-                    localField: 'user',
-                    foreignField: '_id',
-                    as: 'userData'
-                }
-            },
-            { $unwind: { path: '$userData', preserveNullAndEmptyArrays: true } },
-            {
                 $addFields: {
                     user: {
-                        $cond: {
-                            if: { $ne: ['$userData', null] },
-                            then: {
-                                _id : '$userData._id',
-                                username: '$userData.username',
-                                photo: '$userData.photo',
-                                name: '$userData.name'
-                            },
-                            else: null
-                        }
+                        _id: '$userData._id',
+                        username: '$userData.username',
+                        photo: '$userData.photo',
+                        name: '$userData.name'
                     }
                 }
             },
             {
                 $lookup: {
-                    from: "likes",
-                    let: { commentId: "$_id" },
+                    from: 'likes',
+                    let: { commentId: '$_id' },
                     pipeline: [
                         {
                             $match: {
-                                $expr: { $eq: ["$comment", "$$commentId"] },
+                                $expr: { $eq: ['$comment', '$$commentId'] }
                             }
                         },
                         {
@@ -191,7 +217,7 @@ export const getComments = async (req: Request, res: Response) => {
                                 isLiked: {
                                     $sum: {
                                         $cond: [
-                                            { $eq: ["$user", new mongoose.Types.ObjectId(userId)] },
+                                            { $eq: ['$user', new mongoose.Types.ObjectId(userId)] },
                                             1,
                                             0
                                         ]
@@ -200,23 +226,23 @@ export const getComments = async (req: Request, res: Response) => {
                             }
                         }
                     ],
-                    as: "likeData"
+                    as: 'likeData'
                 }
             },
             {
                 $addFields: {
                     likeCount: {
-                        $ifNull: [{ $arrayElemAt: ["$likeData.likeCount", 0] }, 0]
+                        $ifNull: [{ $arrayElemAt: ['$likeData.likeCount', 0] }, 0]
                     },
                     isLiked: {
                         $gt: [
-                            { $ifNull: [{ $arrayElemAt: ["$likeData.isLiked", 0] }, 0] },
+                            { $ifNull: [{ $arrayElemAt: ['$likeData.isLiked', 0] }, 0] },
                             0
                         ]
                     }
                 }
             },
-            { $unset: "likeData" },
+            { $unset: 'likeData' },
             {
                 $project: {
                     _id: 1,
@@ -233,9 +259,9 @@ export const getComments = async (req: Request, res: Response) => {
 
         return handleResponse(res, 200, {
             comments,
-            totalDocuments: totalCount,
+            totalDocuments: total,
             page: Number(page) || 1,
-            totalPages: Math.ceil(totalCount / limit)
+            totalPages: Math.ceil(total / limit)
         });
     } catch (error) {
         console.error(error);

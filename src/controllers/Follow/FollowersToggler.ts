@@ -44,11 +44,13 @@ export const followerHandler = async (req: Request, res: Response) => {
                 return handleResponse(res, 200, success.user_unfollowed);
             }
 
-            const targetUser = await USER.findById(followerId, "private");
+            const targetUser = await USER.findById(followerId, "private isDeactivated");
             if (!targetUser) {
                 return handleResponse(res, 404, errors.user_not_found);
             }
-
+            if (targetUser.isDeactivated) {
+                return handleResponse(res, 400, errors.user_deactivated);
+            }
             await Promise.all([
                 USER.findByIdAndUpdate(me, { $inc: { followingCount: 1 } }, { new: true }),
                 USER.findByIdAndUpdate(followerId, { $inc: { followerCount: 1 } }, { new: true })

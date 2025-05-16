@@ -44,7 +44,6 @@ export const getAllFlicks = async (req: Request, res: Response) => {
                 { $match: matchStage },
                 { $sort: { createdAt: -1 } });
         }
-
         pipeline.push(
             {
                 $lookup: {

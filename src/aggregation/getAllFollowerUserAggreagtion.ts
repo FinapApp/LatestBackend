@@ -25,6 +25,12 @@ export const getAllFollowerUserAggreagtion = async (userId: string, skip: number
                             }
                         },
                         { $unwind: "$followerInfo" },
+                        // Filter out deactivated users
+                        {
+                            $match: {
+                                "followerInfo.isDeactivated": { $ne: true }
+                            }
+                        },
                         {
                             $lookup: {
                                 from: "userfollowers",
@@ -56,6 +62,21 @@ export const getAllFollowerUserAggreagtion = async (userId: string, skip: number
                         }
                     ],
                     totalCount: [
+                        {
+                            $lookup: {
+                                from: "users",
+                                localField: "follower",
+                                foreignField: "_id",
+                                as: "followerInfo"
+                            }
+                        },
+                        { $unwind: "$followerInfo" },
+                        // Filter out deactivated users for count too
+                        {
+                            $match: {
+                                "followerInfo.isDeactivated": { $ne: true }
+                            }
+                        },
                         { $count: "count" }
                     ]
                 }

@@ -32,20 +32,22 @@ export const validateGetFlicks = (query: object) => {
     type: Joi.string().valid("tagged", "self", "user").optional(),
     limit: Joi.number().integer().min(1).max(15).optional(),
     page: Joi.number().integer().min(1).optional(),
-    userId: Joi.string()
-      .regex(/^[0-9a-fA-F]{24}$/)
-      .when("type", {
-        is: "user",
-        then: Joi.required().label("userId"),
-        otherwise: Joi.optional().label("userId"),
-      }),
+    userId: Joi.string().regex(/^[0-9a-fA-F]{24}$/).optional()
   })
     .and("limit", "page")
+    .custom((value, helpers) => {
+      // Enforce: if userId is present, then type must be "user"
+      if (value.userId && value.type !== "user") {
+        return helpers.error("any.invalid", {
+          message: `'type' must be "user" when 'userId' is provided`,
+        });
+      }
+      return value;
+    })
     .messages({
-      "object.and": "Limit and page must be provided together",
-      "string.pattern.base": `"userId" must be a valid MongoDB ObjectId`,
+      "object.and": "lat and long must be provided together",
+      "any.invalid": "{{#message}}"
     });
-
   const { error } = schema.validate(query);
   return error;
 };
@@ -1107,14 +1109,9 @@ export const validateGetQuests = (query: object) => {
     high: Joi.string().optional(),
     limit: Joi.string().optional(),
     page: Joi.number().optional(),
-    userId: Joi.string().regex(/^[0-9a-fA-F]{24}$/, 'object Id').when('type', {
-      is: 'user',
-      then: Joi.required(),
-      otherwise: Joi.optional()
-    }),
+    userId: Joi.string().regex(/^[0-9a-fA-F]{24}$/).optional(),
     mode: Joi.string().valid("go", "on").optional(),
     country: Joi.string().optional().custom((value, helpers) => {
-      // Check if country exists in your predefined countries list
       const countryCodes = value.split(",");
       const invalid = countryCodes.filter((code: string) => !countries.some(c => c.code === code.trim()));
       if (invalid.length > 0) {
@@ -1122,13 +1119,27 @@ export const validateGetQuests = (query: object) => {
       }
       return countryCodes;
     }),
-    type: Joi.string().valid("sponsored", "self", "applied", "favorite", "user")
-  }).and("lat", "long").messages({
-    "object.and": "lat and long must be provided together",
+    type: Joi.string().valid("sponsored", "self", "applied", "favorite", "user").optional(),
   })
-  const { error } = schema.validate(query)
-  return error
-}
+    .and("lat", "long")
+    .custom((value, helpers) => {
+      // Enforce: if userId is present, then type must be "user"
+      if (value.userId && value.type !== "user") {
+        return helpers.error("any.invalid", {
+          message: `'type' must be "user" when 'userId' is provided`,
+        });
+      }
+      return value;
+    })
+    .messages({
+      "object.and": "lat and long must be provided together",
+      "any.invalid": "{{#message}}"
+    });
+
+  const { error } = schema.validate(query);
+  return error;
+};
+
 
 
 export const validateQuestApplicantStatusBatch = (query: object, body: object) => {
