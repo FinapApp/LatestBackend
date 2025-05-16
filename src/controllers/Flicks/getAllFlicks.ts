@@ -13,6 +13,7 @@ export const getAllFlicks = async (req: Request, res: Response) => {
         if (validationError) {
             return handleResponse(res, 400, errors.validation, validationError.details);
         }
+
         const user = new mongoose.Types.ObjectId(res.locals.user);
         let { type, limit = 10, page = 1, userId } = req.query as {
             type?: string;
@@ -26,21 +27,23 @@ export const getAllFlicks = async (req: Request, res: Response) => {
 
         const pipeline: any[] = [];
         const matchStage: any = {};
+
+        // Filtering logic
         if (type === 'tagged') {
             matchStage.$or = [
                 { "media.taggedUsers.user": user },
                 { "description.mention": user },
-            ]
+            ];
         } else if (type === 'self') {
             matchStage.user = user;
-        }
-        if(type == "user"){
-            matchStage.user = new mongoose.Types.ObjectId(userId as string);
+        } else if (type === 'user' && userId) {
+            matchStage.user = new mongoose.Types.ObjectId(userId);
         }
 
         if (Object.keys(matchStage).length > 0) {
             pipeline.push({ $match: matchStage });
         }
+
         pipeline.push(
             {
                 $lookup: {
@@ -51,15 +54,15 @@ export const getAllFlicks = async (req: Request, res: Response) => {
                     pipeline: [
                         {
                             $lookup: {
-                                from: 'userfollowers', 
-                                let: { flickuser: '$_id' }, 
+                                from: 'userfollowers',
+                                let: { flickuser: '$_id' },
                                 pipeline: [
                                     {
                                         $match: {
                                             $expr: {
                                                 $and: [
-                                                    { $eq: ['$follower', user] }, 
-                                                    { $eq: ['$following', '$$flickuser'] } 
+                                                    { $eq: ['$follower', user] },
+                                                    { $eq: ['$following', '$$flickuser'] }
                                                 ]
                                             }
                                         }
@@ -85,22 +88,16 @@ export const getAllFlicks = async (req: Request, res: Response) => {
                     foreignField: '_id',
                     as: 'song',
                     pipeline: [
-                        { $project: { _id: 1, name: 1, url: 1, icon: 1, used: 1, duration: 1 ,artist : 1 } }
+                        { $project: { _id: 1, name: 1, url: 1, icon: 1, used: 1, duration: 1, artist: 1 } }
                     ]
                 }
             },
             {
-                $unwind: {
-                    path: '$song',
-                    preserveNullAndEmptyArrays: true
-                }
+                $unwind: { path: '$song', preserveNullAndEmptyArrays: true }
             },
             { $unwind: '$user' },
             {
-                $unwind: {
-                    path: '$media',
-                    preserveNullAndEmptyArrays: true
-                }
+                $unwind: { path: '$media', preserveNullAndEmptyArrays: true }
             },
             {
                 $lookup: {
@@ -196,8 +193,10 @@ export const getAllFlicks = async (req: Request, res: Response) => {
                     isLiked: { $gt: [{ $size: "$userLiked" }, 0] }
                 }
             },
-            { $unset: "userLiked" },
+            { $unset: "userLiked" }
         );
+
+        // Pagination
         pipeline.push({
             $facet: {
                 results: [
@@ -211,13 +210,14 @@ export const getAllFlicks = async (req: Request, res: Response) => {
         });
 
         const aggregationResult = await FLICKS.aggregate(pipeline);
-
         const flicks = aggregationResult[0]?.results || [];
         const totalCount = aggregationResult[0]?.totalCount[0]?.count || 0;
+
         if (!flicks.length) {
             return handleResponse(res, 404, errors.no_flicks);
         }
-        
+
+        // Redis data for likes/comments
         const [likeData, commentData] = await Promise.all([
             Promise.all(flicks.map((flick: any) => redis.hgetall(`flick:likes:${flick._id}`))),
             Promise.all(flicks.map((flick: any) => redis.hgetall(`flick:comments:${flick._id}`)))
