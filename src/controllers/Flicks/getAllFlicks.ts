@@ -14,7 +14,7 @@ export const getAllFlicks = async (req: Request, res: Response) => {
             return handleResponse(res, 400, errors.validation, validationError.details);
         }
 
-        const user = new mongoose.Types.ObjectId(res.locals.user);
+        const currentUserId = new mongoose.Types.ObjectId(res.locals.userId);
         let { type, limit = 10, page = 1, userId } = req.query as {
             type?: string;
             limit?: number;
@@ -28,14 +28,13 @@ export const getAllFlicks = async (req: Request, res: Response) => {
         const pipeline: any[] = [];
         const matchStage: any = {};
 
-        // Filtering logic
         if (type === 'tagged') {
             matchStage.$or = [
-                { "media.taggedUsers.user": user },
-                { "description.mention": user },
+                { "media.taggedUsers.user": currentUserId },
+                { "description.mention": currentUserId }
             ];
         } else if (type === 'self') {
-            matchStage.user = user;
+            matchStage.user = currentUserId;
         } else if (type === 'user' && userId) {
             matchStage.user = new mongoose.Types.ObjectId(userId);
         }
@@ -55,14 +54,14 @@ export const getAllFlicks = async (req: Request, res: Response) => {
                         {
                             $lookup: {
                                 from: 'userfollowers',
-                                let: { flickuser: '$_id' },
+                                let: { flickUserId: '$_id' },
                                 pipeline: [
                                     {
                                         $match: {
                                             $expr: {
                                                 $and: [
-                                                    { $eq: ['$follower', user] },
-                                                    { $eq: ['$following', '$$flickuser'] }
+                                                    { $eq: ['$follower', currentUserId] },
+                                                    { $eq: ['$following', '$$flickUserId'] }
                                                 ]
                                             }
                                         }
@@ -92,13 +91,9 @@ export const getAllFlicks = async (req: Request, res: Response) => {
                     ]
                 }
             },
-            {
-                $unwind: { path: '$song', preserveNullAndEmptyArrays: true }
-            },
+            { $unwind: { path: '$song', preserveNullAndEmptyArrays: true } },
             { $unwind: '$user' },
-            {
-                $unwind: { path: '$media', preserveNullAndEmptyArrays: true }
-            },
+            { $unwind: { path: '$media', preserveNullAndEmptyArrays: true } },
             {
                 $lookup: {
                     from: 'quests',
@@ -179,7 +174,7 @@ export const getAllFlicks = async (req: Request, res: Response) => {
                                 $expr: {
                                     $and: [
                                         { $eq: ["$flick", "$$flickId"] },
-                                        { $eq: ["$user", user] }
+                                        { $eq: ["$user", currentUserId] }
                                     ]
                                 }
                             }
@@ -193,21 +188,19 @@ export const getAllFlicks = async (req: Request, res: Response) => {
                     isLiked: { $gt: [{ $size: "$userLiked" }, 0] }
                 }
             },
-            { $unset: "userLiked" }
-        );
-
-        // Pagination
-        pipeline.push({
-            $facet: {
-                results: [
-                    { $skip: skip },
-                    { $limit: limit }
-                ],
-                totalCount: [
-                    { $count: 'count' }
-                ]
+            { $unset: "userLiked" },
+            {
+                $facet: {
+                    results: [
+                        { $skip: skip },
+                        { $limit: limit }
+                    ],
+                    totalCount: [
+                        { $count: 'count' }
+                    ]
+                }
             }
-        });
+        );
 
         const aggregationResult = await FLICKS.aggregate(pipeline);
         const flicks = aggregationResult[0]?.results || [];
@@ -217,7 +210,6 @@ export const getAllFlicks = async (req: Request, res: Response) => {
             return handleResponse(res, 404, errors.no_flicks);
         }
 
-        // Redis data for likes/comments
         const [likeData, commentData] = await Promise.all([
             Promise.all(flicks.map((flick: any) => redis.hgetall(`flick:likes:${flick._id}`))),
             Promise.all(flicks.map((flick: any) => redis.hgetall(`flick:comments:${flick._id}`)))
