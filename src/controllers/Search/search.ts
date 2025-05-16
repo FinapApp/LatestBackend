@@ -122,8 +122,8 @@ export const search = async (req: Request, res: Response) => {
                 });
 
                 const currentUserFollows = await FOLLOW.find({
-                    follower: res.locals.userId,
-                    following: { $in: data.hits.map((u: any) => u.userId) }
+                    follower: { $in: data.hits.map((u: any) => u.userId) },
+                    following: res.locals.userId 
                 }).lean();
 
                 const usersWithFollowStatus = data.hits.map((user: any) => ({

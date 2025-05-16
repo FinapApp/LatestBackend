@@ -3,6 +3,7 @@ import Joi from "joi";
 import { validateQuestId } from "../../../validators/validators";
 import { errors, handleResponse, success } from "../../../utils/responseCodec";
 import { QUESTS } from "../../../models/Quest/quest.model";
+import { getIndex } from "../../../config/melllisearch/mellisearch.config";
 
 export const deleteQuest = async (req: Request, res: Response) => {
     try {
@@ -12,6 +13,8 @@ export const deleteQuest = async (req: Request, res: Response) => {
         }
         const deleteQuest = await QUESTS.findOneAndDelete({ _id: req.params.questId, user: res.locals.userId }, { new: true });
         if (deleteQuest) {
+            const questIndex = getIndex("QUESTS");
+            await questIndex.deleteDocument(req.params.questId)
             // if we delete the reel we need to delete the associated likes , comments on it as well , in case of notifing it we can do that as well.
             return handleResponse(res, 200, success.quest_deleted)
         }
