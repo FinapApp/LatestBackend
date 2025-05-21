@@ -46,8 +46,8 @@ export const verifyOTPAfterSignUp = async (req: Request, res: Response) => {
                 return handleResponse(res, 400, errors.unable_to_create_user);
             }
             // REMOVE OTP FROM REDIS // cannot create the user if otp is not removed
-            // await redis.del(`OTP:${email}`);
-            console.log(userCreate)
+            await redis.del(`OTP:${email}`);
+            // ADD DATA TO MEILISEARCH
             const rawUser = userCreate.toObject();
             const { _id, password, ...safeUser } = rawUser;
             const userIndex = getIndex("USERS");

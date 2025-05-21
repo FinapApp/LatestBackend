@@ -5,6 +5,7 @@ import Joi from "joi";
 import { sendErrorToDiscord } from "../../../config/discord/errorDiscord";
 import { QUESTS } from "../../../models/Quest/quest.model";
 import { getIndex } from "../../../config/melllisearch/mellisearch.config";
+import { IMediaSchema } from "../../../models/Flicks/flicks.model";
 
 export const updateQuest = async (req: Request, res: Response) => {
     try {
@@ -31,16 +32,19 @@ export const updateQuest = async (req: Request, res: Response) => {
         }
         const updateQuest = await QUESTS.findOneAndUpdate(
             { _id: questId, user },
-            {...rest},
+            { ...rest },
             { new: true }
         );
         if (updateQuest) {
+            const questPlain = updateQuest.toObject();
+            const { user, media, description, ...restQuest } = questPlain;
             const questIndex = getIndex("QUESTS");
             await questIndex.addDocuments([
                 {
+                    ...restQuest,
                     questId,
-                    coords,
-                    ...updateQuest.toObject(),
+                    thumbnailURLs: media.map((data: IMediaSchema) => data?.thumbnailURL),
+                    alts: media.map((media: IMediaSchema) => media?.alt || []).flat(),
                 },
             ]);
             return handleResponse(res, 200, success.update_quest);

@@ -7,8 +7,6 @@ import { QUESTS } from "../../models/Quest/quest.model";
 import { LIKE } from "../../models/Likes/likes.model";
 import { COMMENT } from "../../models/Comment/comment.model";
 import { FOLLOW } from "../../models/User/userFollower.model";
-import { FEEDBACK } from "../../models/Feedback/feedback.model";
-import { REPORT } from "../../models/reports/report.model";
 import { SEARCHHISTORY } from "../../models/SearchHistory/searchHistory.model";
 import { STORY } from "../../models/Stories/story.model";
 import { STORYVIEW } from "../../models/Stories/storyView.model";
@@ -62,8 +60,8 @@ export const deleteAccount = async (req: Request, res: Response) => {
             COMMENT.deleteMany({ user: userId }),
             LIKE.deleteMany({ user: userId }),
             FOLLOW.deleteMany({ $or: [{ follower: userId }, { following: userId }] }),
-            FEEDBACK.deleteMany({ user: userId }),
-            REPORT.deleteMany({ user: userId }),
+            // FEEDBACK.deleteMany({ user: userId }),
+            // REPORT.deleteMany({ user: userId }),
             SEARCHHISTORY.deleteMany({ user: userId }),
             STORY.deleteMany({ user: userId }),
             STORYVIEW.deleteMany({ user: userId }),
@@ -76,7 +74,7 @@ export const deleteAccount = async (req: Request, res: Response) => {
             getIndex("FLICKS").deleteDocuments([userId]),
             getIndex("QUESTS").deleteDocuments([userId]),
             getIndex("USERS").deleteDocuments([userId]),
-            getIndex("FLICKS").deleteDocuments([userId]),
+            getIndex("HASHTAG").deleteDocuments([userId]),
         ])
         return handleResponse(res, 200, success.delete_account);
 

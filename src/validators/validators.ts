@@ -29,21 +29,12 @@ export const validateLogin = (body: object) => {
 
 export const validateGetFlicks = (query: object) => {
   const schema = Joi.object({
-    type: Joi.string().valid("tagged", "self", "user").optional(),
+    type: Joi.string().valid("tagged", "profile").optional(),
     limit: Joi.number().integer().min(1).max(15).optional(),
     page: Joi.number().integer().min(1).optional(),
     userId: Joi.string().regex(/^[0-9a-fA-F]{24}$/).optional()
   })
     .and("limit", "page")
-    .custom((value, helpers) => {
-      // Enforce: if userId is present, then type must be "user"
-      if (value.userId && value.type !== "user") {
-        return helpers.error("any.invalid", {
-          message: `'type' must be "user" when 'userId' is provided`,
-        });
-      }
-      return value;
-    })
     .messages({
       "object.and": "lat and long must be provided together",
       "any.invalid": "{{#message}}"
@@ -366,6 +357,9 @@ export const validateCreateFlick = (body: object, params: object) => {
     })).optional(),
     commentVisible: Joi.boolean().optional(),
     likeVisible: Joi.boolean().optional(),
+    repostVisible: Joi.boolean().optional(),
+    audienceSetting: Joi.string().valid("public", "friends", "private").optional(),
+    commentSetting: Joi.string().valid("everyone", "friends", "nobody").optional(),
   })
   const combinedSchema = Joi.object({
     body: bodySchema,
@@ -396,6 +390,40 @@ export const validateFlickId = (params: object) => {
   return error
 }
 
+export const validateRepostFlick =  (body: object, params: object) => {
+  const paramsSchema = Joi.object({
+    flickId: Joi.string().regex(/^[0-9a-fA-F]{24}$/, 'object Id').required()
+  })
+  const bodySchema = Joi.object({
+    taggedUsers : Joi.array().items(Joi.object({
+      user: Joi.string().regex(/^[0-9a-fA-F]{24}$/, 'object Id').required(),
+      text: Joi.string().required(),
+      position: Joi.object({
+        x: Joi.number().required(),
+        y: Joi.number().required()
+      }).required()
+    })).optional(),
+    location : Joi.string().optional(),
+    description: Joi.array().items(Joi.object({
+      mention: Joi.string().regex(/^[0-9a-fA-F]{24}$/, 'object Id').optional(),
+      hashTag: Joi.string().regex(/^[0-9a-fA-F]{24}$/, 'object Id').optional(),
+      text: Joi.string().when(Joi.object({ mention: Joi.exist() }).unknown(), {
+        then: Joi.required(),
+        otherwise: Joi.when(Joi.object({ hashTag: Joi.exist() }).unknown(), {
+          then: Joi.required(),
+          otherwise: Joi.optional(),
+        }),
+      }),
+    })).optional(),
+  })
+  const combinedSchema = Joi.object({
+    body: bodySchema,
+    params: paramsSchema
+  })
+  const { error } = combinedSchema.validate({ body, params })
+  return error
+}
+
 export const validateCreateSong = (body: object) => {
   const schema = Joi.object({
     name: Joi.string().required(),
@@ -421,6 +449,19 @@ export const validateGetComments = (params: object, query: object) => {
     query: querySchema
   })
   const { error } = combinedSchema.validate({ params, query })
+  return error
+}
+
+export const validateCreateFeatureIsssue = (body: object) => {
+  const schema = Joi.object({
+    message: Joi.string().required(),
+    attachment: Joi.array().items(Joi.string().required()).optional(),
+    incidentDate: Joi.string().isoDate().required(),
+    feature: Joi.string().valid('Feed', 'Story', 'Profile', 'Wallet', 'Search', 'Notification', 'Setting', 'Flick', 'Quest').required(),
+    issueType: Joi.string().valid('Bug', 'Slow Performance', 'Crash', 'UI Glitch', 'Audio Issue', 'Video Issue', 'Login Issue', 'Other').required(),
+    reportedTo : Joi.string().regex(/^[0-9a-fA-F]{24}$/, 'object Id').optional(),
+  })
+  const { error } = schema.validate(body)
   return error
 }
 
@@ -725,6 +766,9 @@ export const validateUpdateFlick = (body: object, params: object) => {
     })).optional(),
     commentVisible: Joi.boolean().optional(),
     likeVisible: Joi.boolean().optional(),
+    repostVisible: Joi.boolean().optional(),
+    audienceSetting: Joi.string().valid("public", "friends", "private").optional(),
+    commentSetting : Joi.string().valid("everyone", "friends", "nobody").optional(),
   })
   const paramsSchema = Joi.object({
     flickId: Joi.string().regex(/^[0-9a-fA-F]{24}$/, 'object Id').required()
@@ -905,6 +949,11 @@ export const validateGetSearch = (query: object) => {
       'string.max': 'Search query must be less than or equal to 30 characters',
       'any.required': 'Search query is required'
     }),
+    low : Joi.string().optional(),
+    high : Joi.string().optional(),
+    sort: Joi.string().valid("date-asc", "date-desc", "amount-asc", "amount-desc").optional(),
+    mode: Joi.string().valid("go", "on").optional(),
+    sponsored: Joi.string().valid("true", "false").optional(),
     limit: Joi.number().integer().min(1).max(15).messages({
       'number.min': 'Limit must be at least 1',
       'number.max': 'Limit must be at most 10',
@@ -1119,18 +1168,9 @@ export const validateGetQuests = (query: object) => {
       }
       return countryCodes;
     }),
-    type: Joi.string().valid("sponsored", "self", "applied", "favorite", "user").optional(),
+    type: Joi.string().valid("sponsored", "applied", "favorite", "profile").optional(),
   })
     .and("lat", "long")
-    .custom((value, helpers) => {
-      // Enforce: if userId is present, then type must be "user"
-      if (value.userId && value.type !== "user") {
-        return helpers.error("any.invalid", {
-          message: `'type' must be "user" when 'userId' is provided`,
-        });
-      }
-      return value;
-    })
     .messages({
       "object.and": "lat and long must be provided together",
       "any.invalid": "{{#message}}"

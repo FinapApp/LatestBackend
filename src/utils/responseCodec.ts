@@ -27,7 +27,10 @@ export const handleResponse = (
   }
 };
 export const errors = {
-
+  // feature-reported-issues
+  create_feature_issue: {
+    message: "Unable to create feature issue",
+  },
   user_deactivated: {
     message : "User is deactivated",
   },
@@ -378,6 +381,10 @@ export const errors = {
 };
 
 export const success = {
+  //feature-reported-issues 
+  create_feature_issue: {
+    message: "Feature issue created successfully",
+  },
   // Delete Account
   delete_account: {
     message: "Account deleted successfully",
@@ -449,6 +456,9 @@ export const success = {
   },
 
   // Flick-related success
+  flick_reposted: {
+    message: "Flick reposted successfully",
+  },
   flick_uploaded: {
     message: "flick uploaded successfully",
   },

@@ -2,7 +2,7 @@ import { Request, Response } from "express"
 import { validateReportComment } from "../../validators/validators"
 import Joi from "joi"
 import { errors, handleResponse, success } from "../../utils/responseCodec"
-import { REPORT } from "../../models/reports/report.model"
+import { REPORT } from "../../models/Reports/report.model"
 
 export const reportComment = async (req: Request, res: Response) => {
     try {

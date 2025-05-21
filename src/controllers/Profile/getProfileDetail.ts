@@ -41,6 +41,8 @@ export const getProfileDetail = async (req: Request, res: Response) => {
             ...getProfileDetails,
             bioLink,
         };
+
+        // fix this code // MF
         if (requestedUserId && requestedUserId !== currentUserId) {
             const followDoc = await FOLLOW.findOne({
                 follower: currentUserId,

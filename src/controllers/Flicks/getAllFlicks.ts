@@ -13,10 +13,9 @@ export const getAllFlicks = async (req: Request, res: Response) => {
         if (validationError) {
             return handleResponse(res, 400, errors.validation, validationError.details);
         }
-
         const currentUserId = new mongoose.Types.ObjectId(res.locals.userId);
         let { type, limit = 10, page = 1, userId } = req.query as {
-            type?: string;
+            type?: 'profile' | 'tagged';
             limit?: number;
             page?: number;
             userId?: string;
@@ -24,21 +23,17 @@ export const getAllFlicks = async (req: Request, res: Response) => {
 
         limit = Number(limit);
         const skip = ((Number(page) || 1) - 1) * limit;
-
         const pipeline: any[] = [];
         const matchStage: any = {};
-
         if (type === 'tagged') {
             matchStage.$or = [
-                { "media.taggedUsers.user": currentUserId },
-                { "description.mention": currentUserId }
+                { "media.taggedUsers.user": userId || currentUserId },
+                { "description.mention": userId || currentUserId }
             ];
-        } else if (type === 'self') {
-            matchStage.user = currentUserId;
-        } else if (type === 'user' && userId) {
-            matchStage.user = new mongoose.Types.ObjectId(userId);
         }
-
+        else if (type === 'profile') {
+            matchStage.user = new mongoose.Types.ObjectId(userId || currentUserId);
+        }
         if (Object.keys(matchStage).length > 0) {
             pipeline.push(
                 { $match: matchStage },

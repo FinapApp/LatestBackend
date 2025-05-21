@@ -4,6 +4,7 @@ import Joi from "joi";
 import { validateCreateQuest } from "../../../validators/validators";
 import { QUESTS } from "../../../models/Quest/quest.model";
 import { getIndex } from "../../../config/melllisearch/mellisearch.config";
+import { IMediaSchema } from "../../../models/Flicks/flicks.model";
 
 export const createQuest = async (req: Request, res: Response) => {
     try {
@@ -16,7 +17,7 @@ export const createQuest = async (req: Request, res: Response) => {
         const { coords, ...rest } = req.body;
         const quest = await QUESTS.create({
             _id: questId,
-            user:   userId,
+            user: userId,
             gps: {
                 type: "Point",
                 coordinates: [coords.long, coords.lat]
@@ -25,13 +26,18 @@ export const createQuest = async (req: Request, res: Response) => {
         });
         if (quest) {
             const questIndex = getIndex("QUESTS");
-            const userDetails = await quest.populate("user", "username photo name")
+            const userDetails = await quest.populate<{ user: { username: string; photo: string; name: string, _id: string } }>("user", "username photo name");
+            const questPlain = quest.toObject();
+            const { user, media, description, ...restQuest } = questPlain;
             await questIndex.addDocuments([{
-                userId,
+                ...restQuest,
+                thumbnailURLs: media.map((data : IMediaSchema) => data?.thumbnailURL),
+                alts: media.map((media: IMediaSchema) => media?.alt || []).flat(),
+                userId: userDetails.user._id,
+                username: userDetails.user.username,
+                name: userDetails.user.name,
+                photo: userDetails.user.photo,
                 questId,
-                thumbnailURLs : quest.media.map((data) => data?.thumbnailURL),
-                ...quest.toObject(),
-                user : userDetails.user,
             }]);
             return handleResponse(res, 200, success.quest_created);
         }

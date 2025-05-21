@@ -3,7 +3,7 @@ import { ITextDataSchema, TextDataSchema } from "../Comment/comment.model";
 
 interface IFlicks extends Document {
     user: Schema.Types.ObjectId;
-    originFlicks: Schema.Types.ObjectId;
+    repost: Schema.Types.ObjectId;
     media: IMediaSchema[];
     location: string;
     gps: {
@@ -23,6 +23,9 @@ interface IFlicks extends Document {
     likeVisible: boolean;
     commentCount: number;
     likeCount: number;
+    commentSetting: string;
+    audienceSetting: string;
+    repostVisible: boolean;
 }
 
 interface TaggedUser {
@@ -63,8 +66,8 @@ const MediaSchema = new Schema<IMediaSchema>(
         duration: { type: Number },
         audio: { type: Schema.Types.ObjectId, ref: "audio" },
         alt: { type: [String] }, // this is referring to the users search for the best picks for their purpose. gets the user while searching into their metaData for the files 
-        taggedUsers: { type: [taggedSchema] },
-        url: { type: String }
+        taggedUsers: { type: [taggedSchema] }, // it should be changed as per the users
+        url: { type: String } // would be the same.
     },
     { versionKey: false, _id: false }
 );
@@ -73,8 +76,8 @@ const MediaSchema = new Schema<IMediaSchema>(
 export const FlickSchema = new Schema<IFlicks>(
     {
         user: { type: Schema.Types.ObjectId, ref: "user" },
-        originFlicks: { type: Schema.Types.ObjectId, ref: "flick" },
-        media: { type: [MediaSchema] },
+        repost: { type: Schema.Types.ObjectId, ref: "flick" },
+        media: { type: [MediaSchema] }, // same media when in origin flicks 
         location: { type: String },
         gps: {
             type: { type: String, enum: ["Point"] },
@@ -84,7 +87,7 @@ export const FlickSchema = new Schema<IFlicks>(
             }
         },
         thumbnailURL: { type: String },
-        description: { type: [TextDataSchema] },
+        description: { type: [TextDataSchema] }, // it changes for the  repost
         quest: { type: Schema.Types.ObjectId, ref: 'quest' },
         song: { type: Schema.Types.ObjectId, ref: 'song' },
         songStart: { type: Number },
@@ -92,10 +95,13 @@ export const FlickSchema = new Schema<IFlicks>(
         repostCount: { type: Number, default: 0 },
         commentCount: { type: Number, default: 0 },
         likeCount: { type: Number, default: 0 },
-        suspended: { type: Boolean, default: false },
+        suspended: { type: Boolean, default: false }, 
         suspendedReason: { type: String },
-        commentVisible: { type: Boolean, default: true },
-        likeVisible: { type: Boolean, default: true },
+        commentVisible: { type: Boolean, default: true }, // it could be changed
+        likeVisible: { type: Boolean, default: true }, // it could be changed
+        audienceSetting: { type: String, enum: ['public', 'friends'], default: 'public' }, 
+        commentSetting : { type: String, enum: ['everyone', 'friends', 'nobody'], default: 'everyone' }, // when I  want the comments to be controlled by  my user preference , I would change the entire setting of this to be removed from the aggregation pipeline
+        repostVisible: { type: Boolean, default: true }, // it could be changed
     },
     { timestamps: { createdAt: true, updatedAt: false }, versionKey: false }
 );

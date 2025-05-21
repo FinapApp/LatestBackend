@@ -2,7 +2,7 @@ import { Response, Request } from "express";
 import { validateUpdateFlick } from "../../validators/validators";
 import { handleResponse, errors, success } from "../../utils/responseCodec";
 import Joi from "joi";
-import { FLICKS } from "../../models/Flicks/flicks.model";
+import { FLICKS, IMediaSchema } from "../../models/Flicks/flicks.model";
 import { sendErrorToDiscord } from "../../config/discord/errorDiscord";
 import { getIndex } from "../../config/melllisearch/mellisearch.config";
 import { HASHTAGS } from "../../models/User/userHashTag.model";
@@ -37,12 +37,17 @@ export const updateFlick = async (req: Request, res: Response) => {
             { new: true }
         );
         if (updateFlick) {
+            const flickPlain = updateFlick.toObject();
+            const { user, media, description, ...restFlick } = flickPlain;
             const flickIndex = getIndex("FLICKS");
             await flickIndex.addDocuments([
                 {
-                    userId,
+                    ...restFlick,
+                    media,
+                    descriptionText: description.map((text) => text.text),
+                    taggedUsers: media.map((media: IMediaSchema) => media?.taggedUsers?.map(taggedUser => taggedUser.text) || []).flat(),
+                    alts: media.map((media: IMediaSchema) => media?.alt || []).flat(),
                     flickId,
-                    ...updateFlick.toObject(),
                 }
             ])
             return handleResponse(res, 200, success.flick_updated);

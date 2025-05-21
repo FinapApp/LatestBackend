@@ -14,12 +14,17 @@ export const search = async (req: Request, res: Response) => {
             return handleResponse(res, 400, errors.validation, validationError.details);
         }
 
-        let { q = "", page = 1, type, limit = 5, userId } = req.query as {
+        let { q = "", page = 1, type, limit = 5, userId, low, high, sort, mode, sponsored } = req.query as {
             q: string;
             page?: string | number;
             type?: string;
             limit?: string | number;
             userId?: string;
+            low?: string | number;
+            high?: string | number;
+            sort?: string;
+            mode?: string;
+            sponsored?: string;
         };
 
         limit = Number(limit);
@@ -109,7 +114,6 @@ export const search = async (req: Request, res: Response) => {
                     Object.assign(result, buildResult("follower", [], 0));
                     break;
                 }
-
                 const index = getIndex("USERS");
                 const data = await index.search(q, {
                     limit,
@@ -124,7 +128,6 @@ export const search = async (req: Request, res: Response) => {
                     follower: { $in: data.hits.map((u: any) => u.userId) },
                     following: res.locals.userId
                 }).lean();
-                console.log(currentUserFollows)
                 const usersWithFollowStatus = data.hits.map((user: any) => ({
                     ...user,
                     isFollowing: currentUserFollows.some(f => f.following === user.userId)
@@ -138,9 +141,9 @@ export const search = async (req: Request, res: Response) => {
                 const data = await index.search(q, {
                     limit,
                     offset,
+                    filter: "amount >= 1000",
                     attributesToRetrieve: ["userId", "flickId", "thumbnailURL", "media", "description", "user"]
                 });
-
                 let filteredFlick = data.hits.map(flick => {
                     const { media, ...rest } = flick;
                     return {
@@ -167,13 +170,58 @@ export const search = async (req: Request, res: Response) => {
             case "quest": {
                 const index = getIndex("QUESTS");
 
+                // Build filters array
+                const filters: string[] = [];
+
+                // Amount range filter
+                if (low || high) {
+                    let amountFilter = '';
+                    if (low) amountFilter += `avgAmountPerPerson >= ${low}`;
+                    if (high) {
+                        if (low) amountFilter += ' AND ';
+                        amountFilter += `avgAmountPerPerson <= ${high}`;
+                    }
+                    filters.push(amountFilter);
+                }
+
+                // Mode filter
+                if (mode) {
+                    const modeValue = mode === 'go' ? 'GoFlick' : 'OnFlick';
+                    filters.push(`mode = "${modeValue}"`);
+                }
+
+                // Quest type filter (if needed)
+                if (sponsored) {
+                    filters.push('staff EXISTS');
+                }
+                // Build sort array
+                let sortCriteria: string[] = [];
+                if (sort) {
+                    switch (sort) {
+                        case 'date-asc':
+                            sortCriteria = ['createdAt:asc'];
+                            break;
+                        case 'date-desc':
+                            sortCriteria = ['createdAt:desc'];
+                            break;
+                        case 'amount-asc':
+                            sortCriteria = ['avgAmountPerPerson:asc'];
+                            break;
+                        case 'amount-desc':
+                            sortCriteria = ['avgAmountPerPerson:desc'];
+                            break;
+                    }
+                }
+
                 const data = await index.search(q, {
                     limit,
                     offset,
+                    sort: sortCriteria,
+                    filter: filters.length > 0 ? filters.join(' AND ') : undefined,
                     attributesToRetrieve: [
                         "userId", "questId", "description",
                         "media", "avgAmountPerPerson", "createdAt",
-                        "mode", "title", "user"
+                        "mode", "title", "username", "name", "location", "photo"
                     ]
                 });
 

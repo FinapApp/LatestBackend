@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import { FLICKS } from "../../models/Flicks/flicks.model";
+import { FLICKS, IMediaSchema } from "../../models/Flicks/flicks.model";
 import { errors, handleResponse, success } from "../../utils/responseCodec";
 import Joi from "joi";
 import { validateCreateFlick } from "../../validators/validators";
@@ -45,15 +45,23 @@ export const createFlick = async (req: Request, res: Response) => {
         )
         if (flick) {
             const flickIndex = getIndex("FLICKS");
-            const userDetails = await flick.populate("user", "username photo name")
+            const userDetails = await flick.populate<{ user: { username: string; photo: string; name: string ,_id :  string} }>("user", "username photo name");
+            const flickPlain = flick.toObject();
+            const { user, media, description , ...restFlick } = flickPlain;
             await flickIndex.addDocuments([
                 {
-                    userId: user,
+                    ...restFlick,
+                    media,
+                    descriptionText : description.map((text)=> text.text),
+                    taggedUsers: media.map((media: IMediaSchema) => media?.taggedUsers?.map(taggedUser => taggedUser.text) || []).flat(),
+                    alts : media.map((media: IMediaSchema) => media?.alt || []).flat(),
+                    userId: userDetails.user._id,
+                    username: userDetails.user.username,
+                    name: userDetails.user.name,
+                    photo: userDetails.user.photo,
                     flickId,
-                    ...flick.toObject(),
-                    user: userDetails.user,
                 }
-            ])
+            ]);
             USER.findByIdAndUpdate(user, { $inc: { flickCount: 1 } }, { new: true })
                 .catch(err => sendErrorToDiscord("POST:create-flick:flickCount", err));
             return handleResponse(res, 200, success.flick_uploaded);
