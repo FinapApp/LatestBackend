@@ -24,9 +24,9 @@ const PRIMARY_KEYS: Record<keyof typeof INDEXES, string> = {
 
 const FILTERABLE_ATTRIBUTES: Record<keyof typeof INDEXES, string[]> = {
     USERS: ['userId', 'username', 'isDeactivated'],
-    FLICKS: ['flickId', 'userId'],
+    FLICKS: ['flickId', 'userId', 'amount'],
     HASHTAG: ['hashtagId'],
-    QUESTS: ['questId', 'userId', 'mode'],
+    QUESTS: ['questId', 'userId', 'mode', 'avgAmountPerPerson', 'staff'],
     SONGS: ['songId'],
 };
 
@@ -38,18 +38,21 @@ const SEARCHABLE_ATTRIBUTES: Record<keyof typeof INDEXES, string[]> = {
     SONGS: ['name', 'artist'],
 };
 
+const SORTABLE_ATTRIBUTES: Partial<Record<keyof typeof INDEXES, string[]>> = {
+    QUESTS: ['createdAt', 'avgAmountPerPerson'],
+};
+
 const indexCache: Partial<Record<keyof typeof INDEXES, Index>> = {};
 
 const configureIndexSettings = async (index: Index, key: keyof typeof INDEXES) => {
     const indexName = INDEXES[key];
 
     try {
-        // Update settings only if they're different from current
         await index.updateFilterableAttributes(FILTERABLE_ATTRIBUTES[key]);
         console.log(`✅ Configured filterable attributes for ${indexName}`);
     } catch (error) {
         console.error(`❌ Failed to configure filterable attributes for ${indexName}:`, error);
-        throw error; // Rethrow if you want setup to fail for this index
+        throw error;
     }
 
     try {
@@ -57,6 +60,17 @@ const configureIndexSettings = async (index: Index, key: keyof typeof INDEXES) =
         console.log(`✅ Configured searchable attributes for ${indexName}`);
     } catch (error) {
         console.error(`❌ Failed to configure searchable attributes for ${indexName}:`, error);
+        throw error;
+    }
+
+    try {
+        const sortable = SORTABLE_ATTRIBUTES[key];
+        if (sortable) {
+            await index.updateSortableAttributes(sortable);
+            console.log(`✅ Configured sortable attributes for ${indexName}`);
+        }
+    } catch (error) {
+        console.error(`❌ Failed to configure sortable attributes for ${indexName}:`, error);
         throw error;
     }
 };
@@ -87,7 +101,6 @@ export const connectMeilisearch = async () => {
             Object.keys(INDEXES).map((k) => setupIndex(k as keyof typeof INDEXES))
         );
 
-        // Log results for debugging
         results.forEach((result, i) => {
             const indexName = INDEXES[Object.keys(INDEXES)[i] as keyof typeof INDEXES];
             if (result.status === 'rejected') {
@@ -95,10 +108,8 @@ export const connectMeilisearch = async () => {
             }
         });
 
-        // Check if all succeeded
         if (results.some(result => result.status === 'rejected')) {
             console.warn('⚠️ Some Meilisearch indexes failed to setup, but continuing');
-            // Consider whether to throw or continue based on your requirements
         }
 
         console.log('✅ Meilisearch connection initialized');
@@ -118,12 +129,14 @@ export const verifyMeilisearchSettings = async () => {
     for (const [key, indexName] of Object.entries(INDEXES)) {
         const index = getIndex(key as keyof typeof INDEXES);
         try {
-            const [filterable, searchable] = await Promise.all([
+            const [filterable, searchable, sortable] = await Promise.all([
                 index.getFilterableAttributes(),
-                index.getSearchableAttributes()
+                index.getSearchableAttributes(),
+                index.getSortableAttributes(),
             ]);
             console.log(`ℹ️ ${indexName} filterable:`, filterable);
             console.log(`🔍 ${indexName} searchable:`, searchable);
+            console.log(`⬆️ ${indexName} sortable:`, sortable);
         } catch (error) {
             console.error(`❌ Failed to verify settings for ${indexName}:`, error);
         }
