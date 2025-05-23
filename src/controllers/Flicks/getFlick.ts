@@ -12,7 +12,7 @@ export const getFlick = async (req: Request, res: Response) => {
             return handleResponse(res, 400, errors.validation, validationError.details);
         }
         const flickId = req.params.flickId;
-        const checkFlick = await FLICKS.findById(flickId)
+        const checkFlick = await FLICKS.findById(flickId).populate('user', 'username photo name');
         if (checkFlick) {
             return handleResponse(res, 200, { flick : checkFlick })
         }
