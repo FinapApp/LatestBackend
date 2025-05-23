@@ -269,13 +269,15 @@ export const getAllQuests = async (req: Request, res: Response) => {
             );
         }
 
+
+        
         pipeline.push({
             $facet: {
                 results: resultsSubPipeline,
                 totalCount: [{ $count: "count" }]
             }
         });
-
+        console.log(resultsSubPipeline)
         const data = await QUESTS.aggregate(pipeline);
         const quests = data[0]?.results || [];
         const total = data[0]?.totalCount[0]?.count || 0;

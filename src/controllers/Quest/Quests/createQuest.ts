@@ -28,7 +28,7 @@ export const createQuest = async (req: Request, res: Response) => {
             const questIndex = getIndex("QUESTS");
             const userDetails = await quest.populate<{ user: { username: string; photo: string; name: string, _id: string } }>("user", "username photo name");
             const questPlain = quest.toObject();
-            const { user, media, description, ...restQuest } = questPlain;
+            const { user, media,  ...restQuest } = questPlain;
             await questIndex.addDocuments([{
                 ...restQuest,
                 thumbnailURLs: media.map((data : IMediaSchema) => data?.thumbnailURL),
