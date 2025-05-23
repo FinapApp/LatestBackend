@@ -93,7 +93,7 @@ services:
       - IP_GEOLOCATOR_KEY=6ec8f9c4b6634315b1c60020e48555a3
       - MEILI_MASTER_KEY=finapus
       - MELLISSEARCH_HOST=http://meilisearch:7700  
-      - DISCORD_WEBHOOK_URL=https://discord.com/api/webhooks/1366616138586525817/0alnapdFbCVPgnfZVdRTPeSRWtymxvgm6I03iOFszWvrVvkHA09nnTGzWy1KqHTrrhMN
+      - DISCORD_WEBHOOK_URL=https://discord.com/api/webhooks/1366503812273143880/thakQoGnLwo1WkjerlBSXqhUKuxPovIZCl4dZEP-aO4URhstp9NYN_fUDv9smu1I7avd
       - SWAGGER_HOSTED_URL=http://135.235.193.1:4003/api
 
 volumes:

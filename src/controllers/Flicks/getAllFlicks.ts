@@ -13,6 +13,7 @@ export const getAllFlicks = async (req: Request, res: Response) => {
         if (validationError) {
             return handleResponse(res, 400, errors.validation, validationError.details);
         }
+
         const currentUserId = new mongoose.Types.ObjectId(res.locals.userId);
         let { type, limit = 10, page = 1, userId } = req.query as {
             type?: 'profile' | 'tagged';
@@ -24,21 +25,21 @@ export const getAllFlicks = async (req: Request, res: Response) => {
         limit = Number(limit);
         const skip = ((Number(page) || 1) - 1) * limit;
         const pipeline: any[] = [];
+
         const matchStage: any = {};
         if (type === 'tagged') {
             matchStage.$or = [
                 { "media.taggedUsers.user": userId || currentUserId },
                 { "description.mention": userId || currentUserId }
             ];
-        }
-        else if (type === 'profile') {
+        } else if (type === 'profile') {
             matchStage.user = new mongoose.Types.ObjectId(userId || currentUserId);
         }
+
         if (Object.keys(matchStage).length > 0) {
-            pipeline.push(
-                { $match: matchStage },
-                { $sort: { createdAt: -1 } });
+            pipeline.push({ $match: matchStage });
         }
+
         pipeline.push(
             {
                 $lookup: {
@@ -85,12 +86,8 @@ export const getAllFlicks = async (req: Request, res: Response) => {
                     as: 'user'
                 }
             },
-            {
-                $unwind: '$user'
-            },
-            {
-                $match: { user: { $ne: null } } // ✅ Skip flicks with no valid (i.e., deactivated) user
-            },
+            { $unwind: '$user' },
+            { $match: { user: { $ne: null } } },
             {
                 $lookup: {
                     from: 'songs',
@@ -163,6 +160,7 @@ export const getAllFlicks = async (req: Request, res: Response) => {
             {
                 $group: {
                     _id: '$_id',
+                    createdAt: { $first: '$createdAt' },
                     doc: { $first: '$$ROOT' },
                     media: { $push: '$media' }
                 }
@@ -170,10 +168,11 @@ export const getAllFlicks = async (req: Request, res: Response) => {
             {
                 $replaceRoot: {
                     newRoot: {
-                        $mergeObjects: ['$doc', { media: '$media' }]
+                        $mergeObjects: ['$doc', { media: '$media', createdAt: '$createdAt' }]
                     }
                 }
             },
+            { $sort: { createdAt: -1 } }, // ✅ Correct sort position
             {
                 $lookup: {
                     from: 'likes',
