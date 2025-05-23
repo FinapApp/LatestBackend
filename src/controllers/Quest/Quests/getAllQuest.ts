@@ -83,7 +83,7 @@ export const getAllQuests = async (req: Request, res: Response) => {
                                         $expr: {
                                             $and: [
                                                 { $eq: ["$quest", "$$questId"] },
-                                                { $eq: ["$user", new Types.ObjectId(userId as string)] }
+                                                { $eq: ["$user", new Types.ObjectId(userId as string || currentUserId)] }
                                             ]
                                         }
                                     }
@@ -99,7 +99,7 @@ export const getAllQuests = async (req: Request, res: Response) => {
             case 'sponsored':
                 pipeline.push({ $match: { staff: { $exists: true } } });
                 break;
-                case 'profile':
+            case 'profile':
                 pipeline.push({ $match: { user: new Types.ObjectId(userId as string) || currentUserId } });
             case 'applied':
                 pipeline.push(
@@ -113,7 +113,7 @@ export const getAllQuests = async (req: Request, res: Response) => {
                                         $expr: {
                                             $and: [
                                                 { $eq: ["$quest", "$$questId"] },
-                                                { $eq: ["$user", new Types.ObjectId(userId as string)] }
+                                                { $eq: ["$user", new Types.ObjectId(userId as string || currentUserId)] }
                                             ]
                                         }
                                     }
@@ -213,7 +213,7 @@ export const getAllQuests = async (req: Request, res: Response) => {
                                 $expr: {
                                     $and: [
                                         { $eq: ["$quest", "$$questId"] },
-                                        { $eq: ["$user", new Types.ObjectId(userId as string)] }
+                                        { $eq: ["$user", new Types.ObjectId(userId as string) || currentUserId] }
                                     ]
                                 }
                             }
@@ -239,7 +239,7 @@ export const getAllQuests = async (req: Request, res: Response) => {
                                 $expr: {
                                     $and: [
                                         { $eq: ["$quest", "$$questId"] },
-                                        { $eq: ["$user", new Types.ObjectId(userId as string)] }
+                                        { $eq: ["$user", new Types.ObjectId(userId as string) || currentUserId] }
                                     ]
                                 }
                             }
@@ -288,7 +288,7 @@ export const getAllQuests = async (req: Request, res: Response) => {
                                         $expr: {
                                             $and: [
                                                 { $eq: ["$quest", "$$questId"] },
-                                                { $eq: ["$user", new Types.ObjectId(userId as string)] },
+                                                { $eq: ["$user", new Types.ObjectId(userId as string)|| currentUserId] },
                                                 { $eq: ["$status", "approved"] }
                                             ]
                                         }
