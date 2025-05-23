@@ -220,7 +220,7 @@ export const search = async (req: Request, res: Response) => {
                     attributesToRetrieve: [
                         "userId", "questId", "description",
                         "media", "avgAmountPerPerson", "createdAt",
-                        "mode", "title", "username", "name", "location", "photo" , "thumbnailURLs"
+                        "mode", "title", "username", "name", "location", "photo", "thumbnailURLs"
                     ]
                 });
 
@@ -240,7 +240,6 @@ export const search = async (req: Request, res: Response) => {
                     return {
                         ...quest,
                         isFavorite,
-                        thumbnailURLs: undefined
                     };
                 });
 
@@ -277,7 +276,7 @@ export const search = async (req: Request, res: Response) => {
                         limit,
                         attributesToRetrieve: [
                             "userId", "questId", "description", "media",
-                            "avgAmountPerPerson", "createdAt", "mode", "title", "user"
+                            "avgAmountPerPerson", "createdAt", "mode", "title", "user" , "location", "thumbnailURLs"
                         ]
                     }),
                     getIndex("SONGS").search(q, {
