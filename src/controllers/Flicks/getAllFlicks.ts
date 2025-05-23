@@ -50,7 +50,7 @@ export const getAllFlicks = async (req: Request, res: Response) => {
                             $match: {
                                 $expr: {
                                     $and: [
-                                        { $eq: ['$_id', '$$userId'] },
+                                        { $eq: ['$_id', '$$currentUserId'] },
                                         { $ne: ['$isDeactivated', true] }
                                     ]
                                 }
