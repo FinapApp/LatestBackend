@@ -141,7 +141,6 @@ export const search = async (req: Request, res: Response) => {
                 const data = await index.search(q, {
                     limit,
                     offset,
-                    filter: "amount >= 1000",
                     attributesToRetrieve: ["userId", "flickId", "thumbnailURL", "media", "description", "user"]
                 });
                 let filteredFlick = data.hits.map(flick => {
@@ -221,7 +220,7 @@ export const search = async (req: Request, res: Response) => {
                     attributesToRetrieve: [
                         "userId", "questId", "description",
                         "media", "avgAmountPerPerson", "createdAt",
-                        "mode", "title", "username", "name", "location", "photo"
+                        "mode", "title", "username", "name", "location", "photo" , "thumbnailURLs"
                     ]
                 });
 

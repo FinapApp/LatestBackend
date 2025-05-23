@@ -101,6 +101,7 @@ export const getAllQuests = async (req: Request, res: Response) => {
                 break;
             case 'profile':
                 pipeline.push({ $match: { user: new Types.ObjectId(userId as string) || currentUserId } });
+                break;
             case 'applied':
                 pipeline.push(
                     {

@@ -24,7 +24,7 @@ const PRIMARY_KEYS: Record<keyof typeof INDEXES, string> = {
 
 const FILTERABLE_ATTRIBUTES: Record<keyof typeof INDEXES, string[]> = {
     USERS: ['userId', 'username', 'isDeactivated'],
-    FLICKS: ['flickId', 'userId', 'amount'],
+    FLICKS: ['flickId', 'userId'],
     HASHTAG: ['hashtagId'],
     QUESTS: ['questId', 'userId', 'mode', 'avgAmountPerPerson', 'staff'],
     SONGS: ['songId'],
