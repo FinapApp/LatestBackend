@@ -6,17 +6,16 @@ export interface INotificationSchema extends Document {
   flick?: Schema.Types.ObjectId;
   comment?: Schema.Types.ObjectId;
   like?: Schema.Types.ObjectId;
-  battleRequest?: Schema.Types.ObjectId;
   follower?: Schema.Types.ObjectId;
   song?: Schema.Types.ObjectId;
   messaging?: Schema.Types.ObjectId;
+  session?: Schema.Types.ObjectId;
   title: string;
   message: string;
   category:
   | 'auth'
   | 'comment'
   | 'story-reaction'
-  | 'battle-request'
   | 'follower'
   | 'like'
   | 'user'
@@ -59,6 +58,10 @@ const NotificationSchema = new Schema<INotificationSchema>(
     like: {
       type: Schema.Types.ObjectId,
       ref: 'like',
+    },
+    session: {
+      type: Schema.Types.ObjectId,
+      ref: 'usersession',
     },
     messaging: { type: Schema.Types.ObjectId, ref: 'messaging' },  // Not required in here
     title: { type: String },

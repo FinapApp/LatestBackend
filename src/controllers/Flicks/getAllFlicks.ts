@@ -23,17 +23,20 @@ export const getAllFlicks = async (req: Request, res: Response) => {
         };
 
         limit = Number(limit);
-        const skip = ((Number(page) || 1) - 1) * limit;
+        page = Number(page);
+        const skip = (page - 1) * limit;
+
+        const targetUserId = new mongoose.Types.ObjectId(userId || currentUserId);
         const pipeline: any[] = [];
 
         const matchStage: any = {};
         if (type === 'tagged') {
             matchStage.$or = [
-                { "media.taggedUsers.user": userId || currentUserId },
-                { "description.mention": userId || currentUserId }
+                { "media.taggedUsers.user": targetUserId },
+                { "description.mention": targetUserId }
             ];
         } else if (type === 'profile') {
-            matchStage.user = new mongoose.Types.ObjectId(userId || currentUserId);
+            matchStage.user = targetUserId;
         }
 
         if (Object.keys(matchStage).length > 0) {
@@ -172,7 +175,7 @@ export const getAllFlicks = async (req: Request, res: Response) => {
                     }
                 }
             },
-            { $sort: { createdAt: -1 } }, // ✅ Correct sort position
+            { $sort: { createdAt: -1 } },
             {
                 $lookup: {
                     from: 'likes',
@@ -233,7 +236,7 @@ export const getAllFlicks = async (req: Request, res: Response) => {
         return handleResponse(res, 200, {
             flicks: mergedFeed,
             totalDocuments: totalCount,
-            page: Number(page) || 1,
+            page: page,
             totalPages: Math.ceil(totalCount / limit)
         });
     } catch (error) {
