@@ -4,6 +4,7 @@ import Joi from "joi";
 import { validateCommentId } from "../../../validators/validators";
 import { errors, handleResponse, success } from "../../../utils/responseCodec";
 import { sendErrorToDiscord } from "../../../config/discord/errorDiscord";
+import { FLICKS } from "../../../models/Flicks/flicks.model";
 
 export const deleteComment = async (req: Request, res: Response) => {
     try {
@@ -13,6 +14,7 @@ export const deleteComment = async (req: Request, res: Response) => {
         }
         const deleteComment = await COMMENT.findOneAndDelete({ _id: req.params.commentId, user: res.locals.userId })
         if (deleteComment) {
+            await FLICKS.findByIdAndUpdate(deleteComment.flick, { $inc: { commentCount: -1 } }, { new: true })
             // deleteThoseComment as well that as the same commentId as parentComment in the comment model
             return handleResponse(res, 200, success.comment_deleted)
         }

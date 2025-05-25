@@ -17,5 +17,7 @@ flickRoutes.route("/flick/:flickId")
     .put(updateFlick)
     .delete(deleteFlick);
     
-flickRoutes.route("/repost-flick/:flickId/") 
+flickRoutes.route("/repost-flick/:flickId") 
     .post(repostFlick)
+
+    

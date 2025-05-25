@@ -106,6 +106,36 @@ export const getAllFlicks = async (req: Request, res: Response) => {
             { $unwind: { path: '$media', preserveNullAndEmptyArrays: true } },
             {
                 $lookup: {
+                    from: "flicks",
+                    localField: "repost",
+                    foreignField: "_id",
+                    as: "repost",
+                    pipeline: [
+                        {
+                            $lookup: {
+                                from: 'users',
+                                localField: 'user',
+                                foreignField: '_id',
+                                as: 'user',
+                                pipeline: [
+                                    {
+                                        $project: {
+                                            _id: 1,
+                                            username: 1,
+                                            photo: 1,
+                                            name: 1
+                                        }
+                                    }
+                                ]
+                            }
+                        },
+                        { $unwind: '$user' },
+                        { $project: { _id: 1, user: 1} }
+                    ]
+                }
+            },
+            {
+                $lookup: {
                     from: 'quests',
                     localField: 'quest',
                     foreignField: '_id',
@@ -172,6 +202,24 @@ export const getAllFlicks = async (req: Request, res: Response) => {
                 $replaceRoot: {
                     newRoot: {
                         $mergeObjects: ['$doc', { media: '$media', createdAt: '$createdAt' }]
+                    }
+                }
+            },
+            {
+                $addFields: {
+                    repost: {
+                        $cond: {
+                            if: { $gt: [{ $size: "$repost" }, 0] },
+                            then: "$repost",
+                            else: "$$REMOVE"
+                        }
+                    },
+                    quest: {
+                        $cond: {
+                            if: { $gt: [{ $size: "$quest" }, 0] },
+                            then: "$quest",
+                            else: "$$REMOVE"
+                        }
                     }
                 }
             },
