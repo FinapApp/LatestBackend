@@ -8,3 +8,5 @@ export const authRoutes: Router = express.Router();
 authRoutes.post("/login", login);
 authRoutes.post("/logout", logout)
 authRoutes.post("/revalidate", revalidateSessions)
+
+

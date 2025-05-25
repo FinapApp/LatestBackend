@@ -16,5 +16,5 @@ jobs:
       - name: Run remote command using password login
         run: |
           sshpass -p "${{ secrets.AZURE_SSH_PASSWORD }}" \
-            ssh -o StrictHostKeyChecking=no azureadmin@4.213.171.49 \
+            ssh -o StrictHostKeyChecking=no azureadmin@135.235.193.1 \
             "bash ~/deploy3.sh"
