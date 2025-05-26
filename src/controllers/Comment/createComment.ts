@@ -7,6 +7,7 @@ import { errors, handleResponse, success } from "../../utils/responseCodec";
 import { FLICKS } from "../../models/Flicks/flicks.model";
 import { redis } from "../../config/redis/redis.config";
 import { sendErrorToDiscord } from "../../config/discord/errorDiscord";
+import {  sendNotificationKafka } from "../../config/kafka/kafka.config";
 export const createComment = async (req: Request, res: Response) => {
     try {
         const validationError: Joi.ValidationError | undefined = validateComment(req.body, req.params);
@@ -29,7 +30,7 @@ export const createComment = async (req: Request, res: Response) => {
         const updatedFlick = await FLICKS.findByIdAndUpdate(
             flick,
             { $inc: { commentCount: 1 } },
-            { new: true, projection: { commentCount: 1 } }
+            { new: true, projection: { commentCount: 1 , user } }
         );
         if (!updatedFlick) {
             await COMMENT.deleteOne({ _id: newComment._id });
@@ -47,19 +48,12 @@ export const createComment = async (req: Request, res: Response) => {
         if (exists === 0) {
             await redis.hset(redisKey, "count", updatedFlick.commentCount);
         }
-        // 4. Kafka Event (Uncomment when ready)
-        // await producer.send({
-        //     topic: "comment-events",
-        //     messages: [{
-        //         key: flick,
-        //         value: JSON.stringify({
-        //             flickId: flick,
-        //             userId: user,
-        //             action: "comment",
-        //             timestamp: Date.now(),
-        //         }),
-        //     }],
-        // });
+        await sendNotificationKafka('create-comment', {
+            flickId: flick,
+            userId: user,
+            commentId: newComment._id,
+            comment: newComment.comment
+        })
         return handleResponse(res, 201, success.create_comment);
     } catch (error) {
         sendErrorToDiscord("POST:create-comment", error);

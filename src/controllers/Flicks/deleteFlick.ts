@@ -21,7 +21,7 @@ export const deleteFlick = async (req: Request, res: Response) => {
         const {reposted}= req.query;
 
         // Atomic check-and-delete operation
-        const deletedFlick = await FLICKS.findOneAndDelete({ _id: flickId, user: userId });
+        const deletedFlick = await FLICKS.findOneAndDelete({ _id: flickId, user: userId , repost: reposted === "true" ? { $exists: true } : { $exists: false } });
         if (!deletedFlick) {
             return handleResponse(res, 404, errors.flick_not_found);
         }
