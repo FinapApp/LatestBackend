@@ -1,37 +1,32 @@
-version: '3.8'
-
 services:
-  zookeeper:
-    image: zookeeper:latest
-    container_name: zookeeper
-    networks:
-      - kafka-net
-    restart: always
-    ports:
-      - "2181:2181"
 
-  kafka:
-    image: confluentinc/cp-kafka:latest
-    container_name: kafka
-    networks:
-      - kafka-net
-    restart: always
-    ports:
-      - "29092:29092"
-    environment:
-      KAFKA_BROKER_ID: 1
-      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
-      KAFKA_LISTENERS: INSIDE://0.0.0.0:9092,OUTSIDE://0.0.0.0:29092
-      KAFKA_ADVERTISED_LISTENERS: INSIDE://kafka:9092,OUTSIDE://localhost:29092
-      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: INSIDE:PLAINTEXT,OUTSIDE:PLAINTEXT
-      KAFKA_INTER_BROKER_LISTENER_NAME: INSIDE
-      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+  # meilisearch:
+  #   image: getmeili/meilisearch:v1.14
+  #   container_name: meilisearch
+  #   ports:
+  #     - "7700:7700"
+  #   volumes:
+  #     - ./meili_data:/meili_data
+  #   environment:
+  #     - MELLISSEARCH_HOST=http://localhost:7700
+  #     - MELLISSEARCH_MASTER_KEY=finapus
+  #   restart: unless-stopped
+
+# mongodb:
+#   image: mongo:latest
+#   container_name: mongodb
+#   restart: always
+#   ports:
+#     - "27017:27017"
+#   environment:
+#     MONGO_INITDB_ROOT_USERNAME: root
+#     MONGO_INITDB_ROOT_PASSWORD: finapus
+#   volumes:
+#     - mongodb_data:/data/db
 
   mongodb:
     image: mongo:latest
     container_name: mongodb
-    networks:
-      - kafka-net
     restart: always
     ports:
       - "27017:27017"
@@ -41,20 +36,14 @@ services:
   redis:
     image: redis:latest
     container_name: redis
-    networks:
-      - kafka-net
     restart: always
     ports:
       - "6379:6379"
     volumes:
       - redis_data:/data
-
   meilisearch:
     image: getmeili/meilisearch:latest
     container_name: meilisearch
-    networks:
-      - kafka-net
-    restart: always
     ports:
       - "7700:7700"
     environment:
@@ -67,51 +56,47 @@ services:
       context: .
       dockerfile: Dockerfile
     container_name: myapp
-    networks:
-      - kafka-net
     restart: always
     ports:
       - "4003:4003"
     depends_on:
-      - mongodb
-      - redis
-      - meilisearch
-      - kafka
+      meilisearch:
+        condition: service_started
+      mongodb:
+        condition: service_started
+      redis:
+        condition: service_started
     environment:
-      REDIS_URI: redis://redis:6379/
-      MONGO_URI: mongodb://mongodb:27017/flickstar-dev
-      REDIS_EXPIRE_IN: 900
-      REDIS_EXPIRE_IN_STATIC: 86400
-      JWT_EXPIRE_IN: 1d
-      JWT_REFRESH_EXPIRE_IN: 7d
-      JWT_ACCESS_TOKEN_SECRET: "access_token"
-      JWT_REFRESH_TOKEN_SECRET: "refresh_token"
-      KAFKAJS_NO_PARTITIONER_WARNING: 1
-      MASTER_OTP: 123456
-      COOKIE_SECRET: "Flickstar-Secret"
-      APP_VERSION: 01
-      NODE_ENVIRONMENT: production
-      PROJECT_ENVIRONMENT: production
-      PORT: 4003
-      SWAGGER_HOSTED_URL: http://135.235.193.1:4003/api
-      R2_ENDPOINT : https://e102025f2cc22eb4ab717992b480675b.r2.cloudflarestorage.com
-      R2_ACCESS_KEY_ID: 1c556e8cd7ac71e84975f1a12a469779
-      R2_SECRET_ACCESS_KEY: 54443861fdcbbb617b5c018639e47c9ce44a243cd7b1dcce881e4081193f7307
-      R2_REGION: auto
-      R2_BUCKET: test
-      R2_PUBLIC_URL: https://pub-301c1efdf41d428f9ab043c4d4ecbac9.r2.dev
-      GMAIL_USER: noreply@flickstar.net
-      GMAIL_PASSWORD: kD2QxSkxQjeJ
-      IP_GEOLOCATOR_KEY: 6ec8f9c4b6634315b1c60020e48555a3
-      MEILI_MASTER_KEY: finapus
-      MELLISSEARCH_HOST: http://meilisearch:7700  
-      DISCORD_WEBHOOK_URL: https://discord.com/api/webhooks/1366503812273143880/thakQoGnLwo1WkjerlBSXqhUKuxPovIZCl4dZEP-aO4URhstp9NYN_fUDv9smu1I7avd
+      - REDIS_URI=redis://redis:6379/
+      - MONGO_URI=mongodb://mongodb:27017/flickstar-dev
+      - REDIS_EXPIRE_IN=900
+      - REDIS_EXPIRE_IN_STATIC=86400
+      - JWT_EXPIRE_IN=1d
+      - JWT_REFRESH_EXPIRE_IN=7d
+      - JWT_ACCESS_TOKEN_SECRET="access_token"
+      - JWT_REFRESH_TOKEN_SECRET="refresh_token"
+      - KAFKAJS_NO_PARTITIONER_WARNING=1
+      - R2_ENDPOINT=https://e102025f2cc22eb4ab717992b480675b.r2.cloudflarestorage.com
+      - R2_ACCESS_KEY_ID=1c556e8cd7ac71e84975f1a12a469779
+      - R2_SECRET_ACCESS_KEY=54443861fdcbbb617b5c018639e47c9ce44a243cd7b1dcce881e4081193f7307
+      - R2_REGION=auto
+      - R2_BUCKET=test
+      - R2_PUBLIC_URL=https://pub-301c1efdf41d428f9ab043c4d4ecbac9.r2.dev
+      - GMAIL_USER=noreply@flickstar.net
+      - GMAIL_PASSWORD=kD2QxSkxQjeJ
+      - MASTER_OTP=123456
+      - COOKIE_SECRET="Flickstar-Secret"
+      - APP_VERSION=01
+      - NODE_ENVIRONMENT=production
+      - PROJECT_ENVIRONMENT=production
+      - PORT=4003
+      - IP_GEOLOCATOR_KEY=6ec8f9c4b6634315b1c60020e48555a3
+      - MEILI_MASTER_KEY=finapus
+      - MELLISSEARCH_HOST=http://meilisearch:7700  
+      - DISCORD_WEBHOOK_URL=https://discord.com/api/webhooks/1366503812273143880/thakQoGnLwo1WkjerlBSXqhUKuxPovIZCl4dZEP-aO4URhstp9NYN_fUDv9smu1I7avd
+      - SWAGGER_HOSTED_URL=http://135.235.193.1:4003/api
 
 volumes:
   mongodb_data:
   redis_data:
   meili_data:
-
-networks:
-  kafka-net:
-    driver: bridge
