@@ -264,8 +264,8 @@ export const search = async (req: Request, res: Response) => {
                         limit,
                         attributesToRetrieve: ["userId", "name", "username", "photo"],
                         filter: [
-                            `userId != ${JSON.stringify(res.locals.userId)}`,
-                            // `isDeactivated != true`
+                            `userId != "${res.locals.userId}"`,
+                            `isDeactivated != true`
                         ]
                     }),
                     getIndex("HASHTAG").search(q, {

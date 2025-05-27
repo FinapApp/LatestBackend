@@ -15,10 +15,26 @@ import { USERBIOLINKS } from "../../models/User/userBioLinks.model";
 import { SESSION } from "../../models/User/userSession.model";
 import { WALLET } from "../../models/Wallet/wallet.model";
 import { getIndex } from "../../config/melllisearch/mellisearch.config";
+import { validateDeleteAccount } from "../../validators/validators";
+import bcrypt from "bcryptjs";
+import Joi from "joi";
 
 export const deleteAccount = async (req: Request, res: Response) => {
-    const userId = res.locals.userId;
     try {
+        const validationError: Joi.ValidationError | undefined = validateDeleteAccount(req.body);
+        if (validationError) {
+            return handleResponse(res, 400, errors.validation, validationError.details);
+        }
+        const { password } = req.body;
+        const userId = res.locals.userId;
+        const user = await USER.findById(userId , "password");
+        if (!user) {
+            return handleResponse(res, 404, errors.user_not_found);
+        }
+        const isMatch = await bcrypt.compare(password, user.password);
+        if (!isMatch) {
+            return handleResponse(res, 401, errors.incorrect_password);
+        }
         // Fetch follow relations
         const follows = await FOLLOW.find({
             $or: [{ follower: userId }, { following: userId }]

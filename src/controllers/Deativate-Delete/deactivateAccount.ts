@@ -5,46 +5,39 @@ import { sendErrorToDiscord } from "../../config/discord/errorDiscord";
 import { getIndex } from "../../config/melllisearch/mellisearch.config";
 import { validateDeactivateAccount } from "../../validators/validators";
 import Joi from "joi";
+import bcrypt from "bcryptjs";
+
 
 export const deactivateAccount = async (req: Request, res: Response) => {
     try {
-        const validationError: Joi.ValidationError | undefined = validateDeactivateAccount(
-            req.body
-        );
+        const validationError: Joi.ValidationError | undefined = validateDeactivateAccount(req.body);
         if (validationError) {
-            return handleResponse(
-                res,
-                400,
-                errors.validation,
-                validationError.details
-            );
+            return handleResponse(res, 400, errors.validation, validationError.details);
         }
-        const { deactivationReason } = req.body;
+        const { deactivationReason, password } = req.body;
         const userId = res.locals.userId;
-
-        // Atomically push reason & mark as deactivated
-        const updatedUser = await USER.findByIdAndUpdate(
-            userId,
-            {
-                $set: { isDeactivated: true },
-                $push: { deactivationReason }
-            },
-            { new: true }
-        );
-
-        if (updatedUser) {
-            // ✅ Sync with Meilisearch
-            const userIndex = getIndex("USERS");
-            await userIndex.addDocuments([
-                {
-                    userId,
-                    ...updatedUser.toObject()
-                }
-            ]);
-
-            return handleResponse(res, 200, success.deactivate_account);
+        const user = await USER.findById(userId);
+        if (!user) {
+            return handleResponse(res, 404, errors.user_not_found);
         }
-        return handleResponse(res, 404, errors.user_not_found);
+        const isMatch = await bcrypt.compare(password, user.password);
+        if (!isMatch) {
+            return handleResponse(res, 401, errors.incorrect_password);
+        }
+        user.isDeactivated = true;
+        if (!Array.isArray(user.deactivationReason)) {
+            user.deactivationReason = [];
+        }
+        user.deactivationReason.push(deactivationReason);
+        await user.save();
+        const userIndex = getIndex("USERS");
+        await userIndex.addDocuments([
+            {
+                userId,
+                ...user.toObject()
+            }
+        ]);
+        return handleResponse(res, 200, success.deactivate_account);
     } catch (err: any) {
         if (err.code === 11000) {
             return handleResponse(res, 500, errors.cannot_rerunIt);

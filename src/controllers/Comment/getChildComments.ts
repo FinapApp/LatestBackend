@@ -16,15 +16,11 @@ export const getChildComments = async (req: Request, res: Response) => {
         let { page = 1, limit = 10 } = req.query;
         limit = Number(limit);
         page = Number(page)
-        const skip = page <= 1 ? 0 : 4 + ((page- 2) * limit);
+        const skip = (page - 1) * limit;
         const userId = res.locals.userId;
-        if (!userId) {
-            return handleResponse(res, 400, errors.validation, [{ message: 'User ID is required' }]);
-        }
         const totalDocuments = await COMMENT.countDocuments({
             parentComment: new mongoose.Types.ObjectId(commentId)
         });
-
         const replies = await COMMENT.aggregate([
             {
                 $match: {

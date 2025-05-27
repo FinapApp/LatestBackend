@@ -27,6 +27,7 @@ export const handleResponse = (
   }
 };
 export const errors = {
+
   // feature-reported-issues
   create_feature_issue: {
     message: "Unable to create feature issue",
@@ -211,6 +212,9 @@ export const errors = {
   },
 
   // Comment-related errors
+  comment_not_authorized: {
+    message: "You're not authorized to perform this action",
+  },
   comment_not_found: {
     message: "Comment not found",
   },

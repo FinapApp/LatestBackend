@@ -43,6 +43,57 @@ export const getAllFlicks = async (req: Request, res: Response) => {
             pipeline.push({ $match: matchStage });
         }
 
+        // EARLY REPORT FILTERING
+        pipeline.push(
+            {
+                $lookup: {
+                    from: 'reports',
+                    let: { flickId: '$_id' },
+                    pipeline: [
+                        {
+                            $match: {
+                                $expr: {
+                                    $and: [
+                                        { $eq: ['$flick', '$$flickId'] },
+                                        { $in: ['$status', ['pending', 'resolved']] }
+                                    ]
+                                }
+                            }
+                        },
+                        { $project: { user: 1, status: 1 } }
+                    ],
+                    as: 'reports'
+                }
+            },
+            {
+                $match: {
+                    $expr: {
+                        $and: [
+                            { $not: { $in: ['resolved', '$reports.status'] } },
+                            {
+                                $not: {
+                                    $in: [true, {
+                                        $map: {
+                                            input: '$reports',
+                                            as: 'r',
+                                            in: {
+                                                $and: [
+                                                    { $eq: ['$$r.user', currentUserId] },
+                                                    { $eq: ['$$r.status', 'pending'] }
+                                                ]
+                                            }
+                                        }
+                                    }]
+                                }
+                            }
+                        ]
+                    }
+                }
+            },
+            { $unset: 'reports' }
+        );
+
+        // REST OF THE AGGREGATION
         pipeline.push(
             {
                 $lookup: {
@@ -84,7 +135,7 @@ export const getAllFlicks = async (req: Request, res: Response) => {
                             }
                         },
                         { $unset: 'followCheck' },
-                        { $project: { _id: 1, name: 1, username: 1, photo: 1, isFollowing: 1 } }
+                        { $project: { _id: 1, name: 1, username: 1, photo: 1, createdAt: 1, location: 1, isFollowing: 1 } }
                     ],
                     as: 'user'
                 }
@@ -130,7 +181,7 @@ export const getAllFlicks = async (req: Request, res: Response) => {
                             }
                         },
                         { $unwind: '$user' },
-                        { $project: { _id: 1, user: 1} }
+                        { $project: { _id: 1, user: 1 } }
                     ]
                 }
             },

@@ -1300,10 +1300,19 @@ export const validateRefreshToken = (body: object) => {
 
 
 
+export const validateDeleteAccount = (body: object) => {
+  const schema = Joi.object({
+    password: Joi.string().required(),
+  })
+  const { error } = schema.validate(body)
+  return error
+}
+
 
 export const validateDeactivateAccount = (body: object) => {
   const schema = Joi.object({
     deactivationReason: Joi.string().min(2).max(200).required(),
+    password :  Joi.string().required()
   })
   const { error } = schema.validate(body)
   return error

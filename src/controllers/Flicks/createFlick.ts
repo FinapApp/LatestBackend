@@ -71,6 +71,7 @@ export const createFlick = async (req: Request, res: Response) => {
         if (error.code == 11000) {
             return handleResponse(res, 500, errors.cannot_rerunIt)
         }
+        console.log(error);
         sendErrorToDiscord("POST:create-flick", error);
         return handleResponse(res, 500, errors.catch_error);
     }

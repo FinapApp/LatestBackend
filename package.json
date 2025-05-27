@@ -28,7 +28,6 @@
     "stripe": "^17.7.0",
     "swagger-jsdoc": "^6.2.8",
     "swagger-ui-express": "^5.0.1",
-    "typescript": "^5.4.5",
     "useragent": "^2.3.0"
   },
   "name": "ecommerce-backend",
@@ -49,6 +48,7 @@
   "license": "ISC",
   "description": "",
   "devDependencies": {
+    "typescript": "^5.4.5",
     "@types/bcrypt": "^5.0.2",
     "@types/cookie-parser": "^1.4.7",
     "@types/cors": "^2.8.17",

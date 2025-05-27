@@ -7,7 +7,7 @@ import { errors, handleResponse, success } from "../../utils/responseCodec";
 import { FLICKS } from "../../models/Flicks/flicks.model";
 import { redis } from "../../config/redis/redis.config";
 import { sendErrorToDiscord } from "../../config/discord/errorDiscord";
-import {  sendNotificationKafka } from "../../config/kafka/kafka.config";
+// import {  sendNotificationKafka } from "../../config/kafka/kafka.config";
 export const createComment = async (req: Request, res: Response) => {
     try {
         const validationError: Joi.ValidationError | undefined = validateComment(req.body, req.params);
@@ -48,12 +48,12 @@ export const createComment = async (req: Request, res: Response) => {
         if (exists === 0) {
             await redis.hset(redisKey, "count", updatedFlick.commentCount);
         }
-        await sendNotificationKafka('create-comment', {
-            flickId: flick,
-            userId: user,
-            commentId: newComment._id,
-            comment: newComment.comment
-        })
+        // sendNotificationKafka('create-comment', {
+        //     flickId: flick,
+        //     userId: user,
+        //     commentId: newComment._id,
+        //     comment: newComment.comment
+        // })
         return handleResponse(res, 201, success.create_comment);
     } catch (error) {
         sendErrorToDiscord("POST:create-comment", error);

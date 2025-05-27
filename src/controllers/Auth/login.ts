@@ -11,6 +11,7 @@ import useragent from "useragent";
 import bcrypt from "bcryptjs";
 import { USERPREFERENCE } from "../../models/User/userPreference.model";
 import { sendErrorToDiscord } from "../../config/discord/errorDiscord";
+import { getIndex } from "../../config/melllisearch/mellisearch.config";
 
 interface LoginRequest {
   email?: string;
@@ -31,12 +32,6 @@ interface LoginRequest {
  * @throws Will return a 500 status code if an unexpected error occurs.
  */
 
-interface User {
-  password: string;
-  stripeAccountId?: string;
-  _id: string;
-  isDeactivated: boolean;
-}
 
 
 interface UserPreference {
@@ -62,10 +57,7 @@ export const login = async (req: Request, res: Response) => {
     else if (username) query.username = username;
     else if (phone) query.phone = phone;
     // Asked for regex in the frontend to indentify whether to give email or phone or username
-    const checkUser = await USER.findOne(
-      query,
-      "_id password stripeAccountId isDeactivated"
-    ) as User;
+    const checkUser = await USER.findOne(query) 
     if (!checkUser) {
       return handleResponse(res, 400, errors.invalid_credentials);
     }
@@ -86,11 +78,11 @@ export const login = async (req: Request, res: Response) => {
     const checkSession = await SESSION.find({ userId }, "_id", {
       sort: { createdAt: -1 },
     });
-    
+
     if (checkSession && checkSession.length >= config.MAX_LOGIN_SESSION) {
       await SESSION.findByIdAndDelete(checkSession[0]._id);
     }
-    
+
     // Fetch IP and device data
     const geoData: any = await fetchIpGeolocation(req.ip);
     const deviceData = useragent.parse(req.headers["user-agent"]);
@@ -108,7 +100,7 @@ export const login = async (req: Request, res: Response) => {
       device: deviceData.toAgent(),
       os: deviceData.os.toString(),
     };
-    
+
     // Conditionally add geo-related fields
     if (geoData) {
       sessionData.gps = {
@@ -122,13 +114,20 @@ export const login = async (req: Request, res: Response) => {
     if (checkUser.isDeactivated) {
       checkUser.isDeactivated = false;
       (checkUser as any).save();
+      const userIndex = getIndex("USERS");
+      await userIndex.addDocuments([
+        {
+          userId,
+          ...JSON.parse(JSON.stringify(checkUser))
+        }
+      ]);
     }
     const accessToken = jwt.sign(
-      { userId , sessionId: session._id , stripeAccountId },
+      { userId, sessionId: session._id, stripeAccountId },
       config.JWT.ACCESS_TOKEN_SECRET as string,
       { expiresIn: config.JWT.ACCESS_TOKEN_EXPIRE_IN }
     );
-    return handleResponse(res, 200, {userId  , accessToken, refreshToken, userPreferences: checkUserPreference , paymentId : stripeAccountId });
+    return handleResponse(res, 200, { userId, accessToken, refreshToken, userPreferences: checkUserPreference, paymentId: stripeAccountId });
   } catch (err: any) {
     console.log(err);
     sendErrorToDiscord("POST:login", err);

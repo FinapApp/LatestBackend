@@ -12,15 +12,38 @@ export const deleteComment = async (req: Request, res: Response) => {
         if (validationError) {
             return handleResponse(res, 400, errors.validation, validationError.details);
         }
-        const deleteComment = await COMMENT.findOneAndDelete({ _id: req.params.commentId, user: res.locals.userId })
-        if (deleteComment) {
-            await FLICKS.findByIdAndUpdate(deleteComment.flick, { $inc: { commentCount: -1 } }, { new: true })
-            // deleteThoseComment as well that as the same commentId as parentComment in the comment model
-            return handleResponse(res, 200, success.comment_deleted)
+
+        // Populate both flick and comment user
+        const checkComment = await COMMENT.findOne({ _id: req.params.commentId })
+            .populate({ path: "flick", select: "user" })
+            .populate({ path: "user", select: "_id" });
+
+            console.log(checkComment);
+        if (!checkComment) {
+            return handleResponse(res, 404, errors.comment_not_found);
         }
-        return handleResponse(res, 404, errors.comment_delete)
+        const flickOwnerId = (checkComment.flick as any).user.toString();
+        const commentOwnerId = (checkComment.user as any)?._id?.toString();
+        const currentUserId = res.locals.userId.toString();
+
+        const canDelete = flickOwnerId === currentUserId || commentOwnerId === currentUserId;
+
+        if (!canDelete) {
+            return handleResponse(res, 403, errors.comment_not_authorized);
+        }
+
+        const deleteComment = await COMMENT.findOneAndDelete({ _id: req.params.commentId});
+        if (deleteComment) {
+            if (deleteComment.flick) {
+                await FLICKS.findByIdAndUpdate(deleteComment.flick._id, { $inc: { commentCount: -1 } }, { new: true });
+            }
+            // TODO: optionally delete replies (child comments) if applicable
+            return handleResponse(res, 200, success.comment_deleted);
+        }
+        return handleResponse(res, 404, errors.comment_delete);
     } catch (error) {
-        sendErrorToDiscord("DELETE:delete-comment", error)
-        return handleResponse(res, 500, errors.catch_error)
+        sendErrorToDiscord("DELETE:delete-comment", error);
+        return handleResponse(res, 500, errors.catch_error);
     }
-}
+};
+
