@@ -135,7 +135,7 @@ export const getAllFlicks = async (req: Request, res: Response) => {
                             }
                         },
                         { $unset: 'followCheck' },
-                        { $project: { _id: 1, name: 1, username: 1, photo: 1, createdAt: 1, location: 1, isFollowing: 1 } }
+                        { $project: { _id: 1, name: 1, username: 1, photo: 1, createdAt: 1, location: 1, country : 1 , isFollowing: 1 } }
                     ],
                     as: 'user'
                 }
