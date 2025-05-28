@@ -5,6 +5,7 @@ import { createFlick } from "../../controllers/Flicks/createFlick";
 import { getAllFlicks } from "../../controllers/Flicks/getAllFlicks";
 import { updateFlick } from "../../controllers/Flicks/updateFlick";
 import { repostFlick } from "../../controllers/Flicks/repostFlick";
+import { getFlick } from "../../controllers/Flicks/getFlick";
 
 export const flickRoutes: Router = express.Router();
 
@@ -13,11 +14,11 @@ flickRoutes.route("/flick")
     .get(getAllFlicks);
 
 flickRoutes.route("/flick/:flickId")
+    .get(getFlick)
     .post(createFlick)
     .put(updateFlick)
     .delete(deleteFlick);
-    
-flickRoutes.route("/repost-flick/:flickId") 
+
+flickRoutes.route("/repost-flick/:flickId")
     .post(repostFlick)
 
-    
