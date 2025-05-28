@@ -11,7 +11,7 @@ export const isAuthenticatedUserIfNot: any = async (
     try {
         const token: string = req.headers["authorization"] as string;
         if (!token) {
-            return handleResponse(res, 401, errors.no_token);
+            next()
         }
         const tokenArray = token.split(" ") as ['Bearer', string];
         jwt.verify(tokenArray[1], config.JWT.ACCESS_TOKEN_SECRET, (err, data: any) => {
@@ -26,6 +26,7 @@ export const isAuthenticatedUserIfNot: any = async (
             }
             if (data) {
                 res.locals["userId"] = data.userId;
+                res.locals["sessionId"] = data.sessionId;
             }
             next()
         })
