@@ -11,10 +11,10 @@ interface IUserSchema extends Document {
     dob: Date;
     description: ITextDataSchema[];
     country: string;
-    flickCount: number; 
-    successfulQuest: number; 
-    followingCount: number; 
-    followerCount: number; 
+    flickCount: number;
+    successfulQuest: number;
+    followingCount: number;
+    followerCount: number;
     balance: number;
     private: boolean; // not yet formed
     deletedAt: Date;
@@ -25,16 +25,17 @@ interface IUserSchema extends Document {
     nightMode: boolean;
     warnedCount: number,
     suspended: boolean,
-    stripeAccountId :  string;
+    stripeAccountId: string;
     suspensionReason: string,
     isDeactivated: boolean,
+    deletedReason: string[],
     deactivationReason: string[],
     twoFactor: boolean
 }
 
 export const UserSchema = new Schema<IUserSchema>(
     {
-        username: { type: String, unique: true , lowercase: true },
+        username: { type: String, unique: true, lowercase: true },
         name: { type: String },
         email: { type: String, unique: true },
         phone: { type: String },
@@ -53,8 +54,9 @@ export const UserSchema = new Schema<IUserSchema>(
         followerCount: { type: Number, default: 0 },
         suspended: { type: Boolean, default: false },
         stripeAccountId: { type: String },
-        isDeactivated: {type :  Boolean , default: false}, 
+        isDeactivated: { type: Boolean, default: false },
         deactivationReason: { type: [String] },
+        deletedReason: { type: [String] },
         suspensionReason: { type: String },
     },
     { timestamps: { createdAt: true, updatedAt: false }, versionKey: false }
