@@ -21,6 +21,96 @@ export const getFlick = async (req: Request, res: Response) => {
             { $match: { _id: flickId } },
             {
                 $lookup: {
+                    from: 'userfollowers',
+                    let: { flickUserId: '$user' },
+                    pipeline: [
+                        {
+                            $match: {
+                                $expr: {
+                                    $and: [
+                                        { $eq: ['$follower', currentUserId] },
+                                        { $eq: ['$following', '$$flickUserId'] }
+                                    ]
+                                }
+                            }
+                        }
+                    ],
+                    as: 'isFollowing'
+                }
+            },
+            {
+                $addFields: {
+                    isFollowing: { $gt: [{ $size: '$isFollowing' }, 0] }
+                }
+            },
+            {
+                $match: {
+                    $expr: {
+                        $or: [
+                            { $eq: ['$audienceSetting', 'public'] },
+                            {
+                                $and: [
+                                    { $eq: ['$audienceSetting', 'friends'] },
+                                    {
+                                        $or: [
+                                            { $eq: ['$isFollowing', true] },
+                                            { $eq: ['$user', currentUserId] }
+                                        ]
+                                    }
+                                ]
+                            }
+                        ]
+                    }
+                }
+            },
+            {
+                $lookup: {
+                    from: 'reports',
+                    let: { flickId: '$_id' },
+                    pipeline: [
+                        {
+                            $match: {
+                                $expr: {
+                                    $and: [
+                                        { $eq: ['$flick', '$$flickId'] },
+                                        { $in: ['$status', ['pending', 'resolved']] }
+                                    ]
+                                }
+                            }
+                        },
+                        { $project: { user: 1, status: 1 } }
+                    ],
+                    as: 'reports'
+                }
+            },
+            {
+                $match: {
+                    $expr: {
+                        $and: [
+                            { $not: { $in: ['resolved', '$reports.status'] } },
+                            {
+                                $not: {
+                                    $in: [true, {
+                                        $map: {
+                                            input: '$reports',
+                                            as: 'r',
+                                            in: {
+                                                $and: [
+                                                    { $eq: ['$$r.user', currentUserId] },
+                                                    { $eq: ['$$r.status', 'pending'] }
+                                                ]
+                                            }
+                                        }
+                                    }]
+                                }
+                            }
+                        ]
+                    }
+                }
+            },
+            { $unset: 'reports' },
+            {
+                $lookup: {
                     from: 'users',
                     let: { userId: '$user' },
                     pipeline: [
@@ -35,34 +125,9 @@ export const getFlick = async (req: Request, res: Response) => {
                             }
                         },
                         {
-                            $lookup: {
-                                from: 'userfollowers',
-                                let: { flickUserId: '$_id' },
-                                pipeline: [
-                                    {
-                                        $match: {
-                                            $expr: {
-                                                $and: [
-                                                    { $eq: ['$follower', currentUserId] },
-                                                    { $eq: ['$following', '$$flickUserId'] }
-                                                ]
-                                            }
-                                        }
-                                    }
-                                ],
-                                as: 'followCheck'
-                            }
-                        },
-                        {
-                            $addFields: {
-                                isFollowing: { $gt: [{ $size: '$followCheck' }, 0] }
-                            }
-                        },
-                        { $unset: 'followCheck' },
-                        {
                             $project: {
                                 _id: 1, name: 1, username: 1, photo: 1,
-                                createdAt: 1, location: 1, country: 1, isFollowing: 1
+                                createdAt: 1, location: 1, country: 1
                             }
                         }
                     ],
@@ -70,6 +135,8 @@ export const getFlick = async (req: Request, res: Response) => {
                 }
             },
             { $unwind: '$user' },
+
+            // Song enrichment
             {
                 $lookup: {
                     from: 'songs',
@@ -83,12 +150,14 @@ export const getFlick = async (req: Request, res: Response) => {
             },
             { $unwind: { path: '$song', preserveNullAndEmptyArrays: true } },
             { $unwind: { path: '$media', preserveNullAndEmptyArrays: true } },
+
+            // Repost
             {
                 $lookup: {
-                    from: "flicks",
-                    localField: "repost",
-                    foreignField: "_id",
-                    as: "repost",
+                    from: 'flicks',
+                    localField: 'repost',
+                    foreignField: '_id',
+                    as: 'repost',
                     pipeline: [
                         {
                             $lookup: {
@@ -106,6 +175,8 @@ export const getFlick = async (req: Request, res: Response) => {
                     ]
                 }
             },
+
+            // Quest
             {
                 $lookup: {
                     from: 'quests',
@@ -114,18 +185,52 @@ export const getFlick = async (req: Request, res: Response) => {
                     as: 'quest'
                 }
             },
+
+            // Media audio
             {
                 $addFields: {
                     'media.audio': { $arrayElemAt: ['$mediaAudio', 0] }
                 }
             },
+
+            // Tagged users
             {
                 $lookup: {
                     from: 'users',
                     let: { taggedUsers: '$media.taggedUsers.user' },
                     pipeline: [
                         { $match: { $expr: { $in: ['$_id', '$$taggedUsers'] } } },
-                        { $project: { _id: 1, name: 1, username: 1, photo: 1 } }
+                        {
+                            $lookup: {
+                                from: 'userfollowers',
+                                let: { taggedUserId: '$_id' },
+                                pipeline: [
+                                    {
+                                        $match: {
+                                            $expr: {
+                                                $and: [
+                                                    { $eq: ['$follower', '$$taggedUserId'] },
+                                                    { $eq: ['$following', currentUserId] }
+                                                ]
+                                            }
+                                        }
+                                    }
+                                ],
+                                as: 'isFollowedByCurrentUser'
+                            }
+                        },
+                        {
+                            $addFields: {
+                                isFollowing: {
+                                    $gt: [{ $size: '$isFollowedByCurrentUser' }, 0]
+                                }
+                            }
+                        },
+                        {
+                            $project: {
+                                _id: 1, name: 1, username: 1, photo: 1, isFollowing: 1
+                            }
+                        }
                     ],
                     as: 'mediaTaggedUsers'
                 }
@@ -140,16 +245,29 @@ export const getFlick = async (req: Request, res: Response) => {
                                 text: '$$tagged.text',
                                 position: '$$tagged.position',
                                 user: {
-                                    $arrayElemAt: [
-                                        {
-                                            $filter: {
-                                                input: '$mediaTaggedUsers',
-                                                as: 'userDoc',
-                                                cond: { $eq: ['$$userDoc._id', '$$tagged.user'] }
+                                    $let: {
+                                        vars: {
+                                            userDoc: {
+                                                $arrayElemAt: [
+                                                    {
+                                                        $filter: {
+                                                            input: '$mediaTaggedUsers',
+                                                            as: 'userDoc',
+                                                            cond: { $eq: ['$$userDoc._id', '$$tagged.user'] }
+                                                        }
+                                                    },
+                                                    0
+                                                ]
                                             }
                                         },
-                                        0
-                                    ]
+                                        in: {
+                                            _id: '$$userDoc._id',
+                                            name: '$$userDoc.name',
+                                            username: '$$userDoc.username',
+                                            photo: '$$userDoc.photo',
+                                            isFollowing: '$$userDoc.isFollowing'
+                                        }
+                                    }
                                 }
                             }
                         }
@@ -162,6 +280,8 @@ export const getFlick = async (req: Request, res: Response) => {
                     mediaTaggedUsers: 0
                 }
             },
+
+            // Merge media
             {
                 $group: {
                     _id: '$_id',
@@ -177,6 +297,8 @@ export const getFlick = async (req: Request, res: Response) => {
                     }
                 }
             },
+
+            // Cleanup repost/quest
             {
                 $addFields: {
                     repost: {
@@ -192,9 +314,28 @@ export const getFlick = async (req: Request, res: Response) => {
                             then: "$quest",
                             else: "$$REMOVE"
                         }
+                    },
+                    canComment: {
+                        $switch: {
+                            branches: [
+                                { case: { $eq: ['$commentSetting', 'everyone'] }, then: true },
+                                {
+                                    case: {
+                                        $and: [
+                                            { $eq: ['$commentSetting', 'friends'] },
+                                            { $eq: ['$isFollowing', true] }
+                                        ]
+                                    },
+                                    then: true
+                                }
+                            ],
+                            default: false
+                        }
                     }
                 }
             },
+
+            // Like info
             {
                 $lookup: {
                     from: 'likes',
@@ -237,7 +378,7 @@ export const getFlick = async (req: Request, res: Response) => {
         const enrichedFlick = {
             ...flick,
             likeCount: Number(likeData?.count || 0),
-            commentCount: Number(commentData?.count || 0),
+            commentCount: flick.canComment ? Number(commentData?.count || 0) : undefined
         };
 
         return handleResponse(res, 200, { flick: enrichedFlick });

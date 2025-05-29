@@ -222,7 +222,42 @@ export const getAllFlicks = async (req: Request, res: Response) => {
                     let: { taggedUsers: '$media.taggedUsers.user' },
                     pipeline: [
                         { $match: { $expr: { $in: ['$_id', '$$taggedUsers'] } } },
-                        { $project: { _id: 1, name: 1, username: 1, photo: 1 } }
+                        {
+                            $lookup: {
+                                from: 'userfollowers',
+                                let: { taggedUserId: '$_id' },
+                                pipeline: [
+                                    {
+                                        $match: {
+                                            $expr: {
+                                                $and: [
+                                                    { $eq: ['$follower', '$$taggedUserId' ] },
+                                                    { $eq: ['$following', currentUserId ] }
+                                                ]
+                                            }
+                                        }
+                                    },
+                                    { $project: { _id: 1 } }
+                                ],
+                                as: 'isFollowedByCurrentUser'
+                            }
+                        },
+                        {
+                            $addFields: {
+                                isFollowing: {
+                                    $gt: [{ $size: '$isFollowedByCurrentUser' }, 0]
+                                }
+                            }
+                        },
+                        {
+                            $project: {
+                                _id: 1,
+                                name: 1,
+                                username: 1,
+                                photo: 1,
+                                isFollowing: 1
+                            }
+                        }
                     ],
                     as: 'mediaTaggedUsers'
                 }
@@ -237,16 +272,29 @@ export const getAllFlicks = async (req: Request, res: Response) => {
                                 text: '$$tagged.text',
                                 position: '$$tagged.position',
                                 user: {
-                                    $arrayElemAt: [
-                                        {
-                                            $filter: {
-                                                input: '$mediaTaggedUsers',
-                                                as: 'userDoc',
-                                                cond: { $eq: ['$$userDoc._id', '$$tagged.user'] }
+                                    $let: {
+                                        vars: {
+                                            userDoc: {
+                                                $arrayElemAt: [
+                                                    {
+                                                        $filter: {
+                                                            input: '$mediaTaggedUsers',
+                                                            as: 'userDoc',
+                                                            cond: { $eq: ['$$userDoc._id', '$$tagged.user'] }
+                                                        }
+                                                    },
+                                                    0
+                                                ]
                                             }
                                         },
-                                        0
-                                    ]
+                                        in: {
+                                            _id: '$$userDoc._id',
+                                            name: '$$userDoc.name',
+                                            username: '$$userDoc.username',
+                                            photo: '$$userDoc.photo',
+                                            isFollowing: '$$userDoc.isFollowing'
+                                        }
+                                    }
                                 }
                             }
                         }

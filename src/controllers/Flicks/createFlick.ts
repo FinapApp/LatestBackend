@@ -51,7 +51,7 @@ export const createFlick = async (req: Request, res: Response) => {
             const updatedHashtags = await HASHTAGS.find({ _id: { $in: oldHashTagIds } })
                 .select("_id value count") as Array<{ _id: string; value: string; count: number }>;
             // 3. Push updated hashtags to Meilisearch
-            await hashTagIndex.updateDocuments(
+            await hashTagIndex.addDocuments(
                 updatedHashtags.map(tag => ({
                     hashtagId: tag._id.toString(),
                     value: tag.value,
@@ -93,10 +93,10 @@ export const createFlick = async (req: Request, res: Response) => {
         }
         return handleResponse(res, 404, errors.flick_not_found);
     } catch (error: any) {
+        console.log(error);
         if (error.code == 11000) {
             return handleResponse(res, 500, errors.cannot_rerunIt)
         }
-        console.log(error);
         sendErrorToDiscord("POST:create-flick", error);
         return handleResponse(res, 500, errors.catch_error);
     }
