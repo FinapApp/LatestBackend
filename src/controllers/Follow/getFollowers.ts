@@ -4,6 +4,7 @@ import Joi from 'joi';
 import { errors, handleResponse } from '../../utils/responseCodec';
 import { getAllFollowerUserAggreagtion } from '../../aggregation/getAllFollowerUserAggreagtion';
 import { sendErrorToDiscord } from '../../config/discord/errorDiscord';
+import mongoose from 'mongoose';
 
 export const getFollowers = async (req: Request, res: Response) => {
     try {
@@ -11,11 +12,12 @@ export const getFollowers = async (req: Request, res: Response) => {
         if (validationError) {
             return handleResponse(res, 400, errors.validation, validationError.details);
         }
-        let { page, userId , limit=10 } = req.query  as any
-        limit= Number(limit);
+        let { page, userId, limit = 10 } = req.query as any
+        const currentUserId = new mongoose.Types.ObjectId(res.locals.userId);
+        const targetUserId = new mongoose.Types.ObjectId(userId || currentUserId);
+        limit = Number(limit);
         const skip = ((Number(page) || 1) - 1) * limit;
-        userId ??= res.locals.userId as string
-        const result = await getAllFollowerUserAggreagtion(userId, skip, limit )
+        const result = await getAllFollowerUserAggreagtion(currentUserId, targetUserId, skip, limit)
         return handleResponse(res, 200, result)
     } catch (error) {
         sendErrorToDiscord("GET:followers", error)

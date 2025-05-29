@@ -36,7 +36,7 @@ export const getUserSearchHistory = async (req: Request, res: Response) => {
             select: "_id media[0].thumbnailURL",
         },
         {
-            path: "hashTag",
+            path: "hashtag",
             select: "_id value",
         },
         ]).sort({ createdAt: -1 }).skip(skip).limit(limit).exec();

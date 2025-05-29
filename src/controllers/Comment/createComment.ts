@@ -7,7 +7,7 @@ import { errors, handleResponse, success } from "../../utils/responseCodec";
 import { FLICKS } from "../../models/Flicks/flicks.model";
 import { redis } from "../../config/redis/redis.config";
 import { sendErrorToDiscord } from "../../config/discord/errorDiscord";
-// import {  sendNotificationKafka } from "../../config/kafka/kafka.config";
+// import { sendNotificationKafka } from "../../config/kafka/kafka.config";
 export const createComment = async (req: Request, res: Response) => {
     try {
         const validationError: Joi.ValidationError | undefined = validateComment(req.body, req.params);
@@ -30,7 +30,16 @@ export const createComment = async (req: Request, res: Response) => {
         const updatedFlick = await FLICKS.findByIdAndUpdate(
             flick,
             { $inc: { commentCount: 1 } },
-            { new: true, projection: { commentCount: 1 , user } }
+            {
+                new: true, populate: {
+                    path: "user",
+                    select: "photo username name"
+                }, projection: {
+                    commentCount: 1,
+                    user,
+                    thumbnailURL: 1,
+                }
+            }
         );
         if (!updatedFlick) {
             await COMMENT.deleteOne({ _id: newComment._id });
@@ -42,17 +51,16 @@ export const createComment = async (req: Request, res: Response) => {
         const [exists] = await redis.pipeline()
             .exists(redisKey)
             .hincrby(redisKey, "count", 1)
-            .hset(`${redisKey}:users`, user, 1)
+            .hset(`${redisKey}:users`, user._id, 1)
             .exec();
         // If Redis key didn't exist, set initial value from MongoDB
         if (exists === 0) {
             await redis.hset(redisKey, "count", updatedFlick.commentCount);
         }
         // sendNotificationKafka('create-comment', {
-        //     flickId: flick,
-        //     userId: user,
-        //     commentId: newComment._id,
-        //     comment: newComment.comment
+        //     flickId: updatedFlick.thumbnailURL,
+        //     user: user,
+        //   comment: comment,
         // })
         return handleResponse(res, 201, success.create_comment);
     } catch (error) {

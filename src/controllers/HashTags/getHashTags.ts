@@ -14,6 +14,7 @@ export const getHashTag = async (req: Request, res: Response) => {
         }
         let { q = "", page = 1, limit = 10 } = req.query as { q: string; page?: string | number; type?: string, limit?: string | number };
         limit = Number(limit)
+        const newHashTagId = new mongoose.Types.ObjectId
         const offset = ((Number(page) || 1) - 1) * limit;
         const index = getIndex("HASHTAG");
         const data = await index.search(q, {
@@ -28,9 +29,8 @@ export const getHashTag = async (req: Request, res: Response) => {
                 page: Number(page) || 1,
                 totalPages: Math.ceil(data.estimatedTotalHits / limit) || 1,
             }
-            return handleResponse(res, 200, result)
+            return handleResponse(res, 200, { result, newHashTagId })
         }
-        const newHashTagId = new mongoose.Types.ObjectId
         return handleResponse(res, 200, {
             newHashTagId
         });

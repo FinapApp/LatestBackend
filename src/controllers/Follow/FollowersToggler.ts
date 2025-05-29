@@ -39,7 +39,7 @@ export const followerHandler = async (req: Request, res: Response) => {
             if (existingFollow) {
                 await Promise.all([
                     USER.findByIdAndUpdate(me, { $inc: { followingCount: -1 } }, { new: true }),
-                    USER.findByIdAndUpdate(followerId, { $inc: { followerCount: -1 } }, { new: true })
+                    USER.findByIdAndUpdate(followerId, { $inc: { followerCount: -1 } }, { new: true }),
                 ]);
                 return handleResponse(res, 200, success.user_unfollowed);
             }
@@ -55,14 +55,30 @@ export const followerHandler = async (req: Request, res: Response) => {
                 USER.findByIdAndUpdate(me, { $inc: { followingCount: 1 } }, { new: true }),
                 USER.findByIdAndUpdate(followerId, { $inc: { followerCount: 1 } }, { new: true })
             ]);
-
-            await FOLLOW.create({
+            const toggleFollow = await FOLLOW.create({
                 follower: me,
                 following: followerId,
                 approved: targetUser.private ? false : true,
             });
-
-            return handleResponse(res, 200, success.user_followed);
+            if (toggleFollow) {
+                // const myData = await USER.findById(me, "username photo");
+                if (targetUser.private) {
+                    // Notify the followed user about the new follower
+                    // sendNotificationKafka('new-follower', {
+                    //     userId: followerId,
+                    //     followerId: me,
+                    //     followerData: myData
+                    // });
+                }
+                // Optionally, you can send a notification to the follower
+                // sendNotificationKafka('followed', {
+                //     userId: me,
+                //     followedId: followerId,
+                //     followedData: targetUser
+                // });
+                return handleResponse(res, 200, success.user_followed);
+            }
+            return handleResponse(res, 304, errors.toggle_follow);
         }
     } catch (err) {
         console.error(err);

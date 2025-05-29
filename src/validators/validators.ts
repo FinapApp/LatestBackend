@@ -209,10 +209,10 @@ export const validateComment = (body: object, params: object) => {
   const bodySchema = Joi.object({
     comment: Joi.array().items(Joi.object({
       mention: Joi.string().regex(/^[0-9a-fA-F]{24}$/, 'object Id').optional(),
-      hashTag: Joi.string().regex(/^[0-9a-fA-F]{24}$/, 'object Id').optional(),
+      hashtag: Joi.string().regex(/^[0-9a-fA-F]{24}$/, 'object Id').optional(),
       text: Joi.string().when(Joi.object({ mention: Joi.exist() }).unknown(), {
         then: Joi.required(),
-        otherwise: Joi.when(Joi.object({ hashTag: Joi.exist() }).unknown(), {
+        otherwise: Joi.when(Joi.object({ hashtag: Joi.exist() }).unknown(), {
           then: Joi.required(),
           otherwise: Joi.optional(),
         }),
@@ -234,10 +234,10 @@ export const validateCreateReply = (body: object, params: object) => {
   const bodySchema = Joi.object({
     comment: Joi.array().items(Joi.object({
       mention: Joi.string().regex(/^[0-9a-fA-F]{24}$/, 'object Id').optional(),
-      hashTag: Joi.string().regex(/^[0-9a-fA-F]{24}$/, 'object Id').optional(),
+      hashtag: Joi.string().regex(/^[0-9a-fA-F]{24}$/, 'object Id').optional(),
       text: Joi.string().when(Joi.object({ mention: Joi.exist() }).unknown(), {
         then: Joi.required(),
-        otherwise: Joi.when(Joi.object({ hashTag: Joi.exist() }).unknown(), {
+        otherwise: Joi.when(Joi.object({ hashtag: Joi.exist() }).unknown(), {
           then: Joi.required(),
           otherwise: Joi.optional(),
         }),
@@ -341,10 +341,10 @@ export const validateCreateFlick = (body: object, params: object) => {
       .message("thumbnailURL must be a valid URL").required(),
     description: Joi.array().items(Joi.object({
       mention: Joi.string().regex(/^[0-9a-fA-F]{24}$/, 'object Id').optional(),
-      hashTag: Joi.string().regex(/^[0-9a-fA-F]{24}$/, 'object Id').optional(),
+      hashtag: Joi.string().regex(/^[0-9a-fA-F]{24}$/, 'object Id').optional(),
       text: Joi.string().when(Joi.object({ mention: Joi.exist() }).unknown(), {
         then: Joi.required(),
-        otherwise: Joi.when(Joi.object({ hashTag: Joi.exist() }).unknown(), {
+        otherwise: Joi.when(Joi.object({ hashtag: Joi.exist() }).unknown(), {
           then: Joi.required(),
           otherwise: Joi.optional(),
         }),
@@ -421,10 +421,10 @@ export const validateRepostFlick =  (body: object, params: object) => {
     location : Joi.string().optional(),
     description: Joi.array().items(Joi.object({
       mention: Joi.string().regex(/^[0-9a-fA-F]{24}$/, 'object Id').optional(),
-      hashTag: Joi.string().regex(/^[0-9a-fA-F]{24}$/, 'object Id').optional(),
+      hashtag: Joi.string().regex(/^[0-9a-fA-F]{24}$/, 'object Id').optional(),
       text: Joi.string().when(Joi.object({ mention: Joi.exist() }).unknown(), {
         then: Joi.required(),
-        otherwise: Joi.when(Joi.object({ hashTag: Joi.exist() }).unknown(), {
+        otherwise: Joi.when(Joi.object({ hashtag: Joi.exist() }).unknown(), {
           then: Joi.required(),
           otherwise: Joi.optional(),
         }),
@@ -644,14 +644,14 @@ export const validateCreateUserSearchHistory = (body: object) => {
     flick: objectId.optional(),
     quest: objectId.optional(),
     song: objectId.optional(),
-    hashTag: objectId.optional(),
+    hashtag: objectId.optional(),
     userSearched: objectId.optional(),
   }).custom((value, helpers) => {
-    const keys = ['flick', 'quest', 'song', 'hashTag', 'userSearched'];
+    const keys = ['flick', 'quest', 'song', 'hashtag', 'userSearched'];
     const present = keys.filter(key => value[key]);
 
     if (present.length > 1) {
-      return helpers.error('any.custom', { message: 'Only one of flick, quest, song, hashTag, or userSearched is allowed' });
+      return helpers.error('any.custom', { message: 'Only one of flick, quest, song, hashtag, or userSearched is allowed' });
     }
 
     return value;
@@ -767,10 +767,10 @@ export const validateUpdateFlick = (body: object, params: object) => {
       .message("thumbnailURL must be a valid URL").optional(),
     description: Joi.array().items(Joi.object({
       mention: Joi.string().regex(/^[0-9a-fA-F]{24}$/, 'object Id').optional(),
-      hashTag: Joi.string().regex(/^[0-9a-fA-F]{24}$/, 'object Id').optional(),
+      hashtag: Joi.string().regex(/^[0-9a-fA-F]{24}$/, 'object Id').optional(),
       text: Joi.string().when(Joi.object({ mention: Joi.exist() }).unknown(), {
         then: Joi.required(),
-        otherwise: Joi.when(Joi.object({ hashTag: Joi.exist() }).unknown(), {
+        otherwise: Joi.when(Joi.object({ hashtag: Joi.exist() }).unknown(), {
           then: Joi.required(),
           otherwise: Joi.optional(),
         }),
@@ -839,7 +839,7 @@ export const validateCreateStory = (body: string, params: object) => {
       then: Joi.required(),
       otherwise: Joi.optional(),
     }),
-    hashTags: Joi.array().items(Joi.object({
+    hashtags: Joi.array().items(Joi.object({
       hashtag: Joi.string().regex(/^[0-9a-fA-F]{24}$/, 'object Id').required(),
       position: Joi.object({
         x: Joi.number().required(),
@@ -1045,10 +1045,10 @@ export const validateCreateQuestApplication = (body: object, params: object) => 
     quest: Joi.string().regex(/^[0-9a-fA-F]{24}$/, 'object Id').required(),
     description: Joi.array().items(Joi.object({
       mention: Joi.string().regex(/^[0-9a-fA-F]{24}$/, 'object Id').optional(),
-      hashTag: Joi.string().regex(/^[0-9a-fA-F]{24}$/, 'object Id').optional(),
+      hashtag: Joi.string().regex(/^[0-9a-fA-F]{24}$/, 'object Id').optional(),
       text: Joi.string().when(Joi.object({ mention: Joi.exist() }).unknown(), {
         then: Joi.required(),
-        otherwise: Joi.when(Joi.object({ hashTag: Joi.exist() }).unknown(), {
+        otherwise: Joi.when(Joi.object({ hashtag: Joi.exist() }).unknown(), {
           then: Joi.required(),
           otherwise: Joi.optional(),
         }),
@@ -1079,10 +1079,10 @@ export const validateUpdateQuestApplicant = (body: object, params: object) => {
   const bodySchema = Joi.object({
     description: Joi.array().items(Joi.object({
       mention: Joi.string().regex(/^[0-9a-fA-F]{24}$/, 'object Id').optional(),
-      hashTag: Joi.string().regex(/^[0-9a-fA-F]{24}$/, 'object Id').optional(),
+      hashtag: Joi.string().regex(/^[0-9a-fA-F]{24}$/, 'object Id').optional(),
       text: Joi.string().when(Joi.object({ mention: Joi.exist() }).unknown(), {
         then: Joi.required(),
-        otherwise: Joi.when(Joi.object({ hashTag: Joi.exist() }).unknown(), {
+        otherwise: Joi.when(Joi.object({ hashtag: Joi.exist() }).unknown(), {
           then: Joi.required(),
           otherwise: Joi.optional(),
         }),
@@ -1332,10 +1332,10 @@ export const validateUpdateProfile = (body: object) => {
       }),
     description: Joi.array().items(Joi.object({
       mention: Joi.string().regex(/^[0-9a-fA-F]{24}$/, 'object Id').optional(),
-      hashTag: Joi.string().regex(/^[0-9a-fA-F]{24}$/, 'object Id').optional(),
+      hashtag: Joi.string().regex(/^[0-9a-fA-F]{24}$/, 'object Id').optional(),
       text: Joi.string().when(Joi.object({ mention: Joi.exist() }).unknown(), {
         then: Joi.required(),
-        otherwise: Joi.when(Joi.object({ hashTag: Joi.exist() }).unknown(), {
+        otherwise: Joi.when(Joi.object({ hashtag: Joi.exist() }).unknown(), {
           then: Joi.required(),
           otherwise: Joi.optional(),
         }),

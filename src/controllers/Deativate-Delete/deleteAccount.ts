@@ -70,7 +70,7 @@ export const deleteAccount = async (req: Request, res: Response) => {
 
         // Delete the user and related content
         await Promise.all([
-            USER.findByIdAndUpdate(userId),
+            USER.findByIdAndDelete(userId),
             FLICKS.deleteMany({ user: userId }),
             QUESTS.deleteMany({ user: userId }),
             COMMENT.deleteMany({ user: userId }),

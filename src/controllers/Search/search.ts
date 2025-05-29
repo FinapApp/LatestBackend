@@ -67,38 +67,41 @@ export const search = async (req: Request, res: Response) => {
                 break;
             }
 
-
             case "following": {
                 const targetUserId = userId || res.locals.userId;
-
+                const viewerId = res.locals.userId;
                 const followings = await FOLLOW.find({ follower: targetUserId }).lean();
-                const followingIds = followings.map(f => f.following);
-
+                const followingIds = followings.map(f => f.following.toString());
                 if (followingIds.length === 0) {
                     Object.assign(result, buildResult("following", [], 0));
                     break;
                 }
-
                 const index = getIndex("USERS");
                 const data = await index.search(q, {
                     limit,
                     offset,
                     filter: [
-                        `userId IN [${followingIds.join(',')}]`,
+                        `userId IN [${followingIds.map(id => `"${id}"`).join(',')}]`,
                         `isDeactivated != true`
                     ],
                     attributesToRetrieve: ["userId", "name", "username", "photo"]
                 });
 
-                const currentUserFollows = await FOLLOW.find({
-                    follower: res.locals.userId,
-                    following: { $in: data.hits.map((u: any) => u.userId) }
-                }).lean();
+                // Only check follow status if viewing someone else's following
+                let usersWithFollowStatus = data.hits;
+                if (targetUserId !== viewerId) {
+                    const currentUserFollows = await FOLLOW.find({
+                        follower: viewerId,
+                        following: { $in: data.hits.map((u: any) => u.userId) }
+                    }).lean();
 
-                const usersWithFollowStatus = data.hits.map((user: any) => ({
-                    ...user,
-                    isFollowing: currentUserFollows.some(f => f.following === user.userId)
-                }));
+                    usersWithFollowStatus = data.hits.map((user: any) => ({
+                        ...user,
+                        isFollowing: currentUserFollows.some(f =>
+                            f.following.toString() === user.userId.toString()
+                        )
+                    }));
+                }
 
                 Object.assign(result, buildResult("following", usersWithFollowStatus, data.estimatedTotalHits));
                 break;
@@ -106,36 +109,46 @@ export const search = async (req: Request, res: Response) => {
 
             case "follower": {
                 const targetUserId = userId || res.locals.userId;
+                const viewerId = res.locals.userId;
 
                 const followers = await FOLLOW.find({ following: targetUserId }).lean();
-                const followerIds = followers.map(f => f.follower);
+                const followerIds = followers.map(f => f.follower.toString());
 
                 if (followerIds.length === 0) {
                     Object.assign(result, buildResult("follower", [], 0));
                     break;
                 }
+
                 const index = getIndex("USERS");
                 const data = await index.search(q, {
                     limit,
                     offset,
                     filter: [
-                        `userId IN [${followerIds.join(',')}]`,
+                        `userId IN [${followerIds.map(id => `"${id}"`).join(',')}]`,
                         `isDeactivated != true`
                     ],
                     attributesToRetrieve: ["userId", "name", "username", "photo"]
                 });
-                const currentUserFollows = await FOLLOW.find({
-                    follower: { $in: data.hits.map((u: any) => u.userId) },
-                    following: res.locals.userId
-                }).lean();
-                const usersWithFollowStatus = data.hits.map((user: any) => ({
-                    ...user,
-                    isFollowing: currentUserFollows.some(f => f.following === user.userId)
-                }));
+
+                // Only check follow status if viewing someone else's followers
+                let usersWithFollowStatus = data.hits;
+                if (targetUserId !== viewerId) {
+                    const currentUserFollows = await FOLLOW.find({
+                        follower: viewerId,
+                        following: { $in: data.hits.map((u: any) => u.userId) }
+                    }).lean();
+
+                    usersWithFollowStatus = data.hits.map((user: any) => ({
+                        ...user,
+                        isFollowing: currentUserFollows.some(f =>
+                            f.following.toString() === user.userId.toString()
+                        )
+                    }));
+                }
+
                 Object.assign(result, buildResult("follower", usersWithFollowStatus, data.estimatedTotalHits));
                 break;
             }
-
             case "flick": {
                 const index = getIndex("FLICKS");
                 const data = await index.search(q, {

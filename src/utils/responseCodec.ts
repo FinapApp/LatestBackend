@@ -141,6 +141,9 @@ export const errors = {
   user_followed: {
     message: "Unable to follow user",
   },
+  toggle_follow: {
+    message: "Unable to toggle follow",
+  },
   user_unfollowed: {
     message: "Unable to unfollow user",
   },

@@ -4,6 +4,7 @@ import Joi from 'joi';
 import { errors, handleResponse } from '../../utils/responseCodec';
 import { getAllFollowingUserAggreagtion } from '../../aggregation/getAllFollowingUserAggreagtion';
 import { sendErrorToDiscord } from '../../config/discord/errorDiscord';
+import mongoose from 'mongoose';
 
 export const getFollowing = async (req: Request, res: Response) => {
     try {
@@ -15,11 +16,17 @@ export const getFollowing = async (req: Request, res: Response) => {
         let { page, userId, limit = 10 } = req.query as any;
         limit = Number(limit);
         const skip = ((Number(page) || 1) - 1) * limit;
+        const currentUserId = new mongoose.Types.ObjectId(res.locals.userId);
+        const targetUserId = new mongoose.Types.ObjectId(userId || currentUserId);
 
-        const targetUserId = userId || res.locals.userId as string;
-        const viewerId = userId && userId !== res.locals.userId ? res.locals.userId : undefined;
-
-        const result = await getAllFollowingUserAggreagtion(targetUserId, skip, limit, viewerId);
+        // Only include isFollowing field if viewing someone else's following list
+        const result = await getAllFollowingUserAggreagtion(
+            currentUserId,
+            targetUserId,
+            skip,
+            limit
+        );
+        
         return handleResponse(res, 200, result);
     } catch (error) {
         console.log(error);

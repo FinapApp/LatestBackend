@@ -33,7 +33,7 @@ export const updateFlick = async (req: Request, res: Response) => {
         const userId = res.locals.userId;
         const updateFlick = await FLICKS.findOneAndUpdate(
             {_id : flickId , user : userId},
-            ...rest,
+            rest,
             { new: true }
         );
         if (updateFlick) {
@@ -54,6 +54,7 @@ export const updateFlick = async (req: Request, res: Response) => {
         }
         return handleResponse(res, 304, errors.flick_updated);
     } catch (err: any) {
+        console.error("Error updating flick:", err);
         sendErrorToDiscord("PUT:update-flick", err);
         return handleResponse(res, 500, errors.catch_error);
     }

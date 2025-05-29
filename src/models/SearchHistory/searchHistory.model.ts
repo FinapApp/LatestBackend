@@ -7,7 +7,7 @@ export interface ISearchHistorySchema extends Document {
     userSearched: Types.ObjectId
     quest: Types.ObjectId
     song: Types.ObjectId;
-    hashTag: Types.ObjectId;
+    hashtag: Types.ObjectId;
     createdAt: Date
 };
 
@@ -38,7 +38,7 @@ const SearchHistorySchema = new Schema<ISearchHistorySchema>(
             type: Schema.Types.ObjectId,
             ref: 'song'
         },
-        hashTag: {
+        hashtag: {
             type: Schema.Types.ObjectId,
             ref: 'hashtag'
         },

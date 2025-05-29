@@ -1,21 +1,19 @@
-import mongoose from "mongoose";
+import { Types } from "mongoose";
 import { FOLLOW } from "../models/User/userFollower.model";
 
-export const getAllFollowerUserAggreagtion = async (userId: string, skip: number, limit: number) => {
+export const getAllFollowerUserAggreagtion = async (self: Types.ObjectId, userId: Types.ObjectId, skip: number, limit: number) => {
     try {
         const response = await FOLLOW.aggregate([
             {
                 $match: {
-                    following: new mongoose.Types.ObjectId(userId),
+                    following: userId,
                     approved: true
-                }
+                },
             },
             {
                 $facet: {
                     results: [
                         { $sort: { createdAt: -1 } },
-                        { $skip: skip },
-                        { $limit: limit },
                         {
                             $lookup: {
                                 from: "users",
@@ -31,6 +29,8 @@ export const getAllFollowerUserAggreagtion = async (userId: string, skip: number
                                 "followerInfo.isDeactivated": { $ne: true }
                             }
                         },
+                        { $skip: skip },
+                        { $limit: limit },
                         {
                             $lookup: {
                                 from: "userfollowers",
@@ -40,7 +40,7 @@ export const getAllFollowerUserAggreagtion = async (userId: string, skip: number
                                         $match: {
                                             $expr: {
                                                 $and: [
-                                                    { $eq: ["$follower", new mongoose.Types.ObjectId(userId)] },
+                                                    { $eq: ["$follower", self] },
                                                     { $eq: ["$following", "$$followerId"] },
                                                     { $eq: ["$approved", true] }
                                                 ]
@@ -82,7 +82,6 @@ export const getAllFollowerUserAggreagtion = async (userId: string, skip: number
                 }
             }
         ]);
-
         const followers = response[0]?.results || [];
         const total = response[0]?.totalCount?.[0]?.count || 0;
 

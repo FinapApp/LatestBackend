@@ -2,80 +2,70 @@ import mongoose from "mongoose";
 import { FOLLOW } from "../models/User/userFollower.model";
 
 export const getAllFollowingUserAggreagtion = async (
-    userId: string,
+    self: mongoose.Types.ObjectId,
+    targetUserId: mongoose.Types.ObjectId,
     skip: number,
     limit: number,
-    viewerId?: string
 ) => {
     try {
-        const matchStage = {
-            $match: {
-                follower: new mongoose.Types.ObjectId(userId),
-                approved: true
-            }
-        };
-
-        const resultsPipeline: any[] = [
-            { $sort: { createdAt: -1 } },
-            { $skip: skip },
-            { $limit: limit },
+        const response = await FOLLOW.aggregate([
             {
-                $lookup: {
-                    from: "users",
-                    localField: "following",
-                    foreignField: "_id",
-                    as: "followingInfo"
-                }
-            },
-            { $unwind: "$followingInfo" },
-            {
-                // Exclude deactivated users
                 $match: {
-                    "followingInfo.isDeactivated": { $ne: true }
-                }
-            }
-        ];
-
-        if (viewerId && viewerId !== userId) {
-            resultsPipeline.push({
-                $lookup: {
-                    from: "userfollowers",
-                    let: { targetId: "$followingInfo._id" },
-                    pipeline: [
+                    follower: targetUserId,
+                    approved: true
+                },
+            },
+            {
+                $facet: {
+                    results: [
+                        { $sort: { createdAt: -1 } },
+                        {
+                            $lookup: {
+                                from: "users",
+                                localField: "following",
+                                foreignField: "_id",
+                                as: "followingInfo"
+                            }
+                        },
+                        { $unwind: "$followingInfo" },
+                        // Filter out deactivated users
                         {
                             $match: {
-                                $expr: {
-                                    $and: [
-                                        { $eq: ["$follower", new mongoose.Types.ObjectId(viewerId)] },
-                                        { $eq: ["$following", "$$targetId"] },
-                                        { $eq: ["$approved", true] }
-                                    ]
-                                }
+                                "followingInfo.isDeactivated": { $ne: true }
+                            }
+                        },
+                        { $skip: skip },
+                        { $limit: limit },
+                        {
+                            $lookup: {
+                                from: "userfollowers",
+                                let: { followerId: "$followingInfo._id" },
+                                pipeline: [
+                                    {
+                                        $match: {
+                                            $expr: {
+                                                $and: [
+                                                    { $eq: ["$follower", self] },
+                                                    { $eq: ["$following", "$$followerId"] },
+                                                    { $eq: ["$approved", true] }
+                                                ]
+                                            }
+                                        }
+                                    }
+                                ],
+                                as: "isFollowingInfo"
+                            }
+                        },
+                        {
+                            $project: {
+                                _id: "$followingInfo._id",
+                                username: "$followingInfo.username",
+                                name: "$followingInfo.name",
+                                photo: "$followingInfo.photo",
+                                isFollowing: { $gt: [{ $size: "$isFollowingInfo" }, 0] }
                             }
                         }
                     ],
-                    as: "viewerFollows"
-                }
-            });
-        }
-
-        resultsPipeline.push({
-            $project: {
-                _id: "$followingInfo._id",
-                username: "$followingInfo.username",
-                name: "$followingInfo.name",
-                photo: "$followingInfo.photo",
-                ...(viewerId && viewerId !== userId && {
-                    isFollowing: { $gt: [{ $size: "$viewerFollows" }, 0] }
-                })
-            }
-        });
-
-        const response = await FOLLOW.aggregate([
-            matchStage,
-            {
-                $facet: {
-                    results: resultsPipeline,
                     totalCount: [
                         {
                             $lookup: {
@@ -86,6 +76,7 @@ export const getAllFollowingUserAggreagtion = async (
                             }
                         },
                         { $unwind: "$followingInfo" },
+                        // Filter out deactivated users
                         {
                             $match: {
                                 "followingInfo.isDeactivated": { $ne: true }
@@ -96,7 +87,6 @@ export const getAllFollowingUserAggreagtion = async (
                 }
             }
         ]);
-
         const following = response[0]?.results || [];
         const total = response[0]?.totalCount?.[0]?.count || 0;
 

@@ -9,7 +9,7 @@ export interface IUserFollowerSchema extends Document {
 export const UserFollowerSchema = new Schema<IUserFollowerSchema>(
     {
         follower: { type: Schema.Types.ObjectId, ref: "user" },  // 
-        following: { type: Schema.Types.ObjectId, ref: "user" },   // the one who is following someone else
+        following: { type: Schema.Types.ObjectId, ref: "user" },   // we follow someone we are over here. (our own id as following)
         approved: { type: Boolean, default: true }
     },
     { timestamps: { createdAt: true, updatedAt: false }, versionKey: false }

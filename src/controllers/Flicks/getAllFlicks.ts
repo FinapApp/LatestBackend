@@ -43,7 +43,55 @@ export const getAllFlicks = async (req: Request, res: Response) => {
             pipeline.push({ $match: matchStage });
         }
 
-        // EARLY REPORT FILTERING
+        // Audience Filter: restrict based on audienceSetting
+        pipeline.push(
+            {
+                $lookup: {
+                    from: 'userfollowers',
+                    let: { flickUserId: '$user' },
+                    pipeline: [
+                        {
+                            $match: {
+                                $expr: {
+                                    $and: [
+                                        { $eq: ['$follower', currentUserId] },
+                                        { $eq: ['$following', '$$flickUserId'] }
+                                    ]
+                                }
+                            }
+                        }
+                    ],
+                    as: 'isFollowing'
+                }
+            },
+            {
+                $addFields: {
+                    isFollowing: { $gt: [{ $size: '$isFollowing' }, 0] }
+                }
+            },
+            {
+                $match: {
+                    $expr: {
+                        $or: [
+                            { $eq: ['$audienceSetting', 'public'] },
+                            {
+                                $and: [
+                                    { $eq: ['$audienceSetting', 'friends'] },
+                                    {
+                                        $or: [
+                                            { $eq: ['$isFollowing', true] },
+                                            { $eq: ['$user', currentUserId] }
+                                        ]
+                                    }
+                                ]
+                            }
+                        ]
+                    }
+                }
+            }
+        );
+
+        // Remove flicks reported and filtered
         pipeline.push(
             {
                 $lookup: {
@@ -93,7 +141,7 @@ export const getAllFlicks = async (req: Request, res: Response) => {
             { $unset: 'reports' }
         );
 
-        // REST OF THE AGGREGATION
+        // Enrich data
         pipeline.push(
             {
                 $lookup: {
@@ -111,31 +159,10 @@ export const getAllFlicks = async (req: Request, res: Response) => {
                             }
                         },
                         {
-                            $lookup: {
-                                from: 'userfollowers',
-                                let: { flickUserId: '$_id' },
-                                pipeline: [
-                                    {
-                                        $match: {
-                                            $expr: {
-                                                $and: [
-                                                    { $eq: ['$follower', currentUserId] },
-                                                    { $eq: ['$following', '$$flickUserId'] }
-                                                ]
-                                            }
-                                        }
-                                    }
-                                ],
-                                as: 'followCheck'
+                            $project: {
+                                _id: 1, name: 1, username: 1, photo: 1, createdAt: 1, location: 1, country: 1
                             }
-                        },
-                        {
-                            $addFields: {
-                                isFollowing: { $gt: [{ $size: '$followCheck' }, 0] }
-                            }
-                        },
-                        { $unset: 'followCheck' },
-                        { $project: { _id: 1, name: 1, username: 1, photo: 1, createdAt: 1, location: 1, country : 1 , isFollowing: 1 } }
+                        }
                     ],
                     as: 'user'
                 }
@@ -147,37 +174,28 @@ export const getAllFlicks = async (req: Request, res: Response) => {
                     from: 'songs',
                     localField: 'song',
                     foreignField: '_id',
-                    as: 'song',
                     pipeline: [
                         { $project: { _id: 1, name: 1, url: 1, icon: 1, used: 1, duration: 1, artist: 1 } }
-                    ]
+                    ],
+                    as: 'song'
                 }
             },
             { $unwind: { path: '$song', preserveNullAndEmptyArrays: true } },
             { $unwind: { path: '$media', preserveNullAndEmptyArrays: true } },
             {
                 $lookup: {
-                    from: "flicks",
-                    localField: "repost",
-                    foreignField: "_id",
-                    as: "repost",
+                    from: 'flicks',
+                    localField: 'repost',
+                    foreignField: '_id',
+                    as: 'repost',
                     pipeline: [
                         {
                             $lookup: {
                                 from: 'users',
                                 localField: 'user',
                                 foreignField: '_id',
-                                as: 'user',
-                                pipeline: [
-                                    {
-                                        $project: {
-                                            _id: 1,
-                                            username: 1,
-                                            photo: 1,
-                                            name: 1
-                                        }
-                                    }
-                                ]
+                                pipeline: [{ $project: { _id: 1, username: 1, photo: 1, name: 1 } }],
+                                as: 'user'
                             }
                         },
                         { $unwind: '$user' },
@@ -238,7 +256,7 @@ export const getAllFlicks = async (req: Request, res: Response) => {
             {
                 $project: {
                     mediaAudio: 0,
-                    mediaTaggedUsers: 0
+                    mediaTaggedUsers: 0,
                 }
             },
             {
@@ -271,6 +289,21 @@ export const getAllFlicks = async (req: Request, res: Response) => {
                             then: "$quest",
                             else: "$$REMOVE"
                         }
+                    },
+                    canComment: {
+                        $switch: {
+                            branches: [
+                                {
+                                    case: { $eq: ['$commentSetting', 'everyone'] },
+                                    then: true
+                                },
+                                {
+                                    case: { $and: [{ $eq: ['$commentSetting', 'friends'] }, { $eq: ['$isFollowing', true] }] },
+                                    then: true
+                                }
+                            ],
+                            default: false
+                        }
                     }
                 }
             },
@@ -300,6 +333,55 @@ export const getAllFlicks = async (req: Request, res: Response) => {
                 }
             },
             { $unset: "userLiked" },
+            {
+                $project: {
+                    _id: 1,
+                    user: 1,
+                    repost: 1,
+                    media: 1,
+                    location: 1,
+                    gps: 1,
+                    thumbnailURL: 1,
+                    description: 1,
+                    quest: 1,
+                    song: 1,
+                    songStart: 1,
+                    songEnd: 1,
+                    repostCount: 1,
+                    suspended: 1,
+                    suspendedReason: 1,
+                    commentVisible: 1,
+                    likeVisible: 1,
+                    repostVisible: 1,
+                    createdAt: 1,
+                    updatedAt: 1,
+                    isFollowing: 1,
+                    canComment: 1,
+                    isLiked: 1,
+                    likeCount: 1,
+                    commentSetting: {
+                        $cond: {
+                            if: false,
+                            then: '$commentSetting',
+                            else: '$$REMOVE'
+                        }
+                    },
+                    audienceSetting: {
+                        $cond: {
+                            if: false,
+                            then: '$audienceSetting',
+                            else: '$$REMOVE'
+                        }
+                    },
+                    commentCount: {
+                        $cond: {
+                            if: '$canComment',
+                            then: '$commentCount',
+                            else: { $literal: undefined }
+                        }
+                    }
+                }
+            },
             {
                 $facet: {
                     results: [
