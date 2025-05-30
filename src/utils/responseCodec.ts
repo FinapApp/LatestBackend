@@ -27,6 +27,10 @@ export const handleResponse = (
   }
 };
 export const errors = {
+  // Permission-related errors
+  permission_denied: {
+    message: "Permission denied",
+  },
 
   // feature-reported-issues
   create_feature_issue: {

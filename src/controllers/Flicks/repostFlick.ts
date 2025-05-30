@@ -13,24 +13,29 @@ export const repostFlick = async (req: Request, res: Response) => {
         if (validationError) {
             return handleResponse(res, 400, errors.validation, validationError.details);
         }
+
         const { flickId } = req.params;
-        const {
-            taggedUsers = [],
-            description,
-            location,
-            commentVisible,
-            likeVisible
-        } = req.body;
-        const originalFlick = await FLICKS.findById(flickId, "media");
+        const { taggedUsers = [], ...rest } = req.body;
+        const userId = res.locals.userId;
+
+        const originalFlick = await FLICKS.findById(flickId).select("user media thumbnailURL quest song songStart songEnd repostVisible");
         if (!originalFlick) {
             return handleResponse(res, 404, errors.flick_not_found);
         }
+
+        const isOwner = String(originalFlick.user) === userId;
+
+        if (!originalFlick.repostVisible && !isOwner) {
+            return handleResponse(res, 403, errors.permission_denied);
+        }
+
         const updatedMedia = originalFlick.media.map((originalMedia, index) => ({
             ...originalMedia.toObject(),
             taggedUsers: taggedUsers[index] || []
         }));
+
         const repostedFlick = await FLICKS.create({
-            user: res.locals.userId, 
+            user: userId,
             repost: flickId,
             media: updatedMedia,
             thumbnailURL: originalFlick.thumbnailURL,
@@ -38,16 +43,17 @@ export const repostFlick = async (req: Request, res: Response) => {
             song: originalFlick.song,
             songStart: originalFlick.songStart,
             songEnd: originalFlick.songEnd,
-            description,
-            location,
-            commentVisible,
-            likeVisible,
+            ...rest
         });
+
         if (repostedFlick) {
             const flickIndex = getIndex("FLICKS");
+
             const userDetails = await repostedFlick.populate<{ user: { username: string; photo: string; name: string, _id: string } }>("user", "username photo name");
+
             const flickPlain = repostedFlick.toObject();
             const { user, media, description, ...restFlick } = flickPlain;
+
             await Promise.all([
                 flickIndex.addDocuments([
                     {
@@ -65,13 +71,17 @@ export const repostFlick = async (req: Request, res: Response) => {
                 ]),
                 USER.findByIdAndUpdate(user, { $inc: { flickCount: 1 } }, { new: true })
                     .catch(err => sendErrorToDiscord("POST:repost-flick:flickCount", err)),
-                FLICKS.findByIdAndUpdate(flickId, { $inc: { repostCount: 1 } }, { new: true }).catch(err => sendErrorToDiscord("POST:repost-flick:repostCount", err))
-            ])
+                FLICKS.findByIdAndUpdate(flickId, { $inc: { repostCount: 1 } }, { new: true })
+                    .catch(err => sendErrorToDiscord("POST:repost-flick:repostCount", err))
+            ]);
+
             return handleResponse(res, 200, success.flick_reposted);
         }
+
         return handleResponse(res, 500, errors.flick_not_found);
+
     } catch (err: any) {
-        console.log(err)
+        console.log(err);
         sendErrorToDiscord("POST:repost-flick", err);
         return handleResponse(res, 500, errors.catch_error);
     }

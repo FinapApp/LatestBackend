@@ -43,7 +43,6 @@ export const getAllFlicks = async (req: Request, res: Response) => {
             pipeline.push({ $match: matchStage });
         }
 
-        // Audience Filter: restrict based on audienceSetting
         pipeline.push(
             {
                 $lookup: {
@@ -91,7 +90,6 @@ export const getAllFlicks = async (req: Request, res: Response) => {
             }
         );
 
-        // Remove flicks reported and filtered
         pipeline.push(
             {
                 $lookup: {
@@ -141,7 +139,6 @@ export const getAllFlicks = async (req: Request, res: Response) => {
             { $unset: 'reports' }
         );
 
-        // Enrich data
         pipeline.push(
             {
                 $lookup: {
@@ -217,97 +214,6 @@ export const getAllFlicks = async (req: Request, res: Response) => {
                 }
             },
             {
-                $lookup: {
-                    from: 'users',
-                    let: { taggedUsers: '$media.taggedUsers.user' },
-                    pipeline: [
-                        { $match: { $expr: { $in: ['$_id', '$$taggedUsers'] } } },
-                        {
-                            $lookup: {
-                                from: 'userfollowers',
-                                let: { taggedUserId: '$_id' },
-                                pipeline: [
-                                    {
-                                        $match: {
-                                            $expr: {
-                                                $and: [
-                                                    { $eq: ['$follower', '$$taggedUserId' ] },
-                                                    { $eq: ['$following', currentUserId ] }
-                                                ]
-                                            }
-                                        }
-                                    },
-                                    { $project: { _id: 1 } }
-                                ],
-                                as: 'isFollowedByCurrentUser'
-                            }
-                        },
-                        {
-                            $addFields: {
-                                isFollowing: {
-                                    $gt: [{ $size: '$isFollowedByCurrentUser' }, 0]
-                                }
-                            }
-                        },
-                        {
-                            $project: {
-                                _id: 1,
-                                name: 1,
-                                username: 1,
-                                photo: 1,
-                                isFollowing: 1
-                            }
-                        }
-                    ],
-                    as: 'mediaTaggedUsers'
-                }
-            },
-            {
-                $addFields: {
-                    'media.taggedUsers': {
-                        $map: {
-                            input: '$media.taggedUsers',
-                            as: 'tagged',
-                            in: {
-                                text: '$$tagged.text',
-                                position: '$$tagged.position',
-                                user: {
-                                    $let: {
-                                        vars: {
-                                            userDoc: {
-                                                $arrayElemAt: [
-                                                    {
-                                                        $filter: {
-                                                            input: '$mediaTaggedUsers',
-                                                            as: 'userDoc',
-                                                            cond: { $eq: ['$$userDoc._id', '$$tagged.user'] }
-                                                        }
-                                                    },
-                                                    0
-                                                ]
-                                            }
-                                        },
-                                        in: {
-                                            _id: '$$userDoc._id',
-                                            name: '$$userDoc.name',
-                                            username: '$$userDoc.username',
-                                            photo: '$$userDoc.photo',
-                                            isFollowing: '$$userDoc.isFollowing'
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            },
-            {
-                $project: {
-                    mediaAudio: 0,
-                    mediaTaggedUsers: 0,
-                }
-            },
-            {
                 $group: {
                     _id: '$_id',
                     createdAt: { $first: '$createdAt' },
@@ -341,12 +247,19 @@ export const getAllFlicks = async (req: Request, res: Response) => {
                     canComment: {
                         $switch: {
                             branches: [
+                                { case: { $eq: ['$commentSetting', 'everyone'] }, then: true },
                                 {
-                                    case: { $eq: ['$commentSetting', 'everyone'] },
-                                    then: true
-                                },
-                                {
-                                    case: { $and: [{ $eq: ['$commentSetting', 'friends'] }, { $eq: ['$isFollowing', true] }] },
+                                    case: {
+                                        $and: [
+                                            { $eq: ['$commentSetting', 'friends'] },
+                                            {
+                                                $or: [
+                                                    { $eq: ['$isFollowing', true] },
+                                                    { $eq: ['$user', currentUserId] }
+                                                ]
+                                            }
+                                        ]
+                                    },
                                     then: true
                                 }
                             ],
@@ -403,7 +316,6 @@ export const getAllFlicks = async (req: Request, res: Response) => {
                     repostVisible: 1,
                     createdAt: 1,
                     updatedAt: 1,
-                    isFollowing: 1,
                     canComment: 1,
                     isLiked: 1,
                     likeCount: 1,
@@ -426,6 +338,13 @@ export const getAllFlicks = async (req: Request, res: Response) => {
                             if: '$canComment',
                             then: '$commentCount',
                             else: { $literal: undefined }
+                        }
+                    },
+                    isFollowing: {
+                        $cond: {
+                            if: { $eq: ['$user', currentUserId] },
+                            then: '$$REMOVE',
+                            else: '$isFollowing'
                         }
                     }
                 }

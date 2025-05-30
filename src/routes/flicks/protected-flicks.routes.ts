@@ -6,6 +6,7 @@ import { getAllFlicks } from "../../controllers/Flicks/getAllFlicks";
 import { updateFlick } from "../../controllers/Flicks/updateFlick";
 import { repostFlick } from "../../controllers/Flicks/repostFlick";
 import { getFlick } from "../../controllers/Flicks/getFlick";
+import { getMentionByFlick } from "../../controllers/Flicks/getMentionByFlick";
 
 export const flickRoutes: Router = express.Router();
 
@@ -18,6 +19,8 @@ flickRoutes.route("/flick/:flickId")
     .post(createFlick)
     .put(updateFlick)
     .delete(deleteFlick);
+
+flickRoutes.get("/mention-flick/:flickId", getMentionByFlick)
 
 flickRoutes.route("/repost-flick/:flickId")
     .post(repostFlick)

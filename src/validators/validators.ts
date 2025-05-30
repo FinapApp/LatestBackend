@@ -358,7 +358,7 @@ export const validateCreateFlick = (body: object, params: object) => {
     commentVisible: Joi.boolean().optional(),
     likeVisible: Joi.boolean().optional(),
     repostVisible: Joi.boolean().optional(),
-    audienceSetting: Joi.string().valid("public", "friends", "private").optional(),
+    audienceSetting: Joi.string().valid("public", "friends").optional(),
     commentSetting: Joi.string().valid("everyone", "friends", "nobody").optional(),
   })
   const combinedSchema = Joi.object({
@@ -379,6 +379,26 @@ export const validateGetUsersAndHashtags = (query: object) => {
     "object.and": "Limit and page must be provided together",
   })
   const { error } = schema.validate(query)
+  return error
+}
+
+
+export const validateGetFlickMentions = (params: object, query: object) => {
+  const paramsSchema = Joi.object({
+    flickId: Joi.string().regex(/^[0-9a-fA-F]{24}$/, 'object Id').required()
+  })
+  const querySchema = Joi.object({
+    limit: Joi.number().integer().min(1).max(15).optional(),
+    page: Joi.number().integer().min(1).optional(),
+    num : Joi.number().integer().default(0),
+  }).and("limit", "page").messages({
+    "object.and": "Limit and page must be provided together",
+  })
+  const combinedSchema = Joi.object({
+    params: paramsSchema,
+    query: querySchema
+  })
+  const { error } = combinedSchema.validate({ params, query })
   return error
 }
 
@@ -432,6 +452,9 @@ export const validateRepostFlick =  (body: object, params: object) => {
     })).optional(),
     likeVisible: Joi.boolean().optional(),
     commentVisible: Joi.boolean().optional(),
+    repostVisible: Joi.boolean().optional(),
+    audienceSetting: Joi.string().valid("public", "friends").optional(),
+    commentSetting: Joi.string().valid("everyone", "friends", "nobody").optional(),
   })
   const combinedSchema = Joi.object({
     body: bodySchema,
@@ -784,7 +807,7 @@ export const validateUpdateFlick = (body: object, params: object) => {
     commentVisible: Joi.boolean().optional(),
     likeVisible: Joi.boolean().optional(),
     repostVisible: Joi.boolean().optional(),
-    audienceSetting: Joi.string().valid("public", "friends", "private").optional(),
+    audienceSetting: Joi.string().valid("public", "friends").optional(),
     commentSetting : Joi.string().valid("everyone", "friends", "nobody").optional(),
   })
   const paramsSchema = Joi.object({

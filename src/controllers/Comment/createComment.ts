@@ -7,6 +7,8 @@ import { errors, handleResponse, success } from "../../utils/responseCodec";
 import { FLICKS } from "../../models/Flicks/flicks.model";
 import { redis } from "../../config/redis/redis.config";
 import { sendErrorToDiscord } from "../../config/discord/errorDiscord";
+import mongoose from "mongoose";
+import { FOLLOW } from "../../models/User/userFollower.model";
 // import { sendNotificationKafka } from "../../config/kafka/kafka.config";
 export const createComment = async (req: Request, res: Response) => {
     try {
@@ -18,6 +20,26 @@ export const createComment = async (req: Request, res: Response) => {
         const flick = req.params.flickId;
         const comment = req.body.comment;
         // 1. Create Comment in MongoDB
+        const flickExists = await FLICKS.findById(flick, "user commentSetting audienceSetting thumbnailURL commentCount");
+        if (!flickExists) {
+            return handleResponse(res, 404, errors.flick_not_found);
+        }
+        let flickUser = flickExists.user
+        const isOwner = flickUser == user
+
+        if (flickExists.commentSetting === 'friends' && !isOwner) {
+            // Check if current user follows flick creator
+            const isFollowing = await FOLLOW.findOne({
+                follower: new mongoose.Types.ObjectId(user),
+                following: flickUser
+            });
+
+            if (!isFollowing) {
+                return handleResponse(res, 403, errors.permission_denied);
+            }
+        } else if (flickExists.commentSetting !== 'everyone' && !isOwner) {
+            return handleResponse(res, 403, errors.permission_denied);
+        }
         const newComment = await COMMENT.create({
             user,
             flick,
@@ -26,19 +48,22 @@ export const createComment = async (req: Request, res: Response) => {
         if (!newComment) {
             return handleResponse(res, 304, errors.create_comment);
         }
-        // 2. Update Flick's commentCount atomically
         const updatedFlick = await FLICKS.findByIdAndUpdate(
             flick,
             { $inc: { commentCount: 1 } },
             {
-                new: true, populate: {
-                    path: "user",
-                    select: "photo username name"
-                }, projection: {
-                    commentCount: 1,
-                    user,
-                    thumbnailURL: 1,
-                }
+                new: true,
+                // populate: {
+                //     path: "user",
+                //     select: "photo username name"
+                // },
+                //  projection: {
+                //     commentCount: 1,
+                //     user,
+                //     thumbnailURL: 1,
+                //     audienceSetting: 1,
+                //     commentSetting: 1
+                // }
             }
         );
         if (!updatedFlick) {
