@@ -450,6 +450,10 @@ export const validateRepostFlick =  (body: object, params: object) => {
         }),
       }),
     })).optional(),
+    newHashTags: Joi.array().items(Joi.object({
+      id: Joi.string().regex(/^[0-9a-fA-F]{24}$/, 'object Id').required(),
+      value: Joi.string().required()
+    })).optional(),
     likeVisible: Joi.boolean().optional(),
     commentVisible: Joi.boolean().optional(),
     repostVisible: Joi.boolean().optional(),
