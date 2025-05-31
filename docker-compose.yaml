@@ -24,14 +24,14 @@ services:
 #   volumes:
 #     - mongodb_data:/data/db
 
-  mongodb:
-    image: mongo:latest
-    container_name: mongodb
-    restart: always
-    ports:
-      - "27017:27017"
-    volumes:
-      - mongodb_data:/data/db
+  # mongodb:
+  #   image: mongo:latest
+  #   container_name: mongodb
+  #   restart: always
+  #   ports:
+  #     - "27017:27017"
+  #   volumes:
+  #     - mongodb_data:/data/db
 
   redis:
     image: redis:latest
@@ -62,13 +62,13 @@ services:
     depends_on:
       meilisearch:
         condition: service_started
-      mongodb:
-        condition: service_started
+      # mongodb:
+      #   condition: service_started
       redis:
         condition: service_started
     environment:
       - REDIS_URI=redis://redis:6379/
-      - MONGO_URI=mongodb://mongodb:27017/flickstar-dev
+      - MONGO_URI=mongodb+srv://flickstar-dev:shokh%4012@flickstar-test.vap3yqj.mongodb.net/finapp-dev?retryWrites=true&w=majority
       - REDIS_EXPIRE_IN=900
       - REDIS_EXPIRE_IN_STATIC=86400
       - JWT_EXPIRE_IN=1d
@@ -97,7 +97,7 @@ services:
       - SWAGGER_HOSTED_URL=http://135.235.193.1:4003/api
 
 volumes:
-  mongodb_data:
+  # mongodb_data:
   redis_data:
   meili_data:
   

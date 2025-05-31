@@ -11,7 +11,7 @@ export const createFeatureIssue = async (req: Request, res: Response) => {
             return handleResponse(res, 400, errors.validation, validationError.details);
         }
         const { userId } = req.params;
-        const { message , attachment ,...rest } = req.body
+        const { message, attachment, ...rest } = req.body
         const featureIssue = await FEATUREISSUES.create({
             user: userId,
             message: {
@@ -28,6 +28,6 @@ export const createFeatureIssue = async (req: Request, res: Response) => {
         return handleResponse(res, 304, errors.create_feature_issue)
     } catch (error) {
         console.log(error)
-     return handleResponse(res, 500, errors.catch_error)
+        return handleResponse(res, 500, errors.catch_error)
     }
 }
