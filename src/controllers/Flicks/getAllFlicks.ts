@@ -247,17 +247,19 @@ export const getAllFlicks = async (req: Request, res: Response) => {
                     canComment: {
                         $switch: {
                             branches: [
-                                { case: { $eq: ['$commentSetting', 'everyone'] }, then: true },
+                                {
+                                    case: { $eq: ['$user', currentUserId] },
+                                    then: true
+                                },
+                                {
+                                    case: { $eq: ['$commentSetting', 'everyone'] },
+                                    then: true
+                                },
                                 {
                                     case: {
                                         $and: [
                                             { $eq: ['$commentSetting', 'friends'] },
-                                            {
-                                                $or: [
-                                                    { $eq: ['$isFollowing', true] },
-                                                    { $eq: ['$user', currentUserId] }
-                                                ]
-                                            }
+                                            { $eq: ['$isFollowing', true] }
                                         ]
                                     },
                                     then: true
@@ -265,7 +267,7 @@ export const getAllFlicks = async (req: Request, res: Response) => {
                             ],
                             default: false
                         }
-                    }
+                    }                      
                 }
             },
             { $sort: { createdAt: -1 } },

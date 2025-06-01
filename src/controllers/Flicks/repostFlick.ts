@@ -72,6 +72,7 @@ export const repostFlick = async (req: Request, res: Response) => {
             user: userId,
             repost: flickId,
             media: updatedMedia,
+            description: description || [],
             thumbnailURL: originalFlick.thumbnailURL,
             quest: originalFlick.quest,
             song: originalFlick.song,
