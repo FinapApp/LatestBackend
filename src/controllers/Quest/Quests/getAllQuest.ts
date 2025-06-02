@@ -288,6 +288,7 @@ export const getAllQuests = async (req: Request, res: Response) => {
             totalPages: Math.ceil(total / limit)
         });
     } catch (err: any) {
+        console.error(err);
         sendErrorToDiscord("GET:all-quests", err);
         return handleResponse(res, 500, errors.catch_error);
     }

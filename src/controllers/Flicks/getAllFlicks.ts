@@ -259,15 +259,15 @@ export const getAllFlicks = async (req: Request, res: Response) => {
                                     case: { $eq: ['$commentSetting', 'everyone'] },
                                     then: true
                                 },
-                                {
-                                    case: {
-                                        $and: [
-                                            { $eq: ['$commentSetting', 'friends'] },
-                                            { $eq: ['$isFollowing', true] }
-                                        ]
-                                    },
-                                    then: true
-                                }
+                                // {
+                                //     case: {
+                                //         $and: [
+                                //             { $eq: ['$commentSetting', 'friends'] },
+                                //             { $eq: ['$isFollowing', true] }
+                                //         ]
+                                //     },
+                                //     then: true
+                                // }
                             ],
                             default: false
                         }

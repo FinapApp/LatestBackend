@@ -4,6 +4,8 @@ import { validateQuestApplicantId } from "../../../validators/validators";
 import { errors, handleResponse, success } from "../../../utils/responseCodec";
 import { QUEST_APPLICANT } from "../../../models/Quest/questApplicant.model";
 import { QUESTS } from "../../../models/Quest/quest.model";
+import { send } from "process";
+import { sendErrorToDiscord } from "../../../config/discord/errorDiscord";
 
 export const deleteQuestApplication = async (req: Request, res: Response) => {
     try {
@@ -30,6 +32,8 @@ export const deleteQuestApplication = async (req: Request, res: Response) => {
         }
         return handleResponse(res, 404, errors.quest_deleted)
     } catch (error) {
+        console.error(error);
+        sendErrorToDiscord("DELETE:delete-quest-application", error);
         return handleResponse(res, 500, errors.catch_error)
     }
 }

@@ -52,6 +52,7 @@ export const getProfileDetail = async (req: Request, res: Response) => {
         }
         return handleResponse(res, 200, { profileDetail });
     } catch (error: any) {
+        console.log(error);
         sendErrorToDiscord('GET:profile', error);
         return handleResponse(res, 500, errors.catch_error);
     }

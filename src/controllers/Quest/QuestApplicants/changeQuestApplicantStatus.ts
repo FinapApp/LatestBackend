@@ -64,6 +64,7 @@ export const changeQuestApplicantStatus = async (req: Request, res: Response) =>
 
         return handleResponse(res, 200, success.status_changed_flicked);
     } catch (error) {
+        console.error(error);
         sendErrorToDiscord("PUT:quest-change-status-applicant", error);
         return handleResponse(res, 500, errors.catch_error);
     }

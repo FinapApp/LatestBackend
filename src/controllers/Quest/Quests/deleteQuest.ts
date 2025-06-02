@@ -4,6 +4,7 @@ import { validateQuestId } from "../../../validators/validators";
 import { errors, handleResponse, success } from "../../../utils/responseCodec";
 import { QUESTS } from "../../../models/Quest/quest.model";
 import { getIndex } from "../../../config/melllisearch/mellisearch.config";
+import { sendErrorToDiscord } from "../../../config/discord/errorDiscord";
 
 export const deleteQuest = async (req: Request, res: Response) => {
     try {
@@ -20,6 +21,8 @@ export const deleteQuest = async (req: Request, res: Response) => {
         }
         return handleResponse(res, 404, errors.quest_deleted)
     } catch (error) {
+        console.error(error);
+        sendErrorToDiscord("DELETE:delete-quest", error);
         return handleResponse(res, 500, errors.catch_error)
     }
 }

@@ -37,6 +37,7 @@ export const updateQuestApplicant = async (req: Request, res: Response) => {
         }
         return handleResponse(res, 400, errors.update_quest_applicants);
     } catch (err: any) {
+        console.error(err);
         sendErrorToDiscord("PUT:update-quest-applicant", err);
         return handleResponse(res, 500, errors.catch_error);
     }

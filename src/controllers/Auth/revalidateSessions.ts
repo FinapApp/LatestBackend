@@ -42,6 +42,7 @@ export const revalidateSessions = async (req: Request, res: Response) => {
             }
         })
     } catch (error) {
+        console.log(error);
         sendErrorToDiscord("POST:revalidate-sessions", error)
         return handleResponse(res, 500, errors.catch_error);
     }

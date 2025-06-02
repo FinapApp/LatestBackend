@@ -66,6 +66,7 @@ export const getAllQuestApplicant = async (req: Request, res: Response) => {
         });
 
     } catch (err: any) {
+        console.error(err);
         sendErrorToDiscord("GET:all-quests-applicant", err);
         return handleResponse(res, 500, { message: "Internal Server Error" });
     }

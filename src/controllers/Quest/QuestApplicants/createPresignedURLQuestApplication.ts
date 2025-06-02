@@ -28,6 +28,7 @@ export const createPresignedURLQuestApplication = async (req: Request, res: Resp
         }
         return handleResponse(res, 500, errors.unable_to_create_signedURL);
     } catch (error) {
+        console.error(error);
         sendErrorToDiscord("confirm-quest-applicant-upload", error)
         return handleResponse(res, 500, errors.catch_error);
     }
