@@ -191,7 +191,11 @@ export const getAllFlicks = async (req: Request, res: Response) => {
                                 from: 'users',
                                 localField: 'user',
                                 foreignField: '_id',
-                                pipeline: [{ $project: { _id: 1, username: 1, photo: 1, name: 1 } }],
+                                pipeline: [{
+                                    $project: {
+                                        _id: 1, name: 1, username: 1, photo: 1, createdAt: 1, location: 1, country: 1
+                                    }
+                                }],
                                 as: 'user'
                             }
                         },
