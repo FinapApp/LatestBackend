@@ -44,16 +44,25 @@ export const getProfileDetail = async (req: Request, res: Response) => {
 
         // fix this code // MF
         if (requestedUserId && requestedUserId !== currentUserId) {
-            const followDoc = await FOLLOW.findOne({
-                follower: currentUserId,
-                following: requestedUserId
-            }).lean();
-            profileDetail.isFollowing = !!followDoc;
-        }
+            try {
+                const followDoc = await FOLLOW.findOne({
+                    follower: currentUserId,
+                    following: requestedUserId
+                }).lean();
+
+                profileDetail.isFollowing = !!followDoc;
+            } catch (err) {
+                console.error("Error checking follow status", err);
+                profileDetail.isFollowing = false; // graceful fallback
+            }
+          }
         return handleResponse(res, 200, { profileDetail });
-    } catch (error: any) {
-        console.log(error);
-        sendErrorToDiscord('GET:profile', error);
-        return handleResponse(res, 500, errors.catch_error);
-    }
+    }catch (error: any) {
+            console.log(error);
+            sendErrorToDiscord('GET:profile', error);
+
+            if (!res.headersSent) {
+                return handleResponse(res, 500, errors.catch_error);
+            }
+        }
 };

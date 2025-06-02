@@ -22,7 +22,7 @@ export const deactivateAccount = async (req: Request, res: Response) => {
         }
         const isMatch = await bcrypt.compare(password, user.password);
         if (!isMatch) {
-            return handleResponse(res, 401, errors.incorrect_password);
+            return handleResponse(res, 400, errors.incorrect_password);
         }
         user.isDeactivated = true;
         if (!Array.isArray(user.deactivationReason)) {

@@ -33,7 +33,7 @@ export const deleteAccount = async (req: Request, res: Response) => {
         }
         const isMatch = await bcrypt.compare(password, user.password);
         if (!isMatch) {
-            return handleResponse(res, 401, errors.incorrect_password);
+            return handleResponse(res, 400, errors.incorrect_password);
         }
         // Fetch follow relations
         const follows = await FOLLOW.find({

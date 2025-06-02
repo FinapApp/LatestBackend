@@ -8,6 +8,7 @@ export const handleResponse = (
     message: string | null
   }> = []
 ) => {
+  if (res.headersSent) return;
   if (statusCode > 205) {
     return res.status(statusCode).json({
       success: false,
