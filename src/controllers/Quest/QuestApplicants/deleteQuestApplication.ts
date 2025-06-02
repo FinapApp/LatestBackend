@@ -4,7 +4,6 @@ import { validateQuestApplicantId } from "../../../validators/validators";
 import { errors, handleResponse, success } from "../../../utils/responseCodec";
 import { QUEST_APPLICANT } from "../../../models/Quest/questApplicant.model";
 import { QUESTS } from "../../../models/Quest/quest.model";
-import { send } from "process";
 import { sendErrorToDiscord } from "../../../config/discord/errorDiscord";
 
 export const deleteQuestApplication = async (req: Request, res: Response) => {
