@@ -1,4 +1,4 @@
-import express, { Express } from "express";
+import express, { Express, NextFunction, Request, Response } from "express";
 import protectedRoutes from "./routes/protected.routes";
 import normalRoutes from "./routes/normal.routes"
 import { connectDB } from "./config/database/config.database";
@@ -36,6 +36,14 @@ app.use("/flickstar/api-docs", BasicAuth({
   swaggerUi.serve,
   swaggerUi.setup(specs, swaggerUiOptions)
 );
+app.use((err:any, req:Request, res: Response, next:NextFunction) => {
+  console.error("Unhandled Error:", err);
+  if (!res.headersSent) {
+    res.status(500).json({ error: "Internal Server Error" });
+  } else {
+    next(err); // fallback for Express internals
+  }
+});
 if (cluster.isPrimary) {
   for (let i = 0; i < 1; i++) {
     cluster.fork();
