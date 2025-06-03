@@ -1,38 +1,4 @@
 services:
-
-  # meilisearch:
-  #   image: getmeili/meilisearch:v1.14
-  #   container_name: meilisearch
-  #   ports:
-  #     - "7700:7700"
-  #   volumes:
-  #     - ./meili_data:/meili_data
-  #   environment:
-  #     - MELLISSEARCH_HOST=http://localhost:7700
-  #     - MELLISSEARCH_MASTER_KEY=finapus
-  #   restart: unless-stopped
-
-# mongodb:
-#   image: mongo:latest
-#   container_name: mongodb
-#   restart: always
-#   ports:
-#     - "27017:27017"
-#   environment:
-#     MONGO_INITDB_ROOT_USERNAME: root
-#     MONGO_INITDB_ROOT_PASSWORD: finapus
-#   volumes:
-#     - mongodb_data:/data/db
-
-  # mongodb:
-  #   image: mongo:latest
-  #   container_name: mongodb
-  #   restart: always
-  #   ports:
-  #     - "27017:27017"
-  #   volumes:
-  #     - mongodb_data:/data/db
-
   redis:
     image: redis:latest
     container_name: redis
@@ -57,13 +23,9 @@ services:
       dockerfile: Dockerfile
     container_name: myapp
     restart: always
-    # ports:
-    #   - "4003:4003"
     depends_on:
       meilisearch:
         condition: service_started
-      # mongodb:
-      #   condition: service_started
       redis:
         condition: service_started
     environment:
@@ -102,6 +64,7 @@ services:
     restart: always
     ports:
       - "4003:4003"
+      - "4443:4443"
     volumes:
       - ./nginx.conf:/etc/nginx/nginx.conf:ro
       - ./certs:/etc/nginx/certs:ro
