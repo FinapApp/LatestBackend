@@ -6,7 +6,6 @@ import { USERBIOLINKS } from "../../models/User/userBioLinks.model";
 import Joi from "joi";
 import { validateGetProfileDetail } from "../../validators/validators";
 import { FOLLOW } from "../../models/User/userFollower.model";
-
 export const getProfileDetail = async (req: Request, res: Response) => {
     try {
         const validationError: Joi.ValidationError | undefined = validateGetProfileDetail(
@@ -20,11 +19,9 @@ export const getProfileDetail = async (req: Request, res: Response) => {
                 validationError.details
             );
         }
-
         const requestedUserId = (req.query as { userId?: string }).userId;
         const currentUserId = res.locals.userId;
         const userId = requestedUserId || currentUserId;
-
         const [getProfileDetails, bioLink] = await Promise.all([
             USER.findById(
                 userId,
@@ -33,7 +30,6 @@ export const getProfileDetail = async (req: Request, res: Response) => {
             ),
             USERBIOLINKS.find({ user: userId }, "title url").lean()
         ]);
-
         if (!getProfileDetails) {
             return handleResponse(res, 400, errors.profile_not_found);
         }
@@ -41,7 +37,6 @@ export const getProfileDetail = async (req: Request, res: Response) => {
             ...getProfileDetails,
             bioLink,
         };
-
         // fix this code // MF
         if (requestedUserId && requestedUserId !== currentUserId) {
             try {
@@ -49,20 +44,18 @@ export const getProfileDetail = async (req: Request, res: Response) => {
                     follower: currentUserId,
                     following: requestedUserId
                 }).lean();
-
                 profileDetail.isFollowing = !!followDoc;
             } catch (err) {
                 console.error("Error checking follow status", err);
                 profileDetail.isFollowing = false; // graceful fallback
             }
-          }
-        return handleResponse(res, 200, { profileDetail });
-    }catch (error: any) {
-            console.log(error);
-            sendErrorToDiscord('GET:profile', error);
-
-            if (!res.headersSent) {
-                return handleResponse(res, 500, errors.catch_error);
-            }
         }
+        return handleResponse(res, 200, { profileDetail });
+    } catch (error: any) {
+        console.log(error);
+        sendErrorToDiscord('GET:profile', error);
+        if (!res.headersSent) {
+            return handleResponse(res, 500, errors.catch_error);
+        }
+    }
 };
