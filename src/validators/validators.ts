@@ -499,7 +499,7 @@ export const validateGetComments = (params: object, query: object) => {
 export const validateCreateFeatureIsssue = (body: object) => {
   const schema = Joi.object({
     message: Joi.string().required(),
-    attachment: Joi.array().items(Joi.string().required()).optional(),
+    attachment: Joi.array().items(Joi.string().pattern(new RegExp(`^${config.R2.R2_PUBLIC_URL}/.+$`)).message("attachment must be a valid URL").required()).optional(),
     incidentDate: Joi.string().isoDate().required(),
     feature: Joi.string().valid('Feed', 'Story', 'Profile', 'Wallet', 'Search', 'Notification', 'Setting', 'Flick', 'Quest').required(),
     issueType: Joi.string().valid('Bug', 'Slow Performance', 'Crash', 'UI Glitch', 'Audio Issue', 'Video Issue', 'Login Issue', 'Other').required(),
@@ -514,7 +514,7 @@ export const validateReportUser = (body: object, params: object) => {
     userId: Joi.string().regex(/^[0-9a-fA-F]{24}$/, 'object Id').required(),
   })
   const bodySchema = Joi.object({
-    attachment: Joi.array().items(Joi.string().required()).optional(),
+    attachment: Joi.array().items(Joi.string().pattern(new RegExp(`^${config.R2.R2_PUBLIC_URL}/.+$`)).message("attachment must be a valid URL").required()).optional(),
     message: Joi.string().required()
   })
   const combinedSchema = Joi.object({
@@ -530,7 +530,7 @@ export const validateReportStory = (body: object, params: object) => {
     storyId: Joi.string().regex(/^[0-9a-fA-F]{24}$/, 'object Id').required(),
   })
   const bodySchema = Joi.object({
-    attachment: Joi.array().items(Joi.string().required()).optional(),
+    attachment: Joi.array().items(Joi.string().pattern(new RegExp(`^${config.R2.R2_PUBLIC_URL}/.+$`)).message("attachment must be a valid URL").required()).optional(),
     message: Joi.string().required()
   })
   const combinedSchema = Joi.object({
@@ -546,7 +546,7 @@ export const validateReportAudio = (body: object, params: object) => {
     audioId: Joi.string().regex(/^[0-9a-fA-F]{24}$/, 'object Id').required(),
   })
   const bodySchema = Joi.object({
-    attachment: Joi.array().items(Joi.string().required()).optional(),
+    attachment: Joi.array().items(Joi.string().pattern(new RegExp(`^${config.R2.R2_PUBLIC_URL}/.+$`)).message("attachment must be a valid URL").required()).optional(),
     message: Joi.string().required()
   })
   const combinedSchema = Joi.object({
@@ -562,7 +562,7 @@ export const validateReportComment = (body: object, params: object) => {
     commentId: Joi.string().regex(/^[0-9a-fA-F]{24}$/, 'object Id').required(),
   })
   const bodySchema = Joi.object({
-    attachment: Joi.array().items(Joi.string().required()).optional(),
+    attachment: Joi.array().items(Joi.string().pattern(new RegExp(`^${config.R2.R2_PUBLIC_URL}/.+$`)).message("attachment must be a valid URL").required()).optional(),
     message: Joi.string().required()
   })
   const combinedSchema = Joi.object({
@@ -578,7 +578,7 @@ export const validateReportFlick = (body: object, params: object) => {
     flickId: Joi.string().regex(/^[0-9a-fA-F]{24}$/, 'object Id').required(),
   })
   const bodySchema = Joi.object({
-    attachment: Joi.array().items(Joi.string().required()).optional(),
+    attachment: Joi.array().items(Joi.string().pattern(new RegExp(`^${config.R2.R2_PUBLIC_URL}/.+$`)).message("attachment must be a valid URL").required()).optional(),
     message: Joi.string().required()
   })
   const combinedSchema = Joi.object({
