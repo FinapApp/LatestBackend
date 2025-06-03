@@ -10,10 +10,9 @@ export const createFeatureIssue = async (req: Request, res: Response) => {
         if (validationError) {
             return handleResponse(res, 400, errors.validation, validationError.details);
         }
-        const { userId } = req.params;
         const { message, attachment, ...rest } = req.body
         const featureIssue = await FEATUREISSUES.create({
-            user: userId,
+            user: res.locals.userId,
             message: {
                 sentBy: "user",
                 message,
