@@ -38,7 +38,7 @@ export const UserSchema = new Schema<IUserSchema>(
         username: { type: String, unique: true, lowercase: true },
         name: { type: String },
         email: { type: String, unique: true },
-        phone: { type: String },
+        phone: { type: String , unique: true },
         password: { type: String },
         dob: { type: Date },
         description: { type: [TextDataSchema] },

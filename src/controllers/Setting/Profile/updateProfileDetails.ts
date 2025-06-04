@@ -50,13 +50,13 @@ export const updateProfileDetails = async (req: Request, res: Response) => {
     } catch (err: any) {
         if (err.code === 11000) {
             const key = err?.keyValue ? Object.keys(err.keyValue)[0] : null;
-
             if (key === "email") {
                 return handleResponse(res, 500, errors.email_exist);
             }
             if (key === "username") {
                 return handleResponse(res, 500, errors.username_exist);
             }
+            if (key === "phone") return handleResponse(res, 500, errors.phone_exist)
         }
         sendErrorToDiscord("PUT:profile", err);
         return handleResponse(res, 500, errors.catch_error);

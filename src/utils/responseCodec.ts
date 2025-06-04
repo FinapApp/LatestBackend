@@ -28,6 +28,7 @@ export const handleResponse = (
   }
 };
 export const errors = {
+
   // Permission-related errors
   permission_denied: {
     message: "Permission denied",
@@ -124,6 +125,9 @@ export const errors = {
   },
   username_exist: {
     message: "Username already exists",
+  },
+  phone_exist: {
+    message: "Phone number already exists",
   },
   email_exist: {
     message: "Email already exists",
