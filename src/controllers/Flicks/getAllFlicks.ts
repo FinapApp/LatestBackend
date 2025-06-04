@@ -234,13 +234,6 @@ export const getAllFlicks = async (req: Request, res: Response) => {
             },
             {
                 $addFields: {
-                    repost: {
-                        $cond: {
-                            if: { $gt: [{ $size: "$repost" }, 0] },
-                            then: "$repost",
-                            else: "$$REMOVE"
-                        }
-                    },
                     quest: {
                         $cond: {
                             if: { $gt: [{ $size: "$quest" }, 0] },
