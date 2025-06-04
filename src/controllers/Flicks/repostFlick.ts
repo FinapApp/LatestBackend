@@ -63,11 +63,13 @@ export const repostFlick = async (req: Request, res: Response) => {
                 }))
             );
         }
-        const updatedMedia = originalFlick.media.map((originalMedia, index) => ({
-            ...originalMedia.toObject(),
-            taggedUsers: taggedUsers[index] || []
-        }));
-
+        const updatedMedia = originalFlick.media.map((mediaItem, index) => {
+    const tags = taggedUsers?.[index];
+    return {
+        ...mediaItem,
+        taggedUsers: Array.isArray(tags) ? tags : (tags ? [tags] : [])
+    };
+})
         const repostedFlick = await FLICKS.create({
             user: userId,
             repost: flickId,
