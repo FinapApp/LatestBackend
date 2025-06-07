@@ -76,7 +76,7 @@ export const QuestSchema = new Schema<IQuests>(
         avgAmountPerPerson: { type: Number, default: function () {
             return this.totalAmount / (this.maxApplicants || 1); // this is the total amount divided by the max applicants
         }}, // this is the total amount divided by the max applicants
-        status : { type: String, enum: ['pending', 'completed' , 'paused'], default: 'pending' }
+        status : { type: String, enum: ['pending', 'completed' , 'paused' ], default: 'pending' },
     },
     { timestamps: {createdAt : true , updatedAt : false }, versionKey: false }
 );

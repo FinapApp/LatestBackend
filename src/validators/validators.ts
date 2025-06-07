@@ -154,7 +154,15 @@ export const validateVerifyOTPSignUp = (body: object) => {
   const schema = Joi.object({
     fcmToken: Joi.string().required(),
     otp: Joi.string().required(),
-    email: Joi.string().required(),
+    email: Joi.string().email(),
+    phone: Joi.string()
+      .pattern(
+        /^(?:\+1\s?)?(?:\(?\d{3}\)?[\s.-]?)?\d{3}[\s.-]?\d{4}$|^(?:\+998\s?)?[0-9]{2}[\s.-]?[0-9]{3}[\s.-]?[0-9]{4}$|^(?:\+91[\s-]?)?[6-9][0-9]{9}$|^0[6-9][0-9]{9}$/
+      )
+      .messages({
+        'string.pattern.base': 'Phone number must be a valid US, India, or Uzbekistan number',
+        'string.empty': 'Phone number is required',
+      }),
     name: Joi.string().required(),
     dob: Joi.string().isoDate().required(),
     country: Joi.string().required().custom((value, helpers) => {
@@ -172,10 +180,14 @@ export const validateVerifyOTPSignUp = (body: object) => {
         "string.pattern.base": "Invalid username format",
       }),
     password: Joi.string().required(),
+  }).xor('email', 'phone').messages({
+    'object.xor': 'Either email or phone must be provided, but not both',
   });
   const { error } = schema.validate(body);
   return error;
 }
+
+
 export const validateUpdateComment = (body: object, params: object) => {
   const bodySchema = Joi.object({
     comment: Joi.array().items(Joi.object({
@@ -1248,6 +1260,21 @@ export const validateQuestApplicantStatusBatch = (query: object, body: object) =
     body: bodySchema
   })
   const { error } = combinedSchema.validate({ query, body })
+  return error
+}
+
+export const validateQuestApplicantStatusViaQR  = (body: object, params: object) => {
+  const paramsSchema = Joi.object({
+    questApplicantId: Joi.string().regex(/^[0-9a-fA-F]{24}$/, 'object Id').required()
+  })
+  const bodySchema = Joi.object({
+    qrString : Joi.string().required(),
+  })
+  const combinedSchema = Joi.object({
+    body: bodySchema,
+    params: paramsSchema
+  })
+  const { error } = combinedSchema.validate({body, params})
   return error
 }
 

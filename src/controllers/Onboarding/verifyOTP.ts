@@ -29,15 +29,33 @@ export const verifyOTPAfterSignUp = async (req: Request, res: Response) => {
         }
 
         const { email, phone, otp, fcmToken, ...rest } = req.body as ForgetOTPRequest;
+        console.log(phone, email, otp, fcmToken, rest);
 
-        // Try to get OTP data from email-based key first, then phone-based
+        // Try fetching OTP from Redis (email-based and phone-based)
         const [emailData, phoneData] = await Promise.all([
             redis.get(`OTP:${email}`),
             redis.get(`OTP:${phone}`)
         ]);
 
-        let redisData = Object.keys(emailData).length ? emailData : phoneData;
-        redisData = JSON.parse(redisData);
+        let redisDataRaw: string | null = null;
+
+        if (emailData) {
+            redisDataRaw = emailData;
+        } else if (phoneData) {
+            redisDataRaw = phoneData;
+        }
+
+        if (!redisDataRaw) {
+            return handleResponse(res, 400, errors.otp_expired);
+        }
+
+        let redisData: any;
+        try {
+            redisData = JSON.parse(redisDataRaw);
+        } catch (err) {
+            return handleResponse(res, 400, errors.otp_expired);
+        }
+
         if (!redisData || !redisData.OTP) {
             return handleResponse(res, 400, errors.otp_expired);
         }
@@ -47,9 +65,19 @@ export const verifyOTPAfterSignUp = async (req: Request, res: Response) => {
         if (otp !== storedOTP && otp !== config.MASTER_OTP) {
             return handleResponse(res, 400, errors.otp_not_match);
         }
-
+        let createUser: any = {
+            fcmToken , 
+            ...rest
+        }
+        if(email){
+            createUser.email = email;
+        }
+        if(phone){
+            createUser.phone = phone;
+        }
+        
         // Create user
-        const userCreate = await USER.create({ email, phone, fcmToken, ...rest }) as {
+        const userCreate = await USER.create(createUser) as {
             _id: string;
             toObject: () => Record<string, any>;
         };
@@ -58,7 +86,7 @@ export const verifyOTPAfterSignUp = async (req: Request, res: Response) => {
             return handleResponse(res, 400, errors.unable_to_create_user);
         }
 
-        // Clean up OTP data from Redis
+        // Clean up OTP from Redis
         await Promise.all([
             redis.del(`OTP:${email}`),
             redis.del(`OTP:${phone}`)
@@ -86,8 +114,9 @@ export const verifyOTPAfterSignUp = async (req: Request, res: Response) => {
             const key = err?.keyValue ? Object.keys(err.keyValue)[0] : null;
             if (key === "email") return handleResponse(res, 500, errors.email_exist);
             if (key === "username") return handleResponse(res, 500, errors.username_exist);
-            if (key === "phone") return handleResponse(res, 500, errors.phone_exist)
+            if (key === "phone") return handleResponse(res, 500, errors.phone_exist);
         }
+
         sendErrorToDiscord("POST:verify-otp", err);
         return handleResponse(res, 500, errors.catch_error);
     }

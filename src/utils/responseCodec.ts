@@ -29,6 +29,10 @@ export const handleResponse = (
 };
 export const errors = {
 
+  invalid_qr_string: {
+    message: "Invalid QR string",
+  },
+
   // Permission-related errors
   permission_denied: {
     message: "Permission denied",
@@ -540,6 +544,9 @@ export const success = {
     message: "Theme updated successfully",
   },
   // Quest-related success
+  qr_verified_success: {
+    message: "QR code verified successfully",
+  },
   quest_created: {
     message: "Quest created successfully",
   },

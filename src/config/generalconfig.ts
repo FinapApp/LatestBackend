@@ -45,5 +45,7 @@ export const config = {
   SMS : {
     AUTHENTIC_KEY: process.env.AUTHENTIC_KEY_MSG91!, 
     SIGNUP_OTP_TEMPLATE: process.env.TEMPLATE_ID_SIGNUP_MSG91!
-  }
+  },
+  QR_SECRET: process.env.QR_SECRET!,
+  QR_EXPIRE_TIME: process.env.QR_EXPIRE_TIME || "1d",
 }

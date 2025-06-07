@@ -12,7 +12,8 @@ export interface IQuestApplicant extends Document {
     suspendedReason: string;
     txnId: string;
     txnAmount: number;
-    suspended: boolean;
+    suspended: boolean
+    verified: boolean;
 }
 
 interface Media {
@@ -46,6 +47,7 @@ const QuestApplicantSchema: Schema<IQuestApplicant> = new Schema(
         description: { type: [TextDataSchema] },
         media: { type: [MediaSchema] },
         status: { type: String, enum: ['pending', 'approved', 'rejected'], default: 'pending' },
+        verified: { type: Boolean, default: false },
         partialAllowance: { type: Boolean, default: false },
         suspended: { type: Boolean, default: false },
         txnId : { type: String },

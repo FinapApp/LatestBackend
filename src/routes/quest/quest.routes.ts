@@ -13,6 +13,7 @@ import { getQuest } from "../../controllers/Quest/Quests/getQuest";
 import { getQuestApplicant } from "../../controllers/Quest/QuestApplicants/getQuestApplicant";
 import { updateQuestApplicant } from "../../controllers/Quest/QuestApplicants/updateQuestApplicant";
 import { bulkChangeStatus } from "../../controllers/Quest/QuestApplicants/bulkChangeStatus";
+import { changeVerifyStatusQRApplicant } from "../../controllers/Quest/QuestApplicants/changeVerifyStatusQRApplicant";
 
 export const questRoutes: Router = express.Router();
 
@@ -42,5 +43,7 @@ questRoutes.route("/quest-applicant/:questApplicantId")
     .delete(deleteQuestApplication)
     .patch(changeQuestApplicantStatus)
     .put(updateQuestApplicant)
+
+questRoutes.post("/quest-applicant/:questApplicantId/qr", changeVerifyStatusQRApplicant)
 
 
