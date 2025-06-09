@@ -136,7 +136,8 @@ export const validateSignUp = (body: object) => {
   const schema = Joi.object({
     email: Joi.string().email(),
     phone: Joi.string()
-      .pattern(REGEX.PHONE)
+      .pattern(/^(?:\+?1\s?)?(?:\(?\d{3}\)?[\s.-]?)?\d{3}[\s.-]?\d{4}$|^(?:\+998\s?)?[0-9]{2}[\s.-]?[0-9]{3}[\s.-]?[0-9]{4}$|^(?:\+91[\s-]?)?[6-9][0-9]{9}$|^0[6-9][0-9]{9}$/
+)
       .messages({
         'string.pattern.base': 'Phone number must be a valid US, India, or Uzbekistan number',
         'string.empty': 'Phone number is required',
@@ -155,7 +156,7 @@ export const validateVerifyOTPSignUp = (body: object) => {
     email: Joi.string().email(),
     phone: Joi.string()
       .pattern(
-        /^(?:\+1\s?)?(?:\(?\d{3}\)?[\s.-]?)?\d{3}[\s.-]?\d{4}$|^(?:\+998\s?)?[0-9]{2}[\s.-]?[0-9]{3}[\s.-]?[0-9]{4}$|^(?:\+91[\s-]?)?[6-9][0-9]{9}$|^0[6-9][0-9]{9}$/
+        /^(?:\+?1\s?)?(?:\(?\d{3}\)?[\s.-]?)?\d{3}[\s.-]?\d{4}$|^(?:\+998\s?)?[0-9]{2}[\s.-]?[0-9]{3}[\s.-]?[0-9]{4}$|^(?:\+91[\s-]?)?[6-9][0-9]{9}$|^0[6-9][0-9]{9}$/
       )
       .messages({
         'string.pattern.base': 'Phone number must be a valid US, India, or Uzbekistan number',
