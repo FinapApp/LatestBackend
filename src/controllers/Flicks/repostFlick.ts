@@ -115,7 +115,6 @@ export const repostFlick = async (req: Request, res: Response) => {
         }
 
         return handleResponse(res, 500, errors.flick_not_found);
-
     } catch (err: any) {
         console.log(err);
         sendErrorToDiscord("POST:repost-flick", err);

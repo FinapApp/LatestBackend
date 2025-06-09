@@ -21,6 +21,8 @@ export const sendOTPPhoneVerification = async (OTP: string, phone: string) => {
                 },
             },
         )
+        console.log('OTP sent successfully:', response.data)
+        console.log(response)   
         return response.data
     } catch (error) {
         console.error(error)

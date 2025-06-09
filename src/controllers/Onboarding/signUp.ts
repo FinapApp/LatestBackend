@@ -27,7 +27,8 @@ export const signUp = async (req: Request, res: Response) => {
         if (email) {
             await sendOTPEmailVerification(OTP, email, name)
         } else {
-            await sendOTPPhoneVerification(OTP, phone)
+            const check = await sendOTPPhoneVerification(OTP, phone)
+            console.log(check)
         }
         await redis.set(`OTP:${email || phone}`, JSON.stringify({ OTP }), "EX", config.REDIS_EXPIRE_IN);  // when in resend otp we often dont have to search back again and again and cache could do the thing.
         return handleResponse(res, 200, success.otp_sent);
