@@ -60,18 +60,6 @@ services:
       - AUTHENTIC_KEY_MSG91=
       - TEMPLATE_ID_SIGNUP_MSG91=683f1a76d6fc056a6a5c8d05
 
-  nginx:
-    image: nginx:latest
-    container_name: nginx
-    restart: always
-    ports:
-      - "4003:4003"
-      - "4443:4443"
-    volumes:
-      - ./nginx.conf:/etc/nginx/nginx.conf:ro
-      - ./certs:/etc/nginx/certs:ro
-    depends_on:
-      - app
 
 volumes:
   # mongodb_data:
