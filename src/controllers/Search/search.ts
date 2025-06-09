@@ -68,87 +68,81 @@ export const search = async (req: Request, res: Response) => {
             }
 
             case "following": {
-                const targetUserId = userId || res.locals.userId;
-                const viewerId = res.locals.userId;
-                const followings = await FOLLOW.find({ follower: targetUserId }).lean();
-                const followingIds = followings.map(f => f.following.toString());
-                if (followingIds.length === 0) {
-                    Object.assign(result, buildResult("following", [], 0));
-                    break;
-                }
-                const index = getIndex("USERS");
-                const data = await index.search(q, {
-                    limit,
-                    offset,
-                    filter: [
-                        `userId IN [${followingIds.map(id => `"${id}"`).join(',')}]`,
-                        `isDeactivated != true`
-                    ],
-                    attributesToRetrieve: ["userId", "name", "username", "photo"]
-                });
+    const targetUserId = userId || res.locals.userId;
+    const viewerId = res.locals.userId;
 
-                // Only check follow status if viewing someone else's following
-                let usersWithFollowStatus = data.hits;
-                if (targetUserId !== viewerId) {
-                    const currentUserFollows = await FOLLOW.find({
-                        follower: viewerId,
-                        following: { $in: data.hits.map((u: any) => u.userId) }
-                    }).lean();
+    const followings = await FOLLOW.find({ follower: targetUserId }).lean();
+    const followingIds = followings.map(f => f.following.toString());
 
-                    usersWithFollowStatus = data.hits.map((user: any) => ({
-                        ...user,
-                        isFollowing: currentUserFollows.some(f =>
-                            f.following.toString() === user.userId.toString()
-                        )
-                    }));
-                }
+    if (followingIds.length === 0) {
+        Object.assign(result, buildResult("following", [], 0));
+        break;
+    }
 
-                Object.assign(result, buildResult("following", usersWithFollowStatus, data.estimatedTotalHits));
-                break;
-            }
+    const index = getIndex("USERS");
+    const data = await index.search(q, {
+        limit,
+        offset,
+        filter: `userId IN ["${followingIds.join('","')}"] AND isDeactivated != true`,
+        attributesToRetrieve: ["userId", "name", "username", "photo"]
+    });
 
-            case "follower": {
-                const targetUserId = userId || res.locals.userId;
-                const viewerId = res.locals.userId;
+    const currentUserFollowsSet = new Set(
+        targetUserId !== viewerId
+            ? (await FOLLOW.find({
+                  follower: viewerId,
+                  following: { $in: data.hits.map((u: any) => u.userId) }
+              }).lean()).map(f => f.following.toString())
+            : []
+    );
 
-                const followers = await FOLLOW.find({ following: targetUserId }).lean();
-                const followerIds = followers.map(f => f.follower.toString());
+    const usersWithFollowStatus = data.hits.map((user: any) => ({
+        ...user,
+        isFollowing: currentUserFollowsSet.has(user.userId.toString())
+    }));
 
-                if (followerIds.length === 0) {
-                    Object.assign(result, buildResult("follower", [], 0));
-                    break;
-                }
+    Object.assign(result, buildResult("following", usersWithFollowStatus, data.estimatedTotalHits));
+    break;
+}
 
-                const index = getIndex("USERS");
-                const data = await index.search(q, {
-                    limit,
-                    offset,
-                    filter: [
-                        `userId IN [${followerIds.map(id => `"${id}"`).join(',')}]`,
-                        `isDeactivated != true`
-                    ],
-                    attributesToRetrieve: ["userId", "name", "username", "photo"]
-                });
+case "follower": {
+    const targetUserId = userId || res.locals.userId;
+    const viewerId = res.locals.userId;
 
-                // Only check follow status if viewing someone else's followers
-                let usersWithFollowStatus = data.hits;
-                if (targetUserId !== viewerId) {
-                    const currentUserFollows = await FOLLOW.find({
-                        follower: viewerId,
-                        following: { $in: data.hits.map((u: any) => u.userId) }
-                    }).lean();
+    const followers = await FOLLOW.find({ following: targetUserId }).lean();
+    const followerIds = followers.map(f => f.follower.toString());
 
-                    usersWithFollowStatus = data.hits.map((user: any) => ({
-                        ...user,
-                        isFollowing: currentUserFollows.some(f =>
-                            f.following.toString() === user.userId.toString()
-                        )
-                    }));
-                }
+    if (followerIds.length === 0) {
+        Object.assign(result, buildResult("follower", [], 0));
+        break;
+    }
 
-                Object.assign(result, buildResult("follower", usersWithFollowStatus, data.estimatedTotalHits));
-                break;
-            }
+    const index = getIndex("USERS");
+    const data = await index.search(q, {
+        limit,
+        offset,
+        filter: `userId IN ["${followerIds.join('","')}"] AND isDeactivated != true`,
+        attributesToRetrieve: ["userId", "name", "username", "photo"]
+    });
+
+    const currentUserFollowsSet = new Set(
+        targetUserId !== viewerId
+            ? (await FOLLOW.find({
+                  follower: viewerId,
+                  following: { $in: data.hits.map((u: any) => u.userId) }
+              }).lean()).map(f => f.following.toString())
+            : []
+    );
+
+    const usersWithFollowStatus = data.hits.map((user: any) => ({
+        ...user,
+        isFollowing: currentUserFollowsSet.has(user.userId.toString())
+    }));
+
+    Object.assign(result, buildResult("follower", usersWithFollowStatus, data.estimatedTotalHits));
+    break;
+}
+
             case "flick": {
                 const index = getIndex("FLICKS");
                 const data = await index.search(q, {
