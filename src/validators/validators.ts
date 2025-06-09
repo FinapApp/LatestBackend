@@ -15,7 +15,7 @@ export const validateLogin = (body: object) => {
       }),
     phone: Joi.string()
       .optional()
-      .pattern(REGEX.PHONE)
+      .pattern(REGEX.PHONE_NUMBER)
       .messages({
         'string.pattern.base': 'Phone number must be a valid international format',
       }),
@@ -63,7 +63,7 @@ export const validateForgetPassword = (body: object) => {
     email: Joi.string().email().optional(),
     phone: Joi.string()
       .optional()
-      .pattern(REGEX.PHONE)
+      .pattern(REGEX.PHONE_NUMBER)
       .messages({
         'string.pattern.base': 'Phone number must be a valid international format',
       }),
@@ -85,7 +85,7 @@ export const validateOTPForgetPassword = (body: object) => {
     email: Joi.string().email().optional(),
     phone: Joi.string()
       .optional()
-      .pattern(REGEX.PHONE)
+      .pattern(REGEX.PHONE_NUMBER)
       .messages({
         'string.pattern.base': 'Phone number must be a valid international format',
       }),
@@ -107,7 +107,7 @@ export const validateUpdatePasswordAfterOTP = (body: object) => {
     email: Joi.string().email().optional(),
     phone: Joi.string()
       .optional()
-      .pattern(REGEX.PHONE)
+      .pattern(REGEX.PHONE_NUMBER)
       .messages({
         'string.pattern.base': 'Phone number must be a valid international format',
       }),
@@ -136,8 +136,7 @@ export const validateSignUp = (body: object) => {
   const schema = Joi.object({
     email: Joi.string().email(),
     phone: Joi.string()
-      .pattern(/^(?:\+?1\s?)?(?:\(?\d{3}\)?[\s.-]?)?\d{3}[\s.-]?\d{4}$|^(?:\+998\s?)?[0-9]{2}[\s.-]?[0-9]{3}[\s.-]?[0-9]{4}$|^(?:\+91[\s-]?)?[6-9][0-9]{9}$|^0[6-9][0-9]{9}$/
-)
+      .pattern(REGEX.PHONE_NUMBER)
       .messages({
         'string.pattern.base': 'Phone number must be a valid US, India, or Uzbekistan number',
         'string.empty': 'Phone number is required',
@@ -156,7 +155,7 @@ export const validateVerifyOTPSignUp = (body: object) => {
     email: Joi.string().email(),
     phone: Joi.string()
       .pattern(
-        /^(?:\+?1\s?)?(?:\(?\d{3}\)?[\s.-]?)?\d{3}[\s.-]?\d{4}$|^(?:\+998\s?)?[0-9]{2}[\s.-]?[0-9]{3}[\s.-]?[0-9]{4}$|^(?:\+91[\s-]?)?[6-9][0-9]{9}$|^0[6-9][0-9]{9}$/
+       REGEX.PHONE_NUMBER
       )
       .messages({
         'string.pattern.base': 'Phone number must be a valid US, India, or Uzbekistan number',
@@ -1389,7 +1388,7 @@ export const validateUpdateProfile = (body: object) => {
     gender: Joi.string().optional(),
     phone: Joi.string()
       .optional()
-      .pattern(REGEX.PHONE)
+      .pattern(REGEX.PHONE_NUMBER)
       .messages({
         'string.pattern.base': 'Phone number must be a valid international format',
       }),
