@@ -23,6 +23,8 @@ services:
       dockerfile: Dockerfile
     container_name: myapp
     restart: always
+    ports:
+      - "4003:4003"
     depends_on:
       meilisearch:
         condition: service_started
@@ -57,7 +59,7 @@ services:
       - MELLISSEARCH_HOST=http://meilisearch:7700  
       - DISCORD_WEBHOOK_URL=https://discord.com/api/webhooks/1366503812273143880/thakQoGnLwo1WkjerlBSXqhUKuxPovIZCl4dZEP-aO4URhstp9NYN_fUDv9smu1I7avd
       - SWAGGER_HOSTED_URL=http://135.235.193.1:4003/api
-      - AUTHENTIC_KEY_MSG91=
+      - AUTHENTIC_KEY_MSG91=454657AcRtfWsTFb68450accP1
       - TEMPLATE_ID_SIGNUP_MSG91=683f1a76d6fc056a6a5c8d05
 
 
