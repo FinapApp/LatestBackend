@@ -6,13 +6,16 @@ import { FEATUREISSUES } from "../../models/FeatureIssues/featureIssue.model"
 
 export const createFeatureIssue = async (req: Request, res: Response) => {
     try {
-        const validationError: Joi.ValidationError | undefined = validateCreateFeatureIsssue(req.body);
+        const validationError: Joi.ValidationError | undefined = validateCreateFeatureIsssue(req.body, req.params);
         if (validationError) {
             return handleResponse(res, 400, errors.validation, validationError.details);
         }
+        const userId = res.locals.userId;
+        const featureIssueId = req.params.featureIssueId;
         const { message, attachment, ...rest } = req.body
         const featureIssue = await FEATUREISSUES.create({
-            user: res.locals.userId,
+            _id: featureIssueId,
+            user: userId,
             message: {
                 sentBy: "user",
                 message,

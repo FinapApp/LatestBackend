@@ -12,7 +12,10 @@ import bcrypt from "bcryptjs";
 import { USERPREFERENCE } from "../../models/User/userPreference.model";
 import { sendErrorToDiscord } from "../../config/discord/errorDiscord";
 import { getIndex } from "../../config/melllisearch/mellisearch.config";
-
+import { sendTwoFactorCodeEmail } from "../../utils/sendTwoFactorCodeEmail";
+import { generateNumericOTP } from "../../utils/OTPGenerator";
+import { sendTwoFactorCodePhone } from "../../utils/sendTwoFactorCodePhone";
+import { redis } from "../../config/redis/redis.config";
 interface LoginRequest {
   email?: string;
   username?: string;
@@ -20,7 +23,6 @@ interface LoginRequest {
   password: string;
   fcmToken: string;
 }
-
 /**
  * Handles user login.
  *
@@ -31,18 +33,14 @@ interface LoginRequest {
  * @throws Will return a 400 status code if validation fails or user credentials are invalid.
  * @throws Will return a 500 status code if an unexpected error occurs.
  */
-
-
-
 interface UserPreference {
   _id: string;
-  theme: string;
-  textSize: string;
+  theme: 'dark' | 'light' | 'system';
+  textSize: 'small' | 'medium' | 'large';
   nightMode: boolean;
   twoFactor: boolean;
-  twoFactorMethod: string;
+  twoFactorMethod: 'sms' | 'email';
 }
-
 export const login = async (req: Request, res: Response) => {
   try {
     // Validate request body
@@ -57,7 +55,7 @@ export const login = async (req: Request, res: Response) => {
     else if (username) query.username = username;
     else if (phone) query.phone = phone;
     // Asked for regex in the frontend to indentify whether to give email or phone or username
-    const checkUser = await USER.findOne(query) 
+    const checkUser = await USER.findOne(query)
     if (!checkUser) {
       return handleResponse(res, 400, errors.invalid_credentials);
     }
@@ -66,23 +64,32 @@ export const login = async (req: Request, res: Response) => {
     if (!passwordMatch) {
       return handleResponse(res, 400, errors.invalid_credentials);
     }
-
     const userId = checkUser._id;
-    const checkUserPreference = await USERPREFERENCE.findById(userId, "theme textSize nightMode twoFactor -_id") as UserPreference;
-    // SEND NOTIFICATION TO ALL SESSIONS ABOUT THIS LOGIN
-    if (checkUserPreference?.twoFactor && checkUserPreference?.twoFactorMethod == "email") {
-      // Send OTP to email
-    } else {
-      // Send OTP to phone
+    const checkUserPreference = await USERPREFERENCE.findById(userId, "theme textSize nightMode twoFactor twoFactorMethod -_id") as UserPreference;
+    const checkPreferences = checkUserPreference?.twoFactor;
+    if (checkPreferences) {
+      let OTP = generateNumericOTP();
+      // when in resend otp we often dont have to search back again and again and cache could do the thing.
+      if (checkUserPreference?.twoFactorMethod == "email") {
+        await Promise.all([
+          sendTwoFactorCodeEmail(OTP, checkUser.email as string, checkUser.username as string),
+          redis.set(`2FA-OTP:${email}`, JSON.stringify({ OTP }), "EX", config.REDIS_EXPIRE_IN)
+        ])
+        return handleResponse(res, 200, { fcmToken, type: "email", email: checkUser.email });
+      } else {
+        await Promise.all([
+          sendTwoFactorCodePhone(OTP, checkUser.phone as string),
+          redis.set(`2FA-OTP:${phone}`, JSON.stringify({ OTP }), "EX", config.REDIS_EXPIRE_IN)
+        ])
+        return handleResponse(res, 200, { fcmToken, type: "phone", phone: checkUser.phone });
+      }
     }
     const checkSession = await SESSION.find({ userId }, "_id", {
       sort: { createdAt: -1 },
     });
-
     if (checkSession && checkSession.length >= config.MAX_LOGIN_SESSION) {
       await SESSION.findByIdAndDelete(checkSession[0]._id);
     }
-
     // Fetch IP and device data
     const geoData: any = await fetchIpGeolocation(req.ip);
     const deviceData = useragent.parse(req.headers["user-agent"]);
@@ -100,7 +107,6 @@ export const login = async (req: Request, res: Response) => {
       device: deviceData.toAgent(),
       os: deviceData.os.toString(),
     };
-
     // Conditionally add geo-related fields
     if (geoData) {
       sessionData.gps = {

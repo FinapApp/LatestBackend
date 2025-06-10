@@ -4,7 +4,7 @@ import Joi from "joi";
 import { sendErrorToDiscord } from "../../../config/discord/errorDiscord";
 import mongoose from "mongoose";
 import { validatePresignedQuestApplication } from "../../../validators/validators";
-import { generateSignedURL } from "../../../utils/getSignedURL";
+import { generateSignedURL } from "../../../utils/s3.utils";
 
 export const createPresignedURLQuestApplication = async (req: Request, res: Response) => {
     try {

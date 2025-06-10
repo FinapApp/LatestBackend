@@ -3,11 +3,15 @@ import { getProfileDetails } from "../../controllers/Setting/Profile/getPersonal
 import { createPresignedURLProfile } from "../../controllers/Setting/Profile/createPresignedURLProfile";
 import { updateProfileDetails } from "../../controllers/Setting/Profile/updateProfileDetails";
 import { updatePassword } from "../../controllers/Setting/Profile/updatePassword";
+import { deleteProfilePicture } from "../../controllers/Profile/deleteProfilePicture";
 
 
 export const settingProfile: Router = express.Router();
 
-settingProfile.post("/profile-picture", createPresignedURLProfile);
+settingProfile.route("/profile-picture")
+    .post(createPresignedURLProfile)
+    .delete(deleteProfilePicture)
+
 
 settingProfile
     .route("/profile-detail")

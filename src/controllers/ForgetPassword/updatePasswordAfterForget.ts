@@ -25,6 +25,7 @@ export const updatePasswordAfterOTP = async (req: Request, res: Response) => {
 
         const identifier = email || username || phone;
         const getOTP = await redis.get(`FORGET-PASSWORD:${identifier}`);
+        console.log()
         if (!getOTP) {
             return handleResponse(res, 400, errors.otp_expired);
     }

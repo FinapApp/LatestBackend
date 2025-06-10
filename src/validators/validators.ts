@@ -119,7 +119,7 @@ export const validateUpdatePasswordAfterOTP = (body: object) => {
         "string.pattern.base": "Invalid username format",
       }),
     password: Joi.string().required(),
-  })
+  }).xor('username', 'phone', 'email')
   const { error } = schema.validate(body)
   return error
 }
@@ -142,12 +142,28 @@ export const validateSignUp = (body: object) => {
         'string.empty': 'Phone number is required',
       }),
     name: Joi.string().required(),
-  }).xor('email', 'phone').messages({ 
+  }).xor('email', 'phone').messages({
     'object.xor': 'Either email or phone must be provided, but not both',
   });
   const { error } = schema.validate(body);
   return error;
 };
+
+export const validateVerifyOTPAfter2FA = (body: object) => {
+  const schema = Joi.object({
+    otp: Joi.string().required(),
+    email: Joi.string().email().optional(),
+    phone: Joi.string()
+      .optional()
+      .pattern(REGEX.PHONE_NUMBER)
+      .messages({
+        'string.pattern.base': 'Phone number must be a valid international format',
+      }),
+    fcmToken: Joi.string().required(),
+  }).xor('email', 'username', 'phone');
+  const { error } = schema.validate(body);
+  return error;
+}
 export const validateVerifyOTPSignUp = (body: object) => {
   const schema = Joi.object({
     fcmToken: Joi.string().required(),
@@ -155,7 +171,7 @@ export const validateVerifyOTPSignUp = (body: object) => {
     email: Joi.string().email(),
     phone: Joi.string()
       .pattern(
-       REGEX.PHONE_NUMBER
+        REGEX.PHONE_NUMBER
       )
       .messages({
         'string.pattern.base': 'Phone number must be a valid US, India, or Uzbekistan number',
@@ -410,7 +426,7 @@ export const validateGetFlickMentions = (params: object, query: object) => {
   const querySchema = Joi.object({
     limit: Joi.number().integer().min(1).max(15).optional(),
     page: Joi.number().integer().min(1).optional(),
-    num : Joi.number().integer().default(0),
+    num: Joi.number().integer().default(0),
   }).and("limit", "page").messages({
     "object.and": "Limit and page must be provided together",
   })
@@ -430,7 +446,7 @@ export const validateFlickId = (params: object) => {
   return error
 }
 
-export const validateDeleteFlick = (params : object, query: object) => {
+export const validateDeleteFlick = (params: object, query: object) => {
   const paramsSchema = Joi.object({
     flickId: Joi.string().regex(/^[0-9a-fA-F]{24}$/, 'object Id').required()
   })
@@ -445,12 +461,12 @@ export const validateDeleteFlick = (params : object, query: object) => {
   return error
 }
 
-export const validateRepostFlick =  (body: object, params: object) => {
+export const validateRepostFlick = (body: object, params: object) => {
   const paramsSchema = Joi.object({
     flickId: Joi.string().regex(/^[0-9a-fA-F]{24}$/, 'object Id').required()
-  })  
+  })
   const bodySchema = Joi.object({
-    taggedUsers : Joi.array().items(Joi.object({
+    taggedUsers: Joi.array().items(Joi.object({
       user: Joi.string().regex(/^[0-9a-fA-F]{24}$/, 'object Id').required(),
       text: Joi.string().required(),
       position: Joi.object({
@@ -458,7 +474,7 @@ export const validateRepostFlick =  (body: object, params: object) => {
         y: Joi.number().required()
       }).required()
     })).optional(),
-    location : Joi.string().optional(),
+    location: Joi.string().optional(),
     description: Joi.array().items(Joi.object({
       mention: Joi.string().regex(/^[0-9a-fA-F]{24}$/, 'object Id').optional(),
       hashtag: Joi.string().regex(/^[0-9a-fA-F]{24}$/, 'object Id').optional(),
@@ -516,16 +532,24 @@ export const validateGetComments = (params: object, query: object) => {
   return error
 }
 
-export const validateCreateFeatureIsssue = (body: object) => {
-  const schema = Joi.object({
+export const validateCreateFeatureIsssue = (body: object, params: object) => {
+  const paramsSchema = Joi.object({
+    featureIssueId: Joi.string().regex(/^[0-9a-fA-F]{24}$/, 'object Id').required()
+  })
+  const bodySchema = Joi.object({
+
     message: Joi.string().required(),
     attachment: Joi.array().items(Joi.string().pattern(new RegExp(`^${config.R2.R2_PUBLIC_URL}/.+$`)).message("attachment must be a valid URL").required()).optional(),
     incidentDate: Joi.string().isoDate().required(),
     feature: Joi.string().valid('Feed', 'Story', 'Profile', 'Wallet', 'Search', 'Notification', 'Setting', 'Flick', 'Quest').required(),
     issueType: Joi.string().valid('Bug', 'Slow Performance', 'Crash', 'UI Glitch', 'Audio Issue', 'Video Issue', 'Login Issue', 'Other').required(),
-    reportedTo : Joi.string().regex(/^[0-9a-fA-F]{24}$/, 'object Id').optional(),
+    reportedTo: Joi.string().regex(/^[0-9a-fA-F]{24}$/, 'object Id').optional(),
   })
-  const { error } = schema.validate(body)
+  const combinedSchema = Joi.object({
+    body: bodySchema,
+    params: paramsSchema
+  })
+  const { error } = combinedSchema.validate({ body, params })
   return error
 }
 
@@ -832,7 +856,7 @@ export const validateUpdateFlick = (body: object, params: object) => {
     likeVisible: Joi.boolean().optional(),
     repostVisible: Joi.boolean().optional(),
     audienceSetting: Joi.string().valid("public", "friends").optional(),
-    commentSetting : Joi.string().valid("everyone", "friends", "nobody").optional(),
+    commentSetting: Joi.string().valid("everyone", "friends", "nobody").optional(),
   })
   const paramsSchema = Joi.object({
     flickId: Joi.string().regex(/^[0-9a-fA-F]{24}$/, 'object Id').required()
@@ -1013,8 +1037,8 @@ export const validateGetSearch = (query: object) => {
       'string.max': 'Search query must be less than or equal to 30 characters',
       'any.required': 'Search query is required'
     }),
-    low : Joi.string().optional(),
-    high : Joi.string().optional(),
+    low: Joi.string().optional(),
+    high: Joi.string().optional(),
     sort: Joi.string().valid("date-asc", "date-desc", "amount-asc", "amount-desc").optional(),
     mode: Joi.string().valid("go", "on").optional(),
     sponsored: Joi.string().valid("true", "false").optional(),
@@ -1261,18 +1285,18 @@ export const validateQuestApplicantStatusBatch = (query: object, body: object) =
   return error
 }
 
-export const validateQuestApplicantStatusViaQR  = (body: object, params: object) => {
+export const validateQuestApplicantStatusViaQR = (body: object, params: object) => {
   const paramsSchema = Joi.object({
     questApplicantId: Joi.string().regex(/^[0-9a-fA-F]{24}$/, 'object Id').required()
   })
   const bodySchema = Joi.object({
-    qrString : Joi.string().required(),
+    qrString: Joi.string().required(),
   })
   const combinedSchema = Joi.object({
     body: bodySchema,
     params: paramsSchema
   })
-  const { error } = combinedSchema.validate({body, params})
+  const { error } = combinedSchema.validate({ body, params })
   return error
 }
 
@@ -1374,7 +1398,7 @@ export const validateDeleteAccount = (body: object) => {
 export const validateDeactivateAccount = (body: object) => {
   const schema = Joi.object({
     deactivationReason: Joi.string().min(2).max(200).required(),
-    password :  Joi.string().required()
+    password: Joi.string().required()
   })
   const { error } = schema.validate(body)
   return error

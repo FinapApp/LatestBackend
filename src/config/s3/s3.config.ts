@@ -11,11 +11,3 @@ export const s3Client = new S3Client({
     },
 });
 
-
-// async function listAllObjects() {
-// console.log(
-//     await s3Client.send(new ListObjectsV2Command({ Bucket: "test" })),
-// );
-// }
-
-// listAllObjects();

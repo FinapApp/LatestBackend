@@ -4,4 +4,4 @@ import { createFeatureIssue } from "../../controllers/FeatureIssues/createFeatur
 
 export const featureIssue : Router = express.Router();
 
-featureIssue.post("/feature-issue", createFeatureIssue);
+featureIssue.post("/feature-issue/:featureIssueId", createFeatureIssue);

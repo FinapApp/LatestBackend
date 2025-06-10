@@ -4,10 +4,11 @@ import { redis } from "../../config/redis/redis.config";
 import Joi from "joi";
 import { config } from "../../config/generalconfig";
 import { handleResponse, errors, success } from "../../utils/responseCodec";
-import { generateOTP } from "../../utils/OTPGenerator";
+import { generateNumericOTP } from "../../utils/OTPGenerator";
 import { USER } from "../../models/User/user.model";
 import { sendForgotPasswordEmail } from "../../utils/sendOTP_ForgetPassword";
 import { sendErrorToDiscord } from "../../config/discord/errorDiscord";
+import { sendForgotPasswordPhone } from "../../utils/sendForgotPasswordPhone";
 interface ForgetPasswordRequest {
     email?: string;
     username?: string;
@@ -30,9 +31,9 @@ export const forgetPassword = async (req: Request, res: Response) => {
         if (!checkUser) {
             return handleResponse(res, 404, errors.user_not_found);
         }
-
-        const generatedOTP = generateOTP();
-        if (checkUser.email || checkUser.username) {
+        console.log(checkUser)
+        const generatedOTP = generateNumericOTP();
+        if (checkUser.email) {
             await sendForgotPasswordEmail(
                 generatedOTP,
                 checkUser.email as string,
@@ -40,7 +41,10 @@ export const forgetPassword = async (req: Request, res: Response) => {
             );
         }
         if (checkUser.phone) {
-            // TODO: Implement phone OTP sending logic
+            await sendForgotPasswordPhone(
+                generatedOTP,
+                checkUser.phone as string,
+            );
         }
         // Store OTP in Redis as JSON string
         await redis.set(
@@ -51,6 +55,7 @@ export const forgetPassword = async (req: Request, res: Response) => {
         );
         return handleResponse(res, 200, success.forget_password);
     } catch (err: any) {
+        console.log(err)
         sendErrorToDiscord("POST:forget-password", err);
         return handleResponse(res, 500, errors.catch_error);
     }

@@ -43,13 +43,13 @@ export const errors = {
     message: "Unable to create feature issue",
   },
   user_deactivated: {
-    message : "User is deactivated",
+    message: "User is deactivated",
   },
   //Deactivate Account
   deactivate_account: {
     message: "Unable to deactivate account",
   },
-// Song-related errors
+  // Song-related errors
   song_not_uploaded: {
     message: "Song not uploaded",
   },
@@ -105,6 +105,9 @@ export const errors = {
   },
 
   // Profile-related errors
+  profile_image_deleted : {
+    message: "Profile image deleted successfully"
+  },
   unable_to_signed_profile_image: {
     message: "Unable to signed profile image"
   },
@@ -343,7 +346,7 @@ export const errors = {
   identifier_not_found: {
     message: "Identifier not found",
   },
-  
+
   // OTP-related errors
   otp_expired: {
     message: "OTP has expired",
@@ -401,6 +404,10 @@ export const errors = {
 };
 
 export const success = {
+  //Two-Factor Authentication
+  two_factor_code_sent: {
+    message: "Two-factor authentication code sent successfully",
+  },
   //feature-reported-issues 
   create_feature_issue: {
     message: "Feature issue created successfully",
@@ -444,6 +451,10 @@ export const success = {
   },
 
   // Profile-related success
+  profile_image_deleted: {
+    message: "Profile image deleted successfully"
+  },
+
   profile_updated: {
     message: "Profile updated successfully",
   },

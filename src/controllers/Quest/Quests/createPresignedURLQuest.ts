@@ -2,7 +2,7 @@ import { Request, Response } from "express";
 import { validatePresinedURLQuest } from "../../../validators/validators";
 import Joi from "joi";
 import { errors, handleResponse } from "../../../utils/responseCodec";
-import { generateSignedURL } from "../../../utils/getSignedURL";
+import { generateSignedURL } from "../../../utils/s3.utils";
 import { sendErrorToDiscord } from "../../../config/discord/errorDiscord";
 import mongoose from "mongoose";
 

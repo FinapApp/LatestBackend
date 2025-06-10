@@ -2,7 +2,7 @@ import { Request, Response } from 'express'
 import { validatePresignedProfile } from "../../../validators/validators";
 import { errors, handleResponse } from "../../../utils/responseCodec";
 import Joi from "joi";
-import { generateSignedURL } from '../../../utils/getSignedURL';
+import { generateSignedURL } from "../../../utils/s3.utils";
 import mongoose from 'mongoose';
 import { sendErrorToDiscord } from '../../../config/discord/errorDiscord';
 
@@ -13,7 +13,7 @@ export const createPresignedURLProfile = async (req: Request, res: Response) => 
             return handleResponse(res, 400, errors.validation, validationError.details);
         }
         const userId = res.locals.userId
-        const {  fileType } = req.body
+        const { fileType } = req.body
         const songId = new mongoose.Types.ObjectId();
         if (songId) {
             const profileImagePath = `user/${userId}/profile-image`;

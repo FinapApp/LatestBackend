@@ -29,8 +29,6 @@ export const verifyOTPAfterSignUp = async (req: Request, res: Response) => {
         }
 
         const { email, phone, otp, fcmToken, ...rest } = req.body as ForgetOTPRequest;
-        console.log(phone, email, otp, fcmToken, rest);
-
         // Try fetching OTP from Redis (email-based and phone-based)
         const [emailData, phoneData] = await Promise.all([
             redis.get(`OTP:${email}`),
@@ -44,7 +42,6 @@ export const verifyOTPAfterSignUp = async (req: Request, res: Response) => {
         } else if (phoneData) {
             redisDataRaw = phoneData;
         }
-
         if (!redisDataRaw) {
             return handleResponse(res, 400, errors.otp_expired);
         }
@@ -108,15 +105,13 @@ export const verifyOTPAfterSignUp = async (req: Request, res: Response) => {
 
         return handleResponse(res, 200, success.account_created);
     } catch (err: any) {
-        console.error(err);
-
+        console.log(err)
         if (err.code === 11000) {
             const key = err?.keyValue ? Object.keys(err.keyValue)[0] : null;
             if (key === "email") return handleResponse(res, 500, errors.email_exist);
             if (key === "username") return handleResponse(res, 500, errors.username_exist);
             if (key === "phone") return handleResponse(res, 500, errors.phone_exist);
         }
-
         sendErrorToDiscord("POST:verify-otp", err);
         return handleResponse(res, 500, errors.catch_error);
     }

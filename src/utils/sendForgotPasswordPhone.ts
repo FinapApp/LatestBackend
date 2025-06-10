@@ -1,14 +1,11 @@
 
 import axios from 'axios'
 import { config } from '../config/generalconfig'
+const { AUTHENTIC_KEY: authentic_key, FORGET_PASSWORD_TEMPLATE  : templateId } = config.SMS
 
-
-
-
-const { AUTHENTIC_KEY: authentic_key ,SIGNUP_OTP_TEMPLATE  : templateId } = config.SMS
-
-export const sendOTPPhoneVerification = async (OTP: string, phone: string) => {
+export const sendForgotPasswordPhone = async (OTP: string, phone: string) => {
     try {
+        console.log("asdasdasdasd====>"   ,templateId)
         const response = await axios.post(
             'https://control.msg91.com/api/v5/flow/',
             {
@@ -21,7 +18,6 @@ export const sendOTPPhoneVerification = async (OTP: string, phone: string) => {
                 },
             },
         )
-        console.log('OTP sent successfully:', response.data)
         return response.data
     } catch (error) {
         console.error(error)
