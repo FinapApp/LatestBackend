@@ -9,6 +9,6 @@ export const commonRoutes : Router = express.Router();
 
 commonRoutes.post("/check-username", checkUserNameExist);
 commonRoutes.post("/check-email", checkEmailExist);
-commonRoutes.get("/check-phone", checkPhoneExist); 
+commonRoutes.post("/check-phone", checkPhoneExist); 
 commonRoutes.get("/hashtag" , getHashTag)
 commonRoutes.get("/mention" , getMentions)
