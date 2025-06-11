@@ -40,7 +40,7 @@ export const verifyOTPForgetPassword = async (req: Request, res: Response) => {
         }
         return handleResponse(res, 400, errors.otp_expired);
     } catch (err: any) {
-        sendErrorToDiscord("POST:verify-otp-forget-password", err);
+        await sendErrorToDiscord("POST:verify-otp-forget-password", err);
         return handleResponse(res, 500, errors.catch_error);
     }
 };

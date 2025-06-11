@@ -1543,7 +1543,7 @@ export const validateEmail = (body: object) => {
 
 export const validatePhoneNumber = (body: object) => {
   const schema = Joi.object({
-    phoneNumber: Joi.string()
+    phone: Joi.string()
       .optional()
       .pattern(REGEX.PHONE_NUMBER)
       .messages({

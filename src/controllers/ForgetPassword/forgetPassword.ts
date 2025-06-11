@@ -31,7 +31,6 @@ export const forgetPassword = async (req: Request, res: Response) => {
         if (!checkUser) {
             return handleResponse(res, 404, errors.user_not_found);
         }
-        console.log(checkUser)
         const generatedOTP = generateNumericOTP();
         if (checkUser.email) {
             await sendForgotPasswordEmail(
