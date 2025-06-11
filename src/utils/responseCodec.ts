@@ -593,6 +593,9 @@ export const success = {
   email_available: {
     message: "Email is available",
   },
+  phone_available: {
+    message: "Phone number is available",
+  },
 
   // Miscellaneous success
   forget_password: {

@@ -1541,6 +1541,19 @@ export const validateEmail = (body: object) => {
   return error
 }
 
+export const validatePhoneNumber = (body: object) => {
+  const schema = Joi.object({
+    phoneNumber: Joi.string()
+      .optional()
+      .pattern(REGEX.PHONE_NUMBER)
+      .messages({
+        'string.pattern.base': 'Phone number must be a valid international format',
+      }),
+  })
+  const { error } = schema.validate(body)
+  return error
+}
+
 
 //Payment 
 
