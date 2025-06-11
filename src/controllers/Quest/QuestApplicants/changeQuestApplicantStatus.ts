@@ -25,11 +25,11 @@ export const changeQuestApplicantStatus = async (req: Request, res: Response) =>
             });
         }
 
-        // Step 2: Find the quest
-        const quest = await QUESTS.findById(applicant.quest, "totalApproved leftApproved totalRejected  applicantCount") 
+        // Step 2: Find the quest (including maxApplicants)
+        const quest = await QUESTS.findById(applicant.quest, "totalApproved leftApproved totalRejected applicantCount maxApplicants");
         if (!quest) return handleResponse(res, 404, errors.quest_not_found);
 
-        // 💡 Rejection constraint — totalRejected must not exceed 30% of applicantCount
+        // 💡 Rejection constraint
         if (status === "rejected") {
             const projectedRejectionRate = (quest.totalRejected + 1) / (quest.applicantCount || 1);
             if (projectedRejectionRate > 0.3) {
@@ -38,6 +38,7 @@ export const changeQuestApplicantStatus = async (req: Request, res: Response) =>
                 });
             }
         }
+
         // ✅ Approval check
         if (status === "approved" && quest.leftApproved <= 0) {
             return handleResponse(res, 403, errors.quest_applicant_approval);
@@ -51,11 +52,18 @@ export const changeQuestApplicantStatus = async (req: Request, res: Response) =>
         );
         if (!updatedApplicant) return handleResponse(res, 500, errors.status_changed_flicked);
 
-        // Step 4: Update quest counters
+        // Step 4: Update quest counters (with possible status change)
         const updateQuery: any = { $inc: {} };
+
         if (status === "approved") {
             updateQuery.$inc.totalApproved = 1;
             updateQuery.$inc.leftApproved = -1;
+
+            const projectedTotalApproved = quest.totalApproved + 1;
+            if (projectedTotalApproved >= quest.maxApplicants) {
+                updateQuery.$set = { status: "completed" };
+            }
+
         } else if (status === "rejected") {
             updateQuery.$inc.totalRejected = 1;
         }
@@ -63,8 +71,9 @@ export const changeQuestApplicantStatus = async (req: Request, res: Response) =>
         await QUESTS.findByIdAndUpdate(updatedApplicant.quest, updateQuery);
 
         return handleResponse(res, 200, success.status_changed_flicked);
+
     } catch (error) {
-        console.error(error);
+        console.error("Error in changeQuestApplicantStatus:", error);
         sendErrorToDiscord("PUT:quest-change-status-applicant", error);
         return handleResponse(res, 500, errors.catch_error);
     }

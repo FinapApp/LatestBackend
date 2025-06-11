@@ -10,6 +10,7 @@ export const bulkChangeStatus = async (req: Request, res: Response) => {
     try {
         const validationError: Joi.ValidationError | undefined = validateQuestApplicantStatusBatch(req.query, req.body);
         if (validationError) return handleResponse(res, 400, errors.validation, validationError.details);
+        
         const { questApplicantIds } = req.body;
         const { status } = req.query;
         const applicants = await QUEST_APPLICANT.find({
@@ -43,8 +44,6 @@ export const bulkChangeStatus = async (req: Request, res: Response) => {
                 const projectedRejections = totalRejected + entry.applicantIds.length;
 
                 const rejectionRate = projectedRejections / applicantCount;
-              
-
                 if (rejectionRate > 0.3) {
                     return handleResponse(res, 403, {
                         message: `Rejection cap reached. Max 30% of ${applicantCount} applicants can be rejected.`,
@@ -57,23 +56,47 @@ export const bulkChangeStatus = async (req: Request, res: Response) => {
             { $set: { status } }
         );
         const bulkOps: any[] = [];
+        // for (const [, entry] of questMap) {
+        //     const update: any = { $inc: {} };
+        //     if (status === 'approved') {
+        //         update.$inc.totalApproved = entry.approvalCount;
+        //         update.$inc.leftApproved = -entry.approvalCount;
+        //     } else if (status === 'rejected') {
+        //         update.$inc.totalRejected = entry.applicantIds.length;
+        //     }
+
+        //     bulkOps.push({
+        //         updateOne: {
+        //             filter: { _id: entry.quest._id },
+        //             update
+        //         }
+        //     });
+        // }
+
         for (const [, entry] of questMap) {
             const update: any = { $inc: {} };
+            const quest = entry.quest;
+
             if (status === 'approved') {
                 update.$inc.totalApproved = entry.approvalCount;
                 update.$inc.leftApproved = -entry.approvalCount;
+
+                const projectedTotalApproved = quest.totalApproved + entry.approvalCount;
+                if (projectedTotalApproved >= quest.maxApplicants) {
+                    update.$set = { status: 'completed' };
+                }
             } else if (status === 'rejected') {
                 update.$inc.totalRejected = entry.applicantIds.length;
             }
 
             bulkOps.push({
                 updateOne: {
-                    filter: { _id: entry.quest._id },
+                    filter: { _id: quest._id },
                     update
                 }
             });
         }
-
+        
         await QUESTS.bulkWrite(bulkOps);
         return handleResponse(res, 200, success.status_changed_flicked);
     } catch (error) {
