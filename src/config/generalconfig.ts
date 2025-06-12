@@ -49,5 +49,5 @@ export const config = {
     TWO_FACTOR_AUTH_TEMPLATE: process.env.TEMPLATE_ID_TWO_FACTOR_AUTH_MSG91!
   },
   QR_SECRET: process.env.QR_SECRET!,
-  QR_EXPIRE_TIME: process.env.QR_EXPIRE_TIME || "1d",
+  QR_EXPIRE_TIME: process.env.QR_EXPIRE_TIME! || "1d",
 }

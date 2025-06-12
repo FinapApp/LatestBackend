@@ -1,6 +1,6 @@
 import { Request, Response } from 'express';
 import { validateCreateQuestApplication } from "../../../validators/validators";
-import { errors, handleResponse } from "../../../utils/responseCodec";
+import { errors, handleResponse, success } from "../../../utils/responseCodec";
 import jwt from "jsonwebtoken";
 import Joi from "joi";
 import { QUEST_APPLICANT } from '../../../models/Quest/questApplicant.model';
@@ -21,7 +21,7 @@ export const createQuestApplicant = async (req: Request, res: Response) => {
 
         // Parallel DB operations
         const [questData, existingApplication, pendingCount] = await Promise.all([
-            QUESTS.findById(quest, "status leftApproved applicantCount user"),
+            QUESTS.findById(quest, "status leftApproved applicantCount user mode"),
             QUEST_APPLICANT.findOne({ user, quest }, "status"),
             QUEST_APPLICANT.countDocuments({ quest, status: "pending" })
         ]);
@@ -66,13 +66,16 @@ export const createQuestApplicant = async (req: Request, res: Response) => {
         if (!createdApplicant) {
             return handleResponse(res, 500, errors.create_quest_applicants);
         }
-        let qrString = `quest:${quest}:${questApplicantId}`;
-        qrString = jwt.sign(
-            { qrString },
-            config.QR_SECRET,
-            { expiresIn: config.QR_EXPIRE_TIME }
-        );
-        return handleResponse(res, 201, { qrString });
+        if (questData.mode == "Goflick") {
+            let qrString = `quest:${quest}:${questApplicantId}`;
+            qrString = jwt.sign(
+                { qrString },
+                config.QR_SECRET,
+                { expiresIn: config.QR_EXPIRE_TIME }
+            );
+            return handleResponse(res, 201, { qrString });
+        }
+        return handleResponse(res, 201, success.quest_applicant_updated)
     } catch (err) {
         console.error(err);
         sendErrorToDiscord("create-quest-applicant", err);
