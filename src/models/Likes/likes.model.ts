@@ -30,5 +30,8 @@ const LikeSchema = new Schema<ILikeSchema>(
   { timestamps: { createdAt: true, updatedAt: false }, versionKey: false }
 );
 
+
+LikeSchema.index({ flick: 1, user: 1 });
+
 export const LIKE = model<ILikeSchema>('like', LikeSchema);
 

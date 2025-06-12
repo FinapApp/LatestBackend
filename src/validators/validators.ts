@@ -36,7 +36,7 @@ export const validateGetFlicks = (query: object) => {
   })
     .and("limit", "page")
     .messages({
-      "object.and": "lat and long must be provided together",
+      "object.and": "limit and page must be provided together",
       "any.invalid": "{{#message}}"
     });
   const { error } = schema.validate(query);

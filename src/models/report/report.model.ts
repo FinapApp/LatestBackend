@@ -85,4 +85,9 @@ let reportSchema = new Schema<IReportSchema>(
     { versionKey: false, timestamps: true }
 );
 
+
+reportSchema.index({ flick: 1, status: 1 });
+reportSchema.index({ user: 1, flick: 1, status: 1 });
+
+
 export const REPORT = model<IReportSchema>('report', reportSchema);

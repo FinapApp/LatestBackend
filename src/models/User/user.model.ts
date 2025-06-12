@@ -34,7 +34,7 @@ interface IUserSchema extends Document {
 }
 
 export const UserSchema = new Schema<IUserSchema>(
-    {   
+    {
         username: { type: String, unique: true, lowercase: true, sparse: true },
         name: { type: String },
         email: { type: String, unique: true, sparse: true },
@@ -91,5 +91,8 @@ UserSchema.pre("findOneAndUpdate", async function (next) {
     }
     next();
 });
+UserSchema.index({ _id: 1, isDeactivated: 1 });
+
 export const USER = mongoose.model<IUserSchema>("user", UserSchema);
-export type IUser = InstanceType<typeof USER>
+
+
