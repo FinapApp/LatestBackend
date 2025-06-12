@@ -26,7 +26,6 @@ export const createComment = async (req: Request, res: Response) => {
         }
         let flickUser = flickExists.user
         const isOwner = flickUser == user
-
         if (flickExists.commentSetting === 'friends' && !isOwner) {
             // Check if current user follows flick creator
             const isFollowing = await FOLLOW.findOne({
