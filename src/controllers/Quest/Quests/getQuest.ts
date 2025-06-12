@@ -5,19 +5,16 @@ import Joi from 'joi';
 import { sendErrorToDiscord } from '../../../config/discord/errorDiscord';
 import { QUESTS } from '../../../models/Quest/quest.model';
 import { Types } from 'mongoose';
-
 export const getQuest = async (req: Request, res: Response) => {
     try {
         const validationError: Joi.ValidationError | undefined = validateQuestId(req.params);
         if (validationError) {
             return handleResponse(res, 400, errors.validation, validationError.details);
         }
-
         const { questId } = req.params;
         const userId = res.locals.userId;
         const questObjectId = new Types.ObjectId(questId);
         const userObjectId = new Types.ObjectId(userId);
-
         const pipeline: any[] = [
             { $match: { _id: questObjectId } },
             {
@@ -55,9 +52,7 @@ export const getQuest = async (req: Request, res: Response) => {
                                 userFavorite: [
                                     {
                                         $match: {
-                                            $expr: {
-                                                $eq: ["$user", userObjectId]
-                                            }
+                                            $expr: { $eq: ["$user", userObjectId] }
                                         }
                                     }
                                 ]
@@ -122,20 +117,36 @@ export const getQuest = async (req: Request, res: Response) => {
                             then: { $gt: [{ $size: "$userApplications" }, 0] },
                             else: false
                         }
+                    },
+                    hasApproved: {
+                        $cond: {
+                            if: { $eq: ["$isOwner", false] },
+                            then: {
+                                $gt: [
+                                    {
+                                        $size: {
+                                            $filter: {
+                                                input: "$userApplications",
+                                                as: "app",
+                                                cond: { $eq: ["$$app.status", "approved"] }
+                                            }
+                                        }
+                                    },
+                                    0
+                                ]
+                            },
+                            else: false
+                        }
                     }
                 }
             },
             { $unset: ["userApplications", "isOwner"] }
         ];
-
         const result = await QUESTS.aggregate(pipeline);
-
         if (!result.length) {
             return handleResponse(res, 404, errors.quest_not_found);
         }
-
         return handleResponse(res, 200, { questdetails: result[0] });
-
     } catch (err) {
         console.error(err);
         sendErrorToDiscord("GET:aggregated-quest", err);

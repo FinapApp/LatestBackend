@@ -1300,6 +1300,15 @@ export const validateQuestApplicantStatusViaQR = (body: object, params: object) 
   return error
 }
 
+
+export const validateChangeQuestStatus = (params: object) => {
+  const paramSchema  = Joi.object({
+    questId: Joi.string().regex(/^[0-9a-fA-F]{24}$/, 'object Id').required()
+  })
+  const {error} = paramSchema.validate(params)
+  return error
+}
+
 export const validateQuestApplicantStatus = (query: object, params: object) => {
   const querySchema = Joi.object({
     status: Joi.string().valid("approved", "rejected").required(),

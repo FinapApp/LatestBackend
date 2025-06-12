@@ -5,27 +5,22 @@ import { sendErrorToDiscord } from "../../../config/discord/errorDiscord";
 import Joi from "joi";
 import { validateGetQuests } from "../../../validators/validators";
 import { Types } from "mongoose";
-
 export const getAllQuests = async (req: Request, res: Response) => {
     try {
         const validationError: Joi.ValidationError | undefined = validateGetQuests(req.query);
         if (validationError) {
             return handleResponse(res, 400, errors.validation, validationError.details);
         }
-
         const currentUserId = new Types.ObjectId(res.locals.userId);
         let { sort, low, high, mode, type, long, lat, country, page, limit = 10, userId } = req.query;
-
         // Centralized userId logic
         let ownerId: Types.ObjectId = currentUserId;
         if (userId && Types.ObjectId.isValid(userId as string)) {
             ownerId = new Types.ObjectId(userId as string);
         }
-
         const pipeline: any[] = [];
         limit = Number(limit);
         const skip = ((Number(page) || 1) - 1) * limit;
-
         // Geolocation stage
         if (long && lat) {
             pipeline.push({
@@ -38,20 +33,19 @@ export const getAllQuests = async (req: Request, res: Response) => {
                 }
             });
         }
-
-        pipeline.push({ $match: { status: { $ne: "paused" } } });
-
+        const isOwnerView = type === 'profile' || (!userId || userId === res.locals.userId);
+        if(isOwnerView){
+            pipeline.push({ $match: { status: { $nin: ["paused", "closed"] } } });
+        }
         // Country filter
         if (country && typeof country === 'string') {
             country = country.split(",") as string[];
             pipeline.push({ $match: { country: { $in: country } } });
         }
-
         // Mode filter
         if (mode) {
             pipeline.push({ $match: { mode: mode === 'go' ? 'GoFlick' : 'OnFlick' } });
         }
-
         // Amount range filter
         if (low || high) {
             const amountCondition: any = {};
@@ -59,7 +53,6 @@ export const getAllQuests = async (req: Request, res: Response) => {
             if (high) amountCondition.$lte = Number(high);
             pipeline.push({ $match: { avgAmountPerPerson: amountCondition } });
         }
-
         // Type-specific filters
         switch (type) {
             case 'favorite':
@@ -119,7 +112,6 @@ export const getAllQuests = async (req: Request, res: Response) => {
                 );
                 break;
         }
-
         // Sorting
         if (sort) {
             const sortCriteria: any = {};
@@ -131,7 +123,6 @@ export const getAllQuests = async (req: Request, res: Response) => {
             }
             pipeline.push({ $sort: sortCriteria });
         }
-
         // Results sub-pipeline
         const resultsSubPipeline: any[] = [
             {
@@ -243,7 +234,6 @@ export const getAllQuests = async (req: Request, res: Response) => {
             },
             { $unset: "userApplications" }
         ];
-
         // Additional profile/applied enrichment
         if (type === 'profile') {
             resultsSubPipeline.push(
@@ -259,7 +249,6 @@ export const getAllQuests = async (req: Request, res: Response) => {
                 { $unset: "applicants" }
             );
         }
-
         if (type === 'applied') {
             resultsSubPipeline.push(
                 {
@@ -286,9 +275,6 @@ export const getAllQuests = async (req: Request, res: Response) => {
                 { $unset: "approvedApplications" }
             );
         }
-
-
-
         pipeline.push({
             $facet: {
                 results: resultsSubPipeline,
@@ -298,7 +284,6 @@ export const getAllQuests = async (req: Request, res: Response) => {
         const data = await QUESTS.aggregate(pipeline);
         const quests = data[0]?.results || [];
         const total = data[0]?.totalCount[0]?.count || 0;
-
         return handleResponse(res, 200, {
             quests,
             totalDocuments: total,

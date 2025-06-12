@@ -26,7 +26,8 @@ interface IQuests extends Document {
     totalRejected : number; // number of people rejected
     leftApproved: number; // number of people left to be approved
     avgAmountPerPerson: number;
-    status : 'pending' | 'completed' | 'paused';
+    status : 'pending' | 'completed' | 'paused' | 'closed';
+    isVerified : boolean;
 }
 
 const MediaSchema = new Schema<IMediaSchema>(
@@ -76,7 +77,8 @@ export const QuestSchema = new Schema<IQuests>(
         avgAmountPerPerson: { type: Number, default: function () {
             return this.totalAmount / (this.maxApplicants || 1); // this is the total amount divided by the max applicants
         }}, // this is the total amount divided by the max applicants
-        status : { type: String, enum: ['pending', 'completed' , 'paused' ], default: 'pending' },
+        status : { type: String, enum: ['pending', 'completed' , 'paused'  , 'closed' ], default: 'pending' },
+        isVerified : {type : Boolean , default : false}
     },
     { timestamps: {createdAt : true , updatedAt : false }, versionKey: false }
 );

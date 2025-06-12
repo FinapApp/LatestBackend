@@ -273,6 +273,10 @@ export const errors = {
   },
 
   // Quest-related errors
+quest_already_closed: {
+    message: "Quest is already closed",
+  },
+
   cannot_apply_to_own_quest: {
     message: "You cannot apply to your own quest",
   },
@@ -557,6 +561,9 @@ export const success = {
   // Quest-related success
   qr_verified_success: {
     message: "QR code verified successfully",
+  },
+  quest_status_closed: {
+    message: "Quest status changed to closed successfully",
   },
   quest_created: {
     message: "Quest created successfully",
