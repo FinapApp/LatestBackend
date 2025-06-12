@@ -222,7 +222,25 @@ export const getAllQuests = async (req: Request, res: Response) => {
                     as: "userApplications"
                 }
             },
-            { $addFields: { hasApplied: { $gt: [{ $size: "$userApplications" }, 0] } } },
+            {
+                $addFields: {
+                    hasApplied: { $gt: [{ $size: "$userApplications" }, 0] },
+                    hasApproved: {
+                        $gt: [
+                            {
+                                $size: {
+                                    $filter: {
+                                        input: "$userApplications",
+                                        as: "app",
+                                        cond: { $eq: ["$$app.status", "approved"] }
+                                    }
+                                }
+                            },
+                            0
+                        ]
+                    }
+                }
+            },
             { $unset: "userApplications" }
         ];
 
@@ -270,7 +288,7 @@ export const getAllQuests = async (req: Request, res: Response) => {
         }
 
 
-        
+
         pipeline.push({
             $facet: {
                 results: resultsSubPipeline,
