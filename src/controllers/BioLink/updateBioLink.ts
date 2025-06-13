@@ -18,8 +18,8 @@ export const updateBioLink = async (req: Request, res: Response) => {
                 validationError.details
             );
         }
-        const updateBioLinks = await USERBIOLINKS.findByIdAndUpdate(
-            req.params.bioLinkId,
+        const updateBioLinks = await USERBIOLINKS.findOneAndUpdate(
+            { _id: req.params.bioLinkId, user: res.locals.userId },
             req.body, { new: true }
         );
         if (updateBioLinks) {

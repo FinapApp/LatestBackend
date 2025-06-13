@@ -52,17 +52,6 @@ export const createComment = async (req: Request, res: Response) => {
             { $inc: { commentCount: 1 } },
             {
                 new: true,
-                // populate: {
-                //     path: "user",
-                //     select: "photo username name"
-                // },
-                //  projection: {
-                //     commentCount: 1,
-                //     user,
-                //     thumbnailURL: 1,
-                //     audienceSetting: 1,
-                //     commentSetting: 1
-                // }
             }
         );
         if (!updatedFlick) {

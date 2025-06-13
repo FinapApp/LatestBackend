@@ -13,8 +13,8 @@ export const changeQuestStatusClosed = async (req: Request, res: Response) => {
         }
         const { questId } = req.params;
         // Step 1: Find the quest
-        const changeStatus = await QUESTS.findByIdAndUpdate(
-            questId,
+        const changeStatus = await QUESTS.findOneAndUpdate(
+            { _id : questId, user: res.locals.userId },
             { status: "closed" },
             { new: true, projection: { status: 1, _id: 0 } }
         );

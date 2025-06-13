@@ -38,8 +38,8 @@ export const deleteFlick = async (req: Request, res: Response) => {
             getIndex("FLICKS").deleteDocument(flickId),
             USER.findByIdAndUpdate(userId, { $inc: { flickCount: -1 } }, { new: true })
                 .catch(err => sendErrorToDiscord("DELETE:delete-flick:flickCount", err)),
-            COMMENT.deleteMany({ flick: flickId }),
-            LIKE.deleteMany({ flick: flickId }),
+            COMMENT.deleteMany({ flick: flickId , user : res.locals.userId}),
+            LIKE.deleteMany({ flick: flickId, user: res.locals.userId }),
         ];
 
         if (isRepost && originalFlickId) {
