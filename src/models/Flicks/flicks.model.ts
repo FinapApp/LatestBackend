@@ -113,6 +113,7 @@
     FlickSchema.index({ "description.mention": 1 });
     FlickSchema.index({ repost: 1 });
     FlickSchema.index({ quest: 1 });
-    FlickSchema.index({ audienceSetting: 1 });
+    FlickSchema.index({ audienceSetting: 1 })
+    
     export const FLICKS = mongoose.model<IFlicks>("flick", FlickSchema);
 

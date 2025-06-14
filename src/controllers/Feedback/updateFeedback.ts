@@ -7,15 +7,19 @@ import { sendErrorToDiscord } from "../../config/discord/errorDiscord";
 
 export const updateFeedback = async (req: Request, res: Response) => {
     try {
-        const validationError: Joi.ValidationError | undefined = validateUpdateFeedback(req.body , req.params);
+        const validationError: Joi.ValidationError | undefined = validateUpdateFeedback(req.body, req.params);
         if (validationError) {
             return handleResponse(res, 400, errors.validation, validationError.details);
         }
         const feedbackId = req.params.feedbackId;
-        const feedback = await FEEDBACK.findByIdAndUpdate(feedbackId, req.body, { new: true });
+        const feedback = await FEEDBACK.findOneAndUpdate(
+            { _id: feedbackId, user: res.locals.userId },
+            req.body,
+            { new: true }
+        );
         if (feedback) {
             return handleResponse(res, 200, success.update_feedback);
-        }   
+        }
         return handleResponse(res, 500, errors.update_feedback);
     } catch (error) {
         sendErrorToDiscord("PUT:update-feedback", error);

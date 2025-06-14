@@ -15,8 +15,6 @@ export type ITextDataSchema = {
     hashtag?: string
 };
 
-
-
 export const TextDataSchema = new Schema<ITextDataSchema>(
     {  
         mention: {
@@ -67,11 +65,8 @@ const CommentSchema = new Schema<ICommentSchema>(
     },
     { timestamps: true, versionKey: false }
 );
+
 CommentSchema.index({ createdAt: -1 })
 
-
-export const COMMENT = model<ICommentSchema>(
-    'comment',
-    CommentSchema,
-);
+export const COMMENT = model<ICommentSchema>('comment',CommentSchema);
 export type IComment = InstanceType<typeof Comment>;

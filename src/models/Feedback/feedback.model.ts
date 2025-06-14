@@ -51,4 +51,6 @@ let FeedbackSchema = new Schema<IFeedback>(
   { timestamps: true, versionKey: false }
 );
 
+FeedbackSchema.index({ user: 1, _id: 1 });
+
 export const FEEDBACK = model<IFeedback>('feedback', FeedbackSchema);
