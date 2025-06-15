@@ -1037,6 +1037,7 @@ export const validateGetSearch = (query: object) => {
       'string.max': 'Search query must be less than or equal to 30 characters',
       'any.required': 'Search query is required'
     }),
+    quest: Joi.string().regex(/^[0-9a-fA-F]{24}$/, 'object Id').optional(),
     low: Joi.string().optional(),
     high: Joi.string().optional(),
     sort: Joi.string().valid("date-asc", "date-desc", "amount-asc", "amount-desc").optional(),
@@ -1047,8 +1048,9 @@ export const validateGetSearch = (query: object) => {
       'number.max': 'Limit must be at most 10',
     }).optional(),
     page: Joi.number().integer().min(1).optional(),
-    type: Joi.string().valid('user', 'flick', 'hashtag', 'quest', 'song', 'follower', 'following').optional(),
+    type: Joi.string().valid('user', 'flick', 'hashtag', 'quest', 'song', 'follower', 'following', 'quest-applicant').optional(),
     userId: Joi.string().regex(/^[0-9a-fA-F]{24}$/, 'object Id').optional(),
+    status: Joi.string().valid('approved', 'rejected').optional()
   }).and("type", "limit").messages({
     "object.and": "type and limit must be provided together",
   })
@@ -1302,10 +1304,10 @@ export const validateQuestApplicantStatusViaQR = (body: object, params: object) 
 
 
 export const validateChangeQuestStatus = (params: object) => {
-  const paramSchema  = Joi.object({
+  const paramSchema = Joi.object({
     questId: Joi.string().regex(/^[0-9a-fA-F]{24}$/, 'object Id').required()
   })
-  const {error} = paramSchema.validate(params)
+  const { error } = paramSchema.validate(params)
   return error
 }
 

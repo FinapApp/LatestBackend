@@ -25,17 +25,15 @@ export const createQuestApplicant = async (req: Request, res: Response) => {
             QUEST_APPLICANT.findOne({ user, quest }, "status"),
             QUEST_APPLICANT.countDocuments({ quest, status: "pending" })
         ]);
-
         if (!questData) {
             return handleResponse(res, 404, errors.quest_not_found);
         }
         if (String(questData.user) === String(user)) {
             return handleResponse(res, 403, errors.cannot_apply_to_own_quest);
         }
-        if (questData.status !== "pending") {
-            return handleResponse(res, 403, errors.quest_not_approved);
+        if (!["pending", "paused"].includes(questData.status)) {
+            return handleResponse(res, 403, errors.quest_not_authorized);
         }
-
         if (existingApplication) {
             return handleResponse(res, 403, errors.quest_already_applied);
         }

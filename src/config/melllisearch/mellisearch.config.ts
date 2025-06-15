@@ -26,7 +26,7 @@ const FILTERABLE_ATTRIBUTES: Record<keyof typeof INDEXES, string[]> = {
     USERS: ['userId', 'username', 'isDeactivated'],
     FLICKS: ['flickId', 'userId'],
     HASHTAG: ['hashtagId'],
-    QUESTS: ['questId', 'userId', 'mode', 'avgAmountPerPerson', 'staff'],
+    QUESTS: ['questId', 'userId', 'mode', 'avgAmountPerPerson', 'staff' , 'status'],
     SONGS: ['songId'],
 };
 

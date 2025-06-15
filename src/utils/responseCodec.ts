@@ -301,8 +301,8 @@ quest_already_closed: {
   quest_not_found: {
     message: "Quest not found",
   },
-  quest_not_approved: {
-    message: "Quest not approved",
+  quest_not_authorized: {
+    message: "Quest not authorized",
   },
   create_quest: {
     message: "Unable to create quest",

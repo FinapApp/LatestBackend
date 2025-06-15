@@ -34,7 +34,7 @@ export const getAllQuests = async (req: Request, res: Response) => {
             });
         }
         const isOwnerView = type === 'profile' || (!userId || userId === res.locals.userId);
-        if(isOwnerView){
+        if(!isOwnerView){
             pipeline.push({ $match: { status: { $nin: ["paused", "closed"] } } });
         }
         // Country filter

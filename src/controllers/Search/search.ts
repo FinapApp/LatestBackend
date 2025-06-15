@@ -5,6 +5,8 @@ import Joi from "joi";
 import { validateGetSearch } from "../../validators/validators";
 import { FOLLOW } from "../../models/User/userFollower.model";
 import { QUEST_FAV } from "../../models/Quest/questFavorite.model";
+import { QUEST_APPLICANT } from "../../models/Quest/questApplicant.model";
+import mongoose from "mongoose";
 // import { USER } from "../../models/User/user.model";
 
 export const search = async (req: Request, res: Response) => {
@@ -14,7 +16,7 @@ export const search = async (req: Request, res: Response) => {
             return handleResponse(res, 400, errors.validation, validationError.details);
         }
 
-        let { q = "", page = 1, type, limit = 5, userId, low, high, sort, mode, sponsored } = req.query as {
+        let { q = "", page = 1, type, limit = 5, userId, low, high, sort, mode, sponsored, quest , status } = req.query as {
             q: string;
             page?: string | number;
             type?: string;
@@ -25,6 +27,8 @@ export const search = async (req: Request, res: Response) => {
             sort?: string;
             mode?: string;
             sponsored?: string;
+            quest :  string;
+            status: 'approved' | 'rejected'
         };
 
         limit = Number(limit);
@@ -105,6 +109,54 @@ export const search = async (req: Request, res: Response) => {
                 break;
             }
 
+            case "quest-applicant": {
+                const applicants = await QUEST_APPLICANT.aggregate([
+                    {
+                        $match: {
+                            status,
+                            user: { $exists: true },
+                            ...(quest ? { quest: new mongoose.Types.ObjectId(quest) } : {})
+                        }
+                    },
+                    {
+                        $lookup: {
+                            from: "users",
+                            localField: "user",
+                            foreignField: "_id",
+                            as: "user"
+                        }
+                    },
+                    { $unwind: "$user" },
+                    {
+                        $match: {
+                            "user.username": { $regex: q || "", $options: "i" }
+                        }
+                    },
+                    {
+                        $project: {
+                            user: {
+                                _id: 1,
+                                username: 1,
+                                name: 1,
+                                photo: 1
+                            },
+                            quest: 1,
+                            status: 1,
+                            media: 1,
+                            partialAllowance: 1,
+                            verified: 1,
+                            createdAt: 1
+                        }
+                    }
+                ]);
+
+                const total = applicants.length;
+                const paginatedApplicants = applicants.slice(offset, offset + limit);
+
+                Object.assign(result, buildResult("applicants", paginatedApplicants, total));
+                break;
+            }
+
             case "follower": {
                 const viewerId = res.locals.userId;
                 const targetUserId = userId || viewerId;
@@ -177,7 +229,7 @@ export const search = async (req: Request, res: Response) => {
                 const index = getIndex("QUESTS");
 
                 // Build filters array
-                const filters: string[] = [];
+                const filters: string[] = ['status != "closed"'];
 
                 // Amount range filter
                 if (low || high) {
