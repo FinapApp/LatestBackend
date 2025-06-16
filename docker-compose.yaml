@@ -64,6 +64,17 @@ services:
       - TEMPLATE_ID_FORGET_PASSWORD_MSG91=6847b650d6fc051ec82a9689
       - TEMPLATE_ID_TWO_FACTOR_AUTH_MSG91=6847bafdd6fc0524f970e3f5
       - QR_EXPIRE_TIME=1d
+  nginx:
+    image: nginx:latest
+    container_name: nginx
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./src/config/nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./src/config/nginx/certs:/etc/nginx/certs:ro
+    depends_on:
+      - app
 
 volumes:
   # mongodb_data:
