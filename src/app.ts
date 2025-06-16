@@ -73,6 +73,13 @@ if (cluster.isPrimary) {
   app.use(helmet({ contentSecurityPolicy: false }))
   app.use("/api/v1", isAuthenticatedUser, protectedRoutes);
   app.use("/api", normalRoutes);
+  app.get("/", (req: Request, res: Response) => {
+    res.status(200).json({
+      message: "Welcome to Flickstar API",
+      version: "1.0.0",
+      documentation: "/flickstar/api-docs"
+    });
+  })
   mongoose.model("song", SongSchema)
   mongoose.model("staff", StaffSchema)
   const startServer = async () => {
