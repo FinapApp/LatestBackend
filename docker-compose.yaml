@@ -1,3 +1,5 @@
+version: '3.8'
+
 services:
   redis:
     image: redis:latest
@@ -7,6 +9,7 @@ services:
       - "6379:6379"
     volumes:
       - redis_data:/data
+
   meilisearch:
     image: getmeili/meilisearch:latest
     container_name: meilisearch
@@ -23,14 +26,14 @@ services:
       dockerfile: Dockerfile
     container_name: myapp
     restart: always
-    ports:
-      - "4003:4003"
+    expose:
+      - "4003"
     depends_on:
-      meilisearch:
-        condition: service_started
       redis:
         condition: service_started
-    environment:
+      meilisearch:
+        condition: service_started
+      environment:
       - REDIS_URI=redis://redis:6379/
       - MONGO_URI=mongodb+srv://flickstar-dev:shokh%4012@flickstar-test.vap3yqj.mongodb.net/finapp-dev?retryWrites=true&w=majority
       - REDIS_EXPIRE_IN=900
@@ -64,17 +67,24 @@ services:
       - TEMPLATE_ID_FORGET_PASSWORD_MSG91=6847b650d6fc051ec82a9689
       - TEMPLATE_ID_TWO_FACTOR_AUTH_MSG91=6847bafdd6fc0524f970e3f5
       - QR_EXPIRE_TIME=1d
+    networks:
+      - web
+
   nginx:
     image: nginx:latest
     container_name: nginx
+    restart: always
     ports:
       - "80:80"
       - "443:443"
     volumes:
       - ./src/config/nginx/nginx.conf:/etc/nginx/nginx.conf:ro
-      - ./src/config/nginx/certs:/etc/nginx/certs:ro
+      - ./src/config/nginx/certs:/etc/letsencrypt:ro
+      - ./src/config/nginx/certbot-www:/var/www/certbot
     depends_on:
       - app
+    networks:
+      - web
 
   certbot:
     image: certbot/certbot
@@ -86,11 +96,12 @@ services:
       sh -c "certbot certonly --webroot --webroot-path=/var/www/certbot
       --email krakshak@flickstar.net --agree-tos --no-eff-email
       -d api.autobots.live"
-
-
+    networks:
+      - web
 
 volumes:
-  # mongodb_data:
   redis_data:
   meili_data:
-  
+
+networks:
+  web:
