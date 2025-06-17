@@ -33,10 +33,6 @@ export const getAllQuests = async (req: Request, res: Response) => {
                 }
             });
         }
-        const isOwnerView = type === 'profile' || (!userId || userId === res.locals.userId);
-        if(!isOwnerView){
-            pipeline.push({ $match: { status: { $nin: ["paused", "closed"] } } });
-        }
         // Country filter
         if (country && typeof country === 'string') {
             country = country.split(",") as string[];
@@ -111,6 +107,14 @@ export const getAllQuests = async (req: Request, res: Response) => {
                     { $unset: "applications" }
                 );
                 break;
+        }
+
+        // ✅ Only allow paused/closed quests in self-profile view
+        const isOwnProfileView = type === 'profile' && userId?.toString() === res.locals.userId;
+        if (!isOwnProfileView) {
+            pipeline.push({
+                $match: { status: { $nin: ["paused", "closed"] } }
+            });
         }
         // Sorting
         if (sort) {
