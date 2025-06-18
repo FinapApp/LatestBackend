@@ -111,7 +111,8 @@ export const getAllQuests = async (req: Request, res: Response) => {
 
         // ✅ Only allow paused/closed quests in self-profile view
         const isOwnProfileView = type === 'profile' && userId?.toString() === res.locals.userId;
-        if (!isOwnProfileView) {
+        const isAppliedView = type === 'applied';
+        if (!isOwnProfileView && !isAppliedView) {
             pipeline.push({
                 $match: { status: { $nin: ["paused", "closed"] } }
             });
