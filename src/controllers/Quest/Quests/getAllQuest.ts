@@ -219,19 +219,11 @@ export const getAllQuests = async (req: Request, res: Response) => {
             },
             {
                 $addFields: {
-                    hasApplied: { $gt: [{ $size: "$userApplications" }, 0] },
-                    hasApproved: {
-                        $gt: [
-                            {
-                                $size: {
-                                    $filter: {
-                                        input: "$userApplications",
-                                        as: "app",
-                                        cond: { $eq: ["$$app.status", "approved"] }
-                                    }
-                                }
-                            },
-                            0
+                    userApplicationStatus: {
+                        $cond: [
+                            { $gt: [{ $size: "$userApplications" }, 0] },
+                            { $arrayElemAt: ["$userApplications.status", 0] },
+                            "not-applied"
                         ]
                     }
                 }
