@@ -16,12 +16,10 @@ import { settingSessionRoutes } from "./setting/settingSession.routes";
 import { settingThemeRoutes } from "./setting/settingTheme.routes";
 import { settingTwoFactorRoutes } from "./setting/settingTwoFactor.routes";
 import { storyRoutes } from "./stories/story.routes";
-import { walletRoutes } from "./wallet/wallet.routes";
 
 
 const routes = [
     flickRoutes,
-    walletRoutes,
     commentRoutes,
     reportRoutes,
     storyRoutes,
