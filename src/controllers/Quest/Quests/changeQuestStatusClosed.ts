@@ -14,14 +14,14 @@ export const changeQuestStatusClosed = async (req: Request, res: Response) => {
         const { questId } = req.params;
         // Step 1: Find the quest
         const changeStatus = await QUESTS.findOneAndUpdate(
-            { _id : questId, user: res.locals.userId },
+            { _id: questId, user: res.locals.userId },
             { status: "closed" },
             { new: true, projection: { status: 1, _id: 0 } }
         );
         if (!changeStatus) {
             return handleResponse(res, 404, errors.quest_not_found);
         }
-        return handleResponse(res, 400, success.quest_status_closed);
+        return handleResponse(res, 200, success.quest_status_closed);
     } catch (error) {
         sendErrorToDiscord("PATCH:quest-change-status-closed", error);
         return handleResponse(res, 500, errors.catch_error);

@@ -1,57 +1,92 @@
-import { model, Schema } from "mongoose";
+import mongoose, { Schema, Document } from 'mongoose';
 
-
-export interface ITransactionSchema extends Document {
-    userId: Schema.Types.ObjectId;
-    date: Date;
-    status: 'Pending' | 'Completed' | 'Failed';
-    type: 'Credit' | 'Debit';
-    transaction_string: string;
-    source: string;
+interface ITransaction extends Document {
+    user: mongoose.Types.ObjectId;
     amount: number;
-    description: string;
-};
+    netAmount: number; // optional field for net amount after fees
+    type: 'deposit' | 'transfer' | 'withdrawal' | 'refund';
+    stripeTxnId?: string;
+    stripeTransferId?: string; // optional field for Stripe transfer ID
+    stripeTransferReversalId?: string; // optional field for Stripe transfer reversal ID
+    stripeReversalId?: string; // optional field for Stripe reversal ID
+    stripeChargeId?: string; // optional field for Stripe charge ID
+    stripeBalanceId?: string; // optional field for Stripe balance transaction ID
+    reason?: string; // optional field for the reason of the transaction
+    connectedAccountId?: string; // optional field for connected account ID in Stripe
+    description?: string; // optional field for transaction description
+    metadata?: Record<string, any>; // optional field for additional metadata
+    currency: string;
+    sourceInfo?: {
+        type: string;
+        brand?: string;
+        last4?: string;
+        funding?: string;
+        country?: string;
+        network?: string;
+    }
+    destinationBank?: {
+        bank_name?: string;
+        last4?: string;
+        account_holder_name?: string;
+        currency?: string;
+        country?: string;
+        account_type?: string;
+    };
+    status: 'succeeded' | 'pending' | 'failed' | "reversed";
+}
 
-const TransactionSchema = new Schema<ITransactionSchema>(
+const TransactionSchema: Schema = new Schema<ITransaction>(
     {
-        userId : {
-            type : Schema.Types.ObjectId,
-            ref : 'user',
-            required : true
-        },
-        date: {
-            type: Date,
-            required: true,
-        },
-        status: {
-            type: String,
-            enum: ['Pending', 'Completed', 'Failed'],
-            required: true,
-        },
+        user: { type: Schema.Types.ObjectId, ref: 'user' },
+        amount: { type: Number, required: true },
+        netAmount: { type: Number, default: 0 }, // optional field for net amount after fees
         type: {
             type: String,
-            enum: ['Credit', 'Debit'],
+            enum: ['deposit', 'transfer', 'withdrawal', 'refund'],
             required: true,
         },
-        transaction_string: {
+        stripeTxnId: { type: String, default: null }, // optional field for Stripe transaction ID
+        stripeTransferId: { type: String, default: null }, // optional field for Stripe transfer ID
+        stripeTransferReversalId: { type: String, default: null }, // optional field for Stripe transfer reversal ID
+        stripeReversalId: { type: String, default: null }, // optional field for Stripe reversal ID
+        stripeChargeId: { type: String, default: null }, // optional field for Stripe charge ID
+        stripeBalanceId: { type: String, default: null }, // optional field for Stripe balance transaction ID
+        reason: { type: String, default: null }, // optional field for the reason of the transaction
+        connectedAccountId: { type: String, default: null }, // optional field for connected account ID in Stripe
+        description: { type: String, default: null }, // optional field for transaction description
+        metadata: { type: Schema.Types.Mixed, default: {} }, // optional field for additional metadata
+        destinationBank: {
+            type: new Schema({
+                bank_name: String,
+                last4: String,
+                account_holder_name: String,
+                currency: String,
+                country: String,
+                account_type: String,
+            }, { _id: false }),
+            default: null
+        },
+        sourceInfo: {
+            type: new Schema({
+                type: String,
+                brand: String,
+                last4: String,
+                funding: String,
+                country: String,
+                network: String,
+            }, { _id: false }),
+            default: null
+        },
+        currency: { type: String, required: true }, // currency of the transaction
+        status: {
             type: String,
-            required: true,
-        },
-        source: {
-            type: String,
-            required: true,
-        },
-        amount: {
-            type: Number,
-            required: true,
-        },
-        description: {
-            type: String,
+            enum: ['succeeded', 'pending', 'failed', 'reversed'],
+            default: 'succeeded', // default status is succeeded
         },
     },
-    { timestamps: true, versionKey: false }
+    { timestamps: { createdAt: true }, versionKey: false }
 );
 
+TransactionSchema.index({ user: 1, createdAt: 1 });
 
-
-export const Transaction = model<ITransactionSchema>('transaction', TransactionSchema, 'transactions');
+export const TRANSACTION = mongoose.model<ITransaction>('transaction', TransactionSchema);

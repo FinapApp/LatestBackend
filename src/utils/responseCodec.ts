@@ -136,6 +136,9 @@ export const errors = {
   phone_exist: {
     message: "Phone number already exists",
   },
+  phone_not_found: {
+    message: "Phone number not found",
+  },
   email_exist: {
     message: "Email already exists",
   },

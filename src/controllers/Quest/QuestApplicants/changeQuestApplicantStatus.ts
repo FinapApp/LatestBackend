@@ -5,6 +5,7 @@ import { sendErrorToDiscord } from "../../../config/discord/errorDiscord";
 import { QUEST_APPLICANT } from "../../../models/Quest/questApplicant.model";
 import { validateQuestApplicantStatus } from "../../../validators/validators";
 import { QUESTS } from "../../../models/Quest/quest.model";
+import { WALLET } from "../../../models/Wallet/wallet.model";
 
 export const changeQuestApplicantStatus = async (req: Request, res: Response) => {
     try {
@@ -16,8 +17,7 @@ export const changeQuestApplicantStatus = async (req: Request, res: Response) =>
         const { questApplicantId } = req.params;
         const { status } = req.query;
 
-        // Step 1: Find the applicant
-        const applicant = await QUEST_APPLICANT.findById(questApplicantId, { status: 1, quest: 1 });
+        const applicant = await QUEST_APPLICANT.findById(questApplicantId).select("status quest user");
         if (!applicant) return handleResponse(res, 404, errors.quest_applicant_not_found);
         if (applicant.status !== "pending") {
             return handleResponse(res, 400, {
@@ -25,11 +25,10 @@ export const changeQuestApplicantStatus = async (req: Request, res: Response) =>
             });
         }
 
-        // Step 2: Find the quest (including maxApplicants)
-        const quest = await QUESTS.findById(applicant.quest, "totalApproved leftApproved totalRejected applicantCount maxApplicants");
+        const quest = await QUESTS.findById(applicant.quest).select("totalApproved leftApproved totalRejected applicantCount maxApplicants avgAmountPerPerson status");
         if (!quest) return handleResponse(res, 404, errors.quest_not_found);
 
-        // 💡 Rejection constraint
+        // ❌ Rejection cap
         if (status === "rejected") {
             const projectedRejectionRate = (quest.totalRejected + 1) / (quest.applicantCount || 1);
             if (projectedRejectionRate > 0.3) {
@@ -39,21 +38,22 @@ export const changeQuestApplicantStatus = async (req: Request, res: Response) =>
             }
         }
 
-        // ✅ Approval check
+        // ❌ No approval left
         if (status === "approved" && quest.leftApproved <= 0) {
             return handleResponse(res, 403, errors.quest_applicant_approval);
         }
 
-        // Step 3: Update the applicant
+        // ✅ Step 1: Update applicant
         const updatedApplicant = await QUEST_APPLICANT.findByIdAndUpdate(
             questApplicantId,
             { status },
-            { new: true, projection: { quest: 1, _id: 0 } }
+            { new: true, projection: { quest: 1, user: 1 } }
         );
         if (!updatedApplicant) return handleResponse(res, 500, errors.status_changed_flicked);
 
-        // Step 4: Update quest counters (with possible status change)
+        // ✅ Step 2: Prepare quest update
         const updateQuery: any = { $inc: {} };
+        let shouldMarkCompleted = false;
 
         if (status === "approved") {
             updateQuery.$inc.totalApproved = 1;
@@ -61,17 +61,50 @@ export const changeQuestApplicantStatus = async (req: Request, res: Response) =>
 
             const projectedTotalApproved = quest.totalApproved + 1;
             if (projectedTotalApproved >= quest.maxApplicants) {
+                shouldMarkCompleted = true;
                 updateQuery.$set = { status: "completed" };
             }
-
         } else if (status === "rejected") {
             updateQuery.$inc.totalRejected = 1;
         }
 
+        // ✅ Step 3: Apply quest update
         await QUESTS.findByIdAndUpdate(updatedApplicant.quest, updateQuery);
 
-        return handleResponse(res, 200, success.status_changed_flicked);
+        // ✅ Step 4: Update wallet
+        if (status === "approved") {
+            // First: always increment reservedBalance on approval
+            await WALLET.findOneAndUpdate(
+                { user: applicant.user },
+                { $inc: { reservedBalance: quest.avgAmountPerPerson } }
+            );
 
+            // Second: if quest is now completed, unlock all
+            if (shouldMarkCompleted) {
+                const allApprovedApplicants = await QUEST_APPLICANT.find({
+                    quest: quest._id,
+                    status: 'approved'
+                }, 'user');
+
+                const walletBulkOps = allApprovedApplicants.map(app => ({
+                    updateOne: {
+                        filter: { user: app.user },
+                        update: {
+                            $inc: {
+                                availableBalance: quest.avgAmountPerPerson,
+                                reservedBalance: -quest.avgAmountPerPerson
+                            }
+                        }
+                    }
+                }));
+
+                if (walletBulkOps.length > 0) {
+                    await WALLET.bulkWrite(walletBulkOps);
+                }
+            }
+        }
+
+        return handleResponse(res, 200, success.status_changed_flicked);
     } catch (error) {
         console.error("Error in changeQuestApplicantStatus:", error);
         sendErrorToDiscord("PUT:quest-change-status-applicant", error);
