@@ -4,6 +4,7 @@ import Joi from "joi";
 import { sendErrorToDiscord } from "../../../config/discord/errorDiscord";
 import { validateChangeQuestStatus } from "../../../validators/validators";
 import { QUESTS } from "../../../models/Quest/quest.model";
+import { getIndex } from "../../../config/melllisearch/mellisearch.config";
 
 export const changeQuestStatusClosed = async (req: Request, res: Response) => {
     try {
@@ -16,11 +17,21 @@ export const changeQuestStatusClosed = async (req: Request, res: Response) => {
         const changeStatus = await QUESTS.findOneAndUpdate(
             { _id: questId, user: res.locals.userId },
             { status: "closed" },
-            { new: true, projection: { status: 1, _id: 0 } }
+            { new: true }
         );
         if (!changeStatus) {
             return handleResponse(res, 404, errors.quest_not_found);
         }
+        const questPlain = changeStatus.toObject();
+        const { user, media, description, ...restQuest } = questPlain;
+        const questIndex = getIndex("QUESTS");
+        await questIndex.addDocuments([
+            {
+                ...restQuest,
+                questId,
+                status: "closed",
+            },
+        ]);
         return handleResponse(res, 200, success.quest_status_closed);
     } catch (error) {
         sendErrorToDiscord("PATCH:quest-change-status-closed", error);

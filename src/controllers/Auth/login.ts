@@ -140,8 +140,8 @@ export const login = async (req: Request, res: Response) => {
       accessToken,
       refreshToken,
       userPreferences: checkUserPreference,
-      paymentId: stripeAccountId
-      , paymentReady: stripeReady
+      paymentId: stripeAccountId,
+      paymentReady: stripeReady
     });
   } catch (err: any) {
     console.log(err);

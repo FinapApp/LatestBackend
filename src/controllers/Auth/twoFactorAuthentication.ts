@@ -74,7 +74,7 @@ export const twoFactorAuthentication = async (req: Request, res: Response) => {
         }
         const session = await SESSION.create(sessionData);
         const walletCheck = await WALLET.findOne({ user: userId }, "stripeAccountId stripeReady");
-        const { stripeAccountId ,  stripeReady } = walletCheck || {};
+        const { stripeAccountId, stripeReady } = walletCheck || {};
         if (user.isDeactivated) {
             user.isDeactivated = false;
             await user.save();
