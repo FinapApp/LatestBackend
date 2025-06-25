@@ -12,6 +12,7 @@ import { fetchIpGeolocation } from "../../utils/IP_helpers";
 import useragent from "useragent";
 import { getIndex } from "../../config/melllisearch/mellisearch.config";
 import { sendErrorToDiscord } from "../../config/discord/errorDiscord";
+import { WALLET } from "../../models/Wallet/wallet.model";
 export const twoFactorAuthentication = async (req: Request, res: Response) => {
     try {
         const validationError: Joi.ValidationError | undefined = validateVerifyOTPAfter2FA(req.body);
@@ -23,7 +24,7 @@ export const twoFactorAuthentication = async (req: Request, res: Response) => {
         const query: Record<string, string> = {};
         if (email) query.email = email;
         else if (phone) query.phone = phone;
-        const user = await USER.findOne(query);
+        const user = await USER.findOne(query, "_id isDeactivated");
         if (!user) return handleResponse(res, 400, errors.invalid_credentials);
         const userId = user._id;
         // Get OTP from Redis
@@ -42,7 +43,7 @@ export const twoFactorAuthentication = async (req: Request, res: Response) => {
         if (otp !== redisData.OTP && otp !== config.MASTER_OTP) {
             return handleResponse(res, 400, errors.otp_not_match);
         }
-        
+
         await Promise.all([
             redis.del(`2FA-OTP:${email}`),
             redis.del(`2FA-OTP:${phone}`)
@@ -72,7 +73,8 @@ export const twoFactorAuthentication = async (req: Request, res: Response) => {
             sessionData.location = `${geoData.zipcode} ${geoData.city}, ${geoData.state_prov} ${geoData.country_name} ${geoData.continent_name}`;
         }
         const session = await SESSION.create(sessionData);
-        const stripeAccountId = user.stripeAccountId;
+        const walletCheck = await WALLET.findOne({ user: userId }, "stripeAccountId stripeReady");
+        const { stripeAccountId ,  stripeReady } = walletCheck || {};
         if (user.isDeactivated) {
             user.isDeactivated = false;
             await user.save();
@@ -86,7 +88,7 @@ export const twoFactorAuthentication = async (req: Request, res: Response) => {
         }
         const checkUserPreference = await USERPREFERENCE.findById(userId, "theme textSize nightMode twoFactor -_id");
         const accessToken = jwt.sign(
-            { userId, sessionId: session._id, stripeAccountId },
+            { userId, sessionId: session._id },
             config.JWT.ACCESS_TOKEN_SECRET as string,
             { expiresIn: config.JWT.ACCESS_TOKEN_EXPIRE_IN }
         );
@@ -95,6 +97,7 @@ export const twoFactorAuthentication = async (req: Request, res: Response) => {
             accessToken,
             refreshToken,
             userPreferences: checkUserPreference,
+            paymentReady: stripeReady,
             paymentId: stripeAccountId
         });
     } catch (err: any) {

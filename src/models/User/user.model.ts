@@ -1,5 +1,4 @@
 import mongoose, { Document, Schema } from "mongoose";
-import bcrypt from "bcryptjs";
 import { ITextDataSchema, TextDataSchema } from "../Comment/comment.model";
 
 interface IUserSchema extends Document {
@@ -25,7 +24,6 @@ interface IUserSchema extends Document {
     nightMode: boolean;
     warnedCount: number,
     suspended: boolean,
-    stripeAccountId: string;
     suspensionReason: string,
     isDeactivated: boolean,
     deletedReason: string[],
@@ -35,10 +33,10 @@ interface IUserSchema extends Document {
 
 export const UserSchema = new Schema<IUserSchema>(
     {
-        username: { type: String, unique: true, lowercase: true, sparse: true },
+        username: { type: String, unique: true, lowercase: true },
         name: { type: String },
-        email: { type: String, unique: true, sparse: true },
-        phone: { type: String, unique: true, sparse: true },
+        email: { type: String, unique: true },
+        phone: { type: String },
         password: { type: String },
         dob: { type: Date },
         description: { type: [TextDataSchema] },
@@ -53,7 +51,6 @@ export const UserSchema = new Schema<IUserSchema>(
         followingCount: { type: Number, default: 0 },
         followerCount: { type: Number, default: 0 },
         suspended: { type: Boolean, default: false },
-        stripeAccountId: { type: String },
         isDeactivated: { type: Boolean, default: false },
         deactivationReason: { type: [String] },
         deletedReason: { type: [String] },
@@ -63,36 +60,5 @@ export const UserSchema = new Schema<IUserSchema>(
 );
 
 
-// Middleware to hash password before saving
-UserSchema.pre("save", async function (next) {
-    const user = this as IUserSchema;
-    if (!user.isModified("password")) return next(); // Only hash if password is modified
-    try {
-        const salt = await bcrypt.genSalt(10);
-        user.password = await bcrypt.hash(user.password, salt);
-        next();
-    } catch (error: any) {
-        next(error);
-    }
-});
-
-// Middleware to hash password before updating
-UserSchema.pre("findOneAndUpdate", async function (next) {
-    const update = this.getUpdate() as Partial<IUserSchema>;
-
-    if (update.password) {
-        try {
-            const salt = await bcrypt.genSalt(10);
-            update.password = await bcrypt.hash(update.password, salt);
-            this.setUpdate(update);
-        } catch (error: any) {
-            return next(error);
-        }
-    }
-    next();
-});
-UserSchema.index({ _id: 1, isDeactivated: 1 });
-
 export const USER = mongoose.model<IUserSchema>("user", UserSchema);
-
-
+export type IUser = InstanceType<typeof USER>

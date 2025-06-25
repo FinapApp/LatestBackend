@@ -16,6 +16,7 @@ import { sendTwoFactorCodeEmail } from "../../utils/sendTwoFactorCodeEmail";
 import { generateNumericOTP } from "../../utils/OTPGenerator";
 import { sendTwoFactorCodePhone } from "../../utils/sendTwoFactorCodePhone";
 import { redis } from "../../config/redis/redis.config";
+import { WALLET } from "../../models/Wallet/wallet.model";
 interface LoginRequest {
   email?: string;
   username?: string;
@@ -116,7 +117,8 @@ export const login = async (req: Request, res: Response) => {
       sessionData.location = `${geoData.zipcode} ${geoData.city}, ${geoData.state_prov} ${geoData.country_name} ${geoData.continent_name}`;
     }
     const session = await SESSION.create(sessionData);
-    const stripeAccountId = checkUser.stripeAccountId;
+    const walletCheck = await WALLET.findOne({ user: userId }, "stripeAccountId stripeReady");
+    const { stripeAccountId, stripeReady } = walletCheck || {};
     if (checkUser.isDeactivated) {
       checkUser.isDeactivated = false;
       (checkUser as any).save();
@@ -129,11 +131,18 @@ export const login = async (req: Request, res: Response) => {
       ]);
     }
     const accessToken = jwt.sign(
-      { userId, sessionId: session._id, stripeAccountId },
+      { userId, sessionId: session._id },
       config.JWT.ACCESS_TOKEN_SECRET as string,
       { expiresIn: config.JWT.ACCESS_TOKEN_EXPIRE_IN }
     );
-    return handleResponse(res, 200, { userId, accessToken, refreshToken, userPreferences: checkUserPreference, paymentId: stripeAccountId });
+    return handleResponse(res, 200, {
+      userId,
+      accessToken,
+      refreshToken,
+      userPreferences: checkUserPreference,
+      paymentId: stripeAccountId
+      , paymentReady: stripeReady
+    });
   } catch (err: any) {
     console.log(err);
     sendErrorToDiscord("POST:login", err);
