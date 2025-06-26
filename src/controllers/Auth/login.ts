@@ -117,8 +117,6 @@ export const login = async (req: Request, res: Response) => {
       sessionData.location = `${geoData.zipcode} ${geoData.city}, ${geoData.state_prov} ${geoData.country_name} ${geoData.continent_name}`;
     }
     const session = await SESSION.create(sessionData);
-    const walletCheck = await WALLET.findOne({ user: userId }, "stripeAccountId stripeReady");
-    const { stripeAccountId, stripeReady } = walletCheck || {};
     if (checkUser.isDeactivated) {
       checkUser.isDeactivated = false;
       (checkUser as any).save();
@@ -135,6 +133,13 @@ export const login = async (req: Request, res: Response) => {
       config.JWT.ACCESS_TOKEN_SECRET as string,
       { expiresIn: config.JWT.ACCESS_TOKEN_EXPIRE_IN }
     );
+    let stripeAccountId: string | null = null;
+    let stripeReady: boolean = false;
+    const walletCheck = await WALLET.findOne({ user: userId }, "stripeAccountId stripeReady").lean();
+    if (walletCheck) {
+      stripeAccountId = walletCheck.stripeAccountId ?? null;
+      stripeReady = walletCheck.stripeReady ?? false;
+    }
     return handleResponse(res, 200, {
       userId,
       accessToken,
