@@ -7,31 +7,27 @@ import { sendErrorToDiscord } from "../../../config/discord/errorDiscord";
 import bcrypt from "bcryptjs";
 export const updatePassword = async (req: Request, res: Response) => {
     try {
-        const validationError: Joi.ValidationError | undefined = validatePassword(
-            req.body
-        );
+        const validationError: Joi.ValidationError | undefined = validatePassword(req.body);
         if (validationError) {
-            return handleResponse(
-                res,
-                400,
-                errors.validation,
-                validationError.details
-            );
+            return handleResponse(res, 400, errors.validation, validationError.details);
         }
+
         const { password, newPassword } = req.body;
-        const user = await USER.findById(res.locals.userId, "password")
+        const user = await USER.findById(res.locals.userId, "password"); // ❗ no .lean()
+
         if (!user) {
             return handleResponse(res, 404, errors.user_not_found);
         }
+
         const isMatch = await bcrypt.compare(password, user.password);
         if (!isMatch) {
             return handleResponse(res, 400, errors.incorrect_password);
         }
-        // Hash the new password
-        const salt = await bcrypt.genSalt(10);
-        const hashedPassword = await bcrypt.hash(newPassword, salt);
+
+        const hashedPassword = await bcrypt.hash(newPassword, 10);
         user.password = hashedPassword;
-        await user.save();
+
+        await user.save(); // ✅ Works now
         return handleResponse(res, 200, success.password_updated);
     } catch (err: any) {
         await sendErrorToDiscord("PUT:password", err);
