@@ -19,7 +19,7 @@ export const updatePassword = async (req: Request, res: Response) => {
             );
         }
         const { password, newPassword } = req.body;
-        const user = await USER.findById(res.locals.userId , "password")
+        const user = await USER.findById(res.locals.userId, "password")
         if (!user) {
             return handleResponse(res, 404, errors.user_not_found);
         }
@@ -27,7 +27,10 @@ export const updatePassword = async (req: Request, res: Response) => {
         if (!isMatch) {
             return handleResponse(res, 400, errors.incorrect_password);
         }
-        user.password = newPassword;
+        // Hash the new password
+        const salt = await bcrypt.genSalt(10);
+        const hashedPassword = await bcrypt.hash(newPassword, salt);
+        user.password = hashedPassword;
         await user.save();
         return handleResponse(res, 200, success.password_updated);
     } catch (err: any) {

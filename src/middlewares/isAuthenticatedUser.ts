@@ -14,7 +14,7 @@ export const isAuthenticatedUser: any = async (
             return handleResponse(res, 401, errors.no_token);
         }
         const tokenArray = token.split(" ") as ['Bearer', string];
-        jwt.verify(tokenArray[1], config.JWT.ACCESS_TOKEN_SECRET, (err, data: any) => {
+        jwt.verify(tokenArray[1], config.JWT.ACCESS_TOKEN_SECRET, async (err, data: any) => {
             if (err) {
                 if (err.name === 'TokenExpiredError') {
                     return handleResponse(res, 401, errors.jwt_expired);
