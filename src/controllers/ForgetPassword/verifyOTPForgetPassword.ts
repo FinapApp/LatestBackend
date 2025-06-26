@@ -33,14 +33,14 @@ export const verifyOTPForgetPassword = async (req: Request, res: Response) => {
             return handleResponse(res, 400, errors.otp_expired);
         }
 
-        let parsedData: { generatedOTP: string };
+        let parsedData: { OTP: string };
         try {
             parsedData = JSON.parse(redisDataRaw);
         } catch {
             return handleResponse(res, 400, errors.otp_expired);
         }
 
-        if (otp !== parsedData.generatedOTP) {
+        if (otp !== parsedData.OTP) {
             return handleResponse(res, 404, errors.otp_not_match);
         }
         return handleResponse(res, 200, success.verify_otp);
