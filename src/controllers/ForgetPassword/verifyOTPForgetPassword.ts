@@ -27,22 +27,22 @@ export const verifyOTPForgetPassword = async (req: Request, res: Response) => {
             return handleResponse(res, 400, errors.identifier_not_found);
         }
 
+        // JSON.stringify({ generatedOTP, _id: checkUser._id }),
         const redisDataRaw = await redis.get(`FORGET-PASSWORD:${identifier}`);
         if (!redisDataRaw) {
             return handleResponse(res, 400, errors.otp_expired);
         }
 
-        let parsedData: { OTP: string; _id: string };
+        let parsedData: { generatedOTP: string };
         try {
             parsedData = JSON.parse(redisDataRaw);
         } catch {
             return handleResponse(res, 400, errors.otp_expired);
         }
 
-        if (otp !== parsedData.OTP) {
+        if (otp !== parsedData.generatedOTP) {
             return handleResponse(res, 404, errors.otp_not_match);
         }
-
         return handleResponse(res, 200, success.verify_otp);
     } catch (err: any) {
         await sendErrorToDiscord("POST:verify-otp-forget-password", err);

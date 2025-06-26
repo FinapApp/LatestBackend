@@ -48,7 +48,7 @@ export const forgetPassword = async (req: Request, res: Response) => {
         // Store OTP in Redis as JSON string
         await redis.set(
             `FORGET-PASSWORD:${email || username || phone}`,
-            JSON.stringify({ generatedOTP, _id: checkUser._id }),
+            JSON.stringify({ generatedOTP}),
             "EX",
             config.REDIS_EXPIRE_IN
         );
