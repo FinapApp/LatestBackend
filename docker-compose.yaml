@@ -72,7 +72,7 @@ services:
       - "443:443"
     volumes:
       - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
-      - /etc/letsencrypt/live/api.autobots.live:/etc/nginx/certs:ro
+      - ./nginx/certs:/etc/nginx/certs:ro
     depends_on:
       - app
 
