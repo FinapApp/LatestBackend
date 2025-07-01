@@ -1,8 +1,22 @@
 import { Kafka } from "kafkajs";
+import { generateAuthToken }  from "aws-msk-iam-sasl-signer-js"
 
+
+async function oauthBearerTokenProvider(region : string) {
+    // Uses AWS Default Credentials Provider Chain to fetch credentials
+    const authTokenResponse = await generateAuthToken({ region });
+    return {
+        value: authTokenResponse.token
+    }
+ }
 export const kafka = new Kafka({
     clientId: "notification-services-flickstar",
-    brokers: ["kafka:9092"],
+    brokers: ["boot-ipft11ob.c3.kafka-serverless.ap-south-1.amazonaws.com:9098"],
+    ssl: true,
+    sasl: {
+        mechanism: 'oauthbearer',
+        oauthBearerProvider: () => oauthBearerTokenProvider('ap-south-1')
+    }
 });
 export async function kafkaConnecter() {
     const admin = kafka.admin();
