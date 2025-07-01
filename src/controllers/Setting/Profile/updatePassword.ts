@@ -25,6 +25,7 @@ export const updatePassword = async (req: Request, res: Response) => {
         }
 
         const hashedPassword = await bcrypt.hash(newPassword, 10);
+        
         user.password = hashedPassword;
 
         await user.save(); // ✅ Works now

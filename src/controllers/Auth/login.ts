@@ -135,7 +135,7 @@ export const login = async (req: Request, res: Response) => {
     );
     let stripeAccountId: string | null = null;
     let stripeReady: boolean = false;
-    const walletCheck = await WALLET.findOne({ user: userId }, "stripeAccountId stripeReady").lean();
+    const walletCheck = await WALLET.findOne({ user: userId }, "stripeAccountId stripeReady", { upsert: true }).lean();
     if (walletCheck) {
       stripeAccountId = walletCheck.stripeAccountId ?? null;
       stripeReady = walletCheck.stripeReady ?? false;

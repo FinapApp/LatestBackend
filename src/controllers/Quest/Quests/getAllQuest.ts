@@ -165,7 +165,7 @@ export const getAllQuests = async (req: Request, res: Response) => {
                     totalAmount: 1,
                     mode: 1,
                     location: 1,
-                    distanceinKM: 1,
+                    distanceInMiles: 1,
                     thumbnailURLs: {
                         $map: { input: "$media", as: "m", in: "$$m.thumbnailURL" }
                     },
