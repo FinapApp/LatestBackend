@@ -7,7 +7,7 @@ import { redis } from "./config/redis/redis.config";
 import cors from 'cors';
 import cluster from "cluster";
 import helmet from "helmet";
-import { kafkaConnecter } from "./config/kafka/kafka.config";
+// import { kafkaConnecter } from "./config/kafka/kafka.config";
 import { isAuthenticatedUser } from "./middlewares/isAuthenticatedUser";
 import BasicAuth from 'express-basic-auth'
 import { specs, swaggerUi } from "./utils/swagger";
@@ -15,7 +15,6 @@ import mongoose from "mongoose";
 import { SongSchema } from "./models/Song/song.model";
 import { StaffSchema } from "./models/Staff/staff.model";
 import { connectMeilisearch } from "./config/melllisearch/mellisearch.config";
-// import { kafkaConnecter } from "./config/kafka/kafka.config";
 const app: Express = express();
 
 // SWAGGER
@@ -64,7 +63,7 @@ if (cluster.isPrimary) {
   app.set("redis", redis);
 
   // KAFKA CONNECTER
-  kafkaConnecter()
+  // kafkaConnecter()
 
   // MELLISEARCH CONNECTER
   connectMeilisearch()

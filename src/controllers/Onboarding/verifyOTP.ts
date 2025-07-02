@@ -8,6 +8,8 @@ import { USER } from "../../models/User/user.model";
 import { sendErrorToDiscord } from "../../config/discord/errorDiscord";
 import { getIndex } from "../../config/melllisearch/mellisearch.config";
 import bcrypt from "bcryptjs";
+import { REFERRAL } from "../../models/Referral/referral.model";
+import { generateNumericOTP } from "../../utils/OTPGenerator";
 
 interface ForgetOTPRequest {
     email: string;
@@ -75,10 +77,18 @@ export const verifyOTPAfterSignUp = async (req: Request, res: Response) => {
             _id: string;
             toObject: () => Record<string, any>;
         };
-
+        
         if (!userCreate) {
             return handleResponse(res, 400, errors.unable_to_create_user);
         }
+        let code: string;
+        let exists: boolean;
+        do {
+            code = generateNumericOTP(6);
+            exists = !!(await REFERRAL.exists({ code }));
+        } while (exists);
+
+        await REFERRAL.create({ user: userCreate._id, code });
 
         // Clean up OTP
         await Promise.all([

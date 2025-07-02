@@ -1,4 +1,5 @@
 import * as dotenv from "dotenv";
+
 dotenv.config();
 export const config = {
   MELLISSEARCH: {
@@ -6,6 +7,10 @@ export const config = {
     masterKey: process.env.MEILI_MASTER_KEY!,
     // userIndex: process.env.MELLISSEARCH_USER_INDEX!,
     // flickIndex :process.env.MELLISSEARCH_FLICK_INDEX!,  
+  },
+  REFERRAL : {
+    referrerReward: parseFloat(process.env.REFERRAL_REFERRER_REWARD!) || 2,
+    referredUserReward: parseFloat(process.env.REFERRAL_REFERRED_USER_REWARD!) || 1,
   },
   MONGODB: {
     URI: process.env.MONGO_URI!,

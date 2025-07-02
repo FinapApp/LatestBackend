@@ -1,5 +1,5 @@
 import { Kafka } from "kafkajs";
-import { generateAuthToken }  from "aws-msk-iam-sasl-signer-js"
+import { generateAuthToken  }  from "aws-msk-iam-sasl-signer-js"
 
 
 async function oauthBearerTokenProvider(region : string) {

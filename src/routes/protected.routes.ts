@@ -8,6 +8,7 @@ import { followRoutes } from "./follow/follow.routes";
 import { friendSuggestionRoutes } from "./friendSuggestion/friendSuggestion.routes";
 import { likeRoutes } from "./like/like.routes";
 import { questRoutes } from "./quest/quest.routes";
+import { referralRoutes } from "./referral/referral.routes";
 import { reportRoutes } from "./report/report.routes";
 import { searchRoutes } from "./search/search.routes";
 import { settingNotificationRoutes } from "./setting/settingNotification.routes";
@@ -19,6 +20,7 @@ import { storyRoutes } from "./stories/story.routes";
 
 
 const routes = [
+    referralRoutes,
     flickRoutes,
     commentRoutes,
     reportRoutes,

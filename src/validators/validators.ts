@@ -3,6 +3,10 @@ import countries from "../constants/countryList";
 import { config } from "../config/generalconfig";
 import { REGEX } from "../utils/regex";
 
+
+
+
+
 export const validateLogin = (body: object) => {
   const schema = Joi.object({
     email: Joi.string().email().optional(),
@@ -25,6 +29,14 @@ export const validateLogin = (body: object) => {
   const { error } = schema.validate(body);
   return error;
 };
+
+export const validateApplyReferralCode = (body: object) => {
+  const schema = Joi.object({
+    code: Joi.string().required(),
+  });
+  const { error } = schema.validate(body);
+  return error;
+}
 
 
 export const validateGetFlicks = (query: object) => {

@@ -28,6 +28,16 @@ export const handleResponse = (
   }
 };
 export const errors = {
+  //Referral Code
+  referral_code_not_found: {
+    message: "Referral code not found",
+  },
+  cannot_use_own_referral_code: {
+    message: "You cannot use your own referral code",
+  },
+  referral_code_already_used: {
+    message: "Referral code already used",
+  },
 
   invalid_qr_string: {
     message: "Invalid QR string",
@@ -411,6 +421,10 @@ quest_already_closed: {
 };
 
 export const success = {
+  //Referral Code
+  referral_code_applied: {
+    message: "Referral code applied successfully",
+  },
   //Two-Factor Authentication
   two_factor_code_sent: {
     message: "Two-factor authentication code sent successfully",

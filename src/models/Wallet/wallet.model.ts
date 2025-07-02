@@ -3,6 +3,7 @@ import { Schema, model } from 'mongoose';
 
 export interface IWalletSchema extends Document {
     user: Schema.Types.ObjectId
+    promotionalBalance?: number; // optional, for promotional balance
     reservedBalance: number; // balance - availableBalance
     availableBalance: number; // balance  - reservedBalance
     stripeAccountId?: string; // optional, for Stripe integration
@@ -17,11 +18,18 @@ const WalletSchema = new Schema<IWalletSchema>(
             ref: 'user',
             required: true,
         },
+        promotionalBalance: {
+            type: Number,
+            required: false, // optional field for promotional balance
+            default: 0, // default value for promotional balance
+        },
+        // reservedBalance is the balance that is reserved for pending transactions
         reservedBalance: {
             type: Number,
             required: true,
             default: 0,
         },
+        // availableBalance is the balance that can be used for transactions
         availableBalance: {
             type: Number,
             required: true,
