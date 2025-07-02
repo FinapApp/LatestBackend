@@ -64,6 +64,8 @@ services:
       - TEMPLATE_ID_FORGET_PASSWORD_MSG91=6847b650d6fc051ec82a9689
       - TEMPLATE_ID_TWO_FACTOR_AUTH_MSG91=6847bafdd6fc0524f970e3f5
       - QR_EXPIRE_TIME=1d
+      - REFERRAL_REFERRER_REWARD=5
+      - REFERRAL_REFERRED_USER_REWARD=3
   nginx:
     image: nginx:latest
     container_name: nginx
