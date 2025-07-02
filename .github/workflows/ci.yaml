@@ -10,11 +10,11 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Install sshpass
-        run: sudo apt-get update && sudo apt-get install -y sshpass
-
-      - name: Run remote command using password login
+      - name: Decode and set permissions for SSH key
         run: |
-          sshpass -p "${{ secrets.AZURE_SSH_PASSWORD }}" \
-            ssh -o StrictHostKeyChecking=no azureadmin@135.235.193.1 \
-            "bash ~/deploy3.sh"
+          echo "${{ secrets.SSH_PRIVATE_KEY }}" | base64 -d > flickstarend-user.pem
+          chmod 600 flickstarend-user.pem
+
+      - name: Run remote command using SSH key
+        run: |
+          ssh -o StrictHostKeyChecking=no -i flickstarend-user.pem ubuntu@${{ secrets.SERVER_IP }} "bash ~/deploy.sh"
