@@ -4,6 +4,7 @@ import { Schema, model } from 'mongoose';
 export interface IWalletSchema extends Document {
     user: Schema.Types.ObjectId
     promotionalBalance?: number; // optional, for promotional balance
+    totalEarning?: number; // optional, for total earnings
     reservedBalance: number; // balance - availableBalance
     availableBalance: number; // balance  - reservedBalance
     stripeAccountId?: string; // optional, for Stripe integration
@@ -42,6 +43,10 @@ const WalletSchema = new Schema<IWalletSchema>(
         stripeReady: {
             type: Boolean,
             default: false, // optional field to indicate if Stripe setup is complete
+        },
+        totalEarning: {
+            type: Number,
+            default: 0, // total earnings from the wallet
         },
         currency: {
             type: String,

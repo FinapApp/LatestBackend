@@ -107,7 +107,8 @@ export const bulkChangeStatus = async (req: Request, res: Response) => {
                                 update: {
                                     $inc: {
                                         availableBalance: quest.avgAmountPerPerson,
-                                        reservedBalance: -quest.avgAmountPerPerson
+                                        reservedBalance: -quest.avgAmountPerPerson,
+                                        totalEarning: quest.avgAmountPerPerson
                                     }
                                 }
                             }
