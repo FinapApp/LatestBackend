@@ -93,7 +93,8 @@ export const changeQuestApplicantStatus = async (req: Request, res: Response) =>
                             $inc: {
                                 availableBalance: quest.avgAmountPerPerson,
                                 reservedBalance: -quest.avgAmountPerPerson,
-                                totalEarning: quest.avgAmountPerPerson
+                                totalEarning: quest.avgAmountPerPerson,
+                                completedQuests: 1
                             }
                         }
                     }

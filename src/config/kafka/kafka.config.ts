@@ -11,7 +11,7 @@ async function oauthBearerTokenProvider(region : string) {
  }
 export const kafka = new Kafka({
     clientId: "notification-services-flickstar",
-    brokers: ["boot-ipft11ob.c3.kafka-serverless.ap-south-1.amazonaws.com:9098"],
+    brokers: ["boot-xszmsp2k.c3.kafka-serverless.ap-south-1.amazonaws.com:9098"],
     ssl: true,
     sasl: {
         mechanism: 'oauthbearer',

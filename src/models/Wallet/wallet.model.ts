@@ -4,6 +4,7 @@ import { Schema, model } from 'mongoose';
 export interface IWalletSchema extends Document {
     user: Schema.Types.ObjectId
     promotionalBalance?: number; // optional, for promotional balance
+    completedQuests?: number; // optional, for total completed quests
     totalEarning?: number; // optional, for total earnings
     reservedBalance: number; // balance - availableBalance
     availableBalance: number; // balance  - reservedBalance
@@ -47,6 +48,10 @@ const WalletSchema = new Schema<IWalletSchema>(
         totalEarning: {
             type: Number,
             default: 0, // total earnings from the wallet
+        },
+        completedQuests: {
+            type: Number, 
+            default: 0, // total number of completed quests
         },
         currency: {
             type: String,
