@@ -41,7 +41,21 @@ export const createQuest = async (req: Request, res: Response) => {
         if (!quest) {
             return handleResponse(res, 404, errors.quest_not_found);
         }
+        // Deduct the amount from balances
+        // Deduct promotional first, then available
+        let amountLeftToDeduct = totalAmount;
+        let updatedFields: { availableBalance?: number; promotionalBalance?: number } = {};
 
+        if (wallet.promotionalBalance >= amountLeftToDeduct) {
+            updatedFields.promotionalBalance = wallet.promotionalBalance - amountLeftToDeduct;
+        } else {
+            amountLeftToDeduct -= wallet.promotionalBalance;
+            updatedFields.promotionalBalance = 0;
+            updatedFields.availableBalance = wallet.availableBalance - amountLeftToDeduct;
+        }
+
+        await WALLET.updateOne({ user: userId }, { $set: updatedFields });
+        
         const questIndex = getIndex("QUESTS");
 
         const userDetails = await quest.populate<{ user: { username: string; photo: string; name: string; _id: string } }>("user", "username photo name");
