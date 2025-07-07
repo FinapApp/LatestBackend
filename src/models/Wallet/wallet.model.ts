@@ -3,8 +3,8 @@ import { Schema, model } from 'mongoose';
 
 export interface IWalletSchema extends Document {
     user: Schema.Types.ObjectId
-    promotionalBalance?: number; // optional, for promotional balance
-    completedQuests?: number; // optional, for total completed quests
+    promotionalBalance: number; // optional, for promotional balance
+    completedQuests: number; // optional, for total completed quests
     totalEarning?: number; // optional, for total earnings
     reservedBalance: number; // balance - availableBalance
     availableBalance: number; // balance  - reservedBalance

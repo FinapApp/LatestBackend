@@ -1,14 +1,15 @@
 import { Kafka } from "kafkajs";
-import { generateAuthToken  }  from "aws-msk-iam-sasl-signer-js"
+import { generateAuthToken } from "aws-msk-iam-sasl-signer-js"
 
 
-async function oauthBearerTokenProvider(region : string) {
+async function oauthBearerTokenProvider(region: string) {
     // Uses AWS Default Credentials Provider Chain to fetch credentials
     const authTokenResponse = await generateAuthToken({ region });
     return {
         value: authTokenResponse.token
     }
- }
+}
+
 export const kafka = new Kafka({
     clientId: "notification-services-flickstar",
     brokers: ["boot-xszmsp2k.c3.kafka-serverless.ap-south-1.amazonaws.com:9098"],

@@ -28,6 +28,13 @@ export const handleResponse = (
   }
 };
 export const errors = {
+  // Wallet-related errors
+  wallet_not_found: {
+    message: "Wallet not found",
+  },
+  insufficient_balance: {
+    message: "Insufficient balance",
+  },
   //Referral Code
   referral_code_not_found: {
     message: "Referral code not found",
