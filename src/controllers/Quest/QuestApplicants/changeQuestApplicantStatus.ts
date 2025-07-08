@@ -19,11 +19,11 @@ export const changeQuestApplicantStatus = async (req: Request, res: Response) =>
 
         const applicant = await QUEST_APPLICANT.findById(questApplicantId).select("status quest user");
         if (!applicant) return handleResponse(res, 404, errors.quest_applicant_not_found);
-        if (applicant.status !== "pending") {
-            return handleResponse(res, 400, {
-                message: `Applicant is already ${applicant.status}. Only pending applicants can be updated.`,
-            });
-        }
+        // if (applicant.status !== "pending") {
+        //     return handleResponse(res, 400, {
+        //         message: `Applicant is already ${applicant.status}. Only pending applicants can be updated.`,
+        //     });
+        // }
 
         const quest = await QUESTS.findById(applicant.quest).select("totalApproved leftApproved totalRejected applicantCount maxApplicants avgAmountPerPerson status");
         if (!quest) return handleResponse(res, 404, errors.quest_not_found);
