@@ -46,4 +46,4 @@ const DeleteAccountSchema = new Schema<IDeletedAccount>(
 
 DeleteAccountSchema.index({ createdAt: -1 })
 
-export const DELETEACCOUNT = model<IDeletedAccount>('comment', DeleteAccountSchema);
+export const DELETEACCOUNT = model<IDeletedAccount>('deletedaccount', DeleteAccountSchema);
