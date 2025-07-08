@@ -18,6 +18,7 @@ import { getIndex } from "../../config/melllisearch/mellisearch.config";
 import { validateDeleteAccount } from "../../validators/validators";
 import bcrypt from "bcryptjs";
 import Joi from "joi";
+import { DELETEACCOUNT } from "../../models/DeletedAccounts/deleteAccounts.model";
 
 export const deleteAccount = async (req: Request, res: Response) => {
     try {
@@ -25,17 +26,22 @@ export const deleteAccount = async (req: Request, res: Response) => {
         if (validationError) {
             return handleResponse(res, 400, errors.validation, validationError.details);
         }
-        const { password } = req.body;
+
+        const { password, reason = "No reason provided" } = req.body;
         const userId = res.locals.userId;
-        const user = await USER.findById(userId , "password");
+
+        // Fetch full user info first
+        const user = await USER.findById(userId, "password email username phone createdAt");
         if (!user) {
             return handleResponse(res, 404, errors.user_not_found);
         }
+
         const isMatch = await bcrypt.compare(password, user.password);
         if (!isMatch) {
             return handleResponse(res, 400, errors.incorrect_password);
         }
-        // Fetch follow relations
+
+        // Handle follow relationship cleanup
         const follows = await FOLLOW.find({
             $or: [{ follower: userId }, { following: userId }]
         });
@@ -43,8 +49,7 @@ export const deleteAccount = async (req: Request, res: Response) => {
         const bulkUpdates: any[] = [];
 
         for (const follow of follows) {
-            // If the user was following someone, decrement that someone's followerCount
-            if (String(follow.follower) === userId) {
+            if (String(follow.follower) === String(userId)) {
                 bulkUpdates.push({
                     updateOne: {
                         filter: { _id: follow.following },
@@ -53,8 +58,7 @@ export const deleteAccount = async (req: Request, res: Response) => {
                 });
             }
 
-            // If someone was following the user, decrement their followingCount
-            if (String(follow.following) === userId) {
+            if (String(follow.following) === String(userId)) {
                 bulkUpdates.push({
                     updateOne: {
                         filter: { _id: follow.follower },
@@ -68,7 +72,7 @@ export const deleteAccount = async (req: Request, res: Response) => {
             await USER.bulkWrite(bulkUpdates);
         }
 
-        // Delete the user and related content
+        // Delete all related content
         await Promise.all([
             USER.findByIdAndDelete(userId),
             FLICKS.deleteMany({ user: userId }),
@@ -76,22 +80,38 @@ export const deleteAccount = async (req: Request, res: Response) => {
             COMMENT.deleteMany({ user: userId }),
             LIKE.deleteMany({ user: userId }),
             FOLLOW.deleteMany({ $or: [{ follower: userId }, { following: userId }] }),
-            // FEEDBACK.deleteMany({ user: userId }),
-            // REPORT.deleteMany({ user: userId }),
             SEARCHHISTORY.deleteMany({ user: userId }),
             STORY.deleteMany({ user: userId }),
             STORYVIEW.deleteMany({ user: userId }),
             USERPREFERENCE.findOneAndDelete({ user: userId }),
             USERBIOLINKS.deleteMany({ user: userId }),
             SESSION.deleteMany({ user: userId }),
-            WALLET.findOneAndDelete({ userId: userId }),
+            WALLET.findOneAndDelete({ userId }),
         ]);
-        await Promise.all([
+
+        const deletionResults = await Promise.allSettled([
             getIndex("FLICKS").deleteDocuments([userId]),
             getIndex("QUESTS").deleteDocuments([userId]),
             getIndex("USERS").deleteDocuments([userId]),
             getIndex("HASHTAG").deleteDocuments([userId]),
-        ])
+        ]);
+
+        for (const result of deletionResults) {
+            if (result.status === "rejected") {
+                sendErrorToDiscord("DELETE:delete-account", result.reason);
+            }
+        }
+
+        // Log deleted account info
+        await DELETEACCOUNT.create({
+            user: userId,
+            reason,
+            email: user.email,
+            username: user.username,
+            phone: user.phone,
+            accountCreatedAt: user?.createdAt,
+        });
+
         return handleResponse(res, 200, success.delete_account);
 
     } catch (error: any) {
@@ -102,3 +122,4 @@ export const deleteAccount = async (req: Request, res: Response) => {
         return handleResponse(res, 500, errors.catch_error);
     }
 };
+

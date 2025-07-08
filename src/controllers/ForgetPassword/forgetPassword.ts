@@ -32,12 +32,19 @@ export const forgetPassword = async (req: Request, res: Response) => {
             return handleResponse(res, 404, errors.user_not_found);
         }
         const generatedOTP = generateNumericOTP();
+        await redis.set(
+            `FORGET-PASSWORD:${email || username || phone}`,
+            JSON.stringify({ OTP: generatedOTP, _id: checkUser._id }),
+            "EX",
+            config.REDIS_EXPIRE_IN
+        );
         if (checkUser.email) {
             await sendForgotPasswordEmail(
                 generatedOTP,
                 checkUser.email as string,
                 checkUser.username as string,
             );
+            return handleResponse(res, 200, success.forget_password_email);
         }
         if (checkUser.phone) {
             await sendForgotPasswordPhone(
@@ -45,14 +52,7 @@ export const forgetPassword = async (req: Request, res: Response) => {
                 checkUser.phone as string,
             );
         }
-        // Store OTP in Redis as JSON string
-        await redis.set(
-            `FORGET-PASSWORD:${email || username || phone}`,
-            JSON.stringify({ OTP: generatedOTP, _id: checkUser._id }),
-            "EX",
-            config.REDIS_EXPIRE_IN
-        );
-        return handleResponse(res, 200, success.forget_password);
+        return handleResponse(res, 200, success.forget_password_sms);
     } catch (err: any) {
         console.log(err)
         sendErrorToDiscord("POST:forget-password", err);

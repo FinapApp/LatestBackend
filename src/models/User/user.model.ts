@@ -28,7 +28,8 @@ interface IUserSchema extends Document {
     isDeactivated: boolean,
     deletedReason: string[],
     deactivationReason: string[],
-    twoFactor: boolean
+    twoFactor: boolean;
+    createdAt: Date;
 }
 
 export const UserSchema = new Schema<IUserSchema>(

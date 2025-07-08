@@ -632,6 +632,12 @@ export const success = {
   forget_password: {
     message: "OTP sent successfully",
   },
+  forget_password_sms: {
+    message: "SMS sent successfully",
+  },
+  forget_password_email: {
+    message: "Email sent successfully",
+  },
   share_post: {
     message: "Post shared successfully",
   },

@@ -1036,6 +1036,7 @@ export const validateCreateQuest = (body: object, params: object) => {
 
 export const validateGetSearchHistory = (query: object) => {
   const schema = Joi.object({
+    type : Joi.string().valid('userSearched', 'flick', 'quest', 'song', 'hashtag' , "user").optional(),
     limit: Joi.number().integer().min(1).max(15).optional(),
     page: Joi.number().integer().min(1).optional(),
   })
@@ -1412,6 +1413,7 @@ export const validateRefreshToken = (body: object) => {
 export const validateDeleteAccount = (body: object) => {
   const schema = Joi.object({
     password: Joi.string().required(),
+    reason : Joi.string().min(2).max(200).required()
   })
   const { error } = schema.validate(body)
   return error
