@@ -18,7 +18,7 @@ export const createQuest = async (req: Request, res: Response) => {
         const questId = req.params.questId;
         const { coords, totalAmount, ...rest } = req.body;
 
-        const wallet = await WALLET.findOne({ user: userId }).select("availableBalance promotionalBalance");
+        const wallet = await WALLET.findOne({ user: userId }).select("availableBalance promotionalBalance currency");
         if (!wallet) {
             return handleResponse(res, 404, errors.wallet_not_found);
         }
@@ -63,6 +63,7 @@ export const createQuest = async (req: Request, res: Response) => {
             amount: totalAmount,
             description: `Quest created with ID ${questId}`,
             quest: questId,
+            currency: wallet.currency,
             status: "succeeded",
         });
         

@@ -15,7 +15,6 @@ import mongoose from "mongoose";
 import { SongSchema } from "./models/Song/song.model";
 import { StaffSchema } from "./models/Staff/staff.model";
 import { connectMeilisearch } from "./config/melllisearch/mellisearch.config";
-import "./cron/node-cron"
 const app: Express = express();
 
 // SWAGGER
@@ -85,7 +84,7 @@ if (cluster.isPrimary) {
   const startServer = async () => {
     try {
       await connectDB(); // must be a real awaited connection
-      await import('./cron/node-cron'); // start cron after DB is connected
+      // await import('./cron/node-cron'); // start cron after DB is connected
       app.listen(config.PORT, () => {
         console.log(`🚀 Server started on port ${config.PORT}`);
       });
