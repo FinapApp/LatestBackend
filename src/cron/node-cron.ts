@@ -4,7 +4,7 @@ import { QUESTS } from '../models/Quest/quest.model';
 import { WALLET } from '../models/Wallet/wallet.model';
 
 // Run every hour
-cron.schedule('* * * * *', async () => {
+cron.schedule('0 * * * *', async () => {
     console.log('Running balance update cron job...');
     const oneDayAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
     try {
