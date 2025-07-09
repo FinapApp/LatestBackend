@@ -6,6 +6,7 @@ import { QUESTS } from "../../../models/Quest/quest.model";
 import { getIndex } from "../../../config/melllisearch/mellisearch.config";
 import { IMediaSchema } from "../../../models/Flicks/flicks.model";
 import { WALLET } from "../../../models/Wallet/wallet.model";
+import { TRANSACTION } from "../../../models/Wallet/transaction.model";
 export const createQuest = async (req: Request, res: Response) => {
     try {
         const validationError: Joi.ValidationError | undefined = validateCreateQuest(req.body, req.params);
@@ -55,6 +56,15 @@ export const createQuest = async (req: Request, res: Response) => {
         }
 
         await WALLET.updateOne({ user: userId }, { $set: updatedFields });
+
+        await TRANSACTION.create({
+            user: userId,
+            type: "quest",
+            amount: totalAmount,
+            description: `Quest created with ID ${questId}`,
+            quest: questId,
+            status: "succeeded",
+        });
         
         const questIndex = getIndex("QUESTS");
 

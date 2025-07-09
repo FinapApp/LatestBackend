@@ -13,7 +13,6 @@ export const changeQuestApplicantStatus = async (req: Request, res: Response) =>
         if (validationError) {
             return handleResponse(res, 400, errors.validation, validationError.details);
         }
-
         const { questApplicantId } = req.params;
         const { status } = req.query;
 
@@ -24,7 +23,6 @@ export const changeQuestApplicantStatus = async (req: Request, res: Response) =>
         //         message: `Applicant is already ${applicant.status}. Only pending applicants can be updated.`,
         //     });
         // }
-
         const quest = await QUESTS.findById(applicant.quest).select("totalApproved leftApproved totalRejected applicantCount maxApplicants avgAmountPerPerson status");
         if (!quest) return handleResponse(res, 404, errors.quest_not_found);
 
@@ -53,15 +51,12 @@ export const changeQuestApplicantStatus = async (req: Request, res: Response) =>
 
         // ✅ Step 2: Prepare quest update
         const updateQuery: any = { $inc: {} };
-        let shouldMarkCompleted = false;
-
         if (status === "approved") {
             updateQuery.$inc.totalApproved = 1;
             updateQuery.$inc.leftApproved = -1;
 
             const projectedTotalApproved = quest.totalApproved + 1;
             if (projectedTotalApproved >= quest.maxApplicants) {
-                shouldMarkCompleted = true;
                 updateQuery.$set = { status: "completed" };
             }
         } else if (status === "rejected") {
@@ -79,31 +74,31 @@ export const changeQuestApplicantStatus = async (req: Request, res: Response) =>
                 { $inc: { reservedBalance: quest.avgAmountPerPerson } }
             );
 
-            // Second: if quest is now completed, unlock all
-            if (shouldMarkCompleted) {
-                const allApprovedApplicants = await QUEST_APPLICANT.find({
-                    quest: quest._id,
-                    status: 'approved'
-                }, 'user');
+            // // Second: if quest is now completed, unlock all
+            // if (shouldMarkCompleted) {
+            //     const allApprovedApplicants = await QUEST_APPLICANT.find({
+            //         quest: quest._id,
+            //         status: 'approved'
+            //     }, 'user');
 
-                const walletBulkOps = allApprovedApplicants.map(app => ({
-                    updateOne: {
-                        filter: { user: app.user },
-                        update: {
-                            $inc: {
-                                availableBalance: quest.avgAmountPerPerson,
-                                reservedBalance: -quest.avgAmountPerPerson,
-                                totalEarning: quest.avgAmountPerPerson,
-                                completedQuests: 1
-                            }
-                        }
-                    }
-                }));
+            //     const walletBulkOps = allApprovedApplicants.map(app => ({
+            //         updateOne: {
+            //             filter: { user: app.user },
+            //             update: {
+            //                 $inc: {
+            //                     availableBalance: quest.avgAmountPerPerson,
+            //                     reservedBalance: -quest.avgAmountPerPerson,
+            //                     totalEarning: quest.avgAmountPerPerson,
+            //                     completedQuests: 1
+            //                 }
+            //             }
+            //         }
+            //     }));
 
-                if (walletBulkOps.length > 0) {
-                    await WALLET.bulkWrite(walletBulkOps);
-                }
-            }
+            //     if (walletBulkOps.length > 0) {
+            //         await WALLET.bulkWrite(walletBulkOps);
+            //     }
+            // }
         }
 
         return handleResponse(res, 200, success.status_changed_flicked);

@@ -7,6 +7,7 @@ interface IGPSLocation {
 }
 
 interface IQuests extends Document {
+    _id : Schema.Types.ObjectId;
     user: Schema.Types.ObjectId;
     title: string;
     staff: Schema.Types.ObjectId;

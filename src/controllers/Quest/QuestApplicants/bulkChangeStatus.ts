@@ -89,33 +89,33 @@ export const bulkChangeStatus = async (req: Request, res: Response) => {
                     });
                 }
 
-                const projectedTotalApproved = quest.totalApproved + entry.approvalCount;
+                // const projectedTotalApproved = quest.totalApproved + entry.approvalCount;
 
-                // 2️⃣ If quest is completed, unlock all reserved to available
-                if (projectedTotalApproved >= quest.maxApplicants) {
-                    update.$set = { status: 'completed' };
+                // // 2️⃣ If quest is completed, unlock all reserved to available
+                // if (projectedTotalApproved >= quest.maxApplicants) {
+                //     update.$set = { status: 'completed' };
 
-                    const allApprovedApplicants = await QUEST_APPLICANT.find({
-                        quest: quest._id,
-                        status: 'approved'
-                    }, 'user');
+                //     const allApprovedApplicants = await QUEST_APPLICANT.find({
+                //         quest: quest._id,
+                //         status: 'approved'
+                //     }, 'user');
 
-                    for (const applicant of allApprovedApplicants) {
-                        walletBulkOps.push({
-                            updateOne: {
-                                filter: { user: applicant.user },
-                                update: {
-                                    $inc: {
-                                        availableBalance: quest.avgAmountPerPerson,
-                                        reservedBalance: -quest.avgAmountPerPerson,
-                                        totalEarning: quest.avgAmountPerPerson,
-                                        completedQuests: 1
-                                    }
-                                }
-                            }
-                        });
-                    }
-                }
+                //     for (const applicant of allApprovedApplicants) {
+                //         walletBulkOps.push({
+                //             updateOne: {
+                //                 filter: { user: applicant.user },
+                //                 update: {
+                //                     $inc: {
+                //                         availableBalance: quest.avgAmountPerPerson,
+                //                         reservedBalance: -quest.avgAmountPerPerson,
+                //                         totalEarning: quest.avgAmountPerPerson,
+                //                         completedQuests: 1
+                //                     }
+                //                 }
+                //             }
+                //         });
+                //     }
+                // }
             } else if (status === 'rejected') {
                 update.$inc.totalRejected = entry.applicantIds.length;
             }

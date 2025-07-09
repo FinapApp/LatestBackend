@@ -4,8 +4,9 @@ interface ITransaction extends Document {
     user: mongoose.Types.ObjectId;
     amount: number;
     netAmount: number; // optional field for net amount after fees
-    type: 'deposit' | 'transfer' | 'withdrawal' | 'refund';
+    type: 'deposit' | 'transfer' | 'withdrawal' | 'refund' | 'quest'; // type of transaction
     stripeTxnId?: string;
+    quest?: mongoose.Types.ObjectId; // optional field for quest ID
     stripeTransferId?: string; // optional field for Stripe transfer ID
     stripeTransferReversalId?: string; // optional field for Stripe transfer reversal ID
     stripeReversalId?: string; // optional field for Stripe reversal ID
@@ -42,19 +43,20 @@ const TransactionSchema: Schema = new Schema<ITransaction>(
         netAmount: { type: Number, default: 0 }, // optional field for net amount after fees
         type: {
             type: String,
-            enum: ['deposit', 'transfer', 'withdrawal', 'refund'],
+            enum: ['deposit', 'transfer', 'withdrawal', 'refund' , 'quest'],
             required: true,
         },
-        stripeTxnId: { type: String, default: null }, // optional field for Stripe transaction ID
-        stripeTransferId: { type: String, default: null }, // optional field for Stripe transfer ID
-        stripeTransferReversalId: { type: String, default: null }, // optional field for Stripe transfer reversal ID
-        stripeReversalId: { type: String, default: null }, // optional field for Stripe reversal ID
-        stripeChargeId: { type: String, default: null }, // optional field for Stripe charge ID
-        stripeBalanceId: { type: String, default: null }, // optional field for Stripe balance transaction ID
-        reason: { type: String, default: null }, // optional field for the reason of the transaction
-        connectedAccountId: { type: String, default: null }, // optional field for connected account ID in Stripe
-        description: { type: String, default: null }, // optional field for transaction description
-        metadata: { type: Schema.Types.Mixed, default: {} }, // optional field for additional metadata
+        stripeTxnId: { type: String, }, // optional field for Stripe transaction ID
+        quest: { type: Schema.Types.ObjectId, ref: 'quest' },
+        stripeTransferId: { type: String, }, // optional field for Stripe transfer ID
+        stripeTransferReversalId: { type: String, }, // optional field for Stripe transfer reversal ID
+        stripeReversalId: { type: String, }, // optional field for Stripe reversal ID
+        stripeChargeId: { type: String, }, // optional field for Stripe charge ID
+        stripeBalanceId: { type: String, }, // optional field for Stripe balance transaction ID
+        reason: { type: String, }, // optional field for the reason of the transaction
+        connectedAccountId: { type: String, }, // optional field for connected account ID in Stripe
+        description: { type: String, }, // optional field for transaction description
+        metadata: { type: Schema.Types.Mixed }, // optional field for additional metadata
         destinationBank: {
             type: new Schema({
                 bank_name: String,
@@ -64,7 +66,7 @@ const TransactionSchema: Schema = new Schema<ITransaction>(
                 country: String,
                 account_type: String,
             }, { _id: false }),
-            default: null
+
         },
         sourceInfo: {
             type: new Schema({
@@ -75,7 +77,7 @@ const TransactionSchema: Schema = new Schema<ITransaction>(
                 country: String,
                 network: String,
             }, { _id: false }),
-            default: null
+
         },
         currency: { type: String, required: true }, // currency of the transaction
         status: {
