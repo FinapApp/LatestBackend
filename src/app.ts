@@ -7,7 +7,7 @@ import { redis } from "./config/redis/redis.config";
 import cors from 'cors';
 import cluster from "cluster";
 import helmet from "helmet";
-// import { kafkaConnecter } from "./config/kafka/kafka.config";
+import { kafkaConnecter } from "./config/kafka/kafka.config";
 import { isAuthenticatedUser } from "./middlewares/isAuthenticatedUser";
 import BasicAuth from 'express-basic-auth'
 import { specs, swaggerUi } from "./utils/swagger";
@@ -63,7 +63,7 @@ if (cluster.isPrimary) {
   app.set("redis", redis);
 
   // KAFKA CONNECTER
-  // kafkaConnecter()
+  kafkaConnecter()
 
   // MELLISEARCH CONNECTER
   connectMeilisearch()
@@ -84,7 +84,7 @@ if (cluster.isPrimary) {
   const startServer = async () => {
     try {
       await connectDB(); // must be a real awaited connection
-      // await import('./cron/node-cron'); // start cron after DB is connected
+      await import('./cron/node-cron'); // start cron after DB is connected
       app.listen(config.PORT, () => {
         console.log(`🚀 Server started on port ${config.PORT}`);
       });
