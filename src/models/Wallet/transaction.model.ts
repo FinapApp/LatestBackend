@@ -4,7 +4,7 @@ interface ITransaction extends Document {
     user: mongoose.Types.ObjectId;
     amount: number;
     netAmount: number; // optional field for net amount after fees
-    type: 'deposit' | 'transfer' | 'withdrawal' | 'refund';
+    type: 'deposit' | 'transfer' | 'withdrawal' | 'refund' | 'quest'; // type of transaction
     stripeTxnId?: string;
     stripeTransferId?: string; // optional field for Stripe transfer ID
     stripeTransferReversalId?: string; // optional field for Stripe transfer reversal ID
@@ -43,7 +43,7 @@ const TransactionSchema: Schema = new Schema<ITransaction>(
         netAmount: { type: Number, default: 0 }, // optional field for net amount after fees
         type: {
             type: String,
-            enum: ['deposit', 'transfer', 'withdrawal', 'refund'],
+            enum: ['deposit', 'transfer', 'withdrawal', 'refund' , 'quest'],
             required: true,
         },
         stripeTxnId: { type: String, }, // optional field for Stripe transaction ID
