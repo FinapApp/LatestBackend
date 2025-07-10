@@ -3,7 +3,7 @@ import { validateForgetPassword } from "../../validators/validators";
 import { redis } from "../../config/redis/redis.config";
 import Joi from "joi";
 import { config } from "../../config/generalconfig";
-import { handleResponse, errors, success } from "../../utils/responseCodec";
+import { handleResponse, errors} from "../../utils/responseCodec";
 import { generateNumericOTP } from "../../utils/OTPGenerator";
 import { USER } from "../../models/User/user.model";
 import { sendForgotPasswordEmail } from "../../utils/sendOTP_ForgetPassword";
@@ -44,7 +44,7 @@ export const forgetPassword = async (req: Request, res: Response) => {
                 checkUser.email as string,
                 checkUser.username as string,
             );
-            return handleResponse(res, 200, success.forget_password_email);
+            return handleResponse(res, 200 , { message : `An OTP has been sent to your email. ${checkUser.email}` });
         }
         if (checkUser.phone) {
             await sendForgotPasswordPhone(
@@ -52,7 +52,7 @@ export const forgetPassword = async (req: Request, res: Response) => {
                 checkUser.phone as string,
             );
         }
-        return handleResponse(res, 200, success.forget_password_sms);
+        return handleResponse(res, 200, {message : `An OTP has been sent to your phone. ${checkUser.phone}`});
     } catch (err: any) {
         console.log(err)
         sendErrorToDiscord("POST:forget-password", err);
