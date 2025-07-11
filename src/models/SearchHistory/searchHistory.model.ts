@@ -3,6 +3,7 @@ import { Schema, model, Types } from 'mongoose';
 export interface ISearchHistorySchema extends Document {
     user: Types.ObjectId
     text: string
+    questText?: string
     flick: Types.ObjectId
     userSearched: Types.ObjectId
     quest: Types.ObjectId
@@ -17,6 +18,10 @@ const SearchHistorySchema = new Schema<ISearchHistorySchema>(
             type: Schema.Types.ObjectId,
             ref: 'user',
             required: true,
+        },
+        questText : {
+            type: String,
+            required: false,
         },
         text: {
             type: String,

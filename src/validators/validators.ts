@@ -723,6 +723,7 @@ export const validateCreateUserSearchHistory = (body: object) => {
 
   const historyItemSchema = Joi.object({
     text: Joi.string().min(1).max(30).required(),
+    questText: Joi.string().optional(),
     createdAt: Joi.date().required(),
     flick: objectId.optional(),
     quest: objectId.optional(),
@@ -730,7 +731,7 @@ export const validateCreateUserSearchHistory = (body: object) => {
     hashtag: objectId.optional(),
     userSearched: objectId.optional(),
   }).custom((value, helpers) => {
-    const keys = ['flick', 'quest', 'song', 'hashtag', 'userSearched'];
+    const keys = ['flick', 'quest', 'song', 'hashtag', 'userSearched' ]
     const present = keys.filter(key => value[key]);
 
     if (present.length > 1) {

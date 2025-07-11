@@ -11,8 +11,8 @@ export const createUserSearchHistory = async (req: Request, res: Response) => {
         if (validationError) {
             return handleResponse(res, 400, errors.validation, validationError.details);
         }
-        const {history} = req.body;
-        const searchHistory   = await SEARCHHISTORY.insertMany(history.map((history : any) => ({
+        const { history } = req.body;
+        const searchHistory = await SEARCHHISTORY.insertMany(history.map((history: any) => ({
             user: res.locals.userId,
             ...history
         })));

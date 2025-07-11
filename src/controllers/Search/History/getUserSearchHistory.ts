@@ -17,7 +17,7 @@ export const getUserSearchHistory = async (req: Request, res: Response) => {
         let { limit = 10, page = 1, type } = req.query as {
             limit?: number;
             page?: number;
-            type?: 'userSearched' | 'flick' | 'quest' | 'song' | 'hashtag';
+            type?: 'userSearched' | 'flick' | 'quest' | 'song' | 'hashtag' | 'questText'
         };
 
         limit = Number(limit);
@@ -50,6 +50,7 @@ export const getUserSearchHistory = async (req: Request, res: Response) => {
             },
             quest: {
                 quest: { $exists: true },
+                questText  : { $exists: true },
                 flick: { $exists: false },
                 userSearched: { $exists: false },
                 song: { $exists: false },

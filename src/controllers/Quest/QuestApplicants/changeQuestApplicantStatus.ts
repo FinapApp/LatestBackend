@@ -37,10 +37,9 @@ export const changeQuestApplicantStatus = async (req: Request, res: Response) =>
         }
 
         // ❌ No approval left
-        if (status === "approved" && quest.leftApproved <= 0) {
+        if (status === "approved" && quest.leftApproved == 0) {
             return handleResponse(res, 403, errors.quest_applicant_approval);
         }
-
         // ✅ Step 1: Update applicant
         const updatedApplicant = await QUEST_APPLICANT.findByIdAndUpdate(
             questApplicantId,

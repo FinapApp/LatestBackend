@@ -20,10 +20,9 @@ export const createQuestApplicant = async (req: Request, res: Response) => {
         const { quest } = req.body;
 
         // Parallel DB operations
-        const [questData, existingApplication, pendingCount] = await Promise.all([
+        const [questData ,existingApplication] = await Promise.all([
             QUESTS.findById(quest, "status leftApproved applicantCount user mode"),
             QUEST_APPLICANT.findOne({ user, quest }, "status"),
-            QUEST_APPLICANT.countDocuments({ quest, status: "pending" })
         ]);
         if (!questData) {
             return handleResponse(res, 404, errors.quest_not_found);
@@ -37,19 +36,7 @@ export const createQuestApplicant = async (req: Request, res: Response) => {
         if (existingApplication) {
             return handleResponse(res, 403, errors.quest_already_applied);
         }
-
-        const { leftApproved } = questData;
-        const maxPendingThreshold = leftApproved + Math.ceil(leftApproved * 0.3);
-
-        // Handle over-threshold logic
-        if (pendingCount >= maxPendingThreshold) {
-            // Pause quest and exit
-            await QUESTS.findByIdAndUpdate(quest, { status: "paused" });
-            return handleResponse(res, 400, {
-                ...errors.max_applicants,
-                message: `Pending applicant limit reached. Quest paused automatically.`
-            });
-        }
+     
 
         // Create applicant & increment count in parallel
         const [createdApplicant] = await Promise.all([
