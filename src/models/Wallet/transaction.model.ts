@@ -32,6 +32,7 @@ interface ITransaction extends Document {
         country?: string;
         account_type?: string;
     };
+    quest?: mongoose.Types.ObjectId; // optional field for quest ID
     status: 'succeeded' | 'pending' | 'failed' | "reversed";
     date: Date; // date of the transaction
 }
@@ -41,6 +42,7 @@ const TransactionSchema: Schema = new Schema<ITransaction>(
         user: { type: Schema.Types.ObjectId, ref: 'user' },
         amount: { type: Number, required: true },
         netAmount: { type: Number, default: 0 }, // optional field for net amount after fees
+        quest: { type: Schema.Types.ObjectId, ref: 'quest' }, // optional field for quest ID
         type: {
             type: String,
             enum: ['deposit', 'transfer', 'withdrawal', 'refund' , 'quest'],

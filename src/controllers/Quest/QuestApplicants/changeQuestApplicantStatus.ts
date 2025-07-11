@@ -71,7 +71,7 @@ export const changeQuestApplicantStatus = async (req: Request, res: Response) =>
             // First: always increment reservedBalance on approval
             await WALLET.findOneAndUpdate(
                 { user: applicant.user },
-                { $inc: { reservedBalance: quest.avgAmountPerPerson } }
+                { $inc: { reservedBalance: quest.avgAmountPerPerson }}
             );
 
             // // Second: if quest is now completed, unlock all
