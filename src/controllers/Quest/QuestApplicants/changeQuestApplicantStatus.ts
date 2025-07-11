@@ -37,7 +37,7 @@ export const changeQuestApplicantStatus = async (req: Request, res: Response) =>
         }
 
         // ❌ No approval left
-        if (status === "approved" && quest.leftApproved == 0) {
+        if (status === "approved" && quest.leftApproved <= 0) {
             return handleResponse(res, 403, errors.quest_applicant_approval);
         }
         // ✅ Step 1: Update applicant
@@ -53,13 +53,11 @@ export const changeQuestApplicantStatus = async (req: Request, res: Response) =>
         if (status === "approved") {
             updateQuery.$inc.totalApproved = 1;
             updateQuery.$inc.leftApproved = -1;
-
-            const projectedTotalApproved = quest.totalApproved + 1;
-            if (projectedTotalApproved >= quest.maxApplicants) {
-                updateQuery.$set = { status: "completed" };
-            }
         } else if (status === "rejected") {
             updateQuery.$inc.totalRejected = 1;
+        }
+        if (quest.totalApproved == quest.maxApplicants) {
+            updateQuery.$set = { status: "completed" };
         }
 
         // ✅ Step 3: Apply quest update
