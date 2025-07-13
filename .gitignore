@@ -2,3 +2,4 @@ kubernetes/
 .env
 dist/
 node_modules
+nginx/certs/
