@@ -21,7 +21,7 @@ export const UserSessionSchema = new Schema<IUserSession>(
         device: { type: String },
         fcmToken: { type: String },
         gps : {
-            type: { type: String, enum: ["Point"] ,  default: "Point" },
+            type: { type: String, enum: ["Point"] },
             coordinates: {
                 type: [Number],
             }
