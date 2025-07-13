@@ -110,10 +110,7 @@ export const login = async (req: Request, res: Response) => {
     };
     // Conditionally add geo-related fields
     if (geoData) {
-      sessionData.gps = {
-        type: "Point",
-        coordinates: [geoData.longitude, geoData.latitude],
-      };
+      sessionData.gps.coordinates = [geoData.longitude, geoData.latitude],
       sessionData.location = `${geoData.zipcode} ${geoData.city}, ${geoData.state_prov} ${geoData.country_name} ${geoData.continent_name}`;
     }
     const session = await SESSION.create(sessionData);

@@ -29,12 +29,12 @@ export const revalidateSessions = async (req: Request, res: Response) => {
             }
             if (data) {
                 const { userId } = data
-                const checkSession = await SESSION.find({ refreshToken, userId }, "_id")
+                const checkSession = await SESSION.findOne({ refreshToken, user: userId }, "_id")
                 if (!checkSession) {
                     return handleResponse(res, 400, errors.retry_login);
                 }
                 const accessToken = jwt.sign(
-                    { userId },
+                    { userId , sessionId: checkSession._id },
                     config.JWT.ACCESS_TOKEN_SECRET as string,
                     { expiresIn: config.JWT.ACCESS_TOKEN_EXPIRE_IN }
                 );

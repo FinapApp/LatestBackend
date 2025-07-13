@@ -12,8 +12,8 @@ export interface IQuestApplicant extends Document {
     suspendedReason: string;
     txnId: string;
     txnAmount: number;
-    suspended: boolean
-    verified: boolean;
+    suspended: boolean;
+    isDeposited: boolean; // indicates if the deposit has been made
 }
 
 interface Media {
@@ -47,12 +47,12 @@ const QuestApplicantSchema: Schema<IQuestApplicant> = new Schema(
         description: { type: [TextDataSchema] },
         media: { type: [MediaSchema] },
         status: { type: String, enum: ['pending', 'approved', 'rejected'], default: 'pending' },
-        verified: { type: Boolean, default: false },
         partialAllowance: { type: Boolean, default: false },
         suspended: { type: Boolean, default: false },
-        txnId : { type: String },
-        txnAmount : { type: Number },
-        suspendedReason: { type: String }
+        suspendedReason: { type: String },
+        txnId: { type: String },
+        txnAmount: { type: Number },
+        isDeposited: { type: Boolean, default: false }, // indicates if the deposit has been made
     },
     { timestamps: true, versionKey: false }
 );

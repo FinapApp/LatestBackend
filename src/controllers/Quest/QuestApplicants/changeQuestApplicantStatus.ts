@@ -6,97 +6,72 @@ import { QUEST_APPLICANT } from "../../../models/Quest/questApplicant.model";
 import { validateQuestApplicantStatus } from "../../../validators/validators";
 import { QUESTS } from "../../../models/Quest/quest.model";
 import { WALLET } from "../../../models/Wallet/wallet.model";
-
 export const changeQuestApplicantStatus = async (req: Request, res: Response) => {
     try {
         const validationError: Joi.ValidationError | undefined = validateQuestApplicantStatus(req.query, req.params);
         if (validationError) {
             return handleResponse(res, 400, errors.validation, validationError.details);
         }
+
         const { questApplicantId } = req.params;
         const { status } = req.query;
 
         const applicant = await QUEST_APPLICANT.findById(questApplicantId).select("status quest user");
         if (!applicant) return handleResponse(res, 404, errors.quest_applicant_not_found);
-        // if (applicant.status !== "pending") {
-        //     return handleResponse(res, 400, {
-        //         message: `Applicant is already ${applicant.status}. Only pending applicants can be updated.`,
-        //     });
-        // }
-        const quest = await QUESTS.findById(applicant.quest).select("totalApproved leftApproved totalRejected applicantCount maxApplicants avgAmountPerPerson status");
+
+        const quest = await QUESTS.findById(applicant.quest);
         if (!quest) return handleResponse(res, 404, errors.quest_not_found);
 
-        // ❌ Rejection cap
         if (status === "rejected") {
-            const projectedRejectionRate = (quest.totalRejected + 1) / (quest.applicantCount || 1);
-            if (projectedRejectionRate > 0.3) {
+            const projectedRejections = quest.totalRejected + 1;
+            const rejectionRate = projectedRejections / quest.applicantCount;
+            if (rejectionRate > 0.3) {
                 return handleResponse(res, 403, {
                     message: `Rejection cap reached. Max 30% of ${quest.applicantCount} applicants can be rejected.`,
                 });
             }
         }
 
-        // ❌ No approval left
         if (status === "approved" && quest.leftApproved <= 0) {
             return handleResponse(res, 403, errors.quest_applicant_approval);
         }
-        // ✅ Step 1: Update applicant
-        const updatedApplicant = await QUEST_APPLICANT.findByIdAndUpdate(
-            questApplicantId,
-            { status },
-            { new: true, projection: { quest: 1, user: 1 } }
-        );
-        if (!updatedApplicant) return handleResponse(res, 500, errors.status_changed_flicked);
 
-        // ✅ Step 2: Prepare quest update
-        const updateQuery: any = { $inc: {} };
-        if (status === "approved") {
-            updateQuery.$inc.totalApproved = 1;
-            updateQuery.$inc.leftApproved = -1;
-        } else if (status === "rejected") {
-            updateQuery.$inc.totalRejected = 1;
-        }
-        if (quest.totalApproved == quest.maxApplicants) {
-            updateQuery.$set = { status: "completed" };
-        }
-
-        // ✅ Step 3: Apply quest update
-        await QUESTS.findByIdAndUpdate(updatedApplicant.quest, updateQuery);
-
-        // ✅ Step 4: Update wallet
-        if (status === "approved") {
-            // First: always increment reservedBalance on approval
-            await WALLET.findOneAndUpdate(
-                { user: applicant.user },
-                { $inc: { reservedBalance: quest.avgAmountPerPerson }}
+        // ✅ Step 1: Perform applicant status update + quest update atomically
+        const session = await QUEST_APPLICANT.startSession();
+        await session.withTransaction(async () => {
+            // ✅ Update applicant
+            await QUEST_APPLICANT.findByIdAndUpdate(
+                questApplicantId,
+                { status },
+                { session }
             );
 
-            // // Second: if quest is now completed, unlock all
-            // if (shouldMarkCompleted) {
-            //     const allApprovedApplicants = await QUEST_APPLICANT.find({
-            //         quest: quest._id,
-            //         status: 'approved'
-            //     }, 'user');
+            // ✅ Update quest
+            const questUpdate: any = { $inc: {}, $set: {} };
 
-            //     const walletBulkOps = allApprovedApplicants.map(app => ({
-            //         updateOne: {
-            //             filter: { user: app.user },
-            //             update: {
-            //                 $inc: {
-            //                     availableBalance: quest.avgAmountPerPerson,
-            //                     reservedBalance: -quest.avgAmountPerPerson,
-            //                     totalEarning: quest.avgAmountPerPerson,
-            //                     completedQuests: 1
-            //                 }
-            //             }
-            //         }
-            //     }));
+            if (status === "approved") {
+                questUpdate.$inc.totalApproved = 1;
+                questUpdate.$inc.leftApproved = -1;
+            } else if (status === "rejected") {
+                questUpdate.$inc.totalRejected = 1;
+            }
 
-            //     if (walletBulkOps.length > 0) {
-            //         await WALLET.bulkWrite(walletBulkOps);
-            //     }
-            // }
-        }
+            const newTotalApproved = quest.totalApproved + (status === "approved" ? 1 : 0);
+            if (newTotalApproved >= quest.maxApplicants) {
+                questUpdate.$set.status = "completed";
+            }
+
+            await QUESTS.findByIdAndUpdate(quest._id, questUpdate, { session });
+
+            // ✅ Reserve money only on approval
+            if (status === "approved") {
+                await WALLET.findOneAndUpdate(
+                    { user: applicant.user },
+                    { $inc: { reservedBalance: quest.avgAmountPerPerson } },
+                    { session }
+                );
+            }
+        });
 
         return handleResponse(res, 200, success.status_changed_flicked);
     } catch (error) {

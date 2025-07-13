@@ -22,12 +22,10 @@ export const createQuest = async (req: Request, res: Response) => {
         if (!wallet) {
             return handleResponse(res, 404, errors.wallet_not_found);
         }
-
         const combinedBalance = wallet.availableBalance + wallet.promotionalBalance;
-        if (combinedBalance < totalAmount) {
+        if (combinedBalance < totalAmount) {   
             return handleResponse(res, 400, errors.insufficient_balance);
         }
-
         const quest = await QUESTS.create({
             _id: questId,
             user: userId,
@@ -54,21 +52,19 @@ export const createQuest = async (req: Request, res: Response) => {
             updatedFields.promotionalBalance = 0;
             updatedFields.availableBalance = wallet.availableBalance - amountLeftToDeduct;
         }
-
-        await WALLET.updateOne({ user: userId }, { $set: updatedFields });
-
-        await TRANSACTION.create({
-            user: userId,
-            type: "quest",
-            amount: totalAmount,
-            description: `Quest created with ID ${questId}`,
-            quest: questId,
-            currency: wallet.currency,
-            status: "succeeded",
-        });
-        
+        await Promise.all([
+            WALLET.updateOne({ user: userId }, { $set: updatedFields }),
+            TRANSACTION.create({
+                user: userId,
+                type: "quest",
+                amount: totalAmount,
+                description: `Quest created with ID ${questId}`,
+                quest: questId,
+                currency: wallet.currency,
+                status: "succeeded",
+            })
+        ])
         const questIndex = getIndex("QUESTS");
-
         const userDetails = await quest.populate<{ user: { username: string; photo: string; name: string; _id: string } }>("user", "username photo name");
         const questPlain = quest.toObject();
         const { user, media, ...restQuest } = questPlain;
@@ -84,9 +80,7 @@ export const createQuest = async (req: Request, res: Response) => {
             photo: userDetails.user.photo,
             questId,
         }]);
-
         return handleResponse(res, 200, success.quest_created);
-
     } catch (error: any) {
         console.error(error);
         if (error.code === 11000) {
