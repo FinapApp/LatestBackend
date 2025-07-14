@@ -23,9 +23,8 @@ export const changeQuestApplicantStatus = async (req: Request, res: Response) =>
         if (!quest) return handleResponse(res, 404, errors.quest_not_found);
 
         if (status === "rejected") {
-            const projectedRejections = quest.totalRejected + 1;
-            const rejectionRate = projectedRejections / quest.applicantCount;
-            if (rejectionRate > 0.3) {
+            const projectedRejections = quest.totalApproved + quest.applicantCount - quest.totalApproved >= quest.maxApplicants
+            if (projectedRejections) {
                 return handleResponse(res, 403, {
                     message: `Rejection cap reached. Max 30% of ${quest.applicantCount} applicants can be rejected.`,
                 });
