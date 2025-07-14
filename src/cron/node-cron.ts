@@ -7,7 +7,7 @@ import { TRANSACTION } from '../models/Wallet/transaction.model';
 cron.schedule('* * * * *', async () => {
     console.log('⏰ Running balance update cron job...');
 
-    const oneDayAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
+    const oneDayAgo = new Date(Date.now() - 60);
 
     try {
         const approvedApplicants = await QUEST_APPLICANT.find({

@@ -35,7 +35,7 @@ services:
       - MONGO_URI=mongodb+srv://flickstar-dev:shokh%4012@flickstar-test.vap3yqj.mongodb.net/finapp-dev?retryWrites=true&w=majority
       - REDIS_EXPIRE_IN=900
       - REDIS_EXPIRE_IN_STATIC=86400
-      - JWT_EXPIRE_IN=15m
+      - JWT_EXPIRE_IN=1m
       - JWT_REFRESH_EXPIRE_IN=7d
       - JWT_ACCESS_TOKEN_SECRET="access_token"
       - JWT_REFRESH_TOKEN_SECRET="refresh_token"
