@@ -63,15 +63,14 @@ export const bulkChangeStatus = async (req: Request, res: Response) => {
 
                 // ✅ Handle Rejection Cap
                 if (status === 'rejected') {
-                    const projectedRejections = quest.totalRejected + entry.rejectionCandidates.length;
-                    const rejectionRate = projectedRejections / (quest.applicantCount || 1);
-                    if (rejectionRate > 0.3) {
-                        throw {
-                            code: 403,
+                    const projectedRejections = quest.totalApproved + (quest.applicantCount - quest.totalApproved) >= quest.maxApplicants
+                    console.info(`📉 [Logic] Projected rejection rate: ${projectedRejections}`);
+                    if (projectedRejections) {
+                        console.warn("⛔ [Limit] Rejection cap exceeded");
+                        return handleResponse(res, 403, {
                             message: `Rejection cap reached. Max 30% of ${quest.applicantCount} applicants can be rejected.`,
-                        };
+                        });
                     }
-
                     finalApplicantIdsToUpdate.push(...entry.rejectionCandidates.map(a => a._id.toString()));
 
                     questBulkOps.push({
