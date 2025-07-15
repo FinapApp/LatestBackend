@@ -478,14 +478,18 @@ export const validateRepostFlick = (body: object, params: object) => {
     flickId: Joi.string().regex(/^[0-9a-fA-F]{24}$/, 'object Id').required()
   })
   const bodySchema = Joi.object({
-    taggedUsers: Joi.array().items(Joi.object({
-      user: Joi.string().regex(/^[0-9a-fA-F]{24}$/, 'object Id').required(),
-      text: Joi.string().required(),
-      position: Joi.object({
-        x: Joi.number().required(),
-        y: Joi.number().required()
-      }).required()
-    })).optional(),
+    taggedUsers: Joi.array().items(
+      Joi.array().items(
+        Joi.object({
+          user: Joi.string().regex(/^[0-9a-fA-F]{24}$/, 'object Id').required(),
+          text: Joi.string().required(),
+          position: Joi.object({
+            x: Joi.number().required(),
+            y: Joi.number().required()
+          }).optional() // Fixed: made optional
+        })
+      )
+    ).optional(),
     location: Joi.string().optional(),
     description: Joi.array().items(Joi.object({
       mention: Joi.string().regex(/^[0-9a-fA-F]{24}$/, 'object Id').optional(),

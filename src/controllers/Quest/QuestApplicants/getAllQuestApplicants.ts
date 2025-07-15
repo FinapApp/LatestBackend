@@ -29,19 +29,39 @@ export const getAllQuestApplicant = async (req: Request, res: Response) => {
                     as: "user",
                 },
             },
-            { $unwind: "$user" },
+            {
+                $unwind: {
+                    path: "$user",
+                    preserveNullAndEmptyArrays: true
+                }
+            },
             {
                 $project: {
                     _id: 1,
                     status: 1,
                     description: 1,
                     createdAt: 1,
-                    "user._id": 1,
-                    "user.name": 1,
-                    "user.username": 1,
-                    "user.photo": 1,
-                },
-            },
+                    user: {
+                        $cond: {
+                            if: { $ifNull: ["$user", false] },
+                            then: {
+                                _id: "$user._id",
+                                name: "$user.name",
+                                username: "$user.username",
+                                photo: "$user.photo",
+                                isDeleted: false
+                            },
+                            else: {
+                                _id: null,
+                                name: "Deleted User",
+                                username: "deleted_user",
+                                photo: null,
+                                isDeleted: true
+                            }
+                        }
+                    }
+                }
+            },                       
             {
                 $facet: {
                     results: [

@@ -21,17 +21,34 @@ export const kafka = new Kafka({
 });
 export async function kafkaConnecter() {
     const admin = kafka.admin();
-    await admin.connect();
-    console.log("Flickstar Kafka Admin Connected");
-    await admin.createTopics({
-        topics: [
-            { topic: 'notification-services', numPartitions: 2 },
-        ]
-    });
-    await admin.disconnect();
+    try {
+        await admin.connect();
+        console.log("✅ Flickstar Kafka Admin Connected");
+
+        const existingTopics = await admin.listTopics();
+        const topicName = 'notification-services';
+
+        if (existingTopics.includes(topicName)) {
+            console.log(`⚠️ Kafka topic "${topicName}" already exists. Skipping creation.`);
+        } else {
+            const created = await admin.createTopics({
+                topics: [{ topic: topicName }],
+                waitForLeaders: true,
+            });
+
+            if (created) {
+                console.log(`✅ Kafka topic "${topicName}" created successfully.`);
+            } else {
+                console.warn(`⚠️ Kafka topic "${topicName}" was not created (already exists or silent fail).`);
+            }
+        }
+    } catch (error) {
+        console.error("❌ Kafka topic creation failed:", error);
+    } finally {
+        await admin.disconnect();
+    }
 }
-
-
+  
 export const kafkaProducer = kafka.producer()
 
 

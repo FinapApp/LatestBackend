@@ -31,45 +31,18 @@ export const getUserSearchHistory = async (req: Request, res: Response) => {
                 }
             }
         ];
-
-        // Map of type filters similar to getAllFlicks
         const typeFilters: Record<string, any> = {
-            userSearched: {
-                userSearched: { $exists: true },
-                flick: { $exists: false },
-                quest: { $exists: false },
-                song: { $exists: false },
-                hashtag: { $exists: false }
-            },
-            flick: {
-                flick: { $exists: true },
-                userSearched: { $exists: false },
-                quest: { $exists: false },
-                song: { $exists: false },
-                hashtag: { $exists: false }
-            },
+            userSearched: { userSearched: { $exists: true } },
+            flick: { flick: { $exists: true } },
             quest: {
-                quest: { $exists: true },
-                questText  : { $exists: true },
-                flick: { $exists: false },
-                userSearched: { $exists: false },
-                song: { $exists: false },
-                hashtag: { $exists: false }
+                $or: [
+                    { quest: { $exists: true } },
+                    { questText: { $exists: true } }
+                ]
             },
-            song: {
-                song: { $exists: true },
-                flick: { $exists: false },
-                userSearched: { $exists: false },
-                quest: { $exists: false },
-                hashtag: { $exists: false }
-            },
-            hashtag: {
-                hashtag: { $exists: true },
-                flick: { $exists: false },
-                userSearched: { $exists: false },
-                quest: { $exists: false },
-                song: { $exists: false }
-            }
+            questText: { questText: { $exists: true } },
+            song: { song: { $exists: true } },
+            hashtag: { hashtag: { $exists: true } }
         };
 
         if (type && typeFilters[type]) {

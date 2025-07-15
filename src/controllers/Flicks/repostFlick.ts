@@ -14,7 +14,6 @@ export const repostFlick = async (req: Request, res: Response) => {
         if (validationError) {
             return handleResponse(res, 400, errors.validation, validationError.details);
         }
-
         const { flickId } = req.params;
         const { taggedUsers = [], description, newHashTags , ...rest } = req.body;
         const userId = res.locals.userId;
@@ -63,11 +62,19 @@ export const repostFlick = async (req: Request, res: Response) => {
                 }))
             );
         }
+
         const updatedMedia = originalFlick.media.map((mediaItem, index) => {
-            const tags = taggedUsers?.[index];
+            const tags = taggedUsers?.[index] || [];
+            // Validate structure
+            if (!Array.isArray(tags)) {
+                throw new Error(`Invalid tagged users format for media ${index}`);
+            }
+            // Convert Mongoose document to plain object
+            const mediaObj = mediaItem.toObject ? mediaItem.toObject() : mediaItem;
+
             return {
-                ...mediaItem,
-                taggedUsers: Array.isArray(tags) ? tags : (tags ? [tags] : [])
+                ...mediaObj,
+                taggedUsers: tags
             };
         });
         const repostedFlick = await FLICKS.create({

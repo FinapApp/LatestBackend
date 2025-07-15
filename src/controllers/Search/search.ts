@@ -196,6 +196,8 @@ export const search = async (req: Request, res: Response) => {
             }
 
             case "flick": {
+
+                // isFollowerThingy is also coming
                 const index = getIndex("FLICKS");
                 const data = await index.search(q, {
                     limit,

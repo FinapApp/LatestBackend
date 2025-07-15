@@ -19,6 +19,7 @@ import { validateDeleteAccount } from "../../validators/validators";
 import bcrypt from "bcryptjs";
 import Joi from "joi";
 import { DELETEACCOUNT } from "../../models/DeletedAccounts/deleteAccounts.model";
+import { QUEST_APPLICANT } from "../../models/Quest/questApplicant.model";
 
 export const deleteAccount = async (req: Request, res: Response) => {
     try {
@@ -72,11 +73,32 @@ export const deleteAccount = async (req: Request, res: Response) => {
             await USER.bulkWrite(bulkUpdates);
         }
 
+        // ⚠️ Handle quest applicant cleanup logic
+        const pendingApplicants = await QUEST_APPLICANT.find({
+            user: userId,
+            isDeposited: false,
+            status: "pending"
+        }, "quest");
+
+        const affectedQuestIds = pendingApplicants.map(app => app.quest);
+        const applicantIds = pendingApplicants.map(app => app._id);
+        if (affectedQuestIds.length > 0) {
+            await Promise.all(
+                affectedQuestIds.map((questId) =>
+                    QUESTS.updateOne(
+                        { _id: questId },
+                        { $inc: { applicantCount: -1 } }
+                    )
+                )
+            );
+        }
+
         // Delete all related content
         await Promise.all([
             USER.findByIdAndDelete(userId),
             FLICKS.deleteMany({ user: userId }),
             QUESTS.deleteMany({ user: userId }),
+            QUEST_APPLICANT.deleteMany({_id : {$in: applicantIds}}),
             COMMENT.deleteMany({ user: userId }),
             LIKE.deleteMany({ user: userId }),
             FOLLOW.deleteMany({ $or: [{ follower: userId }, { following: userId }] }),
@@ -95,6 +117,9 @@ export const deleteAccount = async (req: Request, res: Response) => {
             getIndex("USERS").deleteDocuments([userId]),
             getIndex("HASHTAG").deleteDocuments([userId]),
         ]);
+
+
+        // when you're deleting the account
 
         for (const result of deletionResults) {
             if (result.status === "rejected") {

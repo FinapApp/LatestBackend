@@ -14,127 +14,140 @@ export const bulkChangeStatus = async (req: Request, res: Response) => {
         if (validationError) {
             return handleResponse(res, 400, errors.validation, validationError.details);
         }
-
         const { questApplicantIds } = req.body;
         const { status } = req.query;
+        if (status === "pending") {
+            return handleResponse(res, 403, {
+                message: "Status cannot be reverted back to pending once changed.",
+            });
+        }
+        const applicants = await QUEST_APPLICANT.find({
+            _id: { $in: questApplicantIds },
+        })
+            .populate("quest", "totalApproved leftApproved maxApplicants totalRejected applicantCount avgAmountPerPerson status")
+            .select("status quest user isDeposited")
+            .session(session);
 
-        await session.withTransaction(async () => {
-            // Fetch applicants and their quests
-            const applicants = await QUEST_APPLICANT.find({
-                _id: { $in: questApplicantIds },
-                status: 'pending'
-            })
-                .populate('quest', 'totalApproved leftApproved maxApplicants totalRejected applicantCount avgAmountPerPerson status')
-                .session(session);
+        if (applicants.some(app => app.isDeposited)) {
+            return handleResponse(res, 403, {
+                message: "One or more applicants belong to a quest that is already deposited. Status changes are not allowed.",
+            });
+        }
 
-            const questMap = new Map<string, {
-                quest: any,
-                approvalCandidates: any[],
-                rejectionCandidates: any[],
-            }>();
+        const questMap = new Map<string, {
+            quest: any,
+            applicants: typeof applicants,
+        }>();
+
+        for (const app of applicants) {
+            const questId = app.quest._id.toString();
+            if (!questMap.has(questId)) {
+                questMap.set(questId, { quest: app.quest, applicants: [] });
+            }
+            questMap.get(questId)!.applicants.push(app);
+        }
+
+        const finalApplicantIdsToUpdate: string[] = [];
+        const walletBulkOps: any[] = [];
+        const questBulkOps: any[] = [];
+
+        for (const [, { quest, applicants }] of questMap.entries()) {
+            const questUpdate: any = { $inc: {}, $set: {} };
+            let approvedDelta = 0;
+            let rejectedDelta = 0;
 
             for (const app of applicants) {
-                const quest = app.quest;
-                const questId = quest._id.toString();
+                const prevStatus = app.status;
 
-                if (!questMap.has(questId)) {
-                    questMap.set(questId, {
-                        quest,
-                        approvalCandidates: [],
-                        rejectionCandidates: [],
+                // Prevent flick if no change
+                if (prevStatus === status) continue;
+
+                // Reverting back to pending is already blocked globally
+
+                // 🔐 Approval cap check
+                if (status === "approved" && prevStatus !== "approved") {
+                    if (quest.leftApproved <= 0) {
+                        return handleResponse(res, 403, errors.quest_applicant_approval);
+                    }
+                    approvedDelta++;
+                    quest.leftApproved--; // simulate update
+                    walletBulkOps.push({
+                        updateOne: {
+                            filter: { user: app.user },
+                            update: { $inc: { reservedBalance: quest.avgAmountPerPerson } },
+                            upsert: true,
+                        },
                     });
                 }
 
-                const entry = questMap.get(questId)!;
-
-                if (status === 'approved') {
-                    entry.approvalCandidates.push(app);
-                } else if (status === 'rejected') {
-                    entry.rejectionCandidates.push(app);
+                // 🔓 If demoting from approved
+                if (prevStatus === "approved" && status !== "approved") {
+                    approvedDelta--;
+                    quest.leftApproved++;
+                    walletBulkOps.push({
+                        updateOne: {
+                            filter: { user: app.user },
+                            update: { $inc: { reservedBalance: -quest.avgAmountPerPerson } },
+                            upsert: true,
+                        },
+                    });
                 }
-            }
 
-            const finalApplicantIdsToUpdate: string[] = [];
-            const walletBulkOps: any[] = [];
-            const questBulkOps: any[] = [];
+                // ❌ Rejection cap logic
+                const isRejection = status === "rejected";
+                const isPreviouslyRejected = prevStatus === "rejected";
 
-            for (const [, entry] of questMap) {
-                const quest = entry.quest;
+                if (isRejection && !isPreviouslyRejected) {
+                    const totalRejected = quest.totalRejected + rejectedDelta + 1;
+                    const remainingApplicants = quest.applicantCount - totalRejected;
 
-                // ✅ Handle Rejection Cap
-                if (status === 'rejected') {
-                    const projectedRejections = quest.totalApproved + (quest.applicantCount - quest.totalApproved) >= quest.maxApplicants
-                    console.info(`📉 [Logic] Projected rejection rate: ${projectedRejections}`);
-                    if (projectedRejections) {
-                        console.warn("⛔ [Limit] Rejection cap exceeded");
+                    const seventyPercent = Math.floor(quest.applicantCount * 0.7);
+                    const rejectionThreshold = Math.min(seventyPercent, quest.maxApplicants);
+
+                    if (remainingApplicants < rejectionThreshold) {
                         return handleResponse(res, 403, {
-                            message: `Rejection cap reached. Max 30% of ${quest.applicantCount} applicants can be rejected.`,
+                            message: `Rejection cap exceeded. At least ${rejectionThreshold} applicants must remain after rejection.`,
                         });
                     }
-                    finalApplicantIdsToUpdate.push(...entry.rejectionCandidates.map(a => a._id.toString()));
 
-                    questBulkOps.push({
-                        updateOne: {
-                            filter: { _id: quest._id },
-                            update: {
-                                $inc: {
-                                    totalRejected: entry.rejectionCandidates.length,
-                                },
-                            },
-                        },
-                    });
+                    rejectedDelta++;
                 }
 
-                // ✅ Handle Approval Cap
-                if (status === 'approved') {
-                    const availableSlots = quest.maxApplicants - quest.totalApproved;
-                    if (availableSlots <= 0) {
-                        throw {
-                            code: 403,
-                            message: `No approval slots left for quest: ${quest._id}`,
-                        };
-                    }
-
-                    const approvedSubset = entry.approvalCandidates.slice(0, availableSlots);
-
-                    if (approvedSubset.length === 0) {
-                        continue;
-                    }
-
-                    finalApplicantIdsToUpdate.push(...approvedSubset.map(a => a._id.toString()));
-
-                    // Quest update
-                    const questUpdate: any = {
-                        $inc: {
-                            totalApproved: approvedSubset.length,
-                            leftApproved: -approvedSubset.length,
-                        },
-                    };
-
-                    if (quest.totalApproved + approvedSubset.length >= quest.maxApplicants) {
-                        questUpdate.$set = { status: 'completed' };
-                    }
-
-                    questBulkOps.push({
-                        updateOne: {
-                            filter: { _id: quest._id },
-                            update: questUpdate,
-                        },
-                    });
-
-                    // Wallet update
-                    for (const app of approvedSubset) {
-                        walletBulkOps.push({
-                            updateOne: {
-                                filter: { user: app.user },
-                                update: { $inc: { reservedBalance: quest.avgAmountPerPerson } },
-                            },
-                        });
-                    }
+                // revert previous rejections
+                if (prevStatus === "rejected" && status !== "rejected") {
+                    rejectedDelta--;
                 }
+
+                finalApplicantIdsToUpdate.push(app._id.toString());
             }
 
-            // ✅ Update applicants
+            if (approvedDelta !== 0) {
+                questUpdate.$inc.totalApproved = approvedDelta;
+                questUpdate.$inc.leftApproved = -approvedDelta;
+            }
+
+            if (rejectedDelta !== 0) {
+                questUpdate.$inc.totalRejected = rejectedDelta;
+            }
+
+            const projectedApproved = quest.totalApproved + approvedDelta;
+            if (projectedApproved >= quest.maxApplicants) {
+                questUpdate.$set.status = "completed";
+            } else if (quest.status === "completed") {
+                questUpdate.$set.status = "pending";
+            }
+
+            if (Object.keys(questUpdate.$inc).length > 0 || Object.keys(questUpdate.$set).length > 0) {
+                questBulkOps.push({
+                    updateOne: {
+                        filter: { _id: quest._id },
+                        update: questUpdate,
+                    },
+                });
+            }
+        }
+
+        await session.withTransaction(async () => {
             if (finalApplicantIdsToUpdate.length > 0) {
                 await QUEST_APPLICANT.updateMany(
                     { _id: { $in: finalApplicantIdsToUpdate } },
@@ -143,24 +156,22 @@ export const bulkChangeStatus = async (req: Request, res: Response) => {
                 );
             }
 
-            // ✅ Update quests
             if (questBulkOps.length > 0) {
                 await QUESTS.bulkWrite(questBulkOps, { session });
             }
 
-            // ✅ Update wallets
             if (walletBulkOps.length > 0) {
                 await WALLET.bulkWrite(walletBulkOps, { session });
             }
         });
-
         return handleResponse(res, 200, success.status_changed_flicked);
     } catch (error: any) {
-        console.error("Error in bulkChangeStatus:", error);
+        console.error("🔥 Error in bulkChangeStatus:", error);
         sendErrorToDiscord("PUT:bulk-quest-applicant-status", error);
         return handleResponse(res, error.code || 500, error.message || errors.catch_error);
     } finally {
         session.endSession();
     }
 };
+
 
