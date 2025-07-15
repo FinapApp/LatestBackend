@@ -458,18 +458,11 @@ export const validateFlickId = (params: object) => {
   return error
 }
 
-export const validateDeleteFlick = (params: object, query: object) => {
+export const validateDeleteFlick = (params: object) => {
   const paramsSchema = Joi.object({
     flickId: Joi.string().regex(/^[0-9a-fA-F]{24}$/, 'object Id').required()
   })
-  const querySchema = Joi.object({
-    reposted: Joi.boolean().optional()
-  })
-  const combinedSchema = Joi.object({
-    query: querySchema,
-    params: paramsSchema
-  })
-  const { error } = combinedSchema.validate({ params, query })
+  const { error } = paramsSchema.validate( params )
   return error
 }
 

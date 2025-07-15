@@ -12,36 +12,37 @@ import { HASHTAGS } from "../../models/User/userHashTag.model";
 
 export const deleteFlick = async (req: Request, res: Response) => {
     try {
-        const validationError: Joi.ValidationError | undefined = validateDeleteFlick(req.params, req.query);
+        const validationError: Joi.ValidationError | undefined = validateDeleteFlick(req.params);
         if (validationError) {
             return handleResponse(res, 400, errors.validation, validationError.details);
         }
 
         const userId = res.locals.userId;
         const flickId = req.params.flickId;
-        const { reposted } = req.query;
 
-        // Find the flick before deleting
-        const flick = await FLICKS.findOne({ _id: flickId, user: userId, repost: reposted === "true" ? { $exists: true } : { $exists: false } });
-        if (!flick) {
+        // Find and delete in one atomic operation
+        const flick = await FLICKS.findByIdAndDelete(flickId);
+
+        // Check if flick exists and belongs to the user
+        if (!flick || flick.user.toString() !== userId) {
             return handleResponse(res, 404, errors.flick_not_found);
         }
 
-        // Extract data before deletion
+        // Extract data from deleted flick
         const isRepost = !!flick.repost;
         const originalFlickId = flick.repost;
         const description = flick.description || [];
 
-        // Remove the flick
-        await flick.deleteOne();
+        // Prepare cleanup operations
         const operations: Promise<any>[] = [
             getIndex("FLICKS").deleteDocument(flickId),
             USER.findByIdAndUpdate(userId, { $inc: { flickCount: -1 } }, { new: true })
                 .catch(err => sendErrorToDiscord("DELETE:delete-flick:flickCount", err)),
-            COMMENT.deleteMany({ flick: flickId , user : res.locals.userId}),
-            LIKE.deleteMany({ flick: flickId, user: res.locals.userId }),
+            COMMENT.deleteMany({ flick: flickId, user: userId }),
+            LIKE.deleteMany({ flick: flickId, user: userId }),
         ];
 
+        // If it's a repost, decrement the original flick's repost count
         if (isRepost && originalFlickId) {
             operations.push(
                 FLICKS.findByIdAndUpdate(originalFlickId, { $inc: { repostCount: -1 } }, { new: true })
@@ -76,6 +77,7 @@ export const deleteFlick = async (req: Request, res: Response) => {
                     .catch(err => sendErrorToDiscord("DELETE:delete-flick:sync-hashtags-to-meili", err))
             );
         }
+        // Execute all operations
         await Promise.all(operations);
         return handleResponse(res, 200, success.flick_deleted);
     } catch (error) {
