@@ -52,13 +52,4 @@ export async function kafkaConnecter() {
 export const kafkaProducer = kafka.producer()
 
 
-export const sendNotificationKafka = async (key: string, messages: any) => {
-    await kafkaProducer.connect();
-    await kafkaProducer.send({
-        topic: "notification-services",
-        messages: [{ key, value: JSON.stringify(messages) }],
-    });
-    await kafkaProducer.disconnect();
-}
-
 

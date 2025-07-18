@@ -2,6 +2,7 @@ import mongoose, { Document, Schema } from "mongoose";
 import { ITextDataSchema, TextDataSchema } from "../Comment/comment.model";
 
 interface IUserSchema extends Document {
+    _id: string;
     username: string;
     name: string;
     email: string;

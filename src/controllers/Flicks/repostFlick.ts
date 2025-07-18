@@ -23,7 +23,6 @@ export const repostFlick = async (req: Request, res: Response) => {
             return handleResponse(res, 404, errors.flick_not_found);
         }
 
-
         const isOwner = String(originalFlick.user) === userId;
 
         if (!originalFlick.repostVisible && !isOwner) {

@@ -82,6 +82,7 @@ export const deleteAccount = async (req: Request, res: Response) => {
 
         const affectedQuestIds = pendingApplicants.map(app => app.quest);
         const applicantIds = pendingApplicants.map(app => app._id);
+        
         if (affectedQuestIds.length > 0) {
             await Promise.all(
                 affectedQuestIds.map((questId) =>
