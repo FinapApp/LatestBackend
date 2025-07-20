@@ -54,7 +54,7 @@ services:
       - NODE_ENVIRONMENT=production
       - PROJECT_ENVIRONMENT=production
       - PORT=4003
-      - IP_GEOLOCATOR_KEY=6ec8f9c4b6634315b1c60020e48555a3
+      - IP_GEOLOCATOR_KEY=5b78e37cf8c2479a840d96a0bf978de1
       - MEILI_MASTER_KEY=finapus
       - MELLISSEARCH_HOST=http://meilisearch:7700  
       - DISCORD_WEBHOOK_URL=https://discord.com/api/webhooks/1366503812273143880/thakQoGnLwo1WkjerlBSXqhUKuxPovIZCl4dZEP-aO4URhstp9NYN_fUDv9smu1I7avd

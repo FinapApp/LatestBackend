@@ -96,7 +96,9 @@ export const login = async (req: Request, res: Response) => {
     }
 
     // Fetch IP and device data
-    const geoData: any = await fetchIpGeolocation(req.ip);
+    const IP = req.headers['x-forwarded-for'] || ""
+    let geoData: any = await fetchIpGeolocation(IP as string)
+        console.log("Geolocation Data:", geoData);
     const deviceData = useragent.parse(req.headers["user-agent"]);
 
     // Generate tokens
@@ -110,7 +112,7 @@ export const login = async (req: Request, res: Response) => {
       user: userId,
       refreshToken,
       fcmToken,
-      ip: req.ip,
+      ip: IP,
       device: deviceData.toAgent(),
       os: deviceData.os.toString(),
     };
@@ -221,3 +223,4 @@ export const login = async (req: Request, res: Response) => {
     return handleResponse(res, 500, errors.catch_error);
   }
 };
+

@@ -16,6 +16,7 @@ import { SongSchema } from "./models/Song/song.model";
 import { StaffSchema } from "./models/Staff/staff.model";
 import { connectMeilisearch } from "./config/melllisearch/mellisearch.config";
 const app: Express = express();
+app.set('trust proxy', true); // ✅ Add this line
 
 // SWAGGER
 const swaggerUiOptions = {
@@ -94,3 +95,4 @@ if (cluster.isPrimary) {
   };
   startServer();
 }
+

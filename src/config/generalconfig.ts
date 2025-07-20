@@ -38,7 +38,7 @@ export const config = {
   },
   STRIPE_PRIVATE_KEY :  process.env.PRIVATE_KEY!  ,
   MAX_OTP_COUNT_LIMIT: 5,
-  MAX_LOGIN_SESSION: 4,
+  MAX_LOGIN_SESSION: 2,
   MASTER_OTP: process.env.MASTER_OTP!,
   APPVERSION: process.env.APP_VERSION!,
   NODE_ENV: process.env.NODE_ENVIRONMENT!,
