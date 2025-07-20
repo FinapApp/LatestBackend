@@ -98,7 +98,6 @@ export const login = async (req: Request, res: Response) => {
     // Fetch IP and device data
     const IP = req.headers['x-forwarded-for'] || ""
     let geoData: any = await fetchIpGeolocation(IP as string)
-        console.log("Geolocation Data:", geoData);
     const deviceData = useragent.parse(req.headers["user-agent"]);
 
     // Generate tokens

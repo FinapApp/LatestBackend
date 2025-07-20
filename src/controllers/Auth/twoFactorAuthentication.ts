@@ -54,14 +54,15 @@ export const twoFactorAuthentication = async (req: Request, res: Response) => {
         if (checkSession.length >= config.MAX_LOGIN_SESSION) {
             await SESSION.findByIdAndDelete(checkSession[0]._id);
         }
-        const geoData: any = await fetchIpGeolocation(req.ip);
+        const IP = req.headers['x-forwarded-for'] || ""
+        let geoData: any = await fetchIpGeolocation(IP as string)
         const deviceData = useragent.parse(req.headers["user-agent"]);
         const refreshToken = jwt.sign({ userId }, config.JWT.REFRESH_TOKEN_SECRET as string);
         const sessionData: any = {
             user: userId,
             refreshToken,
             fcmToken,
-            ip: req.ip,
+            ip: IP,
             device: deviceData.toAgent(),
             os: deviceData.os.toString(),
         };
