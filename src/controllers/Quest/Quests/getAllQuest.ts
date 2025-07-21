@@ -114,7 +114,8 @@ export const getAllQuests = async (req: Request, res: Response) => {
         const isAppliedView = type === 'applied';
         if (!isOwnProfileView && !isAppliedView) {
             pipeline.push({
-                $match: { status: { $nin: ["paused", "closed" , "completed"] } }
+                // $match: { status: { $nin: ["paused", "closed" , "completed"] } } // Shokh's new demands
+                $match: { status: { $nin: ["paused", "completed"] } }
             });
         }
         // Sorting
