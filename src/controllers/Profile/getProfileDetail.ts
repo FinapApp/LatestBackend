@@ -25,7 +25,7 @@ export const getProfileDetail = async (req: Request, res: Response) => {
         const [getProfileDetails, bioLink] = await Promise.all([
             USER.findById(
                 userId,
-                "name username followerCount followingCount flickCount description photo -_id",
+                "name username followerCount followingCount flickCount country  description photo -_id",
                 { lean: true }
             ),
             USERBIOLINKS.find({ user: userId }, "title url").lean()
