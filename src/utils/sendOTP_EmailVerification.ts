@@ -131,7 +131,7 @@ export const sendOTPEmailVerification = (resetCode: string, email: string, name:
                   </tr>
                   <tr>
                      <td class="email-footer">
-                        <p>Need help? <a href="https://flickstar.net/support">Contact Support</a></p>
+                        <p>Need help? <a href="https://about.flickstar.net/contact-us">Contact Support</a></p>
                         <p>&copy; 2024 Flickstar.net, All rights reserved.</p>
                      </td>
                   </tr>
