@@ -85,7 +85,6 @@ if (cluster.isPrimary) {
   const startServer = async () => {
     try {
       await connectDB(); // must be a real awaited connection
-      await import('./cron/node-cron'); // start cron after DB is connected
       app.listen(config.PORT, () => {
         console.log(`🚀 Server started on port ${config.PORT}`);
       });

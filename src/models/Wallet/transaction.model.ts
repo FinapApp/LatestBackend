@@ -34,20 +34,24 @@ interface ITransaction extends Document {
     };
     quest?: mongoose.Types.ObjectId; // optional field for quest ID
     status: 'succeeded' | 'pending' | 'failed' | "reversed";
+    serviceFee?: number; // optional field for service fee
+    transactionFee?: number; // optional field for transaction fee
     date: Date; // date of the transaction
 }
 
 const TransactionSchema: Schema = new Schema<ITransaction>(
     {
         user: { type: Schema.Types.ObjectId, ref: 'user' },
-        amount: { type: Number, required: true },
-        netAmount: { type: Number, default: 0 }, // optional field for net amount after fees
+        amount: { type: Number, required: true },  // includes the fees and everything.
+        netAmount: { type: Number, default: 0 }, // final amount after fee deduction 
         quest: { type: Schema.Types.ObjectId, ref: 'quest' }, // optional field for quest ID
         type: {
             type: String,
             enum: ['deposit', 'transfer', 'withdrawal', 'refund' , 'quest'],
             required: true,
         },
+        serviceFee: { type: Number, default: 0 }, // optional field for service fee
+        transactionFee: { type: Number, default: 0 }, // optional field for transaction
         stripeTxnId: { type: String, }, // optional field for Stripe transaction ID
         stripeTransferId: { type: String, }, // optional field for Stripe transfer ID
         stripeTransferReversalId: { type: String, }, // optional field for Stripe transfer reversal ID
