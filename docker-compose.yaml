@@ -32,7 +32,7 @@ services:
         condition: service_started
     environment:
       - REDIS_URI=redis://redis:6379/
-      - MONGO_DEVELOPMENT_URI=mongodb+srv://flickstar-dev:shokh%4012@flickstar-test.vap3yqj.mongodb.net/finapp-dev?retryWrites=true&w=majority
+      - MONGO_URI=mongodb+srv://flickstar-dev:shokh%4012@flickstar-test.vap3yqj.mongodb.net/finapp-dev?retryWrites=true&w=majority
       - REDIS_EXPIRE_IN=900
       - REDIS_EXPIRE_IN_STATIC=86400
       - JWT_EXPIRE_IN=15m
