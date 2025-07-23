@@ -12,10 +12,7 @@ export const config = {
     referrerReward: parseFloat(process.env.REFERRAL_REFERRER_REWARD!) || 2,
     referredUserReward: parseFloat(process.env.REFERRAL_REFERRED_USER_REWARD!) || 1,
   },
-  MONGODB: {
-    PRODUCTION_URI: process.env.MONGO_PRODUCTION_URI!,
-    DEVELOPMENT_URI: process.env.MONGO_DEVELOPMENT_URI!,
-  },
+  MONGO_URI : process.env.MONGO_URI!,
   REDIS: process.env.REDIS_URI!,
   REDIS_EXPIRE_IN: process.env.REDIS_EXPIRE_IN || 900,
   REDIS_EXPIRE_IN_STATIC: process.env.REDIS_EXPIRE_IN_STATIC || 86400,

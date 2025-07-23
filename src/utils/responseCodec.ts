@@ -27,615 +27,614 @@ export const handleResponse = (
     });
   }
 };
+
 export const errors = {
   // Wallet-related errors
   wallet_not_found: {
-    message: "Wallet not found",
+    message: "Wallet could not be found. Please check your account details.",
   },
   insufficient_balance: {
-    message: "Insufficient balance",
+    message: "Your wallet does not have sufficient balance to complete this transaction.",
   },
-  //Referral Code
+  // Referral Code
   referral_code_not_found: {
-    message: "Referral code not found",
+    message: "The referral code entered is invalid or does not exist.",
   },
   cannot_use_own_referral_code: {
-    message: "You cannot use your own referral code",
+    message: "You cannot use your own referral code. Please enter a different code.",
   },
   referral_code_already_used: {
-    message: "Referral code already used",
+    message: "This referral code has already been used.",
   },
 
   invalid_qr_string: {
-    message: "Invalid QR string",
+    message: "The provided QR code is invalid. Please try again.",
   },
 
   // Permission-related errors
   permission_denied: {
-    message: "Permission denied",
+    message: "You do not have permission to perform this action.",
   },
 
-  // feature-reported-issues
+  // Feature-reported-issues
   create_feature_issue: {
-    message: "Unable to create feature issue",
+    message: "We were unable to create your feature issue. Please try again later.",
   },
   user_deactivated: {
-    message: "User is deactivated",
+    message: "This user account has been deactivated.",
   },
-  //Deactivate Account
+  // Deactivate Account
   deactivate_account: {
-    message: "Unable to deactivate account",
+    message: "We were unable to deactivate your account at this time.",
   },
   // Song-related errors
   song_not_uploaded: {
-    message: "Song not uploaded",
+    message: "The song could not be uploaded. Please try again.",
   },
 
   // Search-related errors
   search_history_not_found: {
-    message: "Search history not found",
+    message: "No search history found.",
   },
   search_history_not_updated: {
-    message: "Search history not updated",
+    message: "Unable to update search history. Please try again.",
   },
   search_history_not_deleted: {
-    message: "Search history not deleted",
+    message: "Unable to delete search history. Please try again.",
   },
   search_history_created: {
-    message: "Search history created",
+    message: "Search history was created, but with issues. Please review.",
   },
   // Bio-links related errors
   bio_link_not_found: {
-    message: "Bio-link not found",
+    message: "The requested bio-link could not be found.",
   },
   bio_link_not_updated: {
-    message: "Bio-link not updated",
+    message: "Unable to update the bio-link. Please try again.",
   },
   bio_link_not_created: {
-    message: "Bio-link not created",
+    message: "Unable to create the bio-link. Please try again.",
   },
   bio_link_not_deleted: {
-    message: "Bio-link not deleted",
+    message: "Unable to delete the bio-link. Please try again.",
   },
 
-  //HashTags
+  // HashTags
   no_hashtags: {
-    message: "No hashtags found",
+    message: "No hashtags were found for your request.",
   },
   create_hashtags: {
-    message: "Unable to create hashtags",
+    message: "Unable to create hashtags at this time.",
   },
   // Two-factor authentication-related errors
   update_two_factor: {
-    message: "Unable to update two-factor authentication",
+    message: "Unable to update two-factor authentication settings.",
   },
   get_two_factor: {
-    message: "Unable to get two-factor authentication",
+    message: "Unable to retrieve two-factor authentication settings.",
   },
 
   // Notification-related errors
   user_notification_not_found: {
-    message: "Unable to get notifications",
+    message: "Unable to retrieve notifications at this time.",
   },
   update_notification_setting: {
-    message: "Unable to update notification setting",
+    message: "Unable to update notification settings. Please try again.",
   },
 
   // Profile-related errors
-  profile_image_deleted : {
-    message: "Profile image deleted successfully"
+  profile_image_deleted: {
+    message: "Profile image was deleted, but with issues. Please review.",
   },
   unable_to_signed_profile_image: {
-    message: "Unable to signed profile image"
+    message: "Unable to generate a signed URL for your profile image.",
   },
   profile_not_updated: {
-    message: "Unable to update profile",
+    message: "Unable to update your profile. Please try again.",
   },
   profile_not_found: {
-    message: "Profile not found",
+    message: "Profile not found. Please check your account details.",
   },
 
   // Password-related errors
   password_not_updated: {
-    message: "Password not updated",
+    message: "Unable to update your password. Please try again.",
   },
 
   // User-related errors
   unable_to_create_user: {
-    message: "Unable to create user",
+    message: "Unable to create user account. Please try again later.",
   },
   user_not_found: {
-    message: "User not found",
+    message: "User not found. Please check your credentials.",
   },
   username_exist: {
-    message: "Username already exists",
+    message: "This username is already taken. Please choose another.",
   },
   phone_exist: {
-    message: "Phone number already exists",
+    message: "This phone number is already associated with another account.",
   },
   phone_not_found: {
-    message: "Phone number not found",
+    message: "Phone number not found. Please check and try again.",
   },
   email_exist: {
-    message: "Email already exists",
+    message: "This email address is already registered.",
   },
   email_not_found: {
-    message: "Email not found",
+    message: "Email address not found. Please check and try again.",
   },
   invalid_credentials: {
-    message: "Invalid Credentials",
+    message: "The credentials provided are invalid. Please try again.",
   },
   incorrect_password: {
-    message: "Incorrect password , please try again",
+    message: "Incorrect password. Please try again.",
   },
   unauthorized: {
-    message: "You're unauthorized to perform this action",
+    message: "You are not authorized to perform this action.",
   },
   user_reported: {
-    message: "Unable to report User",
+    message: "Unable to report this user at the moment.",
   },
   user_followed: {
-    message: "Unable to follow user",
+    message: "Unable to follow this user. Please try again.",
   },
   toggle_follow: {
-    message: "Unable to toggle follow",
+    message: "Unable to update follow status. Please try again.",
   },
   user_unfollowed: {
-    message: "Unable to unfollow user",
+    message: "Unable to unfollow this user. Please try again.",
   },
   follow_not_found: {
-    message: "User not followed",
+    message: "You are not following this user.",
   },
   self_follow: {
-    message: "You can't follow yourself",
+    message: "You cannot follow yourself.",
   },
   follower_removed: {
-    message: "Follower removed",
+    message: "Follower was removed, but with issues. Please review.",
   },
 
   // Session-related errors
   session_not_found: {
-    message: "Session not found",
+    message: "Session not found. Please log in again.",
   },
   session_deleted: {
-    message: "Unable to delete session",
+    message: "Unable to delete session. Please try again.",
   },
 
   // Flick-related errors
   flick_not_found: {
-    message: "flick not found",
+    message: "The requested flick could not be found.",
   },
   flick_uploaded: {
-    message: "Unable to upload flick",
+    message: "Unable to upload flick. Please try again.",
   },
   flick_created: {
-    message: "Unable to create flick",
+    message: "Unable to create flick. Please try again.",
   },
   flick_updated: {
-    message: "Unable to update flick",
+    message: "Unable to update flick. Please try again.",
   },
   flick_deleted: {
-    message: "Unable to delete flick",
+    message: "Unable to delete flick. Please try again.",
   },
   flick_reported: {
-    message: "Unable to report Flick",
+    message: "Unable to report this flick at the moment.",
   },
   no_flicks: {
-    message: "No flicks found",
+    message: "No flicks found for your request.",
   },
   toggle_like: {
-    message: "Unable to toggle like",
+    message: "Unable to update like status. Please try again.",
   },
   status_changed_flicked: {
-    message: "Status changed flicked",
+    message: "Unable to change flick status. Please try again.",
   },
 
   // Story-related errors
   story_already_exists: {
-    message: "Story already exists",
+    message: "A story already exists for this context.",
   },
   story_uploaded: {
-    message: "Unable to upload story",
+    message: "Unable to upload story. Please try again.",
   },
   story_deleted: {
-    message: "Unable to delete story",
+    message: "Unable to delete story. Please try again.",
   },
   story_reported: {
-    message: "Unable to report Story",
+    message: "Unable to report this story at the moment.",
   },
   add_story_viewer: {
-    message: "Unable to add story viewer",
+    message: "Unable to add viewer to story. Please try again.",
   },
   get_story_view: {
-    message: "Unable to get story",
+    message: "Unable to retrieve story view. Please try again.",
   },
 
   // Comment-related errors
   comment_not_authorized: {
-    message: "You're not authorized to perform this action",
+    message: "You are not authorized to perform this comment action.",
   },
   comment_not_found: {
-    message: "Comment not found",
+    message: "Comment not found.",
   },
   comment_delete: {
-    message: "Unable to delete comment",
+    message: "Unable to delete comment. Please try again.",
   },
   comment_reported: {
-    message: "Unable to report Comment",
+    message: "Unable to report this comment at the moment.",
   },
   create_comment: {
-    message: "Unable to create comment",
+    message: "Unable to create comment. Please try again.",
   },
   update_comment: {
-    message: "Unable to update comment",
+    message: "Unable to update comment. Please try again.",
   },
 
   // Feedback-related errors
   update_feedback: {
-    message: "Unable to update feedback",
+    message: "Unable to update feedback. Please try again.",
   },
   get_feedback: {
-    message: "Unable to get feedback",
+    message: "Unable to retrieve feedback. Please try again.",
   },
   delete_feedback: {
-    message: "Unable to delete feedback",
+    message: "Unable to delete feedback. Please try again.",
   },
   create_feedback: {
-    message: "Unable to create feedback",
+    message: "Unable to create feedback. Please try again.",
   },
 
   // Theme-related errors 
   update_theme: {
-    message: "Unable to update theme",
+    message: "Unable to update theme settings. Please try again.",
   },
   get_theme: {
-    message: "Unable to get theme",
+    message: "Unable to retrieve theme settings. Please try again.",
   },
 
   // Quest-related errors
-quest_already_closed: {
-    message: "Quest is already closed",
+  quest_already_closed: {
+    message: "This quest is already closed and cannot be modified.",
   },
-
   cannot_apply_to_own_quest: {
-    message: "You cannot apply to your own quest",
+    message: "You cannot apply to your own quest.",
   },
   quest_already_applied: {
-    message: "Already applied for this quest",
+    message: "You have already applied for this quest.",
   },
   unable_to_delete_quest_after_approval: {
-    message: "Unable to delete quest after approval",
+    message: "Unable to delete quest after it has been approved.",
   },
   unable_to_update_quest_after_approval: {
-    message: "Unable to update quest after approval",
+    message: "Unable to update quest after it has been approved.",
   },
   quest_already_exists: {
-    message: "Quest already exists",
+    message: "A quest with these details already exists.",
   },
   update_quest_applicants: {
-    message: "Unable to update quest applicants",
+    message: "Unable to update quest applicants. Please try again.",
   },
   update_quest: {
-    message: "Unable to update quest",
+    message: "Unable to update quest. Please try again.",
   },
   quest_not_found: {
-    message: "Quest not found",
+    message: "Quest not found. Please check the details and try again.",
   },
   quest_not_authorized: {
-    message: "Quest not authorized",
+    message: "You are not authorized to access this quest.",
   },
   create_quest: {
-    message: "Unable to create quest",
+    message: "Unable to create quest. Please try again.",
   },
   quest_deleted: {
-    message: "Unable to delete quest",
+    message: "Unable to delete quest. Please try again.",
   },
   create_quest_applicants: {
-    message: "Unable to create quest applicants",
+    message: "Unable to create quest applicants. Please try again.",
   },
   quest_applicant_not_found: {
-    message: "Quest applicant not found",
+    message: "Quest applicant not found.",
   },
   quest_applicant_not_updated: {
-    message: "Quest applicant not updated",
+    message: "Unable to update quest applicant. Please try again.",
   },
   quest_applicant_approval: {
-    message: "Unable to approve quest applicant",
+    message: "Unable to approve quest applicant. Please try again.",
   },
-
-
 
   // Authentication-related errors
   no_token: {
-    message: "No token provided",
+    message: "Authentication token is missing. Please log in.",
   },
   jwt_expired: {
-    message: "JWT has expired",
+    message: "Your session has expired. Please log in again.",
   },
   invalid_jwt: {
-    message: "Invalid JWT",
+    message: "Invalid authentication token. Please log in again.",
   },
   jwt_verification_error: {
-    message: "JWT verification error",
+    message: "There was an error verifying your authentication token.",
   },
   invalid_refresh_token: {
-    message: "Invalid refresh token",
+    message: "Invalid refresh token. Please log in again.",
   },
   refresh_token_expired: {
-    message: "Refresh token has expired",
+    message: "Your session has expired. Please log in again.",
   },
   refresh_token_not_found: {
-    message: "Refresh token not found",
+    message: "Refresh token not found. Please log in again.",
   },
   identifier_not_found: {
-    message: "Identifier not found",
+    message: "Identifier not found. Please check your details.",
   },
 
   // OTP-related errors
   otp_expired: {
-    message: "OTP has expired",
+    message: "The OTP has expired. Please request a new one.",
   },
   otp_not_match: {
-    message: "OTP does not match",
+    message: "The OTP entered is incorrect. Please try again.",
   },
 
   // Miscellaneous errors
   retry_signup: {
-    message: "Please retry signup",
+    message: "Signup failed. Please try again.",
   },
   retry_login: {
-    message: "Please get yourself authenticated",
+    message: "Authentication failed. Please log in again.",
   },
   forget_password: {
-    message: "Unable to send OTP",
+    message: "Unable to send OTP for password reset. Please try again.",
   },
   audio_reported: {
-    message: "Unable to report Audio",
+    message: "Unable to report this audio at the moment.",
   },
   audio_uploaded: {
-    message: "Unable to upload audio",
+    message: "Unable to upload audio. Please try again.",
   },
   create_audio: {
-    message: "Unable to create audio",
+    message: "Unable to create audio. Please try again.",
   },
   create_songs: {
-    message: "Unable to create songs",
+    message: "Unable to create songs. Please try again.",
   },
   song_not_found: {
-    message: "Song not found",
+    message: "Song not found.",
   },
   max_applicants: {
-    message: "Max applicants reached",
+    message: "The maximum number of applicants has been reached for this quest.",
   },
   notification: {
-    message: "Unable to get notifications",
+    message: "Unable to retrieve notifications at this time.",
   },
   share_post: {
-    message: "Unable to share post",
+    message: "Unable to share post. Please try again.",
   },
   validation: {
     success: false,
+    message: "Validation failed. Please check your input and try again.",
   },
   catch_error: {
-    message: "An error occurred",
+    message: "An unexpected error occurred. Please try again later.",
   },
   unable_to_create_signedURL: {
-    message: "Unable to create signed URL",
+    message: "Unable to generate a signed URL at this time.",
   },
   cannot_rerunIt: {
-    message: "Don't rerun the code",
+    message: "This operation cannot be repeated. Please contact support if you need assistance.",
   },
 };
 
 export const success = {
-  //Referral Code
+  // Referral Code
   referral_code_applied: {
-    message: "Referral code applied successfully",
+    message: "Referral code applied successfully. Welcome to the community!",
   },
-  //Two-Factor Authentication
+  // Two-Factor Authentication
   two_factor_code_sent: {
-    message: "Two-factor authentication code sent successfully",
+    message: "A verification code has been sent to your device for two-factor authentication.",
   },
-  //feature-reported-issues 
+  // Feature-reported-issues 
   create_feature_issue: {
-    message: "Feature issue created successfully",
+    message: "Thank you for your feedback. Your feature request has been submitted successfully.",
   },
   // Delete Account
   delete_account: {
-    message: "Account deleted successfully",
+    message: "Your account has been deleted. We're sorry to see you go.",
   },
-  //Deactivate Account
+  // Deactivate Account
   deactivate_account: {
-    message: "Account deactivated successfully",
+    message: "Your account has been deactivated. You can reactivate it anytime by logging in.",
   },
   // Search-related success
   search_history_created: {
-    message: "Search history created successfully",
+    message: "Your search history has been saved successfully.",
   },
   search_history_deleted: {
-    message: "Search history deleted successfully",
+    message: "Your search history has been deleted.",
   },
   search_history_updated: {
-    message: "Search history updated successfully",
+    message: "Your search history has been updated.",
   },
   // Bio-links related-success
   update_biolink: {
-    message: "Bio-link updated successfully",
+    message: "Your bio-link has been updated successfully.",
   },
   create_biolink: {
-    message: "Bio-link created successfully",
+    message: "Your bio-link has been created successfully.",
   },
   delete_biolink: {
-    message: "Bio-link deleted successfully",
+    message: "Your bio-link has been deleted.",
   },
 
   // Two-factor authentication-related success
   update_two_factor: {
-    message: "Two-factor authentication updated successfully",
+    message: "Two-factor authentication settings updated successfully.",
   },
   // Notification-related success
   update_notification_setting: {
-    message: "Notification setting updated successfully",
+    message: "Your notification settings have been updated.",
   },
 
   // Profile-related success
   profile_image_deleted: {
-    message: "Profile image deleted successfully"
+    message: "Your profile image has been deleted.",
   },
 
   profile_updated: {
-    message: "Profile updated successfully",
+    message: "Your profile has been updated successfully.",
   },
 
   // Password-related success
   password_updated: {
-    message: "Password updated successfully",
+    message: "Your password has been changed successfully.",
   },
 
   // User-related success
   account_created: {
-    message: "Account created successfully",
+    message: "Your account has been created. Welcome aboard!",
   },
   user_followed: {
-    message: "User followed successfully",
+    message: "You are now following this user.",
   },
   user_unfollowed: {
-    message: "User unfollowed successfully",
+    message: "You have unfollowed this user.",
   },
   follower_removed: {
-    message: "Follower removed successfully",
+    message: "The follower has been removed from your list.",
   },
   user_reported: {
-    message: "User reported successfully",
+    message: "Thank you for reporting. We will review this user promptly.",
   },
 
   // Session-related success
   session_deleted: {
-    message: "Session deleted successfully",
+    message: "You have been logged out successfully.",
   },
 
   // Flick-related success
   flick_reposted: {
-    message: "Flick reposted successfully",
+    message: "Flick reposted successfully. Share your favorite moments!",
   },
   flick_uploaded: {
-    message: "flick uploaded successfully",
+    message: "Your flick has been uploaded successfully.",
   },
   flick_created: {
-    message: "flick created successfully",
+    message: "Your flick has been created successfully.",
   },
   flick_updated: {
-    message: "flick updated successfully",
+    message: "Your flick has been updated.",
   },
   flick_deleted: {
-    message: "flick deleted successfully",
+    message: "Your flick has been deleted.",
   },
   flick_reported: {
-    message: "Flick reported successfully",
+    message: "Thank you for reporting. We will review this flick.",
   },
   toggle_like: {
-    message: "Like toggled successfully",
+    message: "Your like status has been updated.",
   },
   status_changed_flicked: {
-    message: "Status changed successfully",
+    message: "Flick status changed successfully.",
   },
 
   // Story-related success
   story_uploaded: {
-    message: "Story uploaded successfully",
+    message: "Your story has been uploaded successfully.",
   },
   story_deleted: {
-    message: "Story deleted successfully",
+    message: "Your story has been deleted.",
   },
   story_reported: {
-    message: "Story reported successfully",
+    message: "Thank you for reporting. We will review this story.",
   },
   add_story_viewer: {
-    message: "Story viewer added successfully",
+    message: "Viewer added to your story.",
   },
 
   // Comment-related success
   comment_deleted: {
-    message: "Comment deleted successfully",
+    message: "Your comment has been deleted.",
   },
   create_comment: {
-    message: "Comment created successfully",
+    message: "Your comment has been posted.",
   },
   update_comment: {
-    message: "Comment updated successfully",
+    message: "Your comment has been updated.",
   },
   comment_reported: {
-    message: "Comment reported successfully",
+    message: "Thank you for reporting. We will review this comment.",
   },
 
   // Feedback-related success
   update_feedback: {
-    message: "Feedback updated successfully",
+    message: "Your feedback has been updated. Thank you for helping us improve.",
   },
   delete_feedback: {
-    message: "Feedback deleted successfully",
+    message: "Your feedback has been deleted.",
   },
   create_feedback: {
-    message: "Feedback created successfully",
+    message: "Thank you for your feedback. We appreciate your input.",
   },
-  //Theme Setting
+  // Theme Setting
   update_theme: {
-    message: "Theme updated successfully",
+    message: "Your theme settings have been updated.",
   },
   // Quest-related success
   qr_verified_success: {
-    message: "QR code verified successfully",
+    message: "QR code verified successfully. You may proceed.",
   },
   quest_status_closed: {
-    message: "Quest status changed to closed successfully",
+    message: "The quest has been closed successfully.",
   },
   quest_created: {
-    message: "Quest created successfully",
+    message: "Your quest has been created successfully.",
   },
   update_quest: {
-    message: "Quest updated successfully",
+    message: "Your quest has been updated.",
   },
   quest_deleted: {
-    message: "Quest deleted successfully",
+    message: "Your quest has been deleted.",
   },
   create_quest_applicants: {
-    message: "Quest applicants created successfully",
+    message: "Quest applicants have been added successfully.",
   },
   quest_applicant_updated: {
-    message: "Quest applicant updated successfully",
+    message: "Quest applicant updated successfully.",
   },
 
   // Authentication-related success
   login: {
-    message: "Login successful",
+    message: "Login successful. Welcome back!",
   },
   logout: {
-    message: "Logout successful",
+    message: "You have been logged out. See you again soon!",
   },
   verify_otp: {
-    message: "OTP verified successfully",
+    message: "OTP verified successfully. You may continue.",
   },
   otp_sent: {
-    message: "OTP sent successfully",
+    message: "A one-time password has been sent to your device.",
   },
   username_available: {
-    message: "Username is available",
+    message: "This username is available.",
   },
   email_available: {
-    message: "Email is available",
+    message: "This email address is available.",
   },
   phone_available: {
-    message: "Phone number is available",
+    message: "This phone number is available.",
   },
 
   // Miscellaneous success
   share_post: {
-    message: "Post shared successfully",
+    message: "Your post has been shared successfully.",
   },
   song_uploaded: {
-    message: "Song uploaded successfully",
+    message: "Your song has been uploaded successfully.",
   },
   audio_reported: {
-    message: "Audio reported successfully",
+    message: "Thank you for reporting. We will review this audio.",
   },
 };

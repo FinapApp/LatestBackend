@@ -52,7 +52,7 @@ services:
       - MASTER_OTP=123456
       - COOKIE_SECRET="Flickstar-Secret"
       - APP_VERSION=01
-      - NODE_ENVIRONMENT=production
+      - NODE_ENVIRONMENT=productions 
       - PROJECT_ENVIRONMENT=development
       - PORT=4003
       - IP_GEOLOCATOR_KEY=5b78e37cf8c2479a840d96a0bf978de1

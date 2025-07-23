@@ -3,11 +3,7 @@ import { config } from "../generalconfig";
 
 const connectMainDB = async (): Promise<void> => {
   try {
-    let dbUri = config.MONGODB.PRODUCTION_URI;
-    if (config.NODE_ENV === "development") {
-      dbUri = config.MONGODB.DEVELOPMENT_URI;
-    }
-    await mongoose.connect(dbUri);
+    await mongoose.connect(config.MONGO_URI as string);
     console.log("Main MongoDB connected successfully.");
   } catch (err) {
     console.error("Failed to connect to main MongoDB", err);
