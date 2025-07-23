@@ -32,7 +32,7 @@ services:
         condition: service_started
     environment:
       - REDIS_URI=redis://redis:6379/
-      - MONGO_URI=mongodb+srv://flickstar-dev:shokh%4012@flickstar-test.vap3yqj.mongodb.net/finapp-dev?retryWrites=true&w=majority
+      - MONGO_DEVELOPMENT_URI=mongodb+srv://flickstar-dev:shokh%4012@flickstar-test.vap3yqj.mongodb.net/finapp-dev?retryWrites=true&w=majority
       - REDIS_EXPIRE_IN=900
       - REDIS_EXPIRE_IN_STATIC=86400
       - JWT_EXPIRE_IN=15m
@@ -48,11 +48,12 @@ services:
       - R2_PUBLIC_URL=https://pub-301c1efdf41d428f9ab043c4d4ecbac9.r2.dev
       - GMAIL_USER=noreply@flickstar.net
       - GMAIL_PASSWORD=ewbkauuecnnsqyvj
+      - MONGO_PRODUCTION_URI=mongodb+srv://snurullaev:3KQmFhEIMbAhW1HK@flickstar-v1.5qawgck.mongodb.net/?retryWrites=true&w=majority&appName=FlickStar-v1
       - MASTER_OTP=123456
       - COOKIE_SECRET="Flickstar-Secret"
       - APP_VERSION=01
       - NODE_ENVIRONMENT=production
-      - PROJECT_ENVIRONMENT=production
+      - PROJECT_ENVIRONMENT=development
       - PORT=4003
       - IP_GEOLOCATOR_KEY=5b78e37cf8c2479a840d96a0bf978de1
       - MEILI_MASTER_KEY=finapus

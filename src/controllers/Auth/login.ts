@@ -17,7 +17,7 @@ import { generateNumericOTP } from "../../utils/OTPGenerator";
 import { sendTwoFactorCodePhone } from "../../utils/sendTwoFactorCodePhone";
 import { redis } from "../../config/redis/redis.config";
 import { WALLET } from "../../models/Wallet/wallet.model";
-import { sendBulkNotificationKafka } from "../../utils/sendNotificationKafka";
+// import { sendBulkNotificationKafka } from "../../utils/sendNotificationKafka";
 
 interface LoginRequest {
   email?: string;
@@ -89,9 +89,9 @@ export const login = async (req: Request, res: Response) => {
       sort: { createdAt: 1 },
     });
 
-    let loggedOutSession = null;
+    // let loggedOutSession = null;
     if (checkSession && checkSession.length >= config.MAX_LOGIN_SESSION) {
-      loggedOutSession = checkSession[0];
+      // loggedOutSession = checkSession[0];
       await SESSION.findByIdAndDelete(checkSession[0]._id);
     }
 
@@ -153,60 +153,60 @@ export const login = async (req: Request, res: Response) => {
       stripeReady = walletCheck.stripeReady ?? false;
     }
 
-    // Send Kafka notifications for session management
-    const kafkaMessages = [];
+    // // Send Kafka notifications for session management
+    // const kafkaMessages = [];
 
-    // 1. Notify the logged-out session
-    if (loggedOutSession) {
-      kafkaMessages.push({
-        key: `session-logout-${userId}`,
-        value: {
-          type: "SESSION_LOGOUT",
-          userId: userId.toString() as string,
-          fcmToken: loggedOutSession.fcmToken,
-          device: loggedOutSession.device,
-          location: loggedOutSession.location,
-          message: "You have been logged out due to a new login from another device"
-        }
-      });
-    }
+    // // 1. Notify the logged-out session
+    // if (loggedOutSession) {
+    //   kafkaMessages.push({
+    //     key: `session-logout-${userId}`,
+    //     value: {
+    //       type: "SESSION_LOGOUT",
+    //       userId: userId.toString() as string,
+    //       fcmToken: loggedOutSession.fcmToken,
+    //       device: loggedOutSession.device,
+    //       location: loggedOutSession.location,
+    //       message: "You have been logged out due to a new login from another device"
+    //     }
+    //   });
+    // }
 
-    // 2. Notify other active sessions about new login
-    const otherActiveSessions = await SESSION.find({
-      user: userId,
-      _id: { $ne: session._id }
-    }, "fcmToken");
+    // // 2. Notify other active sessions about new login
+    // const otherActiveSessions = await SESSION.find({
+    //   user: userId,
+    //   _id: { $ne: session._id }
+    // }, "fcmToken");
 
-    if (otherActiveSessions.length > 0) {
-      const tokens = otherActiveSessions.map(s => s.fcmToken).filter(Boolean);
+    // if (otherActiveSessions.length > 0) {
+    //   const tokens = otherActiveSessions.map(s => s.fcmToken).filter(Boolean);
 
-      if (tokens.length > 0) {
-        kafkaMessages.push({
-          key: `new-login-alert-${userId}`,
-          value: {
-            type: "NEW_LOGIN_ALERT_BULK",
-            userId: userId.toString(),
-            tokens: tokens,
-            title: "🔐 New Login Detected",
-            body: `New login from ${deviceData.toAgent()} at ${sessionData.location || "Unknown location"}`,
-            customData: {
-              type: "security_alert",
-              timestamp: new Date().toISOString()
-            }
-          }
-        });
-      }
-    }
+    //   if (tokens.length > 0) {
+    //     kafkaMessages.push({
+    //       key: `new-login-alert-${userId}`,
+    //       value: {
+    //         type: "NEW_LOGIN_ALERT_BULK",
+    //         userId: userId.toString(),
+    //         tokens: tokens,
+    //         title: "🔐 New Login Detected",
+    //         body: `New login from ${deviceData.toAgent()} at ${sessionData.location || "Unknown location"}`,
+    //         customData: {
+    //           type: "security_alert",
+    //           timestamp: new Date().toISOString()
+    //         }
+    //       }
+    //     });
+    //   }
+    // }
 
-    // Send Kafka messages
-    if (kafkaMessages.length > 0) {
-      try {
-        await sendBulkNotificationKafka(kafkaMessages);
-      } catch (kafkaError) {
-        console.error("Kafka notification error:", kafkaError);
-        // Don't fail the login if Kafka fails
-      }
-    }
+    // // Send Kafka messages
+    // if (kafkaMessages.length > 0) {
+    //   try {
+    //     await sendBulkNotificationKafka(kafkaMessages);
+    //   } catch (kafkaError) {
+    //     console.error("Kafka notification error:", kafkaError);
+    //     // Don't fail the login if Kafka fails
+    //   }
+    // }
 
     return handleResponse(res, 200, {
       userId,
