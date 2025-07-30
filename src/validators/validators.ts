@@ -9,8 +9,8 @@ import { REGEX } from "../utils/regex";
 
 export const validateLogin = (body: object) => {
   const schema = Joi.object({
-    email: Joi.string().email().optional(),
-    username: Joi.string().optional()
+    email: Joi.string().email().disallow(null, ''),
+    username: Joi.string().disallow(null, '')
       .min(4)
       .max(30)
       .regex(REGEX.USERNAME)
@@ -18,8 +18,8 @@ export const validateLogin = (body: object) => {
         "string.pattern.base": "Invalid username format",
       }),
     phone: Joi.string()
-      .optional()
       .pattern(REGEX.PHONE_NUMBER)
+      .disallow(null, '')
       .messages({
         'string.pattern.base': 'Phone number must be a valid international format',
       }),
@@ -29,6 +29,146 @@ export const validateLogin = (body: object) => {
   const { error } = schema.validate(body);
   return error;
 };
+
+
+
+export const validateForgetPassword = (body: object) => {
+  const schema = Joi.object({
+    email: Joi.string().email().disallow(null, ''),
+    phone: Joi.string()
+      .pattern(REGEX.PHONE_NUMBER)
+      .disallow(null, '')
+      .messages({
+        'string.pattern.base': 'Phone number must be a valid international format',
+      }),
+    username: Joi.string()
+      .min(4)
+      .max(30)
+      .regex(REGEX.USERNAME)
+      .disallow(null, '')
+      .messages({
+        "string.pattern.base": "Invalid username format",
+      }),
+  }).xor('email', 'username', 'phone');
+  const { error } = schema.validate(body);
+  return error;
+}
+
+export const validateOTPForgetPassword = (body: object) => {
+  const schema = Joi.object({
+    otp: Joi.string().required(),
+    email: Joi.string().email().disallow(null, ''),
+    phone: Joi.string()
+      .pattern(REGEX.PHONE_NUMBER)
+      .disallow(null, '')
+      .messages({
+        'string.pattern.base': 'Phone number must be a valid international format',
+      }),
+    username: Joi.string()
+      .min(4)
+      .max(30)
+      .disallow(null, '')
+      .regex(REGEX.USERNAME)
+      .messages({
+        "string.pattern.base": "Invalid username format",
+      }),
+  }).xor('email', 'username', 'phone');
+  const { error } = schema.validate(body);
+  return error;
+}
+
+
+export const validateUpdatePasswordAfterOTP = (body: object) => {
+  const schema = Joi.object({
+    email: Joi.string().email().disallow(null, ''),
+    phone: Joi.string()
+      .pattern(REGEX.PHONE_NUMBER)
+      .disallow(null, '')
+      .messages({
+        'string.pattern.base': 'Phone number must be a valid international format',
+      }),
+    username: Joi.string()
+      .min(4)
+      .max(30)
+      .regex(REGEX.USERNAME)
+      .messages({
+        "string.pattern.base": "Invalid username format",
+      }),
+    password: Joi.string().required(),
+  }).xor('username', 'phone', 'email')
+  const { error } = schema.validate(body)
+  return error
+}
+
+export const validateSignUp = (body: object) => {
+  const schema = Joi.object({
+    email: Joi.string().email().disallow(null, ''),
+    phone: Joi.string()
+      .disallow(null, '')
+      .pattern(REGEX.PHONE_NUMBER)
+      .messages({
+        'string.pattern.base': 'Phone number must be a valid US, India, or Uzbekistan number',
+        'string.empty': 'Phone number is required',
+      }),
+    name: Joi.string().required(),
+  }).xor('email', 'phone').messages({
+    'object.xor': 'Either email or phone must be provided, but not both',
+  });
+  const { error } = schema.validate(body);
+  return error;
+};
+
+export const validateVerifyOTPAfter2FA = (body: object) => {
+  const schema = Joi.object({
+    otp: Joi.string().required(),
+    email: Joi.string().email().disallow(null, ''),
+    phone: Joi.string()
+      .pattern(REGEX.PHONE_NUMBER)
+      .disallow(null, '')
+      .messages({
+        'string.pattern.base': 'Phone number must be a valid international format',
+      }),
+    fcmToken: Joi.string().required(),
+  }).xor('email', 'username', 'phone').messages({
+    'object.xor': 'Either email or username or phone must be provided, but not both',
+  });
+  const { error } = schema.validate(body);
+  return error;
+}
+export const validateVerifyOTPSignUp = (body: object) => {
+  const schema = Joi.object({
+    fcmToken: Joi.string().required(),
+    otp: Joi.string().required(),
+    email: Joi.string().email().disallow(null, ''),
+    phone: Joi.string()
+      .messages({
+        'string.pattern.base': 'Phone number must be a valid US, India, or Uzbekistan number',
+        'string.empty': 'Phone number is required',
+      }),
+    name: Joi.string().required(),
+    dob: Joi.string().isoDate().required(),
+    country: Joi.string().required().custom((value, helpers) => {
+      // Check if country exists in your predefined countries list
+      if (!countries.some(e => e.code === value)) {
+        return helpers.error("any.invalid", { message: "Country is not valid" });
+      }
+      return value;
+    }),
+    username: Joi.string().required()
+      .min(4)
+      .max(30)
+      .regex(REGEX.USERNAME)
+      .messages({
+        "string.pattern.base": "Invalid username format",
+      }),
+    password: Joi.string().required(),
+  }).xor('email', 'phone').messages({
+    'object.xor': 'Either email or phone must be provided, but not both',
+  });
+  const { error } = schema.validate(body);
+  return error;
+}
+
 
 export const validateApplyReferralCode = (body: object) => {
   const schema = Joi.object({
@@ -68,150 +208,6 @@ export const validateGetFeedback = (query: object) => {
   return error
 }
 
-
-
-export const validateForgetPassword = (body: object) => {
-  const schema = Joi.object({
-    email: Joi.string().email().optional(),
-    phone: Joi.string()
-      .optional()
-      .pattern(REGEX.PHONE_NUMBER)
-      .messages({
-        'string.pattern.base': 'Phone number must be a valid international format',
-      }),
-    username: Joi.string().optional()
-      .min(4)
-      .max(30)
-      .regex(REGEX.USERNAME)
-      .messages({
-        "string.pattern.base": "Invalid username format",
-      }),
-  }).xor('email', 'username', 'phone');
-  const { error } = schema.validate(body);
-  return error;
-}
-
-export const validateOTPForgetPassword = (body: object) => {
-  const schema = Joi.object({
-    otp: Joi.string().required(),
-    email: Joi.string().email().optional(),
-    phone: Joi.string()
-      .optional()
-      .pattern(REGEX.PHONE_NUMBER)
-      .messages({
-        'string.pattern.base': 'Phone number must be a valid international format',
-      }),
-    username: Joi.string().optional()
-      .min(4)
-      .max(30)
-      .regex(REGEX.USERNAME)
-      .messages({
-        "string.pattern.base": "Invalid username format",
-      }),
-  }).xor('email', 'username', 'phone');
-  const { error } = schema.validate(body);
-  return error;
-}
-
-
-export const validateUpdatePasswordAfterOTP = (body: object) => {
-  const schema = Joi.object({
-    email: Joi.string().email().optional(),
-    phone: Joi.string()
-      .optional()
-      .pattern(REGEX.PHONE_NUMBER)
-      .messages({
-        'string.pattern.base': 'Phone number must be a valid international format',
-      }),
-    username: Joi.string().optional()
-      .min(4)
-      .max(30)
-      .regex(REGEX.USERNAME)
-      .messages({
-        "string.pattern.base": "Invalid username format",
-      }),
-    password: Joi.string().required(),
-  }).xor('username', 'phone', 'email')
-  const { error } = schema.validate(body)
-  return error
-}
-export const validateAfterSignUp = (body: object) => {
-  const schema = Joi.object({
-    otp: Joi.string().required(),
-    email: Joi.string().required(),
-    fcmToken: Joi.string().required()
-  });
-  const { error } = schema.validate(body);
-  return error;
-}
-export const validateSignUp = (body: object) => {
-  const schema = Joi.object({
-    email: Joi.string().email(),
-    phone: Joi.string()
-      .pattern(REGEX.PHONE_NUMBER)
-      .messages({
-        'string.pattern.base': 'Phone number must be a valid US, India, or Uzbekistan number',
-        'string.empty': 'Phone number is required',
-      }),
-    name: Joi.string().required(),
-  }).xor('email', 'phone').messages({
-    'object.xor': 'Either email or phone must be provided, but not both',
-  });
-  const { error } = schema.validate(body);
-  return error;
-};
-
-export const validateVerifyOTPAfter2FA = (body: object) => {
-  const schema = Joi.object({
-    otp: Joi.string().required(),
-    email: Joi.string().email().optional(),
-    phone: Joi.string()
-      .optional()
-      .pattern(REGEX.PHONE_NUMBER)
-      .messages({
-        'string.pattern.base': 'Phone number must be a valid international format',
-      }),
-    fcmToken: Joi.string().required(),
-  }).xor('email', 'username', 'phone');
-  const { error } = schema.validate(body);
-  return error;
-}
-export const validateVerifyOTPSignUp = (body: object) => {
-  const schema = Joi.object({
-    fcmToken: Joi.string().required(),
-    otp: Joi.string().required(),
-    email: Joi.string().email(),
-    phone: Joi.string()
-      .pattern(
-        REGEX.PHONE_NUMBER
-      )
-      .messages({
-        'string.pattern.base': 'Phone number must be a valid US, India, or Uzbekistan number',
-        'string.empty': 'Phone number is required',
-      }),
-    name: Joi.string().required(),
-    dob: Joi.string().isoDate().required(),
-    country: Joi.string().required().custom((value, helpers) => {
-      // Check if country exists in your predefined countries list
-      if (!countries.some(e => e.code === value)) {
-        return helpers.error("any.invalid", { message: "Country is not valid" });
-      }
-      return value;
-    }),
-    username: Joi.string().required()
-      .min(4)
-      .max(30)
-      .regex(REGEX.USERNAME)
-      .messages({
-        "string.pattern.base": "Invalid username format",
-      }),
-    password: Joi.string().required(),
-  }).xor('email', 'phone').messages({
-    'object.xor': 'Either email or phone must be provided, but not both',
-  });
-  const { error } = schema.validate(body);
-  return error;
-}
 
 
 export const validateUpdateComment = (body: object, params: object) => {

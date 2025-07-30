@@ -38,7 +38,7 @@ export const toggleLike = async (req: Request, res: Response) => {
 
         // Initialize Redis like count from DB if needed
         if (!(await redis.exists(redisKey)) && type === 'flick') {
-            const flickDoc = await FLICKS.findById(id).select("likeCount");
+            const flickDoc = await FLICKS.findByIdAndUpdate(id, { $inc: { likeCount: 1 } }, { new: true , projection: { likeCount: 1 } });
             if (flickDoc) {
                 await redis.hset(redisKey, "count", flickDoc.likeCount || 0);
             }

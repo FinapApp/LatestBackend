@@ -4,7 +4,6 @@ import mongoose from "mongoose";
 import { errors, handleResponse } from "../../utils/responseCodec";
 import { validateFlickId } from "../../validators/validators";
 import { FLICKS } from "../../models/Flicks/flicks.model";
-import { redis } from "../../config/redis/redis.config";
 import { sendErrorToDiscord } from "../../config/discord/errorDiscord";
 
 export const getFlick = async (req: Request, res: Response) => {
@@ -370,18 +369,7 @@ export const getFlick = async (req: Request, res: Response) => {
             return handleResponse(res, 404, errors.no_flicks);
         }
 
-        const [likeData, commentData] = await Promise.all([
-            redis.hgetall(`flick:likes:${flick._id}`),
-            redis.hgetall(`flick:comments:${flick._id}`)
-        ]);
-
-        const enrichedFlick = {
-            ...flick,
-            likeCount: Number(likeData?.count || 0),
-            commentCount: flick.canComment ? Number(commentData?.count || 0) : undefined
-        };
-
-        return handleResponse(res, 200, { flick: enrichedFlick });
+        return handleResponse(res, 200, flick);
     } catch (error) {
         console.error(error);
         sendErrorToDiscord("GET:get-flick", error);

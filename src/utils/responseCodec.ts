@@ -413,7 +413,6 @@ export const errors = {
   },
   validation: {
     success: false,
-    message: "Validation failed. Please check your input and try again.",
   },
   catch_error: {
     message: "An unexpected error occurred. Please try again later.",
