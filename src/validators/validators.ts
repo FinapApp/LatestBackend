@@ -222,7 +222,7 @@ export const validateApplyReferralCode = (body: object) => {
 export const validateGetFlicks = (query: object) => {
   const schema = Joi.object({
     type: Joi.string().valid("tagged", "profile").optional(),
-    limit: Joi.number().integer().min(1).max(15).optional(),
+    limit: Joi.number().integer().min(1).max(20).optional(),
     page: Joi.number().integer().min(1).optional(),
     userId: Joi.string().regex(/^[0-9a-fA-F]{24}$/).optional()
   })
@@ -917,7 +917,8 @@ export const validateUpdateFlick = (body: object, params: object) => {
 
 export const validateNotificationQuery = (query: object) => {
   const schema = Joi.object({
-    skip: Joi.string().optional()
+    page: Joi.number().integer().min(1).optional(),
+    limit: Joi.number().integer().min(1).max(20).optional(),
   })
   const { error } = schema.validate(query)
   return error

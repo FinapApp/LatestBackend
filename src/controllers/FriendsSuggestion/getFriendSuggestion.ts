@@ -11,7 +11,8 @@ export const getFriendSuggestion = async (req: Request, res: Response) => {
         if (validationError) {
             return handleResponse(res, 400, errors.validation, validationError.details);
         }
-        const friendSuggestion = await getAllFriendSuggestionAggregation(res.locals.userId);
+        const { page = 1, limit = 10 } = req.query;
+        let friendSuggestion = await getAllFriendSuggestionAggregation(res.locals.userId, Number(page), Number(limit));
         if (friendSuggestion) {
             return handleResponse(res, 200, { friendSuggestion });
         }
