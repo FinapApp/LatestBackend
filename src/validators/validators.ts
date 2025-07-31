@@ -225,11 +225,6 @@ export const validateGetFlicks = (query: object) => {
     limit: Joi.number().integer().min(1).max(20).optional(),
     userId: Joi.string().regex(/^[0-9a-fA-F]{24}$/).optional()
   })
-    .and("limit", "page")
-    .messages({
-      "object.and": "limit and page must be provided together",
-      "any.invalid": "{{#message}}"
-    });
   const { error } = schema.validate(query);
   return error;
 };
