@@ -95,6 +95,7 @@ export const getMentionByFlick = async (req: Request, res: Response) => {
                                 username: 1,
                                 country : 1,    
                                 photo: 1,
+                                updatedAt: 1,
                                 isFollowing: 1
                             }
                         },

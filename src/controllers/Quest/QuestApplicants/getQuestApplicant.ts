@@ -12,7 +12,7 @@ export const getQuestApplicant = async (req: Request, res: Response) => {
             return handleResponse(res, 400, errors.validation, validationError.details);
         }
         const { questApplicantId } = req.params
-        const questdetails = await QUEST_APPLICANT.findById(questApplicantId).populate('user', 'username photo name')
+        const questdetails = await QUEST_APPLICANT.findById(questApplicantId).populate('user', 'username photo name updatedAt')
         return handleResponse(res, 200, { questdetails })
     } catch (error) {
         console.error(error)

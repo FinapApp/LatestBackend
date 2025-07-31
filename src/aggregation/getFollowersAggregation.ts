@@ -22,7 +22,8 @@ export const getFollowers = async (userId: string, skip: string = "0") => {
                                 _id: 1,
                                 username: 1,
                                 name: 1,
-                                photo: 1
+                                photo: 1,
+                                updatedAt: 1,
                             }
                         }
                     ]

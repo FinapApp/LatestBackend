@@ -3,6 +3,7 @@
     import Joi from 'joi';
     import { errors, handleResponse } from '../../utils/responseCodec';
     import { FLICKS } from '../../models/Flicks/flicks.model';
+    import { redis } from '../../config/redis/redis.config';
     import { sendErrorToDiscord } from '../../config/discord/errorDiscord';
     import mongoose from 'mongoose';
 
@@ -154,7 +155,7 @@
                             },
                             {
                                 $project: {
-                                    _id: 1, name: 1, username: 1, photo: 1, createdAt: 1, location: 1, country: 1
+                                    _id: 1, name: 1, username: 1, photo: 1, createdAt: 1, location: 1, country: 1,updatedAt: 1
                                 }
                             }
                         ],
@@ -191,7 +192,7 @@
                                     foreignField: '_id',
                                     pipeline: [{
                                         $project: {
-                                            _id: 1, name: 1, username: 1, photo: 1, createdAt: 1, location: 1, country: 1
+                                            _id: 1, name: 1, username: 1, photo: 1, createdAt: 1, location: 1, country: 1 , updatedAt: 1
                                         }
                                     }],
                                     as: 'user'
@@ -366,10 +367,20 @@
             if (!flicks.length) {
                 return handleResponse(res, 404, errors.no_flicks);
             }
-        
+
+            const [likeData, commentData] = await Promise.all([
+                Promise.all(flicks.map((flick: any) => redis.hgetall(`flick:likes:${flick._id}`))),
+                Promise.all(flicks.map((flick: any) => redis.hgetall(`flick:comments:${flick._id}`)))
+            ]);
+
+            const mergedFeed = flicks.map((flick: any, idx: number) => ({
+                ...flick,
+                likeCount: Number(likeData[idx]?.count || 0),
+                commentCount: Number(commentData[idx]?.count || 0),
+            }));
 
             return handleResponse(res, 200, {
-                flicks,
+                flicks: mergedFeed,
                 totalDocuments: totalCount,
                 page: page,
                 totalPages: Math.ceil(totalCount / limit)

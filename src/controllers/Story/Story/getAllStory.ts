@@ -73,7 +73,7 @@ export const getAllStory = async (req: Request, res: Response) => {
                     foreignField: "_id",
                     as: "user",
                     pipeline: [
-                        { $project: { _id: 1, username: 1, photo: 1 } }
+                        { $project: { _id: 1, username: 1, photo: 1  , updatedAt: 1 } }
                     ]
                 }
             },

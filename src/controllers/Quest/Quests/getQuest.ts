@@ -30,6 +30,7 @@ export const getQuest = async (req: Request, res: Response) => {
                                 username: 1,
                                 photo: 1,
                                 name: 1,
+                                updatedAt: 1
                             }
                         }
                     ]

@@ -35,6 +35,7 @@ export const getAllFriendSuggestionAggregation = async (userId: string) => {
                     username: 1,
                     name: 1,
                     photo: 1,
+                    updatedAt: 1,
                 }
             }
         ]);

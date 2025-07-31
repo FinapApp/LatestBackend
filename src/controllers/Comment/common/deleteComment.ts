@@ -49,7 +49,7 @@ export const deleteComment = async (req: Request, res: Response) => {
             { $inc: { commentCount: -1 } },
             {
                 new: true,
-                populate: { path: "user", select: "photo username name" },
+                populate: { path: "user", select: "photo username name updatedAt" },
                 projection: { commentCount: 1, user: 1, thumbnailURL: 1 }
             }
         );

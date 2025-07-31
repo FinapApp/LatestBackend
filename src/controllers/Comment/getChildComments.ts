@@ -93,7 +93,8 @@ export const getChildComments = async (req: Request, res: Response) => {
                                 _id: '$userData._id',
                                 username: '$userData.username',
                                 photo: '$userData.photo',
-                                name: '$userData.name'
+                                name: '$userData.name',
+                                updatedAt: '$userData.updatedAt'
                             },
                             else: null
                         }

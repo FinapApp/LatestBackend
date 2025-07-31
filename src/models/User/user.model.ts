@@ -58,7 +58,7 @@ export const UserSchema = new Schema<IUserSchema>(
         deletedReason: { type: [String] },
         suspensionReason: { type: String },
     },
-    { timestamps: { createdAt: true, updatedAt: false }, versionKey: false }
+    { timestamps: true, versionKey: false }
 );
 
 

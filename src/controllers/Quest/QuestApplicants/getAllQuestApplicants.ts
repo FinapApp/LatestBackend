@@ -49,6 +49,7 @@ export const getAllQuestApplicant = async (req: Request, res: Response) => {
                                 name: "$user.name",
                                 username: "$user.username",
                                 photo: "$user.photo",
+                                updatedAt: "$user.updatedAt",
                                 isDeleted: false
                             },
                             else: {
@@ -56,6 +57,7 @@ export const getAllQuestApplicant = async (req: Request, res: Response) => {
                                 name: "Deleted User",
                                 username: "deleted_user",
                                 photo: null,
+                                updatedAt: null,
                                 isDeleted: true
                             }
                         }

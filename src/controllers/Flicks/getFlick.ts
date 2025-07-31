@@ -126,7 +126,7 @@ export const getFlick = async (req: Request, res: Response) => {
                         {
                             $project: {
                                 _id: 1, name: 1, username: 1, photo: 1,
-                                createdAt: 1, location: 1, country: 1
+                                createdAt: 1, location: 1, country: 1 , updatedAt: 1
                             }
                         }
                     ],
@@ -165,7 +165,7 @@ export const getFlick = async (req: Request, res: Response) => {
                                 foreignField: '_id',
                                 as: 'user',
                                 pipeline: [
-                                    { $project: { _id: 1, username: 1, photo: 1, name: 1 } }
+                                    { $project: { _id: 1, username: 1, photo: 1, name: 1, updatedAt: 1 } }
                                 ]
                             }
                         },
@@ -227,7 +227,7 @@ export const getFlick = async (req: Request, res: Response) => {
                         },
                         {
                             $project: {
-                                _id: 1, name: 1, username: 1, photo: 1, isFollowing: 1
+                                _id: 1, name: 1, username: 1, photo: 1, isFollowing: 1 , updatedAt: 1
                             }
                         }
                     ],
@@ -264,6 +264,7 @@ export const getFlick = async (req: Request, res: Response) => {
                                             name: '$$userDoc.name',
                                             username: '$$userDoc.username',
                                             photo: '$$userDoc.photo',
+                                            updatedAt: '$$userDoc.updatedAt',
                                             isFollowing: '$$userDoc.isFollowing'
                                         }
                                     }

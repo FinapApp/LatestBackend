@@ -147,7 +147,7 @@ export const getAllQuests = async (req: Request, res: Response) => {
                                 }
                             }
                         },
-                        { $project: { _id: 1, name: 1, username: 1, photo: 1 } }
+                        { $project: { _id: 1, name: 1, username: 1, photo: 1 ,updatedAt: 1 } }
                     ],
                     as: "user"
                 }
@@ -162,6 +162,7 @@ export const getAllQuests = async (req: Request, res: Response) => {
                     "user.name": 1,
                     "user.photo": 1,
                     "user.username": 1,
+                    "user.updatedAt": 1,
                     title: 1,
                     description: 1,
                     totalAmount: 1,

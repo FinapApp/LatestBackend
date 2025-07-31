@@ -45,7 +45,8 @@ export const getAllLikes = async (req: Request, res: Response) => {
                     user: {
                         _id: '$user._id',
                         username: '$user.username',
-                        photo: '$user.photo'
+                        photo: '$user.photo',
+                        updatedAt: '$user.updatedAt',
                     }
                 }
             },

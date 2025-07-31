@@ -83,6 +83,7 @@ export const getAllFeedBacks = async (req: Request, res: Response) => {
                     "user.name": 1,
                     "user.photo": 1,
                     "user.username": 1,
+                    "user.updatedAt": 1,
                     message: 1,
                     rating: 1,
                     status: 1,

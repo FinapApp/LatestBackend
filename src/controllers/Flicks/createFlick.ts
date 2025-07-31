@@ -70,7 +70,7 @@ export const createFlick = async (req: Request, res: Response) => {
         )
         if (flick) {
             const flickIndex = getIndex("FLICKS");
-            const userDetails = await flick.populate<{ user: { username: string; photo: string; name: string, _id: string } }>("user", "username photo name");
+            const userDetails = await flick.populate<{ user: { username: string; photo: string; name: string, _id: string, updatedAt: Date } }>("user", "username photo name");
             const flickPlain = flick.toObject();
             const { user, media, description, ...restFlick } = flickPlain;
             await flickIndex.addDocuments([

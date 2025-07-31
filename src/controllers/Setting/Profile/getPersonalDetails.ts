@@ -5,7 +5,7 @@ import { sendErrorToDiscord } from "../../../config/discord/errorDiscord";
 
 export const getProfileDetails = async (req: Request, res: Response) => {
     try {
-        const getProfileDetails = await USER.findById(res.locals.userId, "name photo email dob username gender phone country description")
+        const getProfileDetails = await USER.findById(res.locals.userId, "name photo email dob username gender phone country description updatedAt")
         if (getProfileDetails) {
             return handleResponse(res, 200, { profileDetails: getProfileDetails })
         }
