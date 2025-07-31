@@ -8,29 +8,35 @@ import mongoose from 'mongoose';
 
 export const getUserSearchHistory = async (req: Request, res: Response) => {
     try {
+        // Validate query parameters
         const validationError: Joi.ValidationError | undefined = validateGetSearchHistory(req.query);
         if (validationError) {
             return handleResponse(res, 400, errors.validation, validationError.details);
         }
 
         const currentUserId = new mongoose.Types.ObjectId(res.locals.userId);
+
+        // Parse and set default pagination params
         let { limit = 10, page = 1, type } = req.query as {
-            limit?: number;
-            page?: number;
-            type?: 'userSearched' | 'flick' | 'quest' | 'song' | 'hashtag' | 'questText'
+            limit?: string | number;
+            page?: string | number;
+            type?: 'userSearched' | 'flick' | 'quest' | 'song' | 'hashtag' | 'questText';
         };
 
         limit = Number(limit);
         page = Number(page);
         const skip = (page - 1) * limit;
 
+        // Construct initial match stage for current user
         const pipeline: any[] = [
             {
                 $match: {
-                    user: currentUserId
-                }
-            }
+                    user: currentUserId,
+                },
+            },
         ];
+
+        // Define filters for type parameter
         const typeFilters: Record<string, any> = {
             userSearched: { userSearched: { $exists: true } },
             flick: { flick: { $exists: true } },
@@ -42,14 +48,29 @@ export const getUserSearchHistory = async (req: Request, res: Response) => {
             },
             questText: { questText: { $exists: true } },
             song: { song: { $exists: true } },
-            hashtag: { hashtag: { $exists: true } }
+            hashtag: { hashtag: { $exists: true } },
         };
 
+        // Apply type filter if provided
         if (type && typeFilters[type]) {
             pipeline.push({ $match: typeFilters[type] });
         }
 
-        // Populate references
+        // Sort by createdAt descending to get latest entries first for grouping
+        pipeline.push({ $sort: { createdAt: -1 } });
+
+        // Group by `text` field to get unique latest entries
+        pipeline.push({
+            $group: {
+                _id: "$text",
+                doc: { $first: "$$ROOT" }, // keep the entire latest document per unique text
+            },
+        });
+
+        // Replace root with document to continue aggregation pipeline normally
+        pipeline.push({ $replaceRoot: { newRoot: "$doc" } });
+
+        // Populate references with lookup and unwind
         pipeline.push(
             {
                 $lookup: {
@@ -102,17 +123,19 @@ export const getUserSearchHistory = async (req: Request, res: Response) => {
             { $unwind: { path: '$hashtag', preserveNullAndEmptyArrays: true } }
         );
 
-        pipeline.push(
-            { $sort: { createdAt: -1 } },
-            {
-                $facet: {
-                    results: [{ $skip: skip }, { $limit: limit }],
-                    totalCount: [{ $count: 'count' }]
-                }
+        // Sort again by createdAt descending to keep ordering for pagination
+        pipeline.push({ $sort: { createdAt: -1 } });
+
+        // Apply facet for pagination and total count
+        pipeline.push({
+            $facet: {
+                results: [{ $skip: skip }, { $limit: limit }],
+                totalCount: [{ $count: 'count' }],
             }
-        );
+        });
 
         const result = await SEARCHHISTORY.aggregate(pipeline);
+
         const searchHistory = result[0]?.results || [];
         const totalCount = result[0]?.totalCount?.[0]?.count || 0;
 
@@ -126,6 +149,7 @@ export const getUserSearchHistory = async (req: Request, res: Response) => {
             page,
             totalPages: Math.ceil(totalCount / limit)
         });
+
     } catch (error) {
         console.error(error);
         sendErrorToDiscord('GET:user-search-history', error);
