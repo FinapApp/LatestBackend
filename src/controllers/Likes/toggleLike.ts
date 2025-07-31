@@ -3,7 +3,6 @@ import { validateLikeToggle } from "../../validators/validators";
 import Joi from "joi";
 import { errors, handleResponse, success } from "../../utils/responseCodec";
 import { FLICKS } from "../../models/Flicks/flicks.model";
-import { redis } from "../../config/redis/redis.config";
 import { LIKE } from "../../models/Likes/likes.model";
 import { QUEST_FAV } from "../../models/Quest/questFavorite.model";
 
@@ -32,16 +31,9 @@ export const toggleLike = async (req: Request, res: Response) => {
 
         const query = buildLikeQuery(user, id, type);
         const existingLike = await LIKE.findOne(query);
-
-        const redisKey = `${type}:likes:${id}`;
-        const redisUserKey = `${redisKey}:users`;
-
         // Initialize Redis like count from DB if needed
-        if (!(await redis.exists(redisKey)) && type === 'flick') {
-            const flickDoc = await FLICKS.findByIdAndUpdate(id, { $inc: { likeCount: 1 } }, { new: true , projection: { likeCount: 1 } });
-            if (flickDoc) {
-                await redis.hset(redisKey, "count", flickDoc.likeCount || 0);
-            }
+        if ( type === 'flick') {
+            await FLICKS.findByIdAndUpdate(id, { $inc: { likeCount: 1 } }, { new: true , projection: { likeCount: 1 } });
         }
 
         if (type === "quest") {
@@ -54,12 +46,8 @@ export const toggleLike = async (req: Request, res: Response) => {
         }
         if (existingLike) {
             await existingLike.deleteOne();
-            await redis.hincrby(redisKey, "count", -1);
-            await redis.hdel(redisUserKey, user);
         } else {
             await LIKE.create(query);
-            await redis.hincrby(redisKey, "count", 1);
-            await redis.hset(redisUserKey, user, 1);
         }
         return handleResponse(res, 200, success.toggle_like);
     } catch (error) {

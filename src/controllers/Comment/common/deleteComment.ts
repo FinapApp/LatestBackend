@@ -5,7 +5,6 @@ import { validateCommentId } from "../../../validators/validators";
 import { errors, handleResponse, success } from "../../../utils/responseCodec";
 import { sendErrorToDiscord } from "../../../config/discord/errorDiscord";
 import { FLICKS } from "../../../models/Flicks/flicks.model";
-import { redis } from "../../../config/redis/redis.config";
 import mongoose from "mongoose";
 
 
@@ -57,21 +56,6 @@ export const deleteComment = async (req: Request, res: Response) => {
         if (!updatedFlick) {
             return handleResponse(res, 404, errors.flick_not_found);
         }
-
-        // Redis operations
-        const redisKey = `flick:comments:${flickId}`;
-        const redisUserKey = `${redisKey}:users`;
-
-        const [exists] = await redis.pipeline()
-            .exists(redisKey)
-            .hincrby(redisKey, "count", -1)
-            .hdel(redisUserKey, currentUserId)
-            .exec();
-
-        if (exists === 0) {
-            await redis.hset(redisKey, "count", updatedFlick.commentCount.toString());
-        }
-
         return handleResponse(res, 200, success.comment_deleted);
     } catch (error) {
         sendErrorToDiscord("DELETE:delete-comment", error);

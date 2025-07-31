@@ -5,7 +5,6 @@ import Joi from "joi";
 import { errors, handleResponse, success } from "../../utils/responseCodec";
 // import { sendErrorToDiscord } from "../../config/discord/errorDiscord";
 import { FLICKS } from "../../models/Flicks/flicks.model";
-import { redis } from "../../config/redis/redis.config";
 import { sendErrorToDiscord } from "../../config/discord/errorDiscord";
 import mongoose from "mongoose";
 import { FOLLOW } from "../../models/User/userFollower.model";
@@ -57,18 +56,6 @@ export const createComment = async (req: Request, res: Response) => {
         if (!updatedFlick) {
             await COMMENT.deleteOne({ _id: newComment._id });
             return handleResponse(res, 404, errors.flick_not_found);
-        }
-        // 3. Redis Operations
-        const redisKey = `flick:comments:${flick}`;
-        // Check if Redis key exists using pipeline for atomic operation
-        const [exists] = await redis.pipeline()
-            .exists(redisKey)
-            .hincrby(redisKey, "count", 1)
-            .hset(`${redisKey}:users`, user._id, 1)
-            .exec();
-        // If Redis key didn't exist, set initial value from MongoDB
-        if (exists === 0) {
-            await redis.hset(redisKey, "count", updatedFlick.commentCount);
         }
         // sendNotificationKafka('create-comment', {
         //     flickId: updatedFlick.thumbnailURL,
