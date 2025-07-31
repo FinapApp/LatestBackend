@@ -223,7 +223,6 @@ export const validateGetFlicks = (query: object) => {
   const schema = Joi.object({
     type: Joi.string().valid("tagged", "profile").optional(),
     limit: Joi.number().integer().min(1).max(20).optional(),
-    page: Joi.number().integer().min(1).optional(),
     userId: Joi.string().regex(/^[0-9a-fA-F]{24}$/).optional()
   })
     .and("limit", "page")

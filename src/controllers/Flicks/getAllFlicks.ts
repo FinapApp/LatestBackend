@@ -13,16 +13,12 @@
                 return handleResponse(res, 400, errors.validation, validationError.details);
             }
             const currentUserId = new mongoose.Types.ObjectId(res.locals.userId);
-            let { type, limit = 10, page = 1, userId } = req.query as {
+            let { type, limit = 10,  userId } = req.query as {
                 type?: 'profile' | 'tagged';
                 limit?: number;
-                page?: number;
                 userId?: string;
             };
             limit = Number(limit);
-            page = Number(page);
-            const skip = (page - 1) * limit;
-
             const targetUserId = new mongoose.Types.ObjectId(userId || currentUserId);
             const pipeline: any[] = [];
 
@@ -265,7 +261,6 @@
                         }                      
                     }
                 },
-                { $sort: { createdAt: -1 } },
                 {
                     $lookup: {
                         from: 'likes',
@@ -349,8 +344,7 @@
                 {
                     $facet: {
                         results: [
-                            { $skip: skip },
-                            { $limit: limit }
+                            { $sample: { size: limit } }
                         ],
                         totalCount: [
                             { $count: 'count' }
@@ -370,8 +364,6 @@
             return handleResponse(res, 200, {
                 flicks,
                 totalDocuments: totalCount,
-                page: page,
-                totalPages: Math.ceil(totalCount / limit)
             });
         } catch (error) {
             console.error(error);
