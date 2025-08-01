@@ -34,16 +34,16 @@ export const updateProfileDetails = async (req: Request, res: Response) => {
         const updateProfile = await USER.findByIdAndUpdate(
             userId,
             rest,
-            { new: true }
+            { new: true ,lean: true} // Return the updated document
         );
         if (updateProfile) {
             const userIndex = getIndex("USERS");
             await userIndex.addDocuments([
                 {
                     userId,
-                    ...updateProfile.toObject(),
+                    ...updateProfile,
                 }
-            ])
+            ]);
             return handleResponse(res, 200, success.profile_updated);
         }
         return handleResponse(res, 304, errors.profile_not_updated);
