@@ -17,7 +17,7 @@ import { generateNumericOTP } from "../../utils/OTPGenerator";
 import { sendTwoFactorCodePhone } from "../../utils/sendTwoFactorCodePhone";
 import { redis } from "../../config/redis/redis.config";
 import { WALLET } from "../../models/Wallet/wallet.model";
-// import { sendBulkNotificationKafka } from "../../utils/sendNotificationKafka";
+import { sendBulkNotificationKafka } from "../../utils/sendNotificationKafka";
 
 interface LoginRequest {
   email?: string;
@@ -26,6 +26,7 @@ interface LoginRequest {
   password: string;
   fcmToken: string;
 }
+
 interface UserPreference {
   _id: string;
   theme: 'dark' | 'light' | 'system';
@@ -42,24 +43,30 @@ export const login = async (req: Request, res: Response) => {
     if (validationError) {
       return handleResponse(res, 400, errors.validation, validationError.details);
     }
+
     const { username, email, phone, password, fcmToken } = req.body as LoginRequest;
+
     // Find user by email/username/phone
     const query: Record<string, string> = {}
     if (email) query.email = email;
     else if (username) query.username = username;
     else if (phone) query.phone = phone;
+
     const checkUser = await USER.findOne(query)
     if (!checkUser) {
       return handleResponse(res, 400, errors.invalid_credentials);
     }
+
     // Compare hashed password
     const passwordMatch = await bcrypt.compare(password, checkUser.password);
     if (!passwordMatch) {
       return handleResponse(res, 400, errors.invalid_credentials);
     }
+
     const userId = checkUser._id;
     const checkUserPreference = await USERPREFERENCE.findById(userId, "theme textSize nightMode twoFactor twoFactorMethod -_id") as UserPreference;
     const checkPreferences = checkUserPreference?.twoFactor;
+
     if (checkPreferences) {
       let OTP = generateNumericOTP();
       if (checkUserPreference?.twoFactorMethod == "email") {
@@ -76,24 +83,29 @@ export const login = async (req: Request, res: Response) => {
         return handleResponse(res, 200, { fcmToken, type: "phone", phone: checkUser.phone });
       }
     }
+
     // Session management with notification data
     const checkSession = await SESSION.find({ user: userId }, "_id fcmToken device os location", {
       sort: { createdAt: 1 },
     });
+
     let loggedOutSession = null;
     if (checkSession && checkSession.length >= config.MAX_LOGIN_SESSION) {
       loggedOutSession = checkSession[0];
       await SESSION.findByIdAndDelete(checkSession[0]._id);
     }
+
     // Fetch IP and device data
     const IP = req.headers['x-forwarded-for'] || ""
     let geoData: any = await fetchIpGeolocation(IP as string)
     const deviceData = useragent.parse(req.headers["user-agent"]);
+
     // Generate tokens
     const refreshToken = jwt.sign(
       { userId },
       config.JWT.REFRESH_TOKEN_SECRET as string
     );
+
     // Save session
     const sessionData: any = {
       user: userId,
@@ -103,6 +115,7 @@ export const login = async (req: Request, res: Response) => {
       device: deviceData.toAgent(),
       os: deviceData.os.toString(),
     };
+
     // Conditionally add geo-related fields
     if (geoData) {
       sessionData.gps = {
@@ -111,7 +124,9 @@ export const login = async (req: Request, res: Response) => {
       };
       sessionData.location = `${geoData.zipcode} ${geoData.city}, ${geoData.state_prov} ${geoData.country_name} ${geoData.continent_name}`;
     }
+
     const session = await SESSION.create(sessionData);
+
     if (checkUser.isDeactivated) {
       checkUser.isDeactivated = false;
       (checkUser as any).save();
@@ -123,41 +138,47 @@ export const login = async (req: Request, res: Response) => {
         }
       ]);
     }
+
     const accessToken = jwt.sign(
       { userId, sessionId: session._id },
       config.JWT.ACCESS_TOKEN_SECRET as string,
       { expiresIn: config.JWT.ACCESS_TOKEN_EXPIRE_IN }
     );
+
     let stripeAccountId: string | null = null;
     let stripeReady: boolean = false;
     const walletCheck = await WALLET.findOne({ user: userId }, "stripeAccountId stripeReady", { upsert: true }).lean();
     if (walletCheck) {
       stripeAccountId = walletCheck.stripeAccountId ?? null;
       stripeReady = walletCheck.stripeReady ?? false;
-  }
+    }
+
     // Send Kafka notifications for session management
-    // const kafkaMessages = [];
+    const kafkaMessages = [];
+
     // 1. Notify the logged-out session
     if (loggedOutSession) {
-    //   kafkaMessages.push({
-    //     key: `SESSION_LOGOUT`,
-    //     value: {
-    //       userId: userId.toString() as string,
-    //       fcmToken: loggedOutSession.fcmToken,
-    //     }
-    //   });
-    // }
-    // kafkaMessages.push({
-    //   key: `NEW_LOGIN_ALERT_BULK`,
-    //   value: {
-    //     userId: userId,
-    //     sessionId: session._id,
-    //     device: deviceData.toAgent(),
-    //     location: sessionData.location || "Unknown location",
-    //   }
-    // });
-    // await sendBulkNotificationKafka(kafkaMessages);
+      kafkaMessages.push({
+        key: `SESSION_LOGOUT`,
+        value: {
+          userId: userId.toString() as string,
+          fcmToken: loggedOutSession.fcmToken,
+        }
+      });
     }
+    kafkaMessages.push({
+      key: `NEW_LOGIN_ALERT_BULK`,
+      value: {
+        userId: userId,
+        sessionId: session._id,
+        device: deviceData.toAgent(),
+        location: sessionData.location || "Unknown location",
+      }
+    });
+
+    // Send Kafka messages
+    await sendBulkNotificationKafka(kafkaMessages);
+
     return handleResponse(res, 200, {
       userId,
       accessToken,
@@ -172,3 +193,4 @@ export const login = async (req: Request, res: Response) => {
     return handleResponse(res, 500, errors.catch_error);
   }
 };
+

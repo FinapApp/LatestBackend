@@ -7,7 +7,7 @@ import { redis } from "./config/redis/redis.config";
 import cors from 'cors';
 import cluster from "cluster";
 import helmet from "helmet";
-// import { connectKafkaProducer, kafkaConnecter } from "./config/kafka/kafka.config";
+import { connectKafkaProducer, kafkaConnecter } from "./config/kafka/kafka.config";
 import { isAuthenticatedUser } from "./middlewares/isAuthenticatedUser";
 import BasicAuth from 'express-basic-auth'
 import { specs, swaggerUi } from "./utils/swagger";
@@ -82,8 +82,8 @@ if (cluster.isPrimary) {
       //MONGO CONNECTER
       await connectDB(); // must be a real awaited connection
       // KAFKA CONNECTER
-      // await kafkaConnecter();
-      // await connectKafkaProducer();
+      await kafkaConnecter();
+      await connectKafkaProducer();
       // MELLISEARCH CONNECTER
       await connectMeilisearch();
       // await runMellisearchMigration(); // Run migration after DB connection
