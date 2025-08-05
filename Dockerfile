@@ -17,5 +17,5 @@ COPY --from=builder /usr/src/app/package*.json ./
 
 RUN npm ci --omit=dev
 
-EXPOSE 4002
+EXPOSE 4003
 CMD ["node", "dist/app.js"]
