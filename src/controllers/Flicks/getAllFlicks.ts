@@ -13,7 +13,7 @@ export const getAllFlicks = async (req: Request, res: Response) => {
             return handleResponse(res, 400, errors.validation, validationError.details);
         }
         const currentUserId = new mongoose.Types.ObjectId(res.locals.userId);
-        let { type, limit = 10, page = 10, userId } = req.query as {
+        let { type, limit = 10, page = 1, userId } = req.query as {
             type?: 'profile' | 'tagged';
             limit?: number;
             page?: number;
