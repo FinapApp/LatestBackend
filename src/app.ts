@@ -7,7 +7,7 @@ import { redis } from "./config/redis/redis.config";
 import cors from 'cors';
 import cluster from "cluster";
 import helmet from "helmet";
-import { kafkaConnecter } from "./config/kafka/kafka.config";
+// import { connectKafkaProducer, kafkaConnecter } from "./config/kafka/kafka.config";
 import { isAuthenticatedUser } from "./middlewares/isAuthenticatedUser";
 import BasicAuth from 'express-basic-auth'
 import { specs, swaggerUi } from "./utils/swagger";
@@ -15,7 +15,7 @@ import mongoose from "mongoose";
 import { SongSchema } from "./models/Song/song.model";
 import { StaffSchema } from "./models/Staff/staff.model";
 import { connectMeilisearch } from "./config/melllisearch/mellisearch.config";
-import { runMellisearchMigration } from "./migration/MeilisearchReIndex";
+// import { runMellisearchMigration } from "./migration/MeilisearchReIndex";
 const app: Express = express();
 app.set('trust proxy', true); // ✅ Add this line
 
@@ -37,7 +37,7 @@ app.use("/flickstar/api-docs", BasicAuth({
   swaggerUi.serve,
   swaggerUi.setup(specs, swaggerUiOptions)
 );
-app.use((err:any, req:Request, res: Response, next:NextFunction) => {
+app.use((err: any, req: Request, res: Response, next: NextFunction) => {
   console.error("Unhandled Error:", err);
   if (!res.headersSent) {
     res.status(500).json({ error: "Internal Server Error" });
@@ -63,13 +63,6 @@ if (cluster.isPrimary) {
 
   // REDIS CONNECTER
   app.set("redis", redis);
-
-  // KAFKA CONNECTER
-   kafkaConnecter()
-
-  // MELLISEARCH CONNECTER
-  connectMeilisearch()
-
   // app.use(cors({ credentials: true, origin: true }))
   app.use(helmet({ contentSecurityPolicy: false }))
   app.use("/api/v1", isAuthenticatedUser, protectedRoutes);
@@ -85,8 +78,15 @@ if (cluster.isPrimary) {
   mongoose.model("staff", StaffSchema)
   const startServer = async () => {
     try {
+
+      //MONGO CONNECTER
       await connectDB(); // must be a real awaited connection
-      await runMellisearchMigration(); // Run migration after DB connection
+      // KAFKA CONNECTER
+      // await kafkaConnecter();
+      // await connectKafkaProducer();
+      // MELLISEARCH CONNECTER
+      await connectMeilisearch();
+      // await runMellisearchMigration(); // Run migration after DB connection
       app.listen(config.PORT, () => {
         console.log(`🚀 Server started on port ${config.PORT}`);
       });

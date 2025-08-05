@@ -44,48 +44,27 @@ export const getQuest = async (req: Request, res: Response) => {
                     pipeline: [
                         {
                             $match: {
-                                $expr: { $eq: ["$quest", "$$questId"] }
-                            }
-                        },
-                        {
-                            $facet: {
-                                totalFavorites: [{ $count: "count" }],
-                                userFavorite: [
-                                    {
-                                        $match: {
-                                            $expr: { $eq: ["$user", userObjectId] }
-                                        }
-                                    }
-                                ]
-                            }
-                        },
-                        {
-                            $addFields: {
-                                favoriteCount: {
-                                    $ifNull: [{ $arrayElemAt: ["$totalFavorites.count", 0] }, 0]
-                                },
-                                isFavorite: {
-                                    $gt: [{ $size: "$userFavorite" }, 0]
+                                $expr: {
+                                    $and: [
+                                        { $eq: ["$quest", "$$questId"] },
+                                        { $eq: ["$user", userObjectId] }
+                                    ]
                                 }
                             }
                         },
-                        {
-                            $project: {
-                                favoriteCount: 1,
-                                isFavorite: 1
-                            }
-                        }
+                        { $limit: 1 }
                     ],
                     as: "favoriteMeta"
                 }
             },
             {
                 $addFields: {
-                    favoriteCount: { $arrayElemAt: ["$favoriteMeta.favoriteCount", 0] },
-                    isFavorite: { $arrayElemAt: ["$favoriteMeta.isFavorite", 0] }
+                    isFavorite: {
+                        $gt: [{ $size: "$favoriteMeta" }, 0]
+                    }
                 }
             },
-            { $unset: "favoriteMeta" },
+            { $unset: "favoriteMeta" },              
             {
                 $addFields: {
                     isOwner: { $eq: ["$user._id", userObjectId] }

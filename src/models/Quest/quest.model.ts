@@ -20,6 +20,7 @@ interface IQuests extends Document {
     suspended: boolean;
     suspendedReason: string;
     country: string;
+    likeCount: number;
     type: 'Basic' | 'Exclusive'
     maxApplicants: number;
     applicantCount: number; // number of people applying to my  quest
@@ -62,6 +63,7 @@ export const QuestSchema = new Schema<IQuests>(
                 index: "2dsphere"
             }
         },
+        likeCount: { type: Number, default: 0 },
         totalAmount: { type: Number },
         suspended: { type: Boolean, default: false },
         suspendedReason: { type: String },

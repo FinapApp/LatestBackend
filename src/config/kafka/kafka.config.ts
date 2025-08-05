@@ -37,3 +37,12 @@ export async function kafkaConnecter() {
 }
 
 export const kafkaProducer = kafka.producer();
+
+export async function connectKafkaProducer() {
+    try {
+        await kafkaProducer.connect();
+        console.log("✅ Kafka Producer Connected");
+    } catch (err) {
+        console.error("❌ Kafka Producer connection error:", err);
+    }
+}
