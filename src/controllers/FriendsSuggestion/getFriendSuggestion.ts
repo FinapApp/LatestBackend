@@ -14,7 +14,7 @@ export const getFriendSuggestion = async (req: Request, res: Response) => {
         const { page = 1, limit = 10 } = req.query;
         let friendSuggestion = await getAllFriendSuggestionAggregation(res.locals.userId, Number(page), Number(limit));
         if (friendSuggestion) {
-            return handleResponse(res, 200, { friendSuggestion });
+            return handleResponse(res, 200, friendSuggestion);
         }
         return handleResponse(res, 404, errors.notification)
     } catch (err: any) {

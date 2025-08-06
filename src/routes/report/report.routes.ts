@@ -5,6 +5,7 @@ import { createPresignedURLReport } from "../../controllers/Reports/createPresig
 import { reportStory } from "../../controllers/Reports/reportStory";
 import { reportAudio } from "../../controllers/Reports/reportAudio";
 import { reportUser } from "../../controllers/Reports/reportUser";
+import { reportAIContent } from "../../controllers/Reports/reportAIContent";
 
 export const reportRoutes: Router = express.Router();
 
@@ -20,3 +21,5 @@ reportRoutes.post("/report-user/:userId", reportUser);
 reportRoutes.post("/report-story/:storyId", reportStory);
 
 reportRoutes.post("/report-audio/:audioId", reportAudio);
+
+reportRoutes.post("/report-ai-content", reportAIContent);

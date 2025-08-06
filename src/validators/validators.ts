@@ -609,6 +609,19 @@ export const validateReportUser = (body: object, params: object) => {
   return error
 }
 
+export  const validateReportAIContent = (body: object) => {
+  const bodySchema = Joi.object({
+    aiModel: Joi.string().required(),
+    aiResponse: Joi.string().required(),
+    aiRequest: Joi.string().required(),
+    aiConversationId: Joi.string().regex(/^[0-9a-fA-F]{24}$/, 'object Id').required(),
+    attachment: Joi.array().items(Joi.string().pattern(new RegExp(`^${config.R2.R2_PUBLIC_URL}/.+$`)).message("attachment must be a valid URL").required()).optional(),
+    message: Joi.string().required()
+  })
+  const {error} = bodySchema.validate(body)
+  return error
+}
+
 export const validateReportStory = (body: object, params: object) => {
   const paramsSchema = Joi.object({
     storyId: Joi.string().regex(/^[0-9a-fA-F]{24}$/, 'object Id').required(),

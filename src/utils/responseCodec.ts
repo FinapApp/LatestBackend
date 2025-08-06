@@ -175,6 +175,12 @@ export const errors = {
   user_reported: {
     message: "Unable to report this user at the moment.",
   },
+  ai_content_reported: {
+    message: "Unable to report this AI content at the moment.",
+  },
+  user_not_authorized: {
+    message: "You are not authorized to perform this action.",
+  },
   user_followed: {
     message: "Unable to follow this user. Please try again.",
   },
@@ -505,6 +511,9 @@ export const success = {
   },
   user_reported: {
     message: "Thank you for reporting. We will review this user promptly.",
+  },
+  ai_content_reported: {
+    message: "Thank you for reporting the AI content. We will review it promptly.",
   },
 
   // Session-related success

@@ -27,6 +27,7 @@ export interface IReportSchema extends Document {
     story?: Types.ObjectId;
     audio?: Types.ObjectId;
     quest?: Types.ObjectId;
+    AI?: IAIReportSchema
     incidentDate? : Date;
     profileLink?: string;
     comment?: Types.ObjectId;
@@ -34,6 +35,24 @@ export interface IReportSchema extends Document {
     message: IMessage[];
     status: 'pending' | 'resolved';
 }
+
+
+interface IAIReportSchema  {
+    aiModel: string;
+    aiConversationId: string;
+    aiRequest: string;
+    aiResponse: string;
+}
+
+const AIReportSchema = new Schema<IAIReportSchema>(
+    {
+        aiModel: { type: String, required: true },
+        aiConversationId: { type: String, required: true },
+        aiRequest: { type: String, required: true },
+        aiResponse: { type: String, required: true },
+    },
+    { _id: false, versionKey: false }
+);
 
 let reportSchema = new Schema<IReportSchema>(
     {
@@ -69,7 +88,8 @@ let reportSchema = new Schema<IReportSchema>(
         incidentDate: {
             type: Date,
         },
-        profileLink : {
+        AI: AIReportSchema,
+        profileLink: {
             type: String,
         },
         message: {
