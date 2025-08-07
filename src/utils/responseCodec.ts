@@ -258,6 +258,9 @@ export const errors = {
   },
 
   // Comment-related errors
+  comment_flick_mismatch: {
+    message: "The comment does not belong to the specified flick.",
+  },
   comment_not_authorized: {
     message: "You are not authorized to perform this comment action.",
   },

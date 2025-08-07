@@ -22,10 +22,15 @@ export const getAllFlicks = async (req: Request, res: Response) => {
         limit = Number(limit);
         page = Number(page);
         const skip = (page - 1) * limit;
+
         const targetUserId = new mongoose.Types.ObjectId(userId || currentUserId);
         const pipeline: any[] = [];
 
         const matchStage: any = {};
+        const typeCheck = type  === 'profile' || type === 'tagged';
+        const resultsStages = typeCheck
+            ? [{ $skip: skip }, { $limit: limit }]
+            : [{ $sample: { size: limit } }];
         if (type === 'tagged') {
             matchStage.$or = [
                 { "media.taggedUsers.user": targetUserId },
@@ -37,14 +42,6 @@ export const getAllFlicks = async (req: Request, res: Response) => {
 
         if (Object.keys(matchStage).length > 0) {
             pipeline.push({ $match: matchStage });
-        }
-
-        if (type === 'profile') {
-            pipeline.push(
-                { $sort: { createdAt: -1 } },
-                { $skip: skip },
-                { $limit: limit }
-            );
         }
 
         pipeline.push(
@@ -272,6 +269,14 @@ export const getAllFlicks = async (req: Request, res: Response) => {
                     }
                 }
             },
+        )
+
+        if (typeCheck) {
+            pipeline.push(
+                { $sort: { createdAt: -1 } },
+            )
+        }
+        pipeline.push(
             {
                 $lookup: {
                     from: 'likes',
@@ -354,7 +359,7 @@ export const getAllFlicks = async (req: Request, res: Response) => {
             },
             {
                 $facet: {
-                    results: [type !== "profile" ? { $sample: { size: limit } } : { $skip: skip }, { $limit: limit }],
+                    results: resultsStages,
                     totalCount: [
                         { $count: 'count' }
                     ]
@@ -369,15 +374,13 @@ export const getAllFlicks = async (req: Request, res: Response) => {
         if (!flicks.length) {
             return handleResponse(res, 404, errors.no_flicks);
         }
-        const response: any = {
+
+        return handleResponse(res, 200, {
             flicks,
-            totalDocuments: totalCount
-        };
-        if (type === "profile") {
-            response.page = page;
-            response.totalPages = Math.ceil(totalCount / limit);
-        }
-        return handleResponse(res, 200, response);
+            totalDocuments: totalCount,
+            page: page,
+            totalPages: Math.ceil(totalCount / limit)
+        });
     } catch (error) {
         console.error(error);
         sendErrorToDiscord('GET:get-all-flicks', error);

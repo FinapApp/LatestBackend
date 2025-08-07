@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import { COMMENT } from "../../models/Comment/comment.model";
+import { COMMENT, ITextDataSchema } from "../../models/Comment/comment.model";
 import { validateComment } from "../../validators/validators";
 import Joi from "joi";
 import { errors, handleResponse, success } from "../../utils/responseCodec";
@@ -8,6 +8,7 @@ import { FLICKS } from "../../models/Flicks/flicks.model";
 import { sendErrorToDiscord } from "../../config/discord/errorDiscord";
 import mongoose from "mongoose";
 import { FOLLOW } from "../../models/User/userFollower.model";
+import { sendBulkNotificationKafka } from "../../utils/sendNotificationKafka";
 // import { sendNotificationKafka } from "../../config/kafka/kafka.config";
 export const createComment = async (req: Request, res: Response) => {
     try {
@@ -57,11 +58,53 @@ export const createComment = async (req: Request, res: Response) => {
             await COMMENT.deleteOne({ _id: newComment._id });
             return handleResponse(res, 404, errors.flick_not_found);
         }
-        // sendNotificationKafka('create-comment', {
-        //     flickId: updatedFlick.thumbnailURL,
-        //     user: user,
-        //   comment: comment,
-        // })
+        const commentSnippet = comment
+            .map((seg: ITextDataSchema) => seg.text || '')
+            .join(' ')
+            .slice(0, 100);
+        let kafkaMessages = [];
+        if (user !== updatedFlick.user.toString()) {
+            kafkaMessages.push({
+                key: `NEW_COMMENT`,
+                value: {
+                    userId: user,
+                    contentUserId: updatedFlick.user.toString(),
+                    metadata: {
+                        commentSnippet,
+                        thumbnailURL: updatedFlick.thumbnailURL,
+                    commentCount: updatedFlick.commentCount,
+                },
+                timestamp: new Date().toISOString(),
+            }
+            });
+        }
+        const mentionedUserIdsSet = new Set<string>();
+        comment.forEach((segment: ITextDataSchema) => {
+            if (segment.mention) {
+                const mentionedIdStr = segment.mention.toString();
+                if (mentionedIdStr !== user) {  // avoid notifying self if replier mentioned themselves
+                    mentionedUserIdsSet.add(mentionedIdStr);
+                }
+            }
+        });
+        const mentionedUserIds = Array.from(mentionedUserIdsSet);
+        if (mentionedUserIds.length > 0) {
+            kafkaMessages.push({
+                key: `MENTIONED_COMMENT`,
+                value: {
+                    userId: user,
+                    contentUserId: mentionedUserIds,   // send to all mentioned users
+                    metadata: {
+                        commentSnippet,
+                        thumbnailURL: updatedFlick.thumbnailURL,
+                        commentCount: updatedFlick.commentCount,
+                    },
+                    timestamp: new Date().toISOString(),
+                }
+            });
+        }
+        // Send Kafka notifications for new comment
+        await sendBulkNotificationKafka(kafkaMessages);
         return handleResponse(res, 201, success.create_comment);
     } catch (error) {
         sendErrorToDiscord("POST:create-comment", error);

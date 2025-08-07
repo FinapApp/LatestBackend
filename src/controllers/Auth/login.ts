@@ -177,7 +177,7 @@ export const login = async (req: Request, res: Response) => {
     });
 
     // Send Kafka messages
-    await sendBulkNotificationKafka(kafkaMessages);
+     sendBulkNotificationKafka(kafkaMessages);
 
     return handleResponse(res, 200, {
       userId,

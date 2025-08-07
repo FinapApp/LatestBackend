@@ -614,7 +614,7 @@ export  const validateReportAIContent = (body: object) => {
     aiModel: Joi.string().required(),
     aiResponse: Joi.string().required(),
     aiRequest: Joi.string().required(),
-    aiConversationId: Joi.string().regex(/^[0-9a-fA-F]{24}$/, 'object Id').required(),
+    aiConversationId: Joi.string().required(),
     attachment: Joi.array().items(Joi.string().pattern(new RegExp(`^${config.R2.R2_PUBLIC_URL}/.+$`)).message("attachment must be a valid URL").required()).optional(),
     message: Joi.string().required()
   })

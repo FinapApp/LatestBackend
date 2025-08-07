@@ -1,10 +1,13 @@
 import { Request, Response } from "express"
 import { validateCreateReply } from "../../../validators/validators"
 import Joi from "joi"
-import { COMMENT } from "../../../models/Comment/comment.model"
+import { COMMENT, ITextDataSchema } from "../../../models/Comment/comment.model"
 import { errors, handleResponse, success } from "../../../utils/responseCodec"
 import { sendErrorToDiscord } from "../../../config/discord/errorDiscord"
 import { FLICKS } from "../../../models/Flicks/flicks.model";
+import { sendNotificationKafka } from "../../../utils/sendNotificationKafka"
+import { Types } from "mongoose"
+import { FOLLOW } from "../../../models/User/userFollower.model"
 
 export const createReplyComment = async (req: Request, res: Response) => {
     try {
@@ -14,13 +17,40 @@ export const createReplyComment = async (req: Request, res: Response) => {
         }
 
         const user = res.locals.userId;
-        const flick = req.params.flickId;
+        const { flickId: flick, commentId: parentComment } = req.params;
+        const comment = req.body.comment;
 
+        const parentCommentCheck = await COMMENT.findById(parentComment, "user flick").lean();
+        if (!parentCommentCheck) {
+            return handleResponse(res, 404, errors.comment_not_found);
+        }
+        if (!parentCommentCheck.flick || parentCommentCheck.flick.toString() !== flick) {
+            return handleResponse(res, 400, errors.comment_flick_mismatch);
+        }
+        // Check if flick exists
+        const flickExists = await FLICKS.findById(flick, "user commentSetting audienceSetting thumbnailURL commentCount");
+        if (!flickExists) {
+            return handleResponse(res, 404, errors.flick_not_found);
+        }
+        let flickUser = flickExists.user;
+        const isOwner = flickUser == user;
+        if (flickExists.commentSetting === 'friends' && !isOwner) {
+            // Check if current user follows flick creator
+            const isFollowing = await FOLLOW.findOne({
+                follower: new Types.ObjectId(user),
+                following: flickUser
+            });
+            if (!isFollowing) {
+                return handleResponse(res, 403, errors.permission_denied);
+            }
+        } else if (flickExists.commentSetting !== 'everyone' && !isOwner) {
+            return handleResponse(res, 403, errors.permission_denied);
+        }
         const createReplyComment = await COMMENT.create({
             user,
             flick,
-            comment: req.body.comment,
-            parentComment: req.params.commentId
+            comment,
+            parentComment
         });
         if (!createReplyComment) {
             return handleResponse(res, 304, errors.create_comment);
@@ -35,6 +65,37 @@ export const createReplyComment = async (req: Request, res: Response) => {
         if (!updatedFlick) {
             await COMMENT.deleteOne({ _id: createReplyComment._id });
             return handleResponse(res, 404, errors.flick_not_found);
+        }
+        const commentSnippet = comment
+            .map((seg: ITextDataSchema) => seg.text || '')
+            .join(' ')
+            .slice(0, 100);
+
+        const mentionedUserIdsSet = new Set<string>();
+        comment.forEach((segment: ITextDataSchema) => {
+            if (segment.mention) {
+                const mentionedIdStr = segment.mention.toString();
+                if (mentionedIdStr !== user) {
+                    mentionedUserIdsSet.add(mentionedIdStr);
+                }
+            }
+        });
+        const mentionedUserIds = Array.from(mentionedUserIdsSet);
+        if (user !== parentCommentCheck.user.toString()) {
+            const kafkaMessage = {
+                userId: user,
+                commentId: parentComment,
+                metadata: {
+                    mentionedUserIds,
+                    commentSnippet,
+                    thumbnailURL: updatedFlick.thumbnailURL,
+                },
+                timestamp: new Date().toISOString(),
+            };
+            // fire and forget notification
+            sendNotificationKafka("CREATE_REPLY_COMMENT", kafkaMessage).catch((err) => {
+                console.error("Kafka notification error in createReplyComment:", err);
+            });
         }
         return handleResponse(res, 200, success.create_comment);
     } catch (error) {

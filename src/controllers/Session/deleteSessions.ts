@@ -1,7 +1,7 @@
 import { Request, Response } from "express";
 import { errors, handleResponse, success } from "../../utils/responseCodec";
 import { SESSION } from "../../models/User/userSession.model";
-import { sendBulkNotificationKafka } from "../../utils/sendNotificationKafka"; // bulk sender!
+import { sendNotificationKafka } from "../../utils/sendNotificationKafka"; // bulk sender!
 
 export const deleteSessions = async (req: Request, res: Response) => {
     try {
@@ -22,14 +22,14 @@ export const deleteSessions = async (req: Request, res: Response) => {
             user: res.locals.userId,
             _id: { $ne: res.locals.sessionId }
         });
-        await sendBulkNotificationKafka([{
-            key: 'SESSION_DELETED_ALL_BULK',
-            value: {
+        sendNotificationKafka(
+            'SESSION_DELETED_ALL_BULK',
+            {
                 userId: res.locals.userId,
                 sessionId: res.locals.sessionId,
                 tokens
             }
-        }]);
+        );
         return handleResponse(res, 200, success.session_deleted);
     } catch (error) {
         console.log(error);
