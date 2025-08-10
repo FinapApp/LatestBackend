@@ -1,6 +1,6 @@
 import { Request, Response } from 'express';
 import { validateCreateQuestApplication } from "../../../validators/validators";
-import { errors, handleResponse, success } from "../../../utils/responseCodec";
+import { errors, handleResponse, Lang, success } from "../../../utils/responseCodec";
 import jwt from "jsonwebtoken";
 import Joi from "joi";
 import { QUEST_APPLICANT } from '../../../models/Quest/questApplicant.model';
@@ -9,10 +9,11 @@ import { QUESTS } from '../../../models/Quest/quest.model';
 import { config } from '../../../config/generalconfig';
 
 export const createQuestApplicant = async (req: Request, res: Response) => {
+        const lang = req.query.lang as Lang|| 'en';
     try {
-        const validationError: Joi.ValidationError | undefined = validateCreateQuestApplication(req.body, req.params);
+        const validationError: Joi.ValidationError | undefined = validateCreateQuestApplication(req.body, req.params , req.query);
         if (validationError) {
-            return handleResponse(res, 400, errors.validation, validationError.details);
+            return handleResponse(res, 400, errors.validation, lang , validationError.details);
         }
 
         const questApplicantId = req.params.questApplicantId;
@@ -25,16 +26,16 @@ export const createQuestApplicant = async (req: Request, res: Response) => {
             QUEST_APPLICANT.findOne({ user, quest }, "status"),
         ]);
         if (!questData) {
-            return handleResponse(res, 404, errors.quest_not_found);
+            return handleResponse(res, 404, errors.quest_not_found, lang);
         }
         if (String(questData.user) === String(user)) {
-            return handleResponse(res, 403, errors.cannot_apply_to_own_quest);
+            return handleResponse(res, 403, errors.cannot_apply_to_own_quest, lang);
         }
         if (!["pending", "paused"].includes(questData.status)) {
-            return handleResponse(res, 403, errors.quest_not_authorized);
+            return handleResponse(res, 403, errors.quest_not_authorized, lang);
         }
         if (existingApplication) {
-            return handleResponse(res, 403, errors.quest_already_applied);
+            return handleResponse(res, 403, errors.quest_already_applied, lang);
         }
      
 
@@ -49,7 +50,7 @@ export const createQuestApplicant = async (req: Request, res: Response) => {
         ]);
 
         if (!createdApplicant) {
-            return handleResponse(res, 500, errors.create_quest_applicants);
+            return handleResponse(res, 500, errors.create_quest_applicants, lang);
         }
         if (questData.mode == "Goflick") {
             let qrString = `quest:${quest}:${questApplicantId}`;
@@ -60,10 +61,10 @@ export const createQuestApplicant = async (req: Request, res: Response) => {
             );
             return handleResponse(res, 201, { qrString });
         }
-        return handleResponse(res, 201, success.quest_applicant_updated)
+        return handleResponse(res, 201, success.quest_applicant_updated, lang);
     } catch (err) {
         console.error(err);
         sendErrorToDiscord("create-quest-applicant", err);
-        return handleResponse(res, 500, errors.catch_error);
+        return handleResponse(res, 500, errors.catch_error, lang);
     }
 };

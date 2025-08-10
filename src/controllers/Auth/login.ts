@@ -2,7 +2,7 @@ import { Request, Response } from "express";
 import { validateLogin } from "../../validators/validators";
 import Joi from "joi";
 import jwt from "jsonwebtoken";
-import { handleResponse, errors } from "../../utils/responseCodec";
+import { handleResponse, errors, Lang } from "../../utils/responseCodec";
 import { config } from "../../config/generalconfig";
 import { USER } from "../../models/User/user.model";
 import { SESSION } from "../../models/User/userSession.model";
@@ -37,13 +37,13 @@ interface UserPreference {
 }
 
 export const login = async (req: Request, res: Response) => {
+  const lang = req.query.lang as Lang || 'en';
   try {
     // Validate request body
-    const validationError: Joi.ValidationError | undefined = validateLogin(req.body);
+    const validationError: Joi.ValidationError | undefined = validateLogin(req.body as LoginRequest, req.query);
     if (validationError) {
-      return handleResponse(res, 400, errors.validation, validationError.details);
+      return handleResponse(res, 400, errors.validation, lang , validationError.details);
     }
-
     const { username, email, phone, password, fcmToken } = req.body as LoginRequest;
 
     // Find user by email/username/phone
@@ -54,13 +54,13 @@ export const login = async (req: Request, res: Response) => {
 
     const checkUser = await USER.findOne(query)
     if (!checkUser) {
-      return handleResponse(res, 400, errors.invalid_credentials);
+      return handleResponse(res, 400, errors.invalid_credentials , lang);
     }
 
     // Compare hashed password
     const passwordMatch = await bcrypt.compare(password, checkUser.password);
     if (!passwordMatch) {
-      return handleResponse(res, 400, errors.invalid_credentials);
+      return handleResponse(res, 400, errors.invalid_credentials ,lang);
     }
 
     const userId = checkUser._id;
@@ -190,7 +190,7 @@ export const login = async (req: Request, res: Response) => {
   } catch (err: any) {
     console.log(err);
     sendErrorToDiscord("POST:login", err);
-    return handleResponse(res, 500, errors.catch_error);
+    return handleResponse(res, 500, errors.catch_error , lang);
   }
 };
 

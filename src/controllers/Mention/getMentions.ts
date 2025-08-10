@@ -9,7 +9,7 @@ import { validateGetUsersAndHashtags } from "../../validators/validators";
         try {
             const validationError: Joi.ValidationError | undefined = validateGetUsersAndHashtags(req.query);
             if (validationError) {
-                return handleResponse(res, 400, errors.validation, validationError.details);
+                return handleResponse(res, 400, errors.validation, 'en' , validationError.details);
             }
             let { q = "", page = 1, limit = 10 } = req.query as { q: string; page?: string | number; type?: string, limit?: string | number };
             limit = Number(limit)

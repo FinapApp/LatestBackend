@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
 import { FLICKS, IMediaSchema } from "../../models/Flicks/flicks.model";
-import { errors, handleResponse, success } from "../../utils/responseCodec";
+import { errors, handleResponse, Lang, success } from "../../utils/responseCodec";
 import Joi from "joi";
 import { validateCreateFlick } from "../../validators/validators";
 import { AUDIO } from "../../models/Audio/audio.model";
@@ -10,10 +10,11 @@ import { getIndex } from "../../config/melllisearch/mellisearch.config";
 import { USER } from "../../models/User/user.model";
 
 export const createFlick = async (req: Request, res: Response) => {
+    const lang = req.query.lang as Lang || 'en';
     try {
-        const validationError: Joi.ValidationError | undefined = validateCreateFlick(req.body, req.params);
+        const validationError: Joi.ValidationError | undefined = validateCreateFlick(req.body, req.params , req.query);
         if (validationError) {
-            return handleResponse(res, 400, errors.validation, validationError.details);
+            return handleResponse(res, 400, errors.validation, lang , validationError.details);
         }
         const user = res.locals.userId
         const flickId = req.params.flickId;
@@ -22,7 +23,7 @@ export const createFlick = async (req: Request, res: Response) => {
         if (audio) {
             checkAudio = await AUDIO.create({ url: audio, name: audioName });
             if (!checkAudio) {
-                return handleResponse(res, 404, errors.create_audio);
+                return handleResponse(res, 404, errors.create_audio , lang);
             }
         }
         // EVERYTIME I MAKE A NEWHASHTAG ID STORED I WANT THE ID TO BE THE SAME AS THE ID IN THE DATABASE
@@ -32,7 +33,7 @@ export const createFlick = async (req: Request, res: Response) => {
             const createHashTags = await HASHTAGS.insertMany(newHashTags.map((tag: { id: string, value: string }) => ({ value: tag.value, _id: tag.id })));
             await hashTagIndex.addDocuments(newHashTags.map((tag: { id: string, value: string }) => ({ hashtagId: tag.id, value: tag.value, count: 1 })));
             if (!createHashTags) {
-                return handleResponse(res, 404, errors.create_hashtags);
+                return handleResponse(res, 404, errors.create_hashtags , lang);
             }
         }
         const allDescriptionHashtagIds = (description || [])
@@ -89,15 +90,15 @@ export const createFlick = async (req: Request, res: Response) => {
             ]);
             USER.findByIdAndUpdate(user, { $inc: { flickCount: 1 } }, { new: true })
                 .catch(err => sendErrorToDiscord("POST:create-flick:flickCount", err));
-            return handleResponse(res, 200, success.flick_uploaded);
+            return handleResponse(res, 200, success.flick_uploaded , lang);
         }
-        return handleResponse(res, 404, errors.flick_not_found);
+        return handleResponse(res, 404, errors.flick_not_found , lang);
     } catch (error: any) {
         console.log(error);
         if (error.code == 11000) {
-            return handleResponse(res, 500, errors.cannot_rerunIt)
+            return handleResponse(res, 500, errors.cannot_rerunIt , lang);
         }
         sendErrorToDiscord("POST:create-flick", error);
-        return handleResponse(res, 500, errors.catch_error);
+        return handleResponse(res, 500, errors.catch_error , lang);
     }
 };

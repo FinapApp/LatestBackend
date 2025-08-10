@@ -1,15 +1,16 @@
 import { Request, Response } from 'express';
 import { validateQuestId } from '../../../validators/validators';
-import { errors, handleResponse } from '../../../utils/responseCodec';
+import { errors, handleResponse, Lang } from '../../../utils/responseCodec';
 import Joi from 'joi';
 import { sendErrorToDiscord } from '../../../config/discord/errorDiscord';
 import { QUESTS } from '../../../models/Quest/quest.model';
 import { Types } from 'mongoose';
 export const getQuest = async (req: Request, res: Response) => {
+    const lang = req.query.lang as Lang  || 'en';
     try {
-        const validationError: Joi.ValidationError | undefined = validateQuestId(req.params);
+        const validationError: Joi.ValidationError | undefined = validateQuestId(req.params , req.query);
         if (validationError) {
-            return handleResponse(res, 400, errors.validation, validationError.details);
+            return handleResponse(res, 400, errors.validation, lang , validationError.details);
         }
         const { questId } = req.params;
         const userId = res.locals.userId;
@@ -124,12 +125,12 @@ export const getQuest = async (req: Request, res: Response) => {
         ];
         const result = await QUESTS.aggregate(pipeline);
         if (!result.length) {
-            return handleResponse(res, 404, errors.quest_not_found);
+            return handleResponse(res, 404, errors.quest_not_found, lang);
         }
         return handleResponse(res, 200, { questdetails: result[0] });
     } catch (err) {
         console.error(err);
         sendErrorToDiscord("GET:aggregated-quest", err);
-        return handleResponse(res, 500, errors.catch_error);
+        return handleResponse(res, 500, errors.catch_error  , lang);
     }
 };

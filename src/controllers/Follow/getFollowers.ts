@@ -1,16 +1,17 @@
 import { Request, Response } from 'express'
 import { getQueryParams } from '../../validators/validators';
 import Joi from 'joi';
-import { errors, handleResponse } from '../../utils/responseCodec';
+import { errors, handleResponse, Lang } from '../../utils/responseCodec';
 import { getAllFollowerUserAggreagtion } from '../../aggregation/getAllFollowerUserAggreagtion';
 import { sendErrorToDiscord } from '../../config/discord/errorDiscord';
 import mongoose from 'mongoose';
 
 export const getFollowers = async (req: Request, res: Response) => {
+    const lang = req.query.lang as Lang || 'en';
     try {
         const validationError: Joi.ValidationError | undefined = getQueryParams(req.query);
         if (validationError) {
-            return handleResponse(res, 400, errors.validation, validationError.details);
+            return handleResponse(res, 400, errors.validation, lang , validationError.details);
         }
         let { page, userId, limit = 10 } = req.query as any
         const currentUserId = new mongoose.Types.ObjectId(res.locals.userId);
@@ -18,9 +19,9 @@ export const getFollowers = async (req: Request, res: Response) => {
         limit = Number(limit);
         const skip = ((Number(page) || 1) - 1) * limit;
         const result = await getAllFollowerUserAggreagtion(currentUserId, targetUserId, skip, limit)
-        return handleResponse(res, 200, result)
+        return handleResponse(res, 200, result )
     } catch (error) {
         sendErrorToDiscord("GET:followers", error)
-        return handleResponse(res, 500, errors.catch_error);
+        return handleResponse(res, 500, errors.catch_error , lang);
     }
 }

@@ -2,15 +2,16 @@ import { Request, Response } from 'express';
 import Joi from 'joi';
 import mongoose from 'mongoose';
 import { validateGetAllLikes } from '../../validators/validators';
-import { errors, handleResponse } from '../../utils/responseCodec';
+import { errors, handleResponse, Lang } from '../../utils/responseCodec';
 import { sendErrorToDiscord } from '../../config/discord/errorDiscord';
 import { LIKE } from '../../models/Likes/likes.model';
 
 export const getAllLikes = async (req: Request, res: Response) => {
+        const lang = req.query.lang as Lang || 'en';
     try {
         const validationError: Joi.ValidationError | undefined = validateGetAllLikes(req.query);
         if (validationError) {
-            return handleResponse(res, 400, errors.validation, validationError.details);
+            return handleResponse(res, 400, errors.validation, lang , validationError.details);
         }
 
         const { id, type }: { id: string, type: 'quest' | 'comment' | 'flick' } =
@@ -54,13 +55,13 @@ export const getAllLikes = async (req: Request, res: Response) => {
         ]);
 
         if (!likeList) {
-            return handleResponse(res, 404, errors.comment_not_found);
+            return handleResponse(res, 404, errors.comment_not_found, lang);
         }
 
         return handleResponse(res, 200, { likeList });
 
     } catch (error) {
         sendErrorToDiscord("GET:get-likes", error);
-        return handleResponse(res, 500, errors.catch_error);
+        return handleResponse(res, 500, errors.catch_error , lang);
     }
 };

@@ -1,6 +1,6 @@
 import { Response, Request } from "express";
 import { validateUpdateProfile } from "../../../validators/validators";
-import { handleResponse, errors, success } from "../../../utils/responseCodec";
+import { handleResponse, errors, success, Lang } from "../../../utils/responseCodec";
 import Joi from "joi";
 import { USER } from "../../../models/User/user.model";
 import { sendErrorToDiscord } from "../../../config/discord/errorDiscord";
@@ -9,15 +9,17 @@ import { getIndex } from "../../../config/melllisearch/mellisearch.config";
 
 
 export const updateProfileDetails = async (req: Request, res: Response) => {
+    const lang = req.query.lang as Lang || 'en';
     try {
         const validationError: Joi.ValidationError | undefined = validateUpdateProfile(
-            req.body
+            req.body , req.query 
         );
         if (validationError) {
             return handleResponse(
                 res,
                 400,
                 errors.validation,
+                lang,
                 validationError.details
             );
         }
@@ -27,7 +29,7 @@ export const updateProfileDetails = async (req: Request, res: Response) => {
             const hashTagIndex = getIndex("HASHTAG");
             await hashTagIndex.addDocuments(newHashTags.map((tag: { id: string, value: string }) => ({ hashtagId: tag.id, value: tag.value ,count: 1})));
             if (!createHashTags) {
-                return handleResponse(res, 404, errors.create_hashtags);
+                return handleResponse(res, 404, errors.create_hashtags, lang);
             }
         }
         const userId = res.locals.userId;
@@ -44,21 +46,21 @@ export const updateProfileDetails = async (req: Request, res: Response) => {
                     ...updateProfile,
                 }
             ]);
-            return handleResponse(res, 200, success.profile_updated);
+            return handleResponse(res, 200, success.profile_updated     , lang);
         }
-        return handleResponse(res, 304, errors.profile_not_updated);
+        return handleResponse(res, 304, errors.profile_not_updated, lang);
     } catch (err: any) {
         if (err.code === 11000) {
             const key = err?.keyValue ? Object.keys(err.keyValue)[0] : null;
             if (key === "email") {
-                return handleResponse(res, 500, errors.email_exist);
+                return handleResponse(res, 500, errors.email_exist, lang);
             }
             if (key === "username") {
-                return handleResponse(res, 500, errors.username_exist);
+                return handleResponse(res, 500, errors.username_exist, lang);
             }
-            if (key === "phone") return handleResponse(res, 500, errors.phone_exist)
+            if (key === "phone") return handleResponse(res, 500, errors.phone_exist, lang);
         }
         sendErrorToDiscord("PUT:profile", err);
-        return handleResponse(res, 500, errors.catch_error);
+        return handleResponse(res, 500, errors.catch_error, lang);
     }
 };

@@ -1,5 +1,5 @@
 import { Request, Response } from 'express'
-import { errors, handleResponse } from '../../utils/responseCodec';
+import { errors, handleResponse, Lang } from '../../utils/responseCodec';
 import jwt from 'jsonwebtoken'
 import { config } from '../../config/generalconfig';
 import { SESSION } from '../../models/User/userSession.model';
@@ -8,30 +8,31 @@ import { validateRefreshToken } from '../../validators/validators';
 import { sendErrorToDiscord } from '../../config/discord/errorDiscord';
 
 export const revalidateSessions = async (req: Request, res: Response) => {
+    const lang = req.query.lang as Lang || 'en';
     try {
-        const validationError: Joi.ValidationError | undefined = validateRefreshToken(req.body);
+        const validationError: Joi.ValidationError | undefined = validateRefreshToken(req.body, req.query);
         if (validationError) {
-            return handleResponse(res, 400, errors.validation, validationError.details);
+            return handleResponse(res, 400, errors.validation, lang, validationError.details);
         }
         const { refreshToken } = req.body
         if (!refreshToken) {
-            return handleResponse(res, 400, errors.no_token);
+            return handleResponse(res, 400, errors.no_token, lang);
         }
         jwt.verify(refreshToken, config.JWT.REFRESH_TOKEN_SECRET, async (err: any, data: any) => {
             if (err) {
                 if (err.name === 'TokenExpiredError') {
-                    return handleResponse(res, 401, errors.refresh_token_expired);
+                    return handleResponse(res, 401, errors.refresh_token_expired, lang);
                 } else if (err.name === 'JsonWebTokenError') {
-                    return handleResponse(res, 401, errors.invalid_refresh_token);
+                    return handleResponse(res, 401, errors.invalid_refresh_token, lang);
                 } else {
-                    return handleResponse(res, 401, errors.refresh_token_not_found);
+                    return handleResponse(res, 401, errors.refresh_token_not_found, lang);
                 }
             }
             if (data) {
                 const { userId } = data
                 const checkSession = await SESSION.findOne({ refreshToken, user: userId }, "_id")
                 if (!checkSession) {
-                    return handleResponse(res, 400, errors.retry_login);
+                    return handleResponse(res, 400, errors.retry_login , lang);
                 }
                 const accessToken = jwt.sign(
                     { userId , sessionId: checkSession._id },
@@ -44,6 +45,6 @@ export const revalidateSessions = async (req: Request, res: Response) => {
     } catch (error) {
         console.log(error);
         sendErrorToDiscord("POST:revalidate-sessions", error)
-        return handleResponse(res, 500, errors.catch_error);
+        return handleResponse(res, 500, errors.catch_error , lang);
     }
 }

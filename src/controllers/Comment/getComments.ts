@@ -2,15 +2,16 @@ import { Request, Response } from 'express';
 import Joi from 'joi';
 import mongoose from 'mongoose';
 import { validateGetComments } from '../../validators/validators';
-import { errors, handleResponse } from '../../utils/responseCodec';
+import { errors, handleResponse, Lang } from '../../utils/responseCodec';
 import { COMMENT } from '../../models/Comment/comment.model';
 import { sendErrorToDiscord } from '../../config/discord/errorDiscord';
 
 export const getComments = async (req: Request, res: Response) => {
+    const lang = req.query.lang as Lang || 'en';
     try {
         const validationError: Joi.ValidationError | undefined = validateGetComments(req.params, req.query);
         if (validationError) {
-            return handleResponse(res, 400, errors.validation, validationError.details);
+            return handleResponse(res, 400, errors.validation, lang, validationError.details);
         }
 
         const { flickId } = req.params;
@@ -268,6 +269,6 @@ export const getComments = async (req: Request, res: Response) => {
     } catch (error) {
         console.error(error);
         sendErrorToDiscord("GET:get-comments", error);
-        return handleResponse(res, 500, errors.catch_error);
+        return handleResponse(res, 500, errors.catch_error , lang);
     }
 };

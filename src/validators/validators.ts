@@ -5,10 +5,21 @@ import { REGEX } from "../utils/regex";
 
 
 
+const supportedLang = ['en', 'ru', 'uz', 'hi'];
+const langSchema = Joi.string().valid(...supportedLang).optional();
 
 
-
-export const validateLogin = (body: object) => {
+export const validateLogout = (query: object) => {
+  const querySchema = Joi.object({
+    lang : langSchema
+  })
+  const { error } = querySchema.validate(query);
+  return error;
+}
+export const validateLogin = (body: object, query: object) => {
+  const querySchema = Joi.object({
+    lang: langSchema
+  })
   const schema = Joi.object({
     email: Joi.string().email().trim().min(1).max(255).lowercase(),
     username: Joi.string()
@@ -33,12 +44,18 @@ export const validateLogin = (body: object) => {
     .messages({
       'object.xor': 'Exactly one of email, username, or phone must be provided, and it must not be empty',
     });
-
-  const { error } = schema.validate(body);
+  const combinedSchema = Joi.object({
+    body: schema,
+    query: querySchema
+  });
+  const { error } = combinedSchema.validate({ body, query });
   return error;
 };
 
-export const validateForgetPassword = (body: object) => {
+export const validateForgetPassword = (body: object, query: object) => {
+  const querySchema = Joi.object({
+    lang: langSchema
+  })
   const schema = Joi.object({
     email: Joi.string().email().trim().min(1),
     phone: Joi.string()
@@ -61,12 +78,18 @@ export const validateForgetPassword = (body: object) => {
     .messages({
       'object.xor': 'Exactly one of email, username, or phone must be provided, and it must not be empty',
     });
-
-  const { error } = schema.validate(body);
+  const combinedSchema = Joi.object({
+    body: schema,
+    query: querySchema
+  });
+  const { error } = combinedSchema.validate({ body, query });
   return error;
 };
 
-export const validateOTPForgetPassword = (body: object) => {
+export const validateOTPForgetPassword = (body: object, query: object) => {
+  const querySchema = Joi.object({
+    lang: langSchema
+  })
   const schema = Joi.object({
     otp: Joi.string().required(),
     email: Joi.string().email().trim().min(1),
@@ -90,12 +113,18 @@ export const validateOTPForgetPassword = (body: object) => {
     .messages({
       'object.xor': 'Exactly one of email, username, or phone must be provided, and it must not be empty',
     });
-
-  const { error } = schema.validate(body);
+  const combinedSchema = Joi.object({
+    body: schema,
+    query: querySchema
+  });
+  const { error } = combinedSchema.validate({ body, query });
   return error;
 };
 
-export const validateUpdatePasswordAfterOTP = (body: object) => {
+export const validateUpdatePasswordAfterOTP = (body: object, query: object) => {
+  const querySchema = Joi.object({
+    lang: langSchema
+  })
   const schema = Joi.object({
     email: Joi.string().email().trim().min(1),
     phone: Joi.string()
@@ -119,12 +148,18 @@ export const validateUpdatePasswordAfterOTP = (body: object) => {
     .messages({
       'object.xor': 'Exactly one of username, phone, or email must be provided, and it must not be empty',
     });
-
-  const { error } = schema.validate(body);
+  const combinedSchema = Joi.object({
+    body: schema,
+    query: querySchema
+  });
+  const { error } = combinedSchema.validate({ body, query });
   return error;
 };
 
-export const validateSignUp = (body: object) => {
+export const validateSignUp = (body: object, query: object) => {
+  const querySchema = Joi.object({
+    lang: langSchema
+  })
   const schema = Joi.object({
     email: Joi.string().email().trim().min(1),
     phone: Joi.string()
@@ -140,12 +175,18 @@ export const validateSignUp = (body: object) => {
     .messages({
       'object.xor': 'Either email or phone must be provided, but not both, and it must not be empty',
     });
-
-  const { error } = schema.validate(body);
+  const combinedSchema = Joi.object({
+    body: schema,
+    query: querySchema
+  });
+  const { error } = combinedSchema.validate({ body, query });
   return error;
 };
 
-export const validateVerifyOTPAfter2FA = (body: object) => {
+export const validateVerifyOTPAfter2FA = (body: object, query: object) => {
+  const querySchema = Joi.object({
+    lang: langSchema
+  })
   const schema = Joi.object({
     otp: Joi.string().required(),
     email: Joi.string().email().trim().min(1),
@@ -162,12 +203,18 @@ export const validateVerifyOTPAfter2FA = (body: object) => {
     .messages({
       'object.xor': 'Either email or username or phone must be provided, but not both or empty',
     });
-
-  const { error } = schema.validate(body);
+  const combinedSchema = Joi.object({
+    body: schema,
+    query: querySchema
+  });
+  const { error } = combinedSchema.validate({ body, query });
   return error;
 };
 
-export const validateVerifyOTPSignUp = (body: object) => {
+export const validateVerifyOTPSignUp = (body: object, query: object) => {
+  const querySchema = Joi.object({
+    lang: langSchema
+  })
   const schema = Joi.object({
     fcmToken: Joi.string().required(),
     otp: Joi.string().required(),
@@ -205,22 +252,33 @@ export const validateVerifyOTPSignUp = (body: object) => {
     .messages({
       'object.xor': 'Either email or phone must be provided, but not both, and it must not be empty',
     });
-
-  const { error } = schema.validate(body);
+  const combinedSchema = Joi.object({
+    body: schema,
+    query: querySchema
+  });
+  const { error } = combinedSchema.validate({ body, query });
   return error;
 };
 
-export const validateApplyReferralCode = (body: object) => {
+export const validateApplyReferralCode = (body: object, query: object) => {
+  const querySchema = Joi.object({
+    lang: langSchema
+  })
   const schema = Joi.object({
     code: Joi.string().required(),
   });
-  const { error } = schema.validate(body);
+  const combinedSchema = Joi.object({
+    body: schema,
+    query: querySchema
+  });
+  const { error } = combinedSchema.validate({ body, query });
   return error;
 }
 
 
 export const validateGetFlicks = (query: object) => {
   const schema = Joi.object({
+    lang: langSchema,
     type: Joi.string().valid("tagged", "profile").optional(),
     limit: Joi.number().integer().min(1).max(20).optional(),
     page: Joi.number().integer().min(1).optional(),
@@ -234,6 +292,7 @@ export const validateGetFlicks = (query: object) => {
 
 export const validateGetFeedback = (query: object) => {
   const schema = Joi.object({
+    lang: langSchema,
     type: Joi.string().valid("pending", "resolved").optional(),
     rating: Joi.number().integer().min(1).max(5).optional(),
     limit: Joi.number().integer().min(1).max(15).optional(),
@@ -245,7 +304,10 @@ export const validateGetFeedback = (query: object) => {
 
 
 
-export const validateUpdateComment = (body: object, params: object) => {
+export const validateUpdateComment = (body: object, params: object, query: object) => {
+  const querySchema = Joi.object({
+    lang: langSchema,
+  })
   const bodySchema = Joi.object({
     comment: Joi.array().items(Joi.object({
       type: Joi.string().valid("user", "text"),
@@ -258,13 +320,17 @@ export const validateUpdateComment = (body: object, params: object) => {
   })
   const combinedSchema = Joi.object({
     body: bodySchema,
-    params: paramSchema
+    params: paramSchema,
+    query: querySchema
   })
-  const { error } = combinedSchema.validate({ body, params })
+  const { error } = combinedSchema.validate({ body, params, query })
   return error
 }
 
-export const validateUpdateReplyComment = (body: object, params: object) => {
+export const validateUpdateReplyComment = (body: object, params: object, query: object) => {
+  const querySchema = Joi.object({
+    lang: langSchema,
+  })
   const bodySchema = Joi.object({
     comment: Joi.array().items(Joi.object({
       type: Joi.string().valid("user", "text"),
@@ -278,13 +344,17 @@ export const validateUpdateReplyComment = (body: object, params: object) => {
   })
   const combinedSchema = Joi.object({
     body: bodySchema,
-    params: paramSchema
+    params: paramSchema,
+    query: querySchema
   })
-  const { error } = combinedSchema.validate({ body, params })
+  const { error } = combinedSchema.validate({ body, params, query })
   return error
 }
 
-export const validateComment = (body: object, params: object) => {
+export const validateComment = (body: object, params: object, query: object) => {
+  const querySchema = Joi.object({
+    lang: langSchema
+  })
   const bodySchema = Joi.object({
     comment: Joi.array().items(Joi.object({
       mention: Joi.string().regex(/^[0-9a-fA-F]{24}$/, 'object Id').optional(),
@@ -303,13 +373,17 @@ export const validateComment = (body: object, params: object) => {
   })
   const combinedSchema = Joi.object({
     body: bodySchema,
-    params: paramSchema
+    params: paramSchema,
+    query: querySchema
   })
-  const { error } = combinedSchema.validate({ body, params })
+  const { error } = combinedSchema.validate({ body, params, query })
   return error
 }
 
-export const validateCreateReply = (body: object, params: object) => {
+export const validateCreateReply = (body: object, params: object, query: object) => {
+  const querySchema = Joi.object({
+    lang: langSchema
+  })
   const bodySchema = Joi.object({
     comment: Joi.array().items(Joi.object({
       mention: Joi.string().regex(/^[0-9a-fA-F]{24}$/, 'object Id').optional(),
@@ -329,18 +403,26 @@ export const validateCreateReply = (body: object, params: object) => {
   })
   const combinedSchema = Joi.object({
     body: bodySchema,
-    params: paramSchema
+    params: paramSchema,
+    query: querySchema
   })
-  const { error } = combinedSchema.validate({ body, params })
+  const { error } = combinedSchema.validate({ body, params, query })
   return error
 }
 
 
-export const validateCommentId = (params: object) => {
+export const validateCommentId = (params: object, query: object) => {
+  const querySchema = Joi.object({
+    lang: langSchema
+  })
   const schema = Joi.object({
     commentId: Joi.string().regex(/^[0-9a-fA-F]{24}$/, 'object Id').required()
   })
-  const { error } = schema.validate(params)
+  const combinedSchema = Joi.object({
+    params: schema,
+    query: querySchema
+  })
+  const { error } = combinedSchema.validate({ params, query })
   return error
 }
 
@@ -351,6 +433,7 @@ export const validateGetChildComment = (params: object, query: object) => {
     flickId: Joi.string().regex(/^[0-9a-fA-F]{24}$/, 'object Id').required()
   })
   const querySchema = Joi.object({
+    lang: langSchema,
     page: Joi.number().integer().min(1).optional(),
     limit: Joi.number().integer().min(1).max(15).optional()
   }).and("limit", "page").messages({
@@ -366,7 +449,10 @@ export const validateGetChildComment = (params: object, query: object) => {
 
 
 
-export const validatePresignedFlick = (body: object) => {
+export const validatePresignedFlick = (body: object, query: object) => {
+  const querySchema = Joi.object({
+    lang: langSchema
+  })
   const schema = Joi.object({
     mediaFiles: Joi.array().items(Joi.object({
       fileType: Joi.string().required(),
@@ -375,11 +461,18 @@ export const validatePresignedFlick = (body: object) => {
     audioName: Joi.string().optional(),
     audioFileType: Joi.string().optional()
   })
-  const { error } = schema.validate(body)
+  const combinedSchema = Joi.object({
+    body: schema,
+    query: querySchema
+  })
+  const { error } = combinedSchema.validate({ body, query })
   return error
 }
 
-export const validateCreateFlick = (body: object, params: object) => {
+export const validateCreateFlick = (body: object, params: object, query: object) => {
+  const querySchema = Joi.object({
+    lang: langSchema
+  })
   const paramsSchema = Joi.object({
     flickId: Joi.string().regex(/^[0-9a-fA-F]{24}$/, 'object Id').required()
   })
@@ -442,9 +535,10 @@ export const validateCreateFlick = (body: object, params: object) => {
   })
   const combinedSchema = Joi.object({
     body: bodySchema,
-    params: paramsSchema
+    params: paramsSchema,
+    query: querySchema
   })
-  const { error } = combinedSchema.validate({ body, params })
+  const { error } = combinedSchema.validate({ body, params, query })
   return error
 }
 
@@ -454,6 +548,7 @@ export const validateGetUsersAndHashtags = (query: object) => {
     q: Joi.string().required(),
     limit: Joi.number().integer().min(1).max(15).optional(),
     page: Joi.number().integer().min(1).optional(),
+    lang: langSchema
   }).and("limit", "page").messages({
     "object.and": "Limit and page must be provided together",
   })
@@ -467,6 +562,8 @@ export const validateGetFlickMentions = (params: object, query: object) => {
     flickId: Joi.string().regex(/^[0-9a-fA-F]{24}$/, 'object Id').required()
   })
   const querySchema = Joi.object({
+
+    lang: langSchema,
     limit: Joi.number().integer().min(1).max(15).optional(),
     page: Joi.number().integer().min(1).optional(),
     num: Joi.number().integer().default(0),
@@ -481,23 +578,40 @@ export const validateGetFlickMentions = (params: object, query: object) => {
   return error
 }
 
-export const validateFlickId = (params: object) => {
+export const validateFlickId = (params: object, query: object) => {
+  const querySchema = Joi.object({
+    lang: langSchema
+  })
   const schema = Joi.object({
     flickId: Joi.string().regex(/^[0-9a-fA-F]{24}$/, 'object Id').required()
   })
-  const { error } = schema.validate(params)
+  const combinedSchema = Joi.object({
+    params: schema,
+    query: querySchema
+  })
+  const { error } = combinedSchema.validate({ params, query })
   return error
 }
 
-export const validateDeleteFlick = (params: object) => {
+export const validateDeleteFlick = (params: object, query: object) => {
+  const querySchema = Joi.object({
+    lang: langSchema
+  })
   const paramsSchema = Joi.object({
     flickId: Joi.string().regex(/^[0-9a-fA-F]{24}$/, 'object Id').required()
   })
-  const { error } = paramsSchema.validate( params )
+  const combinedSchema = Joi.object({
+    params: paramsSchema,
+    query: querySchema
+  })
+  const { error } = combinedSchema.validate({ params, query })
   return error
 }
 
-export const validateRepostFlick = (body: object, params: object) => {
+export const validateRepostFlick = (body: object, params: object, query: object) => {
+  const querySchema = Joi.object({
+    lang: langSchema
+  })
   const paramsSchema = Joi.object({
     flickId: Joi.string().regex(/^[0-9a-fA-F]{24}$/, 'object Id').required()
   })
@@ -538,13 +652,18 @@ export const validateRepostFlick = (body: object, params: object) => {
   })
   const combinedSchema = Joi.object({
     body: bodySchema,
-    params: paramsSchema
+    params: paramsSchema,
+    query: querySchema
   })
-  const { error } = combinedSchema.validate({ body, params })
+  const { error } = combinedSchema.validate({ body, params, query })
   return error
 }
 
-export const validateCreateSong = (body: object) => {
+export const validateCreateSong = (body: object, query: object) => {
+  const querySchema = Joi.object({
+    lang: langSchema
+  })
+
   const schema = Joi.object({
     name: Joi.string().required(),
     url: Joi.string().pattern(new RegExp(`^${config.R2.R2_PUBLIC_URL}/.+$`)).message("url must be a valid URL").required(),
@@ -552,7 +671,11 @@ export const validateCreateSong = (body: object) => {
     artist: Joi.string().optional(),
     duration: Joi.number().optional()
   })
-  const { error } = schema.validate(body)
+  const combinedSchema = Joi.object({
+    body: schema,
+    query: querySchema
+  })
+  const { error } = combinedSchema.validate({ body, query })
   return error
 }
 
@@ -561,6 +684,7 @@ export const validateGetComments = (params: object, query: object) => {
     flickId: Joi.string().regex(/^[0-9a-fA-F]{24}$/, 'object Id').required()
   })
   const querySchema = Joi.object({
+    lang: langSchema,
     limit: Joi.number().integer().min(1).max(15).optional(),
     page: Joi.number().integer().min(1).optional(),
   })
@@ -572,7 +696,10 @@ export const validateGetComments = (params: object, query: object) => {
   return error
 }
 
-export const validateCreateFeatureIsssue = (body: object, params: object) => {
+export const validateCreateFeatureIssue = (body: object, params: object, query: object) => {
+  const querySchema = Joi.object({
+    lang: langSchema
+  })
   const paramsSchema = Joi.object({
     featureIssueId: Joi.string().regex(/^[0-9a-fA-F]{24}$/, 'object Id').required()
   })
@@ -587,13 +714,17 @@ export const validateCreateFeatureIsssue = (body: object, params: object) => {
   })
   const combinedSchema = Joi.object({
     body: bodySchema,
-    params: paramsSchema
+    params: paramsSchema,
+    query: querySchema
   })
   const { error } = combinedSchema.validate({ body, params })
   return error
 }
 
-export const validateReportUser = (body: object, params: object) => {
+export const validateReportUser = (body: object, params: object, query: object) => {
+  const querySchema = Joi.object({
+    lang: langSchema
+  })
   const paramsSchema = Joi.object({
     userId: Joi.string().regex(/^[0-9a-fA-F]{24}$/, 'object Id').required(),
   })
@@ -603,13 +734,14 @@ export const validateReportUser = (body: object, params: object) => {
   })
   const combinedSchema = Joi.object({
     body: bodySchema,
-    params: paramsSchema
+    params: paramsSchema,
+    query: querySchema
   })
-  const { error } = combinedSchema.validate({ body, params })
+  const { error } = combinedSchema.validate({ body, params, query })
   return error
 }
 
-export  const validateReportAIContent = (body: object) => {
+export const validateReportAIContent = (body: object, query: object) => {
   const bodySchema = Joi.object({
     aiModel: Joi.string().required(),
     aiResponse: Joi.string().required(),
@@ -618,11 +750,21 @@ export  const validateReportAIContent = (body: object) => {
     attachment: Joi.array().items(Joi.string().pattern(new RegExp(`^${config.R2.R2_PUBLIC_URL}/.+$`)).message("attachment must be a valid URL").required()).optional(),
     message: Joi.string().required()
   })
-  const {error} = bodySchema.validate(body)
+  const querySchema = Joi.object({
+    lang: langSchema
+  })
+  const combinedSchema = Joi.object({
+    body: bodySchema,
+    query: querySchema
+  })
+  const { error } = combinedSchema.validate({ body, query })
   return error
 }
 
-export const validateReportStory = (body: object, params: object) => {
+export const validateReportStory = (body: object, params: object, query: object) => {
+  const querySchema = Joi.object({
+    lang: langSchema
+  })
   const paramsSchema = Joi.object({
     storyId: Joi.string().regex(/^[0-9a-fA-F]{24}$/, 'object Id').required(),
   })
@@ -632,13 +774,17 @@ export const validateReportStory = (body: object, params: object) => {
   })
   const combinedSchema = Joi.object({
     body: bodySchema,
-    params: paramsSchema
+    params: paramsSchema,
+    query: querySchema
   })
   const { error } = combinedSchema.validate({ body, params })
   return error
 }
 
-export const validateReportAudio = (body: object, params: object) => {
+export const validateReportAudio = (body: object, params: object, query: object) => {
+  const querySchema = Joi.object({
+    lang: langSchema
+  })
   const paramsSchema = Joi.object({
     audioId: Joi.string().regex(/^[0-9a-fA-F]{24}$/, 'object Id').required(),
   })
@@ -648,13 +794,18 @@ export const validateReportAudio = (body: object, params: object) => {
   })
   const combinedSchema = Joi.object({
     body: bodySchema,
-    params: paramsSchema
+    params: paramsSchema,
+    query: querySchema
   })
-  const { error } = combinedSchema.validate({ body, params })
+  const { error } = combinedSchema.validate({ body, params, query })
   return error
 }
 
-export const validateReportComment = (body: object, params: object) => {
+export const validateReportComment = (body: object, params: object, query: object) => {
+  const querySchema = Joi.object({
+    lang: langSchema
+  })
+  // Assuming commentId is a valid MongoDB ObjectId
   const paramsSchema = Joi.object({
     commentId: Joi.string().regex(/^[0-9a-fA-F]{24}$/, 'object Id').required(),
   })
@@ -664,13 +815,17 @@ export const validateReportComment = (body: object, params: object) => {
   })
   const combinedSchema = Joi.object({
     body: bodySchema,
-    params: paramsSchema
+    params: paramsSchema,
+    query: querySchema
   })
-  const { error } = combinedSchema.validate({ body, params })
+  const { error } = combinedSchema.validate({ body, params, query })
   return error
 }
 
-export const validateReportFlick = (body: object, params: object) => {
+export const validateReportFlick = (body: object, params: object, query: object) => {
+  const querySchema = Joi.object({
+    lang: langSchema
+  })
   const paramsSchema = Joi.object({
     flickId: Joi.string().regex(/^[0-9a-fA-F]{24}$/, 'object Id').required(),
   })
@@ -680,34 +835,56 @@ export const validateReportFlick = (body: object, params: object) => {
   })
   const combinedSchema = Joi.object({
     body: bodySchema,
-    params: paramsSchema
+    params: paramsSchema,
+    query: querySchema
   })
-  const { error } = combinedSchema.validate({ body, params })
+  const { error } = combinedSchema.validate({ body, params, query })
   return error
 }
 
-export const validateShareFlick = (body: object) => {
+export const validateShareFlick = (body: object, query: object) => {
+  const querySchema = Joi.object({
+    lang: langSchema
+  })
   const schema = Joi.object({
     flickId: Joi.string().regex(/^[0-9a-fA-F]{24}$/, 'object Id').required(),
   })
-  const { error } = schema.validate(body)
+  const combinedSchema = Joi.object({
+    body: schema,
+    query: querySchema
+  })
+  const { error } = combinedSchema.validate({ body, query })
   return error
 }
 
-export const validatePresignedProfile = (body: object) => {
+export const validatePresignedProfile = (body: object, query: object) => {
+  const querySchema = Joi.object({
+    lang: langSchema
+  })
   const schema = Joi.object({
     fileType: Joi.string()
   })
-  const { error } = schema.validate(body)
+  const combinedSchema = Joi.object({
+    body: schema,
+    query: querySchema
+  })
+  const { error } = combinedSchema.validate({ body, query })
   return error
 }
 
-export const validateCreateFeedback = (body: object) => {
+export const validateCreateFeedback = (body: object, query: object) => {
+  const querySchema = Joi.object({
+    lang: langSchema
+  })
   const schema = Joi.object({
     message: Joi.string().required(),
     rating: Joi.string().required()
   })
-  const { error } = schema.validate(body)
+  const combinedSchema = Joi.object({
+    body: schema,
+    query: querySchema
+  })
+  const { error } = combinedSchema.validate({ body, query })
   return error
 }
 
@@ -716,6 +893,7 @@ export const validateFollowerId = (params: object, query: object) => {
     followerId: Joi.string().regex(/^[0-9a-fA-F]{24}$/, 'object Id').required(),
   })
   const querySchema = Joi.object({
+    lang: langSchema,
     type: Joi.string().valid("remove").optional(),
   })
   const combinedSchema = Joi.object({
@@ -739,27 +917,45 @@ export const getQueryParams = (query: object) => {
   return error
 }
 
-export const validateUpdateTheme = (body: object) => {
+export const validateUpdateTheme = (body: object, query: object) => {
+  const querySchema = Joi.object({
+    lang: langSchema
+  })
   const schema = Joi.object({
     theme: Joi.string().valid("light", "dark", "system").required()
   })
-  const { error } = schema.validate(body)
+  const combinedSchema = Joi.object({
+    body: schema,
+    query: querySchema
+  })
+  const { error } = combinedSchema.validate({ body, query })
   return error
 }
 
 
-export const validateUpdateTwoFactor = (body: object) => {
+
+export const validateUpdateTwoFactor = (body: object, query: object) => {
+  const querySchema = Joi.object({
+    lang: langSchema
+  })
   const schema = Joi.object({
     twoFactor: Joi.boolean().optional(),
     twoFactorMethod: Joi.string().valid("sms", "email").optional()
   })
-  const { error } = schema.validate(body)
+  const combinedSchema = Joi.object({
+    body: schema,
+    query: querySchema
+  })
+  const { error } = combinedSchema.validate({ body, query })
   return error
 }
 
 
 
-export const validateCreateUserSearchHistory = (body: object) => {
+export const validateCreateUserSearchHistory = (body: object, query: object) => {
+  const querySchema = Joi.object({
+    lang: langSchema
+  })
   const objectId = Joi.string().regex(/^[0-9a-fA-F]{24}$/, 'object Id');
 
   const historyItemSchema = Joi.object({
@@ -772,7 +968,7 @@ export const validateCreateUserSearchHistory = (body: object) => {
     hashtag: objectId.optional(),
     userSearched: objectId.optional(),
   }).custom((value, helpers) => {
-    const keys = ['flick', 'quest', 'song', 'hashtag', 'userSearched' ]
+    const keys = ['flick', 'quest', 'song', 'hashtag', 'userSearched']
     const present = keys.filter(key => value[key]);
 
     if (present.length > 1) {
@@ -796,30 +992,50 @@ export const validateCreateUserSearchHistory = (body: object) => {
         'any.required': 'History field is required'
       })
   });
-
-  const { error } = schema.validate(body, { abortEarly: false });
+  const combinedSchema = Joi.object({
+    body: schema,
+    query: querySchema
+  });
+  const { error } = combinedSchema.validate({ body, query })
   return error;
 };
 
 
-export const validateUserSearchId = (params: object) => {
+export const validateUserSearchId = (params: object, query: object) => {
+  const querySchema = Joi.object({
+    lang: langSchema
+  })
   const schema = Joi.object({
     searchId: Joi.string().regex(/^[0-9a-fA-F]{24}$/, 'object Id').required()
   })
-  const { error } = schema.validate(params)
+  const combinedSchema = Joi.object({
+    params: schema,
+    query: querySchema
+  })
+  const { error } = combinedSchema.validate({ params, query })
   return error
 }
 
-export const validateCreateBioLink = (body: object) => {
+export const validateCreateBioLink = (body: object, query: object) => {
+  const querySchema = Joi.object({
+    lang: langSchema
+  })
   const schema = Joi.object({
     title: Joi.string().required(),
     url: Joi.string().required()
   })
-  const { error } = schema.validate(body)
+  const combinedSchema = Joi.object({
+    body: schema,
+    query: querySchema
+  })
+  const { error } = combinedSchema.validate({ body, query })
   return error
 }
 
-export const validateUpdateBioLink = (body: object, params: object) => {
+export const validateUpdateBioLink = (body: object, params: object, query: object) => {
+  const querySchema = Joi.object({
+    lang: langSchema
+  })
   const bodySchema = Joi.object({
     title: Joi.string().required(),
     url: Joi.string().required()
@@ -829,18 +1045,26 @@ export const validateUpdateBioLink = (body: object, params: object) => {
   })
   const combinedSchema = Joi.object({
     body: bodySchema,
-    params: paramsSchema
+    params: paramsSchema,
+    query: querySchema
   })
-  const { error } = combinedSchema.validate({ body, params })
+  const { error } = combinedSchema.validate({ body, params, query })
   return error
 }
 
 
-export const validateBioLinkId = (params: object) => {
+export const validateBioLinkId = (params: object, query: object) => {
+  const querySchema = Joi.object({
+    lang: langSchema
+  })
   const schema = Joi.object({
     bioLinkId: Joi.string().regex(/^[0-9a-fA-F]{24}$/, 'object Id').required()
   })
-  const { error } = schema.validate(params)
+  const combinedSchema = Joi.object({
+    params: schema,
+    query: querySchema
+  })
+  const { error } = combinedSchema.validate({ params, query })
   return error
 }
 
@@ -849,6 +1073,7 @@ export const validateGetProfileDetail = (query: object) => {
     // userId   : Joi.alternatives().try(
     //   Joi.string().regex(/^[0-9a-fA-F]{24}$/, 'object Id').optional(),
     // ),
+    lang: langSchema,
     userId: Joi.string().regex(/^[0-9a-fA-F]{24}$/, 'object Id'),
   })
   const { error } = schema.validate(query)
@@ -857,7 +1082,10 @@ export const validateGetProfileDetail = (query: object) => {
 
 
 
-export const validateUpdateFlick = (body: object, params: object) => {
+export const validateUpdateFlick = (body: object, params: object, query: object) => {
+  const querySchema = Joi.object({
+    lang: langSchema
+  })
   const bodySchema = Joi.object({
     media: Joi.array().items(Joi.object({
       type: Joi.string().valid("photo", "video").optional(),
@@ -917,14 +1145,16 @@ export const validateUpdateFlick = (body: object, params: object) => {
   })
   const combinedSchema = Joi.object({
     body: bodySchema,
-    params: paramsSchema
+    params: paramsSchema,
+    query: querySchema
   })
-  const { error } = combinedSchema.validate({ body, params })
+  const { error } = combinedSchema.validate({ body, params, query })
   return error
 }
 
 export const validateNotificationQuery = (query: object) => {
   const schema = Joi.object({
+    lang: langSchema,
     page: Joi.number().integer().min(1).optional(),
     limit: Joi.number().integer().min(1).max(20).optional(),
   })
@@ -932,16 +1162,26 @@ export const validateNotificationQuery = (query: object) => {
   return error
 }
 
-export const validateStoryUpload = (body: object) => {
+export const validateStoryUpload = (body: object, query: object) => {
+  const querySchema = Joi.object({
+    lang: langSchema
+  })
   const schema = Joi.object({
     fileType: Joi.string().required(),
     fileName: Joi.string().required(),
   })
-  const { error } = schema.validate(body)
+  const combinedSchema = Joi.object({
+    body: schema,
+    query: querySchema
+  })
+  const { error } = combinedSchema.validate({ body, query })
   return error
 }
 
-export const validateCreateStory = (body: string, params: object) => {
+export const validateCreateStory = (body: string, params: object, query: object) => {
+  const querySchema = Joi.object({
+    lang: langSchema
+  })
   const paramSchema = Joi.object({
     storyId: Joi.string().regex(/^[0-9a-fA-F]{24}$/, 'object Id').required()
   })
@@ -990,21 +1230,32 @@ export const validateCreateStory = (body: string, params: object) => {
   })
   const combinedSchema = Joi.object({
     body: bodySchema,
-    params: paramSchema
+    params: paramSchema,
+    query: querySchema
   })
-  const { error } = combinedSchema.validate({ body, params })
+  const { error } = combinedSchema.validate({ body, params, query })
   return error
 }
 
-export const validateStoryId = (params: object) => {
+export const validateStoryId = (params: object, query: object) => {
+  const querySchema = Joi.object({
+    lang: langSchema
+  })
   const schema = Joi.object({
     storyId: Joi.string().regex(/^[0-9a-fA-F]{24}$/, 'object Id').required()
   })
-  const { error } = schema.validate(params)
+  const combinedSchema = Joi.object({
+    params: schema,
+    query: querySchema
+  })
+  const { error } = combinedSchema.validate({ params, query })
   return error
 }
 
-export const validateAddStoryViewer = (body: object, params: object) => {
+export const validateAddStoryViewer = (body: object, params: object, query: object) => {
+  const querySchema = Joi.object({
+    lang: langSchema
+  })
   const bodySchema = Joi.object({
     reaction: Joi.string().required()
   })
@@ -1013,21 +1264,32 @@ export const validateAddStoryViewer = (body: object, params: object) => {
   })
   const combinedSchema = Joi.object({
     body: bodySchema,
-    params: paramSchema
+    params: paramSchema,
+    query: querySchema
   })
-  const { error } = combinedSchema.validate({ body, params })
+  const { error } = combinedSchema.validate({ body, params, query })
   return error
 }
 
-export const validatePresignedQuest = (body: object) => {
+export const validatePresignedQuest = (body: object, query: object) => {
+  const querySchema = Joi.object({
+    lang: langSchema
+  })
   const schema = Joi.object({
     media: Joi.array().items(Joi.string()).required(),
   })
-  const { error } = schema.validate(body)
+  const combinedSchema = Joi.object({
+    body: schema,
+    query: querySchema
+  })
+  const { error } = combinedSchema.validate({ body, query })
   return error
 }
 
-export const validateCreateQuest = (body: object, params: object) => {
+export const validateCreateQuest = (body: object, params: object, query: object) => {
+  const querySchema = Joi.object({
+    lang: langSchema
+  })
   const bodySchema = Joi.object({
     type: Joi.string().valid('Exclusive', 'Basic').required(),
     title: Joi.string().required(),
@@ -1070,16 +1332,18 @@ export const validateCreateQuest = (body: object, params: object) => {
   })
   const combinedSchema = Joi.object({
     body: bodySchema,
-    params: paramsSchema
+    params: paramsSchema,
+    query: querySchema
   })
-  const { error } = combinedSchema.validate({ body, params })
+  const { error } = combinedSchema.validate({ body, params, query })
   return error
 }
 
 
 export const validateGetSearchHistory = (query: object) => {
   const schema = Joi.object({
-    type : Joi.string().valid('userSearched', 'flick', 'quest', 'song', 'hashtag' , "user").optional(),
+    lang: langSchema,
+    type: Joi.string().valid('userSearched', 'flick', 'quest', 'song', 'hashtag', "user").optional(),
     limit: Joi.number().integer().min(1).max(15).optional(),
     page: Joi.number().integer().min(1).optional(),
   })
@@ -1087,8 +1351,35 @@ export const validateGetSearchHistory = (query: object) => {
   return error
 }
 
+export const validateCreateFeatureIsssue = (body: object, params: object , query: object) => {
+  const querySchema = Joi.object({
+    lang: langSchema
+  })
+  // Assuming featureIssueId is a valid MongoDB ObjectId
+  const paramsSchema = Joi.object({
+    featureIssueId: Joi.string().regex(/^[0-9a-fA-F]{24}$/, 'object Id').required()
+  })
+  const bodySchema = Joi.object({
+
+    message: Joi.string().required(),
+    attachment: Joi.array().items(Joi.string().pattern(new RegExp(`^${config.R2.R2_PUBLIC_URL}/.+$`)).message("attachment must be a valid URL").required()).optional(),
+    incidentDate: Joi.string().isoDate().required(),
+    feature: Joi.string().valid('Feed', 'Story', 'Profile', 'Wallet', 'Search', 'Notification', 'Setting', 'Flick', 'Quest').required(),
+    issueType: Joi.string().valid('Bug', 'Slow Performance', 'Crash', 'UI Glitch', 'Audio Issue', 'Video Issue', 'Login Issue', 'Other').required(),
+    reportedTo: Joi.string().regex(/^[0-9a-fA-F]{24}$/, 'object Id').optional(),
+  })
+  const combinedSchema = Joi.object({
+    body: bodySchema,
+    params: paramsSchema,
+    query: querySchema
+  })
+  const { error } = combinedSchema.validate({ body, params, query })
+  return error
+}
+
 export const validateGetSearch = (query: object) => {
   const querySchema = Joi.object({
+    lang: langSchema,
     q: Joi.string().max(30).optional().messages({
       'string.max': 'Search query must be less than or equal to 30 characters',
       'any.required': 'Search query is required'
@@ -1117,7 +1408,10 @@ export const validateGetSearch = (query: object) => {
 
 
 
-export const validateUpdateQuest = (body: object, params: object) => {
+export const validateUpdateQuest = (body: object, params: object, query: object) => {
+  const querySchema = Joi.object({
+    lang: langSchema
+  })
   const bodySchema = Joi.object({
     type: Joi.string().valid('Exclusive', 'Basic').optional(),
     title: Joi.string().optional(),
@@ -1160,13 +1454,17 @@ export const validateUpdateQuest = (body: object, params: object) => {
   })
   const combinedSchema = Joi.object({
     body: bodySchema,
-    params: paramsSchema
+    params: paramsSchema,
+    query: querySchema
   })
-  const { error } = combinedSchema.validate({ body, params })
+  const { error } = combinedSchema.validate({ body, params, query })
   return error
 }
 
-export const validateCreateQuestApplication = (body: object, params: object) => {
+export const validateCreateQuestApplication = (body: object, params: object, query: object) => {
+  const querySchema = Joi.object({
+    lang: langSchema
+  })
   const paramsSchema = Joi.object({
     questApplicantId: Joi.string().regex(/^[0-9a-fA-F]{24}$/, 'object Id').required()
   })
@@ -1195,13 +1493,17 @@ export const validateCreateQuestApplication = (body: object, params: object) => 
   })
   const combinedSchema = Joi.object({
     body: bodySchema,
-    params: paramsSchema
+    params: paramsSchema,
+    query: querySchema
   })
-  const { error } = combinedSchema.validate({ body, params })
+  const { error } = combinedSchema.validate({ body, params, query })
   return error
 }
 
-export const validateUpdateQuestApplicant = (body: object, params: object) => {
+export const validateUpdateQuestApplicant = (body: object, params: object, query: object) => {
+  const querySchema = Joi.object({
+    lang: langSchema
+  })
   const paramsSchema = Joi.object({
     questApplicantId: Joi.string().regex(/^[0-9a-fA-F]{24}$/, 'object Id').required()
   })
@@ -1229,50 +1531,79 @@ export const validateUpdateQuestApplicant = (body: object, params: object) => {
   })
   const combinedSchema = Joi.object({
     body: bodySchema,
-    params: paramsSchema
+    params: paramsSchema,
+    query: querySchema
   })
-  const { error } = combinedSchema.validate({ body, params })
+  const { error } = combinedSchema.validate({ body, params, query })
   return error
 }
 
-export const validatePresignedQuestApplication = (body: object) => {
+export const validatePresignedQuestApplication = (body: object, query: object) => {
+  const querySchema = Joi.object({
+    lang: langSchema
+  })
   const schema = Joi.object({
     media: Joi.array().items(Joi.object({
       fileType: Joi.string().required(),
       fileName: Joi.string().required(),
     })).required(),
   })
-  const { error } = schema.validate(body)
+  const combinedSchema = Joi.object({
+    body: schema,
+    query: querySchema
+  })
+  const { error } = combinedSchema.validate({ body, query })
   return error
 }
 
-export const validatePresinedURLQuest = (body: object) => {
+export const validatePresinedURLQuest = (body: object, query: object) => {
+  const querySchema = Joi.object({
+    lang: langSchema
+  })
   const schema = Joi.object({
     media: Joi.array().items(Joi.object({
       fileName: Joi.string().required(),
       fileType: Joi.string().required()
     }))
   })
-  const { error } = schema.validate(body)
+  const combinedSchema = Joi.object({
+    body: schema,
+    query: querySchema
+  })
+  const { error } = combinedSchema.validate({ body, query })
   return error
 }
 
-export const validatePresignedURLReport = (body: object) => {
+export const validatePresignedURLReport = (body: object, query: object) => {
+  const querySchema = Joi.object({
+    lang: langSchema
+  })
   const schema = Joi.object({
     attachment: Joi.array().items(Joi.object({
       fileName: Joi.string().required(),
       fileType: Joi.string().required()
     })).required(),
   })
-  const { error } = schema.validate(body)
+  const combinedSchema = Joi.object({
+    body: schema,
+    query: querySchema
+  })
+  const { error } = combinedSchema.validate({ body, query })
   return error
 }
 
-export const validateQuestId = (params: object) => {
+export const validateQuestId = (params: object, query: object) => {
   const schema = Joi.object({
     questId: Joi.string().regex(/^[0-9a-fA-F]{24}$/, 'object Id').required()
   })
-  const { error } = schema.validate(params)
+  const querySchema = Joi.object({
+    lang: langSchema
+  })
+  const combinedSchema = Joi.object({
+    params: schema,
+    query: querySchema
+  })
+  const { error } = combinedSchema.validate({ params, query })
   return error
 }
 
@@ -1281,6 +1612,7 @@ export const validateGetQuestApplicants = (params: object, query: object) => {
     questId: Joi.string().regex(/^[0-9a-fA-F]{24}$/, 'object Id').required()
   })
   const querySchema = Joi.object({
+    lang: langSchema,
     page: Joi.number().min(1).optional(),
     limit: Joi.number().min(1).optional(),
   })
@@ -1297,6 +1629,7 @@ export const validateGetQuestApplicants = (params: object, query: object) => {
 
 export const validateGetQuests = (query: object) => {
   const schema = Joi.object({
+    lang: langSchema,
     sort: Joi.string().valid("date-asc", "date-desc", "amount-asc", "amount-desc").optional(),
     lat: Joi.string().optional(),
     long: Joi.string().optional(),
@@ -1330,6 +1663,7 @@ export const validateGetQuests = (query: object) => {
 
 export const validateQuestApplicantStatusBatch = (query: object, body: object) => {
   const querySchema = Joi.object({
+    lang: langSchema,
     status: Joi.string().valid("approved", "rejected").required(),
   })
   const bodySchema = Joi.object({
@@ -1343,7 +1677,10 @@ export const validateQuestApplicantStatusBatch = (query: object, body: object) =
   return error
 }
 
-export const validateQuestApplicantStatusViaQR = (body: object, params: object) => {
+export const validateQuestApplicantStatusViaQR = (body: object, params: object, query: object) => {
+  const querySchema = Joi.object({
+    lang: langSchema
+  })
   const paramsSchema = Joi.object({
     questApplicantId: Joi.string().regex(/^[0-9a-fA-F]{24}$/, 'object Id').required()
   })
@@ -1352,23 +1689,32 @@ export const validateQuestApplicantStatusViaQR = (body: object, params: object) 
   })
   const combinedSchema = Joi.object({
     body: bodySchema,
-    params: paramsSchema
+    params: paramsSchema,
+    query: querySchema
   })
-  const { error } = combinedSchema.validate({ body, params })
+  const { error } = combinedSchema.validate({ body, params, query })
   return error
 }
 
 
-export const validateChangeQuestStatus = (params: object) => {
+export const validateChangeQuestStatus = (params: object, query: object) => {
   const paramSchema = Joi.object({
     questId: Joi.string().regex(/^[0-9a-fA-F]{24}$/, 'object Id').required()
   })
-  const { error } = paramSchema.validate(params)
+  const querySchema = Joi.object({
+    lang: langSchema
+  })
+  const combinedSchema = Joi.object({
+    params: paramSchema,
+    query: querySchema
+  })
+  const { error } = combinedSchema.validate({ params, query })
   return error
 }
 
 export const validateQuestApplicantStatus = (query: object, params: object) => {
   const querySchema = Joi.object({
+    lang: langSchema,
     status: Joi.string().valid("approved", "rejected").required(),
   })
   const paramsSchema = Joi.object({
@@ -1384,16 +1730,25 @@ export const validateQuestApplicantStatus = (query: object, params: object) => {
 
 
 
-export const validateQuestApplicantId = (params: object) => {
+export const validateQuestApplicantId = (params: object, query: object) => {
+  const querySchema = Joi.object({
+    lang: langSchema
+  })
   const schema = Joi.object({
     questApplicantId: Joi.string().regex(/^[0-9a-fA-F]{24}$/, 'object Id').required()
   })
-  const { error } = schema.validate(params)
+  const combinedSchema = Joi.object({
+    params: schema,
+    query: querySchema
+  })
+  const { error } = combinedSchema.validate({ params, query })
   return error
 }
 
+
 export const validateLikeToggle = (query: object) => {
   const schema = Joi.object({
+    lang: langSchema,
     id: Joi.string().regex(/^[0-9a-fA-F]{24}$/, 'object Id').required(),
     type: Joi.string().valid("flick", "comment", "quest").required(),
   })
@@ -1403,6 +1758,7 @@ export const validateLikeToggle = (query: object) => {
 
 export const validateGetAllLikes = (query: object) => {
   const schema = Joi.object({
+    lang: langSchema,
     id: Joi.string().regex(/^[0-9a-fA-F]{24}$/, 'object Id').required(),
     type: Joi.string().valid("flick", "comment", "quest").required(),
   })
@@ -1410,15 +1766,25 @@ export const validateGetAllLikes = (query: object) => {
   return error
 }
 
-export const validateFeedbackId = (params: object) => {
+export const validateFeedbackId = (params: object, query: object) => {
+  const querySchema = Joi.object({
+    lang: langSchema
+  })
   const schema = Joi.object({
     feedbackId: Joi.string().regex(/^[0-9a-fA-F]{24}$/, 'object Id').required()
   })
-  const { error } = schema.validate(params)
+  const combinedSchema = Joi.object({
+    params: schema,
+    query: querySchema
+  })
+  const { error } = combinedSchema.validate({ params, query })
   return error
 }
 
-export const validateUpdateFeedback = (body: object, params: object) => {
+export const validateUpdateFeedback = (body: object, params: object, query: object) => {
+  const querySchema = Joi.object({
+    lang: langSchema
+  })
   const bodySchema = Joi.object({
     message: Joi.string().optional(),
     rating: Joi.string().optional(),
@@ -1429,51 +1795,84 @@ export const validateUpdateFeedback = (body: object, params: object) => {
   })
   const combinedSchema = Joi.object({
     body: bodySchema,
-    params: paramsSchema
+    params: paramsSchema,
+    query: querySchema
   })
-  const { error } = combinedSchema.validate({ body, params })
+  const { error } = combinedSchema.validate({ body, params, query })
   return error
 }
 
-export const validateSessionId = (params: object) => {
+export const validateSessionId = (params: object, query: object) => {
+  const querySchema = Joi.object({
+    lang: langSchema
+  })
   const schema = Joi.object({
     sessionId: Joi.string().regex(/^[0-9a-fA-F]{24}$/, 'object Id').required()
   })
-  const { error } = schema.validate(params)
+  const combinedSchema = Joi.object({
+    params: schema,
+    query: querySchema
+  })
+  const { error } = combinedSchema.validate({ params, query })
   return error
 }
 
-export const validateRefreshToken = (body: object) => {
+export const validateRefreshToken = (body: object, query: object) => {
+  const querySchema = Joi.object({
+    lang: langSchema
+  })
   const schema = Joi.object({
     refreshToken: Joi.string().required()
   })
-  const { error } = schema.validate(body)
+  const combinedSchema = Joi.object({
+    body: schema,
+    query: querySchema
+  })
+  const { error } = combinedSchema.validate({ body, query })
   return error
 }
 
 
 
-export const validateDeleteAccount = (body: object) => {
+export const validateDeleteAccount = (body: object, query: object) => {
+  const querySchema = Joi.object({
+    lang: langSchema
+  })
   const schema = Joi.object({
     password: Joi.string().required(),
-    reason : Joi.string().min(2).max(200).required()
+    reason: Joi.string().min(2).max(200).required()
   })
-  const { error } = schema.validate(body)
+  const combinedSchema = Joi.object({
+    body: schema,
+    query: querySchema
+  })
+  const { error } = combinedSchema.validate({ body, query })
   return error
 }
 
 
-export const validateDeactivateAccount = (body: object) => {
+export const validateDeactivateAccount = (body: object, query: object) => {
+  const querySchema = Joi.object({
+    lang: langSchema
+  })
   const schema = Joi.object({
     deactivationReason: Joi.string().min(2).max(200).required(),
     password: Joi.string().required()
   })
-  const { error } = schema.validate(body)
+  const combinedSchema = Joi.object({
+    body: schema,
+    query: querySchema
+  })
+  const { error } = combinedSchema.validate({ body, query })
   return error
 }
 
 
-export const validateUpdateProfile = (body: object) => {
+
+export const validateUpdateProfile = (body: object, query: object) => {
+  const querySchema = Joi.object({
+    lang: langSchema
+  })
   const schema = Joi.object({
     name: Joi.string().optional(),
     email: Joi.string().email().optional(),
@@ -1518,23 +1917,37 @@ export const validateUpdateProfile = (body: object) => {
       .pattern(new RegExp(`^${config.R2.R2_PUBLIC_URL}/.+$`))
       .message("photo must be a valid URL").optional(),
   })
-  const { error } = schema.validate(body)
+  const combinedSchema = Joi.object({
+    body: schema,
+    query: querySchema
+  })
+  const { error } = combinedSchema.validate({ body, query })
   return error
 }
 
 
 
-export const validatePassword = (body: object) => {
+export const validatePassword = (body: object, query: object) => {
+  const querySchema = Joi.object({
+    lang: langSchema
+  })
   const schema = Joi.object({
     password: Joi.string().required(),
     newPassword: Joi.string().required()
   })
-  const { error } = schema.validate(body)
+  const combinedSchema = Joi.object({
+    body: schema,
+    query: querySchema
+  })
+  const { error } = combinedSchema.validate({ body, query })
   return error
 }
 
 
-export const validateUpdateNotificationSetting = (body: object) => {
+export const validateUpdateNotificationSetting = (body: object, query: object) => {
+  const querySchema = Joi.object({
+    lang: langSchema
+  })
   const schema = Joi.object({
     pauseAll: Joi.boolean().optional(),
     likes: Joi.string().valid("everyone", "following", "none").optional(),
@@ -1580,14 +1993,21 @@ export const validateUpdateNotificationSetting = (body: object) => {
     shareBirthday: Joi.string().valid("everyone", "following", "none").optional(),
     loginAlert: Joi.string().valid("everyone", "following", "none").optional(),
   })
-  const { error } = schema.validate(body)
+  const combinedSchema = Joi.object({
+    body: schema,
+    query: querySchema
+  })
+  const { error } = combinedSchema.validate({ body, query })
   return error
 }
 
 
 
 
-export const validateUsername = (body: object) => {
+export const validateUsername = (body: object, query: object) => {
+  const querySchema = Joi.object({
+    lang: langSchema
+  })
   const schema = Joi.object({
     username: Joi.string().required()
       .min(4)
@@ -1597,19 +2017,33 @@ export const validateUsername = (body: object) => {
         "string.pattern.base": "Invalid username format",
       }),
   })
-  const { error } = schema.validate(body)
+  const combinedSchema = Joi.object({
+    body: schema,
+    query: querySchema
+  })
+  const { error } = combinedSchema.validate({ body, query })
   return error
 }
 
-export const validateEmail = (body: object) => {
+export const validateEmail = (body: object, query: object) => {
+  const querySchema = Joi.object({
+    lang: langSchema
+  })
   const schema = Joi.object({
     email: Joi.string().email().required()
   })
-  const { error } = schema.validate(body)
+  const combinedSchema = Joi.object({
+    body: schema,
+    query: querySchema
+  })
+  const { error } = combinedSchema.validate({ body, query })
   return error
 }
 
-export const validatePhoneNumber = (body: object) => {
+export const validatePhoneNumber = (body: object, query: object) => {
+  const querySchema = Joi.object({
+    lang: langSchema
+  })
   const schema = Joi.object({
     phone: Joi.string()
       .optional()
@@ -1618,7 +2052,11 @@ export const validatePhoneNumber = (body: object) => {
         'string.pattern.base': 'Phone number must be a valid international format',
       }),
   })
-  const { error } = schema.validate(body)
+  const combinedSchema = Joi.object({
+    body: schema,
+    query: querySchema
+  })
+  const { error } = combinedSchema.validate({ body, query })
   return error
 }
 
@@ -1628,12 +2066,3 @@ export const validatePhoneNumber = (body: object) => {
 
 
 
-export const validateCreatePayments = (body: object) => {
-  const schema = Joi.object({
-    stripeAccountId: Joi.string().required(),
-    email: Joi.string().email().required(),
-    phoneNumber: Joi.string().optional()
-  })
-  const { error } = schema.validate(body)
-  return error
-}

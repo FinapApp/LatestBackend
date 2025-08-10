@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
 import Joi from "joi";
-import { errors, handleResponse, success } from "../../../utils/responseCodec";
+import { errors, handleResponse, Lang, success } from "../../../utils/responseCodec";
 import { sendErrorToDiscord } from "../../../config/discord/errorDiscord";
 import { QUEST_APPLICANT } from "../../../models/Quest/questApplicant.model";
 import { validateQuestApplicantStatusBatch } from "../../../validators/validators";
@@ -8,18 +8,17 @@ import { QUESTS } from "../../../models/Quest/quest.model";
 import { WALLET } from "../../../models/Wallet/wallet.model";
 
 export const bulkChangeStatus = async (req: Request, res: Response) => {
+    const lang = req.query.lang as Lang || 'en';
     const session = await QUEST_APPLICANT.startSession();
     try {
         const validationError: Joi.ValidationError | undefined = validateQuestApplicantStatusBatch(req.query, req.body);
         if (validationError) {
-            return handleResponse(res, 400, errors.validation, validationError.details);
+            return handleResponse(res, 400, errors.validation, lang, validationError.details);
         }
         const { questApplicantIds } = req.body;
         const { status } = req.query;
         if (status === "pending") {
-            return handleResponse(res, 403, {
-                message: "Status cannot be reverted back to pending once changed.",
-            });
+            return handleResponse(res, 403, errors.status_cannot_revert, lang);
         }
         const applicants = await QUEST_APPLICANT.find({
             _id: { $in: questApplicantIds },
@@ -29,9 +28,7 @@ export const bulkChangeStatus = async (req: Request, res: Response) => {
             .session(session);
 
         if (applicants.some(app => app.isDeposited)) {
-            return handleResponse(res, 403, {
-                message: "One or more applicants belong to a quest that is already deposited. Status changes are not allowed.",
-            });
+            return handleResponse(res, 403, errors.quest_applicant_already_approved_bulk, lang);
         }
 
         const questMap = new Map<string, {
@@ -67,7 +64,7 @@ export const bulkChangeStatus = async (req: Request, res: Response) => {
                 // 🔐 Approval cap check
                 if (status === "approved" && prevStatus !== "approved") {
                     if (quest.leftApproved <= 0) {
-                        return handleResponse(res, 403, errors.quest_applicant_approval);
+                        return handleResponse(res, 403, errors.quest_applicant_approval, lang);
                     }
                     approvedDelta++;
                     quest.leftApproved--; // simulate update
@@ -107,7 +104,7 @@ export const bulkChangeStatus = async (req: Request, res: Response) => {
                     if (remainingApplicants < rejectionThreshold) {
                         return handleResponse(res, 403, {
                             message: `Rejection cap exceeded. At least ${rejectionThreshold} applicants must remain after rejection.`,
-                        });
+                        } , lang);
                     }
 
                     rejectedDelta++;
@@ -164,11 +161,11 @@ export const bulkChangeStatus = async (req: Request, res: Response) => {
                 await WALLET.bulkWrite(walletBulkOps, { session });
             }
         });
-        return handleResponse(res, 200, success.status_changed_flicked);
+        return handleResponse(res, 200, success.status_changed_flicked  , lang);
     } catch (error: any) {
         console.error("🔥 Error in bulkChangeStatus:", error);
         sendErrorToDiscord("PUT:bulk-quest-applicant-status", error);
-        return handleResponse(res, error.code || 500, error.message || errors.catch_error);
+        return handleResponse(res, error.code || 500, error.message || errors.catch_error, lang);
     } finally {
         session.endSession();
     }

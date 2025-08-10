@@ -2,7 +2,7 @@ import { Request, Response } from "express";
 import { COMMENT } from "../../../models/Comment/comment.model";
 import Joi from "joi";
 import { validateCommentId } from "../../../validators/validators";
-import { errors, handleResponse, success } from "../../../utils/responseCodec";
+import { errors, handleResponse, Lang, success } from "../../../utils/responseCodec";
 import { sendErrorToDiscord } from "../../../config/discord/errorDiscord";
 import { FLICKS } from "../../../models/Flicks/flicks.model";
 import mongoose from "mongoose";
@@ -10,12 +10,12 @@ import mongoose from "mongoose";
 
 
 export const deleteComment = async (req: Request, res: Response) => {
+    const lang = req.query.lang as Lang || 'en';
     try {
-        const validationError: Joi.ValidationError | undefined = validateCommentId(req.params);
+        const validationError: Joi.ValidationError | undefined = validateCommentId(req.params , req.query);
         if (validationError) {
-            return handleResponse(res, 400, errors.validation, validationError.details);
+            return handleResponse(res, 400, errors.validation, lang, validationError.details);
         }
-
         const currentUserId = res.locals.userId?.toString();
 
         // Fetch the comment with populated flick and user fields
@@ -39,7 +39,7 @@ export const deleteComment = async (req: Request, res: Response) => {
         // Delete the comment
         const deletedComment = await COMMENT.findByIdAndDelete(req.params.commentId);
         if (!deletedComment) {
-            return handleResponse(res, 404, errors.comment_delete);
+            return handleResponse(res, 404, errors.comment_delete , lang);
         }
 
         // Decrement the comment count on the Flick
@@ -54,11 +54,11 @@ export const deleteComment = async (req: Request, res: Response) => {
         );
 
         if (!updatedFlick) {
-            return handleResponse(res, 404, errors.flick_not_found);
+            return handleResponse(res, 404, errors.flick_not_found , lang);
         }
-        return handleResponse(res, 200, success.comment_deleted);
+        return handleResponse(res, 200, success.comment_deleted, lang);
     } catch (error) {
         sendErrorToDiscord("DELETE:delete-comment", error);
-        return handleResponse(res, 500, errors.catch_error);
+        return handleResponse(res, 500, errors.catch_error, lang);
     }
 };

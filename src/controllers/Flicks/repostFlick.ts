@@ -1,6 +1,6 @@
 import { Response, Request } from "express";
 import { validateRepostFlick, } from "../../validators/validators";
-import { handleResponse, errors, success } from "../../utils/responseCodec";
+import { handleResponse, errors, success, Lang } from "../../utils/responseCodec";
 import Joi from "joi";
 import { sendErrorToDiscord } from "../../config/discord/errorDiscord";
 import { FLICKS, IMediaSchema } from "../../models/Flicks/flicks.model";
@@ -9,10 +9,11 @@ import { USER } from "../../models/User/user.model";
 import { HASHTAGS } from "../../models/User/userHashTag.model";
 
 export const repostFlick = async (req: Request, res: Response) => {
+    const lang =  req.query.lang as Lang || 'en';
     try {
-        const validationError: Joi.ValidationError | undefined = validateRepostFlick(req.body, req.params);
+        const validationError: Joi.ValidationError | undefined = validateRepostFlick(req.body, req.params , req.query);
         if (validationError) {
-            return handleResponse(res, 400, errors.validation, validationError.details);
+            return handleResponse(res, 400, errors.validation, lang , validationError.details);
         }
         const { flickId } = req.params;
         const { taggedUsers = [], description, newHashTags , ...rest } = req.body;
@@ -20,13 +21,13 @@ export const repostFlick = async (req: Request, res: Response) => {
 
         const originalFlick = await FLICKS.findById(flickId).select("user media thumbnailURL quest song songStart songEnd repostVisible");
         if (!originalFlick) {
-            return handleResponse(res, 404, errors.flick_not_found);
+            return handleResponse(res, 404, errors.flick_not_found, lang);
         }
 
         const isOwner = String(originalFlick.user) === userId;
 
         if (!originalFlick.repostVisible && !isOwner) {
-            return handleResponse(res, 403, errors.permission_denied);
+            return handleResponse(res, 403, errors.permission_denied, lang);
         }
 
         const hashTagIndex = getIndex("HASHTAG");
@@ -34,7 +35,7 @@ export const repostFlick = async (req: Request, res: Response) => {
             const createHashTags = await HASHTAGS.insertMany(newHashTags.map((tag: { id: string, value: string }) => ({ value: tag.value, _id: tag.id })));
             await hashTagIndex.addDocuments(newHashTags.map((tag: { id: string, value: string }) => ({ hashtagId: tag.id, value: tag.value, count: 1 })));
             if (!createHashTags) {
-                return handleResponse(res, 404, errors.create_hashtags);
+                return handleResponse(res, 404, errors.create_hashtags , lang);
             }
         }
         const allDescriptionHashtagIds = (description || [])
@@ -117,13 +118,13 @@ export const repostFlick = async (req: Request, res: Response) => {
                     .catch(err => sendErrorToDiscord("POST:repost-flick:repostCount", err))
             ]);
 
-            return handleResponse(res, 200, success.flick_reposted);
+            return handleResponse(res, 200, success.flick_reposted , lang);
         }
 
-        return handleResponse(res, 500, errors.flick_not_found);
+        return handleResponse(res, 500, errors.flick_not_found, lang);
     } catch (err: any) {
         console.log(err);
         sendErrorToDiscord("POST:repost-flick", err);
-        return handleResponse(res, 500, errors.catch_error);
+        return handleResponse(res, 500, errors.catch_error, lang);
     }
 };

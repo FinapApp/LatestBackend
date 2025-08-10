@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import { errors, handleResponse, success } from "../../utils/responseCodec";
+import { errors, handleResponse, Lang, success } from "../../utils/responseCodec";
 import { USER } from "../../models/User/user.model";
 import { sendErrorToDiscord } from "../../config/discord/errorDiscord";
 import { FLICKS } from "../../models/Flicks/flicks.model";
@@ -22,10 +22,11 @@ import { DELETEACCOUNT } from "../../models/DeletedAccounts/deleteAccounts.model
 import { QUEST_APPLICANT } from "../../models/Quest/questApplicant.model";
 
 export const deleteAccount = async (req: Request, res: Response) => {
+    const lang = req.query.lang as Lang  || 'en';
     try {
-        const validationError: Joi.ValidationError | undefined = validateDeleteAccount(req.body);
+        const validationError: Joi.ValidationError | undefined = validateDeleteAccount(req.body , req.query);
         if (validationError) {
-            return handleResponse(res, 400, errors.validation, validationError.details);
+            return handleResponse(res, 400, errors.validation, lang , validationError.details);
         }
 
         const { password, reason = "No reason provided" } = req.body;
@@ -34,12 +35,12 @@ export const deleteAccount = async (req: Request, res: Response) => {
         // Fetch full user info first
         const user = await USER.findById(userId, "password email username phone createdAt");
         if (!user) {
-            return handleResponse(res, 404, errors.user_not_found);
+            return handleResponse(res, 404, errors.user_not_found , lang);
         }
 
         const isMatch = await bcrypt.compare(password, user.password);
         if (!isMatch) {
-            return handleResponse(res, 400, errors.incorrect_password);
+            return handleResponse(res, 400, errors.incorrect_password , lang);
         }
 
         // Handle follow relationship cleanup
@@ -138,14 +139,14 @@ export const deleteAccount = async (req: Request, res: Response) => {
             accountCreatedAt: user?.createdAt,
         });
 
-        return handleResponse(res, 200, success.delete_account);
+        return handleResponse(res, 200, success.delete_account , lang);
 
     } catch (error: any) {
         if (error.code === 11000) {
-            return handleResponse(res, 500, errors.cannot_rerunIt);
+            return handleResponse(res, 500, errors.cannot_rerunIt, lang);
         }
         sendErrorToDiscord("DELETE:delete-account", error);
-        return handleResponse(res, 500, errors.catch_error);
+        return handleResponse(res, 500, errors.catch_error, lang);
     }
 };
 

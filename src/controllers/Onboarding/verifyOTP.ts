@@ -1,7 +1,7 @@
     import { Request, Response } from "express";
     import { validateVerifyOTPSignUp } from "../../validators/validators";
     import Joi from "joi";
-    import { handleResponse, errors, success } from "../../utils/responseCodec";
+    import { handleResponse, errors, success, Lang } from "../../utils/responseCodec";
     import { redis } from "../../config/redis/redis.config";
     import { config } from "../../config/generalconfig";
     import { USER } from "../../models/User/user.model";
@@ -22,10 +22,11 @@
         username: string;
     }
     export const verifyOTPAfterSignUp = async (req: Request, res: Response) => {
+            const lang = req.query.lang as Lang || 'en';
         try {
-            const validationError: Joi.ValidationError | undefined = validateVerifyOTPSignUp(req.body);
+            const validationError: Joi.ValidationError | undefined = validateVerifyOTPSignUp(req.body as ForgetOTPRequest, req.query);
             if (validationError) {
-                return handleResponse(res, 400, errors.validation, validationError.details);
+                return handleResponse(res, 400, errors.validation, lang , validationError.details);
             }
             const { email, phone, otp, fcmToken, password, ...rest } = req.body as ForgetOTPRequest;
             // Fetch OTP from Redis
@@ -35,17 +36,17 @@
             ]);
             const redisDataRaw = emailData || phoneData;
             if (!redisDataRaw) {
-                return handleResponse(res, 400, errors.otp_expired);
+                return handleResponse(res, 400, errors.otp_expired, lang);
             }
             let redisData: any;
             try {
                 redisData = JSON.parse(redisDataRaw);
             } catch {
-                return handleResponse(res, 400, errors.otp_expired);
+                return handleResponse(res, 400, errors.otp_expired , lang);
             }
             const storedOTP = redisData?.OTP;
             if (!storedOTP || (otp !== storedOTP && otp !== config.MASTER_OTP)) {
-                return handleResponse(res, 400, errors.otp_not_match);
+                return handleResponse(res, 400, errors.otp_not_match , lang);
             }
             // Prepare user data
             const createUser: any = {
@@ -65,7 +66,7 @@
                 toObject: () => Record<string, any>;
             };
             if (!userCreate) {
-                return handleResponse(res, 400, errors.unable_to_create_user);
+                return handleResponse(res, 400, errors.unable_to_create_user , lang);
             }
             let code: string;
             let exists: boolean;
@@ -92,16 +93,16 @@
                     dob: new Date(safeUser.dob).toISOString()
                 }
             ]);
-            return handleResponse(res, 200, success.account_created);
+            return handleResponse(res, 200, success.account_created, lang);
         } catch (err: any) {
             console.log(err);
             if (err.code === 11000) {
                 const key = err?.keyValue ? Object.keys(err.keyValue)[0] : null;
-                if (key === "email") return handleResponse(res, 500, errors.email_exist);
-                if (key === "username") return handleResponse(res, 500, errors.username_exist);
-                if (key === "phone") return handleResponse(res, 500, errors.phone_exist);
+                if (key === "email") return handleResponse(res, 500, errors.email_exist, lang);
+                if (key === "username") return handleResponse(res, 500, errors.username_exist, lang);
+                if (key === "phone") return handleResponse(res, 500, errors.phone_exist, lang);
             }
             sendErrorToDiscord("POST:verify-otp", err);
-            return handleResponse(res, 500, errors.catch_error);
+            return handleResponse(res, 500, errors.catch_error, lang);
         }
     };

@@ -1,16 +1,17 @@
 import { Request, Response } from "express";
 import Joi from "joi";
 import mongoose from "mongoose";
-import { errors, handleResponse } from "../../utils/responseCodec";
+import { errors, handleResponse, Lang } from "../../utils/responseCodec";
 import { validateFlickId } from "../../validators/validators";
 import { FLICKS } from "../../models/Flicks/flicks.model";
 import { sendErrorToDiscord } from "../../config/discord/errorDiscord";
 
 export const getFlick = async (req: Request, res: Response) => {
+    const lang = req.query.lang as Lang || 'en';
     try {
-        const validationError: Joi.ValidationError | undefined = validateFlickId(req.params);
+        const validationError: Joi.ValidationError | undefined = validateFlickId(req.params , req.query);
         if (validationError) {
-            return handleResponse(res, 400, errors.validation, validationError.details);
+            return handleResponse(res, 400, errors.validation, lang , validationError.details);
         }
 
         const flickId = new mongoose.Types.ObjectId(req.params.flickId);
@@ -367,13 +368,13 @@ export const getFlick = async (req: Request, res: Response) => {
         const flick = flickResult[0];
 
         if (!flick) {
-            return handleResponse(res, 404, errors.no_flicks);
+            return handleResponse(res, 404, errors.no_flicks    );
         }
 
         return handleResponse(res, 200, flick);
     } catch (error) {
         console.error(error);
         sendErrorToDiscord("GET:get-flick", error);
-        return handleResponse(res, 500, errors.catch_error);
+        return handleResponse(res, 500, errors.catch_error , lang);
     }
 };

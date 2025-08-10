@@ -1,27 +1,28 @@
 import { Response, Request } from "express";
 import { validatePassword } from "../../../validators/validators";
-import { handleResponse, errors, success } from "../../../utils/responseCodec";
+import { handleResponse, errors, success, Lang } from "../../../utils/responseCodec";
 import Joi from "joi";
 import { USER } from "../../../models/User/user.model";
 import { sendErrorToDiscord } from "../../../config/discord/errorDiscord";
 import bcrypt from "bcryptjs";
 export const updatePassword = async (req: Request, res: Response) => {
+    const lang = req.query.lang as Lang || 'en';
     try {
-        const validationError: Joi.ValidationError | undefined = validatePassword(req.body);
+        const validationError: Joi.ValidationError | undefined = validatePassword(req.body, req.query);
         if (validationError) {
-            return handleResponse(res, 400, errors.validation, validationError.details);
+            return handleResponse(res, 400, errors.validation, lang, validationError.details);
         }
-
+        
         const { password, newPassword } = req.body;
         const user = await USER.findById(res.locals.userId, "password"); // ❗ no .lean()
 
         if (!user) {
-            return handleResponse(res, 404, errors.user_not_found);
+            return handleResponse(res, 404, errors.user_not_found, lang);
         }
 
         const isMatch = await bcrypt.compare(password, user.password);
         if (!isMatch) {
-            return handleResponse(res, 400, errors.incorrect_password);
+            return handleResponse(res, 400, errors.incorrect_password, lang);
         }
 
         const hashedPassword = await bcrypt.hash(newPassword, 10);
@@ -29,9 +30,9 @@ export const updatePassword = async (req: Request, res: Response) => {
         user.password = hashedPassword;
 
         await user.save(); // ✅ Works now
-        return handleResponse(res, 200, success.password_updated);
+        return handleResponse(res, 200, success.password_updated, lang);
     } catch (err: any) {
         await sendErrorToDiscord("PUT:password", err);
-        return handleResponse(res, 500, errors.catch_error);
+        return handleResponse(res, 500, errors.catch_error, lang);
     }
 };

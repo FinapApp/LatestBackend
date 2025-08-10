@@ -1,16 +1,17 @@
 import { Request, Response } from "express";
 import { validatePresignedURLReport } from "../../validators/validators";
 import Joi from "joi";
-import { errors, handleResponse } from "../../utils/responseCodec";
+import { errors, handleResponse, Lang } from "../../utils/responseCodec";
 import { generateSignedURL } from "../../utils/s3.utils";
 import { sendErrorToDiscord } from "../../config/discord/errorDiscord";
 import mongoose from "mongoose";
 
 export const createPresignedURLReport = async (req: Request, res: Response) => {
+    const lang = req.query.lang as Lang || 'en';
     try {
-        const validationError: Joi.ValidationError | undefined = validatePresignedURLReport(req.body);
+        const validationError: Joi.ValidationError | undefined = validatePresignedURLReport(req.body ,req.query);
         if (validationError) {
-            return handleResponse(res, 400, errors.validation, validationError.details);
+            return handleResponse(res, 400, errors.validation, lang , validationError.details);
         }
         // Extract metadata without media URLs
         const { attachment } = req.body;
@@ -30,9 +31,9 @@ export const createPresignedURLReport = async (req: Request, res: Response) => {
             }
         }
         
-        return handleResponse(res, 500, errors.unable_to_create_signedURL);
+        return handleResponse(res, 500, errors.unable_to_create_signedURL , lang);
     } catch (error) {
         sendErrorToDiscord("create-flicks", error)
-        return handleResponse(res, 500, errors.catch_error);
+        return handleResponse(res, 500, errors.catch_error, lang);
     }
 };

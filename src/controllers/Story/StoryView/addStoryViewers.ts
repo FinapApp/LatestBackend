@@ -1,15 +1,16 @@
 import Joi from "joi";
 import { validateAddStoryViewer} from "../../../validators/validators";
 import { Request, Response } from "express";
-import { errors, handleResponse, success } from "../../../utils/responseCodec";
+import { errors, handleResponse, Lang, success } from "../../../utils/responseCodec";
 import { STORYVIEW } from "../../../models/Stories/storyView.model";
 import { STORY } from "../../../models/Stories/story.model";
 
 export const addStoryViewer = async (req: Request, res: Response) => {
+    const lang = req.query.lang as Lang || 'en';
     try {
-        const validationError: Joi.ValidationError | undefined = validateAddStoryViewer(req.body, req.params);
+        const validationError: Joi.ValidationError | undefined = validateAddStoryViewer(req.body, req.params , req.query);
         if (validationError) {
-            return handleResponse(res, 400, errors.validation, validationError.details);
+            return handleResponse(res, 400, errors.validation, lang , validationError.details);
         }
         const { storyId } = req.params
         // BATCH PROCESSING 
@@ -18,10 +19,10 @@ export const addStoryViewer = async (req: Request, res: Response) => {
             STORY.findByIdAndUpdate(storyId, { $inc: { viewCount: 1 } })
         ])
         if (storyView && updateStoryCount) {
-            return handleResponse(res, 200, success.add_story_viewer);
+            return handleResponse(res, 200, success.add_story_viewer, lang);
         }
-        return handleResponse(res, 500, errors.add_story_viewer);
+        return handleResponse(res, 500, errors.add_story_viewer, lang);
     } catch (error) {
-        return handleResponse(res, 500, errors.catch_error);
+        return handleResponse(res, 500, errors.catch_error, lang);
     }
 }

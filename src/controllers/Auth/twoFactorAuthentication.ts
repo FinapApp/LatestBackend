@@ -2,7 +2,7 @@ import { Request, Response } from "express";
 import { validateVerifyOTPAfter2FA } from "../../validators/validators";
 import Joi from "joi";
 import jwt from "jsonwebtoken";
-import { handleResponse, errors } from "../../utils/responseCodec";
+import { handleResponse, errors, Lang } from "../../utils/responseCodec";
 import { redis } from "../../config/redis/redis.config";
 import { config } from "../../config/generalconfig";
 import { USER } from "../../models/User/user.model";
@@ -14,10 +14,11 @@ import { getIndex } from "../../config/melllisearch/mellisearch.config";
 import { sendErrorToDiscord } from "../../config/discord/errorDiscord";
 import { WALLET } from "../../models/Wallet/wallet.model";
 export const twoFactorAuthentication = async (req: Request, res: Response) => {
+    const lang = req.query.lang as Lang || 'en';
     try {
-        const validationError: Joi.ValidationError | undefined = validateVerifyOTPAfter2FA(req.body);
+        const validationError: Joi.ValidationError | undefined = validateVerifyOTPAfter2FA(req.body , req.query);
         if (validationError) {
-            return handleResponse(res, 400, errors.validation, validationError.details);
+            return handleResponse(res, 400, errors.validation, lang, validationError.details);
         }
         const { email, phone, otp, fcmToken } = req.body;
         // Find user by identifier
@@ -25,7 +26,7 @@ export const twoFactorAuthentication = async (req: Request, res: Response) => {
         if (email) query.email = email;
         else if (phone) query.phone = phone;
         const user = await USER.findOne(query, "_id isDeactivated");
-        if (!user) return handleResponse(res, 400, errors.invalid_credentials);
+        if (!user) return handleResponse(res, 400, errors.invalid_credentials, lang);
         const userId = user._id;
         // Get OTP from Redis
         const [emailData, phoneData] = await Promise.all([
@@ -33,15 +34,15 @@ export const twoFactorAuthentication = async (req: Request, res: Response) => {
             redis.get(`2FA-OTP:${phone}`)
         ]);
         const redisDataRaw = emailData || phoneData;
-        if (!redisDataRaw) return handleResponse(res, 400, errors.otp_expired);
+        if (!redisDataRaw) return handleResponse(res, 400, errors.otp_expired, lang);
         let redisData: any;
         try {
             redisData = JSON.parse(redisDataRaw);
         } catch {
-            return handleResponse(res, 400, errors.otp_expired);
+            return handleResponse(res, 400, errors.otp_expired, lang);
         }
         if (otp !== redisData.OTP && otp !== config.MASTER_OTP) {
-            return handleResponse(res, 400, errors.otp_not_match);
+            return handleResponse(res, 400, errors.otp_not_match, lang);
         }
 
         await Promise.all([
@@ -104,6 +105,6 @@ export const twoFactorAuthentication = async (req: Request, res: Response) => {
     } catch (err: any) {
         console.log(err);
         sendErrorToDiscord("POST:two-factor-auth", err);
-        return handleResponse(res, 500, errors.catch_error);
+        return handleResponse(res, 500, errors.catch_error , lang);
     }
 };

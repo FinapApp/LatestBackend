@@ -1,17 +1,18 @@
 import { Request, Response } from 'express';
 import Joi from 'joi';
-import { errors, handleResponse } from '../../../utils/responseCodec';
+import { errors, handleResponse, Lang } from '../../../utils/responseCodec';
 import { sendErrorToDiscord } from '../../../config/discord/errorDiscord';
 import { validateGetSearchHistory } from '../../../validators/validators';
 import { SEARCHHISTORY } from '../../../models/SearchHistory/searchHistory.model';
 import mongoose from 'mongoose';
 
 export const getUserSearchHistory = async (req: Request, res: Response) => {
+    const lang = req.query.lang as Lang || 'en';
     try {
         // Validate query parameters
         const validationError: Joi.ValidationError | undefined = validateGetSearchHistory(req.query);
         if (validationError) {
-            return handleResponse(res, 400, errors.validation, validationError.details);
+            return handleResponse(res, 400, errors.validation, lang , validationError.details);
         }
 
         const currentUserId = new mongoose.Types.ObjectId(res.locals.userId);
@@ -140,7 +141,7 @@ export const getUserSearchHistory = async (req: Request, res: Response) => {
         const totalCount = result[0]?.totalCount?.[0]?.count || 0;
 
         if (!searchHistory.length) {
-            return handleResponse(res, 404, errors.search_history_not_found);
+            return handleResponse(res, 404, errors.search_history_not_found, lang);
         }
 
         return handleResponse(res, 200, {
@@ -153,6 +154,6 @@ export const getUserSearchHistory = async (req: Request, res: Response) => {
     } catch (error) {
         console.error(error);
         sendErrorToDiscord('GET:user-search-history', error);
-        return handleResponse(res, 500, errors.catch_error);
+        return handleResponse(res, 500, errors.catch_error, lang);
     }
 };

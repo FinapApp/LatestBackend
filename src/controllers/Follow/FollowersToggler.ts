@@ -1,16 +1,17 @@
 import { Request, Response } from 'express';
 import { validateFollowerId } from "../../validators/validators";
-import { errors, handleResponse, success } from "../../utils/responseCodec";
+import { errors, handleResponse, Lang, success } from "../../utils/responseCodec";
 import Joi from "joi";
 import { FOLLOW } from '../../models/User/userFollower.model';
 import { USER } from '../../models/User/user.model';
 import { sendErrorToDiscord } from '../../config/discord/errorDiscord';
 
 export const followerHandler = async (req: Request, res: Response) => {
+    const lang = req.query.lang as Lang|| 'en';
     try {
         const validationError: Joi.ValidationError | undefined = validateFollowerId(req.params , req.query);
         if (validationError) {
-            return handleResponse(res, 400, errors.validation, validationError.details);
+            return handleResponse(res, 400, errors.validation, lang , validationError.details);
         }
 
         const { followerId } = req.params;
@@ -18,7 +19,7 @@ export const followerHandler = async (req: Request, res: Response) => {
         const me = res.locals.userId;
 
         if (followerId === me) {
-            return handleResponse(res, 400, errors.self_follow);
+            return handleResponse(res, 400, errors.self_follow, lang);
         }
 
         if (type === 'remove') {
@@ -29,9 +30,9 @@ export const followerHandler = async (req: Request, res: Response) => {
                     USER.findByIdAndUpdate(me, { $inc: { followerCount: -1 } }, { new: true }),
                     USER.findByIdAndUpdate(followerId, { $inc: { followingCount: -1 } }, { new: true })
                 ]);
-                return handleResponse(res, 200, success.follower_removed);
+                return handleResponse(res, 200, success.follower_removed, lang);
             } else {
-                return handleResponse(res, 404, errors.follow_not_found);
+                return handleResponse(res, 404, errors.follow_not_found, lang);
             }
         } else {
             // Toggle following/unfollowing
@@ -41,15 +42,15 @@ export const followerHandler = async (req: Request, res: Response) => {
                     USER.findByIdAndUpdate(me, { $inc: { followingCount: -1 } }, { new: true }),
                     USER.findByIdAndUpdate(followerId, { $inc: { followerCount: -1 } }, { new: true }),
                 ]);
-                return handleResponse(res, 200, success.user_unfollowed);
+                return handleResponse(res, 200, success.user_unfollowed, lang);
             }
 
             const targetUser = await USER.findById(followerId, "private isDeactivated");
             if (!targetUser) {
-                return handleResponse(res, 404, errors.user_not_found);
+                return handleResponse(res, 404, errors.user_not_found, lang);
             }
             if (targetUser.isDeactivated) {
-                return handleResponse(res, 400, errors.user_deactivated);
+                return handleResponse(res, 400, errors.user_deactivated, lang);
             }
             await Promise.all([
                 USER.findByIdAndUpdate(me, { $inc: { followingCount: 1 } }, { new: true }),
@@ -76,13 +77,13 @@ export const followerHandler = async (req: Request, res: Response) => {
                 //     followedId: followerId,
                 //     followedData: targetUser
                 // });
-                return handleResponse(res, 200, success.user_followed);
+                return handleResponse(res, 200, success.user_followed, lang);
             }
-            return handleResponse(res, 304, errors.toggle_follow);
+            return handleResponse(res, 304, errors.toggle_follow, lang);
         }
     } catch (err) {
         console.error(err);
         sendErrorToDiscord("POST:/follower-handler", err);
-        return handleResponse(res, 500, errors.catch_error);
+        return handleResponse(res, 500, errors.catch_error , lang);
     }
 };

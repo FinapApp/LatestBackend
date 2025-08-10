@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import { errors, handleResponse, success } from "../../../utils/responseCodec";
+import { errors, handleResponse, Lang, success } from "../../../utils/responseCodec";
 import Joi from "joi";
 import { validateCreateQuest } from "../../../validators/validators";
 import { QUESTS } from "../../../models/Quest/quest.model";
@@ -8,10 +8,11 @@ import { IMediaSchema } from "../../../models/Flicks/flicks.model";
 import { WALLET } from "../../../models/Wallet/wallet.model";
 import { TRANSACTION } from "../../../models/Wallet/transaction.model";
 export const createQuest = async (req: Request, res: Response) => {
+    const lang = req.query.lang as Lang  || 'en';
     try {
-        const validationError: Joi.ValidationError | undefined = validateCreateQuest(req.body, req.params);
+        const validationError: Joi.ValidationError | undefined = validateCreateQuest(req.body, req.params , req.query);
         if (validationError) {
-            return handleResponse(res, 400, errors.validation, validationError.details);
+            return handleResponse(res, 400, errors.validation, lang , validationError.details);
         }
 
         const userId = res.locals.userId;  // session-derived
@@ -20,11 +21,11 @@ export const createQuest = async (req: Request, res: Response) => {
 
         const wallet = await WALLET.findOne({ user: userId }).select("availableBalance promotionalBalance currency");
         if (!wallet) {
-            return handleResponse(res, 404, errors.wallet_not_found);
+            return handleResponse(res, 404, errors.wallet_not_found, lang);
         }
         const combinedBalance = wallet.availableBalance + wallet.promotionalBalance;
-        if (combinedBalance < totalAmount) {   
-            return handleResponse(res, 400, errors.insufficient_balance);
+        if (combinedBalance < totalAmount) {
+            return handleResponse(res, 400, errors.insufficient_balance, lang);
         }
         const quest = await QUESTS.create({
             _id: questId,
@@ -38,7 +39,7 @@ export const createQuest = async (req: Request, res: Response) => {
         });
 
         if (!quest) {
-            return handleResponse(res, 404, errors.quest_not_found);
+            return handleResponse(res, 404, errors.quest_not_found, lang);
         }
         // Deduct the amount from balances
         // Deduct promotional first, then available
@@ -80,12 +81,12 @@ export const createQuest = async (req: Request, res: Response) => {
             photo: userDetails.user.photo,
             questId,
         }]);
-        return handleResponse(res, 200, success.quest_created);
+        return handleResponse(res, 200, success.quest_created, lang);
     } catch (error: any) {
         console.error(error);
         if (error.code === 11000) {
-            return handleResponse(res, 409, errors.quest_already_exists);
+            return handleResponse(res, 409, errors.quest_already_exists, lang);
         }
-        return handleResponse(res, 500, errors.catch_error);
+        return handleResponse(res, 500, errors.catch_error, lang);
     }
 };

@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import { errors, handleResponse } from "../../../utils/responseCodec";
+import { errors, handleResponse, Lang } from "../../../utils/responseCodec";
 import { sendErrorToDiscord } from "../../../config/discord/errorDiscord";
 import { QUEST_APPLICANT } from "../../../models/Quest/questApplicant.model";
 import { validateGetQuestApplicants } from "../../../validators/validators";
@@ -7,10 +7,11 @@ import Joi from "joi";
 import { Types } from "mongoose";
 
 export const getAllQuestApplicant = async (req: Request, res: Response) => {
+        const lang = req.query.lang as Lang|| 'en';
     try {
         const validationError: Joi.ValidationError | undefined = validateGetQuestApplicants(req.params, req.query);
         if (validationError) {
-            return handleResponse(res, 400, errors.validation, validationError.details);
+            return handleResponse(res, 400, errors.validation, lang , validationError.details);
         }
         let { page = 1, limit = 10 } = req.query;
         limit = Number(limit);
@@ -90,6 +91,6 @@ export const getAllQuestApplicant = async (req: Request, res: Response) => {
     } catch (err: any) {
         console.error(err);
         sendErrorToDiscord("GET:all-quests-applicant", err);
-        return handleResponse(res, 500, { message: "Internal Server Error" });
+        return handleResponse(res, 500, errors.catch_error, lang);
     }
 };

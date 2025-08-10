@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import { errors, handleResponse, success } from "../../../utils/responseCodec";
+import { errors, handleResponse, Lang, success } from "../../../utils/responseCodec";
 import Joi from "joi";
 import { sendErrorToDiscord } from "../../../config/discord/errorDiscord";
 import { QUEST_APPLICANT } from "../../../models/Quest/questApplicant.model";
@@ -8,13 +8,14 @@ import { QUESTS } from "../../../models/Quest/quest.model";
 import { WALLET } from "../../../models/Wallet/wallet.model";
 
 export const changeQuestApplicantStatus = async (req: Request, res: Response) => {
+    const lang = req.query.lang as Lang|| 'en';
     console.info("🔄 [changeQuestApplicantStatus] Request received with params:", req.params, "and query:", req.query);
 
     try {
         const validationError: Joi.ValidationError | undefined = validateQuestApplicantStatus(req.query, req.params);
 
         if (validationError) {
-            return handleResponse(res, 400, errors.validation, validationError.details);
+            return handleResponse(res, 400, errors.validation, 'en' , validationError.details);
         }
 
         const { questApplicantId } = req.params;
@@ -22,31 +23,31 @@ export const changeQuestApplicantStatus = async (req: Request, res: Response) =>
 
         const applicant = await QUEST_APPLICANT.findById(questApplicantId).select("status quest user isDeposited");
         if (!applicant) {
-            return handleResponse(res, 404, errors.quest_applicant_not_found);
+            return handleResponse(res, 404, errors.quest_applicant_not_found, lang);
         }
 
         const quest = await QUESTS.findById(applicant.quest);
         if (!quest) {
-            return handleResponse(res, 404, errors.quest_not_found);
+            return handleResponse(res, 404, errors.quest_not_found, lang);
         }
 
         // ❌ Block status changes if quest is deposited
         if (applicant.isDeposited) {
             return handleResponse(res, 403, {
                 message: "Quest is already deposited. Status changes are not allowed.",
-            });
+            }, lang);
         }
 
         const previousStatus = applicant.status;
         if (previousStatus === status) {
-            return handleResponse(res, 200, success.status_changed_flicked);
+            return handleResponse(res, 200, success.status_changed_flicked, lang);
         }
 
         // ❌ Disallow reverting to pending
         if ((previousStatus === "approved" || previousStatus === "rejected") && status === "pending") {
             return handleResponse(res, 403, {
                 message: "Status cannot be reverted back to pending once changed.",
-            });
+            }, lang);
         }
 
         // ✅ Rejection cap using dynamic formula
@@ -64,7 +65,7 @@ export const changeQuestApplicantStatus = async (req: Request, res: Response) =>
             if (remainingApplicants < rejectionThreshold) {
                 return handleResponse(res, 403, {
                     message: `Rejection cap exceeded. At least ${rejectionThreshold} applicants must remain after rejection.`,
-                });
+                }, lang);
             }
         }
 
@@ -74,7 +75,7 @@ export const changeQuestApplicantStatus = async (req: Request, res: Response) =>
             previousStatus !== "approved" &&
             quest.leftApproved <= 0
         ) {
-            return handleResponse(res, 403, errors.quest_applicant_approval);
+            return handleResponse(res, 403, errors.quest_applicant_approval, lang);
         }
 
         // ✅ Start transaction
@@ -134,10 +135,10 @@ export const changeQuestApplicantStatus = async (req: Request, res: Response) =>
             }
         });
 
-        return handleResponse(res, 200, success.status_changed_flicked);
+        return handleResponse(res, 200, success.status_changed_flicked, lang);
     } catch (error) {
         console.error("🔥 [Error] Exception in changeQuestApplicantStatus:", error);
         sendErrorToDiscord("PUT:quest-change-status-applicant", error);
-        return handleResponse(res, 500, errors.catch_error);
+        return handleResponse(res, 500, errors.catch_error, lang);
     }
 };

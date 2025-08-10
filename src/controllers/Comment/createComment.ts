@@ -2,7 +2,7 @@ import { Request, Response } from "express";
 import { COMMENT, ITextDataSchema } from "../../models/Comment/comment.model";
 import { validateComment } from "../../validators/validators";
 import Joi from "joi";
-import { errors, handleResponse, success } from "../../utils/responseCodec";
+import { errors, handleResponse, Lang, success } from "../../utils/responseCodec";
 // import { sendErrorToDiscord } from "../../config/discord/errorDiscord";
 import { FLICKS } from "../../models/Flicks/flicks.model";
 import { sendErrorToDiscord } from "../../config/discord/errorDiscord";
@@ -11,10 +11,11 @@ import { FOLLOW } from "../../models/User/userFollower.model";
 import { sendBulkNotificationKafka } from "../../utils/sendNotificationKafka";
 // import { sendNotificationKafka } from "../../config/kafka/kafka.config";
 export const createComment = async (req: Request, res: Response) => {
+    const lang = req.query.lang as Lang || 'en';
     try {
-        const validationError: Joi.ValidationError | undefined = validateComment(req.body, req.params);
+        const validationError: Joi.ValidationError | undefined = validateComment(req.body, req.params , req.query);
         if (validationError) {
-            return handleResponse(res, 400, errors.validation, validationError.details);
+            return handleResponse(res, 400, errors.validation, lang, validationError.details);
         }
         const user = res.locals.userId;
         const flick = req.params.flickId;
@@ -22,7 +23,7 @@ export const createComment = async (req: Request, res: Response) => {
         // 1. Create Comment in MongoDB
         const flickExists = await FLICKS.findById(flick, "user commentSetting audienceSetting thumbnailURL commentCount");
         if (!flickExists) {
-            return handleResponse(res, 404, errors.flick_not_found);
+            return handleResponse(res, 404, errors.flick_not_found, lang);
         }
         let flickUser = flickExists.user
         const isOwner = flickUser == user
@@ -34,10 +35,10 @@ export const createComment = async (req: Request, res: Response) => {
             });
 
             if (!isFollowing) {
-                return handleResponse(res, 403, errors.permission_denied);
+                return handleResponse(res, 403, errors.permission_denied, lang);
             }
         } else if (flickExists.commentSetting !== 'everyone' && !isOwner) {
-            return handleResponse(res, 403, errors.permission_denied);
+            return handleResponse(res, 403, errors.permission_denied, lang);
         }
         const newComment = await COMMENT.create({
             user,
@@ -45,7 +46,7 @@ export const createComment = async (req: Request, res: Response) => {
             comment
         });
         if (!newComment) {
-            return handleResponse(res, 304, errors.create_comment);
+            return handleResponse(res, 304, errors.create_comment , lang);
         }
         const updatedFlick = await FLICKS.findByIdAndUpdate(
             flick,
@@ -56,7 +57,7 @@ export const createComment = async (req: Request, res: Response) => {
         );
         if (!updatedFlick) {
             await COMMENT.deleteOne({ _id: newComment._id });
-            return handleResponse(res, 404, errors.flick_not_found);
+            return handleResponse(res, 404, errors.flick_not_found , lang);
         }
         const commentSnippet = comment
             .map((seg: ITextDataSchema) => seg.text || '')
@@ -105,9 +106,9 @@ export const createComment = async (req: Request, res: Response) => {
         }
         // Send Kafka notifications for new comment
         await sendBulkNotificationKafka(kafkaMessages);
-        return handleResponse(res, 201, success.create_comment);
+        return handleResponse(res, 201, success.create_comment , lang, );
     } catch (error) {
         sendErrorToDiscord("POST:create-comment", error);
-        return handleResponse(res, 500, errors.catch_error);
+        return handleResponse(res, 500, errors.catch_error , lang);
     }
 };

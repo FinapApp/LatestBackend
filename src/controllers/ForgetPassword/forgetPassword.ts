@@ -3,7 +3,7 @@ import { validateForgetPassword } from "../../validators/validators";
 import { redis } from "../../config/redis/redis.config";
 import Joi from "joi";
 import { config } from "../../config/generalconfig";
-import { handleResponse, errors} from "../../utils/responseCodec";
+import { handleResponse, errors, Lang} from "../../utils/responseCodec";
 import { generateNumericOTP } from "../../utils/OTPGenerator";
 import { USER } from "../../models/User/user.model";
 import { sendForgotPasswordEmail } from "../../utils/sendOTP_ForgetPassword";
@@ -15,10 +15,11 @@ interface ForgetPasswordRequest {
     phone?: string;
 }
 export const forgetPassword = async (req: Request, res: Response) => {
+    const lang = req.query.lang as Lang || 'en';
     try {
-        const validationError: Joi.ValidationError | undefined = validateForgetPassword(req.body);
+        const validationError: Joi.ValidationError | undefined = validateForgetPassword(req.body as ForgetPasswordRequest, req.query);
         if (validationError) {
-            return handleResponse(res, 400, errors.validation, validationError.details);
+            return handleResponse(res, 400, errors.validation, lang , validationError.details);
         }
         const { email, username, phone } = req.body as ForgetPasswordRequest;
         
@@ -29,7 +30,7 @@ export const forgetPassword = async (req: Request, res: Response) => {
         } , "email username phone");
 
         if (!checkUser) {
-            return handleResponse(res, 404, errors.user_not_found);
+            return handleResponse(res, 404, errors.user_not_found, lang);
         }
         const generatedOTP = generateNumericOTP();
         await redis.set(
@@ -56,6 +57,6 @@ export const forgetPassword = async (req: Request, res: Response) => {
     } catch (err: any) {
         console.log(err)
         sendErrorToDiscord("POST:forget-password", err);
-        return handleResponse(res, 500, errors.catch_error);
+        return handleResponse(res, 500, errors.catch_error , lang);
     }
 };

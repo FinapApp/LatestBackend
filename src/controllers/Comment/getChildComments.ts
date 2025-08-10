@@ -3,14 +3,15 @@ import mongoose from 'mongoose';
 import Joi from 'joi';
 import { COMMENT } from '../../models/Comment/comment.model';
 import { validateGetChildComment } from '../../validators/validators';
-import { errors, handleResponse } from '../../utils/responseCodec';
+import { errors, handleResponse, Lang } from '../../utils/responseCodec';
 import { sendErrorToDiscord } from '../../config/discord/errorDiscord';
 
 export const getChildComments = async (req: Request, res: Response) => {
+    const lang = req.query.lang as Lang || 'en';
     try {
         const validationError: Joi.ValidationError | undefined = validateGetChildComment(req.params, req.query);
         if (validationError) {
-            return handleResponse(res, 400, errors.validation, validationError.details);
+            return handleResponse(res, 400, errors.validation, lang, validationError.details);
         }
         const { commentId } = req.params;
         let { page = 1, limit = 10 } = req.query;
@@ -122,6 +123,6 @@ export const getChildComments = async (req: Request, res: Response) => {
     } catch (error) {
         console.error(error);
         sendErrorToDiscord("GET:get-child-comments", error);
-        return handleResponse(res, 500, errors.catch_error);
+        return handleResponse(res, 500, errors.catch_error, lang);
     }
 };

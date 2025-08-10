@@ -1,6 +1,6 @@
 import { getIndex } from "../../config/melllisearch/mellisearch.config";
 import { Request, Response } from "express";
-import { errors, handleResponse } from "../../utils/responseCodec";
+import { errors, handleResponse, Lang } from "../../utils/responseCodec";
 import Joi from "joi";
 import { validateGetSearch } from "../../validators/validators";
 import { FOLLOW } from "../../models/User/userFollower.model";
@@ -10,10 +10,11 @@ import mongoose from "mongoose";
 // import { USER } from "../../models/User/user.model";
 
 export const search = async (req: Request, res: Response) => {
+    const lang = req.query.lang as Lang || 'en';
     try {
         const validationError: Joi.ValidationError | undefined = validateGetSearch(req.query);
         if (validationError) {
-            return handleResponse(res, 400, errors.validation, validationError.details);
+            return handleResponse(res, 400, errors.validation, lang , validationError.details);
         }
 
         let { q = "", page = 1, type, limit = 5, userId, low, high, sort, mode, sponsored, quest , status } = req.query as {
@@ -357,6 +358,6 @@ export const search = async (req: Request, res: Response) => {
         return handleResponse(res, 200, result);
     } catch (err) {
         console.error(err);
-        return handleResponse(res, 500, errors.catch_error);
+        return handleResponse(res, 500, errors.catch_error, lang);
     }
 };

@@ -1,16 +1,17 @@
 import { Request, Response } from 'express';
 import { validateGetFlicks } from '../../validators/validators';
 import Joi from 'joi';
-import { errors, handleResponse } from '../../utils/responseCodec';
+import { errors, handleResponse, Lang } from '../../utils/responseCodec';
 import { FLICKS } from '../../models/Flicks/flicks.model';
 import { sendErrorToDiscord } from '../../config/discord/errorDiscord';
 import mongoose from 'mongoose';
 
 export const getAllFlicks = async (req: Request, res: Response) => {
+    const lang = req.query.lang as Lang || 'en';
     try {
         const validationError: Joi.ValidationError | undefined = validateGetFlicks(req.query);
         if (validationError) {
-            return handleResponse(res, 400, errors.validation, validationError.details);
+            return handleResponse(res, 400, errors.validation, lang , validationError.details);
         }
         const currentUserId = new mongoose.Types.ObjectId(res.locals.userId);
         let { type, limit = 10, page = 1, userId } = req.query as {
@@ -372,7 +373,7 @@ export const getAllFlicks = async (req: Request, res: Response) => {
         const totalCount = aggregationResult[0]?.totalCount[0]?.count || 0;
 
         if (!flicks.length) {
-            return handleResponse(res, 404, errors.no_flicks);
+            return handleResponse(res, 404, errors.no_flicks ,lang);
         }
 
         return handleResponse(res, 200, {
@@ -384,6 +385,6 @@ export const getAllFlicks = async (req: Request, res: Response) => {
     } catch (error) {
         console.error(error);
         sendErrorToDiscord('GET:get-all-flicks', error);
-        return handleResponse(res, 500, errors.catch_error);
+        return handleResponse(res, 500, errors.catch_error  , lang);
     }
 };

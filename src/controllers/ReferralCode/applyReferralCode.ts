@@ -2,23 +2,24 @@ import { Request, Response } from 'express';
 import Joi from 'joi';
 import mongoose from 'mongoose';
 import { validateApplyReferralCode } from "../../validators/validators";
-import { errors, handleResponse, success } from "../../utils/responseCodec";
+import { errors, handleResponse, Lang, success } from "../../utils/responseCodec";
 import { sendErrorToDiscord } from '../../config/discord/errorDiscord';
 import { REFERRAL } from '../../models/Referral/referral.model';
 import { WALLET } from '../../models/Wallet/wallet.model';
 import { config } from '../../config/generalconfig';
 
 export const applyReferralCode = async (req: Request, res: Response) => {
+    const lang = req.query.lang as Lang || 'en';
     const session = await mongoose.startSession();
     session.startTransaction();
 
     try {
         // Validate input
-        const validationError: Joi.ValidationError | undefined = validateApplyReferralCode(req.body);
+        const validationError: Joi.ValidationError | undefined = validateApplyReferralCode(req.body , req.query);
         if (validationError) {
             await session.abortTransaction();
             session.endSession();
-            return handleResponse(res, 400, errors.validation, validationError.details);
+            return handleResponse(res, 400, errors.validation, lang , validationError.details);
         }
 
         const { code } = req.body;
@@ -29,14 +30,14 @@ export const applyReferralCode = async (req: Request, res: Response) => {
         if (!referrerEntry) {
             await session.abortTransaction();
             session.endSession();
-            return handleResponse(res, 404, errors.referral_code_not_found);
+            return handleResponse(res, 404, errors.referral_code_not_found , lang);
         }
 
         // Prevent self-referral
         if (referrerEntry.user.toString() === newUserId.toString()) {
             await session.abortTransaction();
             session.endSession();
-            return handleResponse(res, 400, errors.cannot_use_own_referral_code);
+            return handleResponse(res, 400, errors.cannot_use_own_referral_code , lang);
         }
 
         // Check if user already used a referral
@@ -44,7 +45,7 @@ export const applyReferralCode = async (req: Request, res: Response) => {
         if (alreadyUsed) {
             await session.abortTransaction();
             session.endSession();
-            return handleResponse(res, 400, errors.referral_code_not_found);
+            return handleResponse(res, 400, errors.referral_code_not_found , lang);
         }
 
         // Update referredUsers[] in the referrer’s referral doc
@@ -74,12 +75,12 @@ export const applyReferralCode = async (req: Request, res: Response) => {
 
         await session.commitTransaction();
         session.endSession();
-        return handleResponse(res, 200, success.referral_code_applied);
+        return handleResponse(res, 200, success.referral_code_applied , lang);
 
     } catch (err) {
         await session.abortTransaction();
         session.endSession();
         sendErrorToDiscord("POST:apply-referral", err);
-        return handleResponse(res, 500, errors.catch_error);
+        return handleResponse(res, 500, errors.catch_error, lang);
     }
 };

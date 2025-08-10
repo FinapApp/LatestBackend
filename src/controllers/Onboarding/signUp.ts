@@ -1,7 +1,7 @@
 import { Request, Response } from "express";
 import { validateSignUp } from "../../validators/validators";
 import Joi from "joi";
-import { handleResponse, errors, success } from "../../utils/responseCodec";
+import { handleResponse, errors, success, Lang } from "../../utils/responseCodec";
 import { sendOTPEmailVerification } from "../../utils/sendOTP_EmailVerification";
 import { generateNumericOTP } from "../../utils/OTPGenerator";
 import { redis } from "../../config/redis/redis.config";
@@ -17,10 +17,11 @@ interface SignUpRequest {
 }
 
 export const signUp = async (req: Request, res: Response) => {
+        const lang = req.query.lang as Lang || 'en';
     try {
-        const validationError: Joi.ValidationError | undefined = validateSignUp(req.body);
+        const validationError: Joi.ValidationError | undefined = validateSignUp(req.body as SignUpRequest, req.query);
         if (validationError) {
-            return handleResponse(res, 400, errors.validation, validationError.details);
+            return handleResponse(res, 400, errors.validation, lang , validationError.details);
         }
         const { email, name, phone } = req.body as SignUpRequest;
         let OTP = generateNumericOTP();
@@ -30,10 +31,11 @@ export const signUp = async (req: Request, res: Response) => {
             await sendOTPPhoneVerification(OTP, phone)
         }
         await redis.set(`OTP:${email || phone}`, JSON.stringify({ OTP }), "EX", config.REDIS_EXPIRE_IN);  // when in resend otp we often dont have to search back again and again and cache could do the thing.
-        return handleResponse(res, 200, success.otp_sent);
+        return handleResponse(res, 200, success.otp_sent , lang);
     } catch (err: any) {
-        console.log(err)
+        console.log(err);
+        const lang = req.query.lang as Lang || 'en';
         sendErrorToDiscord("POST:signup", err)
-        return handleResponse(res, 500, errors.catch_error);
+        return handleResponse(res, 500, errors.catch_error , lang);
     }
 };

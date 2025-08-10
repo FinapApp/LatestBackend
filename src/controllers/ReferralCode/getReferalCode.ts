@@ -1,9 +1,10 @@
 import { Request, Response } from 'express'
-import { errors, handleResponse } from '../../utils/responseCodec';
+import { errors, handleResponse, Lang } from '../../utils/responseCodec';
 import { REFERRAL } from '../../models/Referral/referral.model';
 import { sendErrorToDiscord } from '../../config/discord/errorDiscord';
 
 export const getReferalCode = async (req: Request, res: Response) => {
+    const lang = req.query.lang as Lang || 'en';
     try {
         const userId = res.locals.userId;
         const referrals = await REFERRAL.find({ user: userId })
@@ -14,6 +15,6 @@ export const getReferalCode = async (req: Request, res: Response) => {
         });
     } catch (err) {
         sendErrorToDiscord("GET:referred-users", err);
-        return handleResponse(res, 500, errors.catch_error);
+        return handleResponse(res, 500, errors.catch_error , lang);
     }
 };

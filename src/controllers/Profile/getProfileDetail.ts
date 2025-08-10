@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import { errors, handleResponse, } from "../../utils/responseCodec";
+import { errors, handleResponse, Lang, } from "../../utils/responseCodec";
 import { USER } from "../../models/User/user.model";
 import { sendErrorToDiscord } from "../../config/discord/errorDiscord";
 import { USERBIOLINKS } from "../../models/User/userBioLinks.model";
@@ -7,6 +7,7 @@ import Joi from "joi";
 import { validateGetProfileDetail } from "../../validators/validators";
 import { FOLLOW } from "../../models/User/userFollower.model";
 export const getProfileDetail = async (req: Request, res: Response) => {
+        const lang = req.query.lang as Lang || 'en';
     try {
         const validationError: Joi.ValidationError | undefined = validateGetProfileDetail(
             req.query
@@ -16,6 +17,7 @@ export const getProfileDetail = async (req: Request, res: Response) => {
                 res,
                 400,
                 errors.validation,
+                lang,
                 validationError.details
             );
         }
@@ -31,7 +33,7 @@ export const getProfileDetail = async (req: Request, res: Response) => {
             USERBIOLINKS.find({ user: userId }, "title url").lean()
         ]);
         if (!getProfileDetails) {
-            return handleResponse(res, 400, errors.profile_not_found);
+            return handleResponse(res, 400, errors.profile_not_found, lang);
         }
         const profileDetail: any = {
             ...getProfileDetails,
@@ -55,7 +57,7 @@ export const getProfileDetail = async (req: Request, res: Response) => {
         console.log(error);
         sendErrorToDiscord('GET:profile', error);
         if (!res.headersSent) {
-            return handleResponse(res, 500, errors.catch_error);
+            return handleResponse(res, 500, errors.catch_error, lang);
         }
     }
 };

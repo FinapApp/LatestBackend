@@ -1,7 +1,7 @@
 import { Request, Response } from "express";
 import { validateLikeToggle } from "../../validators/validators";
 import Joi from "joi";
-import { errors, handleResponse, success } from "../../utils/responseCodec";
+import { errors, handleResponse, Lang, success } from "../../utils/responseCodec";
 import { FLICKS } from "../../models/Flicks/flicks.model";
 import { LIKE } from "../../models/Likes/likes.model";
 import { QUEST_FAV } from "../../models/Quest/questFavorite.model";
@@ -23,6 +23,7 @@ const buildLikeQuery = (user: string, id: string, type: 'quest' | 'comment' | 'f
 };
 
 export const toggleLike = async (req: Request, res: Response) => {
+        const lang = req.query.lang as Lang || 'en';
     const session = await mongoose.startSession();
     session.startTransaction();
     try {
@@ -30,7 +31,7 @@ export const toggleLike = async (req: Request, res: Response) => {
         if (validationError) {
             await session.abortTransaction();
             session.endSession();
-            return handleResponse(res, 400, errors.validation, validationError.details);
+            return handleResponse(res, 400, errors.validation, 'en' , validationError.details);
         }
 
         const user = res.locals.userId;
@@ -47,7 +48,7 @@ export const toggleLike = async (req: Request, res: Response) => {
             if (!searched) {
                 await session.abortTransaction();
                 session.endSession();
-                return handleResponse(res, 404, errors.quest_not_found);
+                return handleResponse(res, 404, errors.quest_not_found, lang);
             }
 
             const fav = await QUEST_FAV.findOne({ user, quest: id }).session(session);
@@ -71,7 +72,7 @@ export const toggleLike = async (req: Request, res: Response) => {
             if (!searched) {
                 await session.abortTransaction();
                 session.endSession();
-                return handleResponse(res, 404, errors.flick_not_found);
+                return handleResponse(res, 404, errors.flick_not_found, lang);
             }
 
             const inc = existingLike ? -1 : 1;
@@ -110,11 +111,11 @@ export const toggleLike = async (req: Request, res: Response) => {
             });
         }
 
-        return handleResponse(res, 200, success.toggle_like);
+        return handleResponse(res, 200, success.toggle_like, lang);
     } catch (error) {
         await session.abortTransaction();
         session.endSession();
         console.error(error);
-        return handleResponse(res, 500, errors.catch_error);
+        return handleResponse(res, 500, errors.catch_error, lang);
     }
 };

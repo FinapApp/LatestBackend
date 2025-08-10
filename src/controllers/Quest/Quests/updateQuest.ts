@@ -1,6 +1,6 @@
 import { Response, Request } from "express";
 import { validateUpdateQuest } from "../../../validators/validators";
-import { handleResponse, errors, success } from "../../../utils/responseCodec";
+import { handleResponse, errors, success, Lang } from "../../../utils/responseCodec";
 import Joi from "joi";
 import { sendErrorToDiscord } from "../../../config/discord/errorDiscord";
 import { QUESTS } from "../../../models/Quest/quest.model";
@@ -8,15 +8,17 @@ import { getIndex } from "../../../config/melllisearch/mellisearch.config";
 import { IMediaSchema } from "../../../models/Flicks/flicks.model";
 
 export const updateQuest = async (req: Request, res: Response) => {
+    const lang = req.query.lang as Lang  || 'en';
     try {
         const validationError: Joi.ValidationError | undefined = validateUpdateQuest(
-            req.body, req.params
+            req.body, req.params , req.query
         );
         if (validationError) {
             return handleResponse(
                 res,
                 400,
                 errors.validation,
+                lang,
                 validationError.details
             );
         }
@@ -47,12 +49,12 @@ export const updateQuest = async (req: Request, res: Response) => {
                     alts: media.map((media: IMediaSchema) => media?.alt || []).flat(),
                 },
             ]);
-            return handleResponse(res, 200, success.update_quest);
+            return handleResponse(res, 200, success.update_quest, lang);
         }
-        return handleResponse(res, 400, errors.update_quest);
+        return handleResponse(res, 400, errors.update_quest, lang);
     } catch (err: any) {
         console.log(err)
         sendErrorToDiscord("PUT:update-quest", err);
-        return handleResponse(res, 500, errors.catch_error);
+        return handleResponse(res, 500, errors.catch_error, lang);
     }
 };

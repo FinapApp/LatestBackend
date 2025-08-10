@@ -1,16 +1,17 @@
 import { Request, Response } from "express";
 import Joi from "joi";
-import { errors, handleResponse } from "../../utils/responseCodec";
+import { errors, handleResponse, Lang } from "../../utils/responseCodec";
 import { sendErrorToDiscord } from "../../config/discord/errorDiscord";
 import { validateGetFlickMentions } from "../../validators/validators";
 import mongoose from "mongoose";
 import { FLICKS } from "../../models/Flicks/flicks.model";
 
 export const getMentionByFlick = async (req: Request, res: Response) => {
+    const lang = req.query.lang as Lang || 'en';
     try {
         const validationError: Joi.ValidationError | undefined = validateGetFlickMentions(req.params, req.query);
         if (validationError) {
-            return handleResponse(res, 400, errors.validation, validationError.details);
+            return handleResponse(res, 400, errors.validation, lang , validationError.details);
         }
 
         const { flickId } = req.params;
@@ -117,7 +118,7 @@ export const getMentionByFlick = async (req: Request, res: Response) => {
         const result = flickDoc[0];
 
         if (!result) {
-            return handleResponse(res, 404, errors.flick_not_found);
+            return handleResponse(res, 404, errors.flick_not_found , lang);
         }
 
         return handleResponse(res, 200, {
@@ -131,6 +132,6 @@ export const getMentionByFlick = async (req: Request, res: Response) => {
     } catch (error) {
         console.error(error);
         sendErrorToDiscord("GET:get--all-mentions-flick", error);
-        return handleResponse(res, 500, errors.catch_error);
+        return handleResponse(res, 500, errors.catch_error ,lang);
     }
 };

@@ -1,16 +1,17 @@
 import { Request, Response } from "express";
 import Joi from "joi";
-import { errors, handleResponse } from "../../utils/responseCodec";
+import { errors, handleResponse, Lang } from "../../utils/responseCodec";
 import { sendErrorToDiscord } from "../../config/discord/errorDiscord";
 import { validateGetUsersAndHashtags } from "../../validators/validators";
 import mongoose from "mongoose";
 import { getIndex } from "../../config/melllisearch/mellisearch.config";
 
 export const getHashTag = async (req: Request, res: Response) => {
+        const lang = req.query.lang as Lang || 'en';
     try {
         const validationError: Joi.ValidationError | undefined = validateGetUsersAndHashtags(req.query);
         if (validationError) {
-            return handleResponse(res, 400, errors.validation, validationError.details);
+            return handleResponse(res, 400, errors.validation, lang , validationError.details);
         }
         let { q = "", page = 1, limit = 10 } = req.query as { q: string; page?: string | number; type?: string, limit?: string | number };
         limit = Number(limit)
@@ -36,6 +37,6 @@ export const getHashTag = async (req: Request, res: Response) => {
         });
     } catch (error) {
         sendErrorToDiscord("GET:get-hash-ids", error);
-        return handleResponse(res, 500, errors.catch_error);
+        return handleResponse(res, 500, errors.catch_error , lang);
     }
 };

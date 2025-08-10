@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import { errors, handleResponse, success } from "../../../utils/responseCodec";
+import { errors, handleResponse, Lang, success } from "../../../utils/responseCodec";
 import Joi from "joi";
 import { sendErrorToDiscord } from "../../../config/discord/errorDiscord";
 import { validateChangeQuestStatus } from "../../../validators/validators";
@@ -9,11 +9,12 @@ import { QUEST_APPLICANT } from "../../../models/Quest/questApplicant.model";
 import { WALLET } from "../../../models/Wallet/wallet.model";
 
 export const changeQuestStatusClosed = async (req: Request, res: Response) => {
+    const lang = req.query.lang as Lang || 'en';
     const session = await QUESTS.startSession();
     try {
-        const validationError: Joi.ValidationError | undefined = validateChangeQuestStatus(req.params);
+        const validationError: Joi.ValidationError | undefined = validateChangeQuestStatus(req.params , req.query);
         if (validationError) {
-            return handleResponse(res, 400, errors.validation, validationError.details);
+            return handleResponse(res, 400, errors.validation, lang , validationError.details);
         }
         const { questId } = req.params;
 
@@ -62,11 +63,11 @@ export const changeQuestStatusClosed = async (req: Request, res: Response) => {
             ]);
         });
 
-        return handleResponse(res, 200, success.quest_status_closed);
+        return handleResponse(res, 200, success.quest_status_closed, lang);
     } catch (error: any) {
         console.error("🔥 Error in changeQuestStatusClosed:", error);
         sendErrorToDiscord("PATCH:quest-change-status-closed", error);
-        return handleResponse(res, error.code || 500, error.message || errors.catch_error);
+        return handleResponse(res, error.code || 500, error.message || errors.catch_error, lang);
     } finally {
         session.endSession();
     }

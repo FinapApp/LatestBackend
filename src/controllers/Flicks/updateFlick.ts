@@ -1,6 +1,6 @@
 import { Response, Request } from "express";
 import { validateUpdateFlick } from "../../validators/validators";
-import { handleResponse, errors, success } from "../../utils/responseCodec";
+import { handleResponse, errors, success, Lang } from "../../utils/responseCodec";
 import Joi from "joi";
 import { FLICKS, IMediaSchema } from "../../models/Flicks/flicks.model";
 import { sendErrorToDiscord } from "../../config/discord/errorDiscord";
@@ -8,15 +8,17 @@ import { getIndex } from "../../config/melllisearch/mellisearch.config";
 import { HASHTAGS } from "../../models/User/userHashTag.model";
 
 export const updateFlick = async (req: Request, res: Response) => {
+    const lang = req.query.lang as Lang || 'en';
     try {
         const validationError: Joi.ValidationError | undefined = validateUpdateFlick(
-            req.body, req.params
+            req.body, req.params ,  req.query
         );
         if (validationError) {
             return handleResponse(
                 res,
                 400,
                 errors.validation,
+                lang,
                 validationError.details
             );
         }
@@ -26,7 +28,7 @@ export const updateFlick = async (req: Request, res: Response) => {
             const hashTagIndex = getIndex("HASHTAG");
             await hashTagIndex.addDocuments(newHashTags.map((tag: { id: string, value: string }) => ({ hashtagId: tag.id, value: tag.value , count : 1 })));
             if (!createHashTags) {
-                return handleResponse(res, 404, errors.create_hashtags);
+                return handleResponse(res, 404, errors.create_hashtags , lang);
             }
         }
         const flickId = req.params.flickId;
@@ -50,12 +52,12 @@ export const updateFlick = async (req: Request, res: Response) => {
                     flickId,
                 }
             ])
-            return handleResponse(res, 200, success.flick_updated);
+            return handleResponse(res, 200, success.flick_updated , lang);
         }
-        return handleResponse(res, 304, errors.flick_updated);
+        return handleResponse(res, 304, errors.flick_updated, lang);
     } catch (err: any) {
         console.error("Error updating flick:", err);
         sendErrorToDiscord("PUT:update-flick", err);
-        return handleResponse(res, 500, errors.catch_error);
+        return handleResponse(res, 500, errors.catch_error , lang);
     }
 };

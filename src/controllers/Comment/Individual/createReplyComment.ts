@@ -2,7 +2,7 @@ import { Request, Response } from "express"
 import { validateCreateReply } from "../../../validators/validators"
 import Joi from "joi"
 import { COMMENT, ITextDataSchema } from "../../../models/Comment/comment.model"
-import { errors, handleResponse, success } from "../../../utils/responseCodec"
+import { errors, handleResponse, Lang, success } from "../../../utils/responseCodec"
 import { sendErrorToDiscord } from "../../../config/discord/errorDiscord"
 import { FLICKS } from "../../../models/Flicks/flicks.model";
 import { sendNotificationKafka } from "../../../utils/sendNotificationKafka"
@@ -10,10 +10,11 @@ import { Types } from "mongoose"
 import { FOLLOW } from "../../../models/User/userFollower.model"
 
 export const createReplyComment = async (req: Request, res: Response) => {
+    const lang = req.query.lang as Lang || 'en';
     try {
-        const validationError: Joi.ValidationError | undefined = validateCreateReply(req.body, req.params);
+        const validationError: Joi.ValidationError | undefined = validateCreateReply(req.body, req.params, req.query);
         if (validationError) {
-            return handleResponse(res, 400, errors.validation, validationError.details);
+            return handleResponse(res, 400, errors.validation, lang, validationError.details);
         }
 
         const user = res.locals.userId;
@@ -22,15 +23,15 @@ export const createReplyComment = async (req: Request, res: Response) => {
 
         const parentCommentCheck = await COMMENT.findById(parentComment, "user flick").lean();
         if (!parentCommentCheck) {
-            return handleResponse(res, 404, errors.comment_not_found);
+            return handleResponse(res, 404, errors.comment_not_found, lang);
         }
         if (!parentCommentCheck.flick || parentCommentCheck.flick.toString() !== flick) {
-            return handleResponse(res, 400, errors.comment_flick_mismatch);
+            return handleResponse(res, 400, errors.comment_flick_mismatch, lang);
         }
         // Check if flick exists
         const flickExists = await FLICKS.findById(flick, "user commentSetting audienceSetting thumbnailURL commentCount");
         if (!flickExists) {
-            return handleResponse(res, 404, errors.flick_not_found);
+            return handleResponse(res, 404, errors.flick_not_found, lang);
         }
         let flickUser = flickExists.user;
         const isOwner = flickUser == user;
@@ -41,10 +42,10 @@ export const createReplyComment = async (req: Request, res: Response) => {
                 following: flickUser
             });
             if (!isFollowing) {
-                return handleResponse(res, 403, errors.permission_denied);
+                return handleResponse(res, 403, errors.permission_denied , lang);
             }
         } else if (flickExists.commentSetting !== 'everyone' && !isOwner) {
-            return handleResponse(res, 403, errors.permission_denied);
+            return handleResponse(res, 403, errors.permission_denied, lang);
         }
         const createReplyComment = await COMMENT.create({
             user,
@@ -53,7 +54,7 @@ export const createReplyComment = async (req: Request, res: Response) => {
             parentComment
         });
         if (!createReplyComment) {
-            return handleResponse(res, 304, errors.create_comment);
+            return handleResponse(res, 304, errors.create_comment, lang);
         }
 
         // Update flick's commentCount in MongoDB
@@ -64,7 +65,7 @@ export const createReplyComment = async (req: Request, res: Response) => {
         );
         if (!updatedFlick) {
             await COMMENT.deleteOne({ _id: createReplyComment._id });
-            return handleResponse(res, 404, errors.flick_not_found);
+            return handleResponse(res, 404, errors.flick_not_found, lang);
         }
         const commentSnippet = comment
             .map((seg: ITextDataSchema) => seg.text || '')
@@ -97,9 +98,9 @@ export const createReplyComment = async (req: Request, res: Response) => {
                 console.error("Kafka notification error in createReplyComment:", err);
             });
         }
-        return handleResponse(res, 200, success.create_comment);
+        return handleResponse(res, 200, success.create_comment , lang);
     } catch (error) {
         sendErrorToDiscord("POST:create-reply-comment", error);
-        return handleResponse(res, 500, errors.catch_error);
+        return handleResponse(res, 500, errors.catch_error, lang);
     }
 };
