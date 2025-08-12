@@ -73,7 +73,7 @@ export const createComment = async (req: Request, res: Response) => {
                     metadata: {
                         commentSnippet,
                         thumbnailURL: updatedFlick.thumbnailURL,
-                    commentCount: updatedFlick.commentCount,
+                        commentCount: updatedFlick.commentCount,
                 },
                 timestamp: new Date().toISOString(),
             }

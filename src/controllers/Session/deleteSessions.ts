@@ -13,9 +13,9 @@ export const deleteSessions = async (req: Request, res: Response) => {
         }, "fcmToken device location"); // select only necessary fields
 
         if (!sessionsToDelete.length) {
-            return handleResponse(res, 404, errors.session_deleted , lang);
+            return handleResponse(res, 404, errors.session_deleted, lang);
         }
-        
+
         const tokens = sessionsToDelete
             .map(s => s.fcmToken)
             .filter(Boolean);
@@ -37,4 +37,4 @@ export const deleteSessions = async (req: Request, res: Response) => {
         return handleResponse(res, 500, errors.catch_error, lang);
     }
 };
-     
+

@@ -8,6 +8,7 @@ import { redis } from "../../config/redis/redis.config";
 import { config } from "../../config/generalconfig";
 import { sendErrorToDiscord } from "../../config/discord/errorDiscord";
 import { sendOTPPhoneVerification } from "../../utils/sendOTP_PhoneVerification";
+import { sampleEmailTemplate } from "../../utils/sampleEmailTemplate";
 
 interface SignUpRequest {
     email: string;
@@ -26,6 +27,7 @@ export const signUp = async (req: Request, res: Response) => {
         const { email, name, phone } = req.body as SignUpRequest;
         let OTP = generateNumericOTP();
         if (email) {
+            await sampleEmailTemplate(OTP, email, name);
             await sendOTPEmailVerification(OTP, email, name)
         } else {
             await sendOTPPhoneVerification(OTP, phone)

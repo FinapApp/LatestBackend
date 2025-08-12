@@ -71,7 +71,6 @@ export const createReplyComment = async (req: Request, res: Response) => {
             .map((seg: ITextDataSchema) => seg.text || '')
             .join(' ')
             .slice(0, 100);
-
         const mentionedUserIdsSet = new Set<string>();
         comment.forEach((segment: ITextDataSchema) => {
             if (segment.mention) {

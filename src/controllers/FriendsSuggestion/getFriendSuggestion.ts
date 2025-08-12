@@ -6,16 +6,16 @@ import { getAllFriendSuggestionAggregation } from "../../aggregation/getAllFrien
 import { sendErrorToDiscord } from "../../config/discord/errorDiscord";
 
 export const getFriendSuggestion = async (req: Request, res: Response) => {
-        const lang = req.query.lang as Lang || 'en';
+    const lang = req.query.lang as Lang || 'en';
     try {
         const validationError: Joi.ValidationError | undefined = validateNotificationQuery(req.query);
         if (validationError) {
-            return handleResponse(res, 400, errors.validation, lang , validationError.details);
+            return handleResponse(res, 400, errors.validation, lang, validationError.details);
         }
         const { page = 1, limit = 10 } = req.query;
         let friendSuggestion = await getAllFriendSuggestionAggregation(res.locals.userId, Number(page), Number(limit));
         if (friendSuggestion) {
-            return handleResponse(res, 200, friendSuggestion    , lang);
+            return handleResponse(res, 200, friendSuggestion);
         }
         return handleResponse(res, 404, errors.notification, lang);
     } catch (err: any) {

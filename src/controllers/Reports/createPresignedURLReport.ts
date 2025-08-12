@@ -30,7 +30,6 @@ export const createPresignedURLReport = async (req: Request, res: Response) => {
                 });
             }
         }
-        
         return handleResponse(res, 500, errors.unable_to_create_signedURL , lang);
     } catch (error) {
         sendErrorToDiscord("create-flicks", error)
