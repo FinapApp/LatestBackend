@@ -7,6 +7,7 @@ export type ICommentSchema = {
     parentComment?: Types.ObjectId;
     suspended: boolean;
     suspendedReason: string;
+    likeCount: number;
 };
 
 export type ITextDataSchema = {
@@ -54,6 +55,10 @@ const CommentSchema = new Schema<ICommentSchema>(
             parentComment: {
                 type: Schema.Types.ObjectId,
                 ref: 'comment', //To which comment of the reel it is
+            },
+            likeCount: {
+                type: Number,
+                default: 0
             },
             suspended: {
                 type: Boolean,

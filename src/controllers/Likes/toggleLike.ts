@@ -8,6 +8,7 @@ import { QUEST_FAV } from "../../models/Quest/questFavorite.model";
 import mongoose from "mongoose";
 import { sendNotificationKafka } from "../../utils/sendNotificationKafka";
 import { QUESTS } from "../../models/Quest/quest.model";
+import { COMMENT } from "../../models/Comment/comment.model";
 
 interface QueryParams {
     id: string;
@@ -74,9 +75,20 @@ export const toggleLike = async (req: Request, res: Response) => {
                 session.endSession();
                 return handleResponse(res, 404, errors.flick_not_found, lang);
             }
-
             const inc = existingLike ? -1 : 1;
             await FLICKS.updateOne({ _id: id }, { $inc: { likeCount: inc } }).session(session);
+        }
+
+        // Comment logic
+        if (type === "comment") {
+            searched = await COMMENT.findById(id, "user flick likeCount").session(session);
+            if (!searched) {
+                await session.abortTransaction();
+                session.endSession();
+                return handleResponse(res, 404, errors.comment_not_found, lang);
+            }
+            const inc = existingLike ? -1 : 1;
+            await COMMENT.updateOne({ _id: id }, { $inc: { likeCount: inc } }).session(session);
         }
 
         // Comment logic (optional placeholder if needed)
