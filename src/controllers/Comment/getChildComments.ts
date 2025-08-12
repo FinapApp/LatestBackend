@@ -7,21 +7,27 @@ import { errors, handleResponse, Lang } from '../../utils/responseCodec';
 import { sendErrorToDiscord } from '../../config/discord/errorDiscord';
 
 export const getChildComments = async (req: Request, res: Response) => {
-    const lang = req.query.lang as Lang || 'en';
+    const lang = (req.query.lang as Lang) || 'en';
     try {
-        const validationError: Joi.ValidationError | undefined = validateGetChildComment(req.params, req.query);
+        const validationError: Joi.ValidationError | undefined =
+            validateGetChildComment(req.params, req.query);
         if (validationError) {
             return handleResponse(res, 400, errors.validation, lang, validationError.details);
         }
+
         const { commentId } = req.params;
         let { page = 1, limit = 10 } = req.query;
+        page = Number(page) || 1;
         limit = Number(limit);
-        page = Number(page)
         const skip = (page - 1) * limit;
         const userId = res.locals.userId;
+
+        // Count replies for pagination
         const totalDocuments = await COMMENT.countDocuments({
             parentComment: new mongoose.Types.ObjectId(commentId)
         });
+
+        // Get replies with stored likeCount and isLiked check
         const replies = await COMMENT.aggregate([
             {
                 $match: {
@@ -31,7 +37,8 @@ export const getChildComments = async (req: Request, res: Response) => {
             { $sort: { createdAt: 1 } },
             { $skip: skip },
             { $limit: limit },
-            // Like info
+
+            // Minimal lookup only for isLiked
             {
                 $lookup: {
                     from: 'likes',
@@ -39,43 +46,26 @@ export const getChildComments = async (req: Request, res: Response) => {
                     pipeline: [
                         {
                             $match: {
-                                $expr: { $eq: ['$comment', '$$commentId'] },
-                            }
-                        },
-                        {
-                            $group: {
-                                _id: null,
-                                likeCount: { $sum: 1 },
-                                isLiked: {
-                                    $sum: {
-                                        $cond: [
-                                            { $eq: ['$user', new mongoose.Types.ObjectId(userId)] },
-                                            1,
-                                            0
-                                        ]
-                                    }
+                                $expr: {
+                                    $and: [
+                                        { $eq: ['$comment', '$$commentId'] },
+                                        { $eq: ['$user', new mongoose.Types.ObjectId(userId)] }
+                                    ]
                                 }
                             }
                         }
                     ],
-                    as: 'likeData'
+                    as: 'likeMatch'
                 }
             },
             {
                 $addFields: {
-                    likeCount: {
-                        $ifNull: [{ $arrayElemAt: ['$likeData.likeCount', 0] }, 0]
-                    },
-                    isLiked: {
-                        $gt: [
-                            { $ifNull: [{ $arrayElemAt: ['$likeData.isLiked', 0] }, 0] },
-                            0
-                        ]
-                    }
+                    isLiked: { $gt: [{ $size: '$likeMatch' }, 0] }
                 }
             },
-            { $unset: 'likeData' },
-            // User info
+            { $unset: 'likeMatch' },
+
+            // Join user data
             {
                 $lookup: {
                     from: 'users',
@@ -85,6 +75,7 @@ export const getChildComments = async (req: Request, res: Response) => {
                 }
             },
             { $unwind: { path: '$userData', preserveNullAndEmptyArrays: true } },
+
             {
                 $addFields: {
                     user: {
@@ -102,13 +93,14 @@ export const getChildComments = async (req: Request, res: Response) => {
                     }
                 }
             },
+
             {
                 $project: {
                     _id: 1,
                     comment: 1,
                     createdAt: 1,
                     user: 1,
-                    likeCount: 1,
+                    likeCount: 1, // 📌 directly from stored field
                     isLiked: 1
                 }
             }
@@ -117,12 +109,12 @@ export const getChildComments = async (req: Request, res: Response) => {
         return handleResponse(res, 200, {
             replies,
             totalDocuments,
-            page: Number(page),
+            page,
             totalPages: Math.ceil(totalDocuments / limit)
         });
     } catch (error) {
         console.error(error);
-        sendErrorToDiscord("GET:get-child-comments", error);
+        sendErrorToDiscord('GET:get-child-comments', error);
         return handleResponse(res, 500, errors.catch_error, lang);
     }
 };
