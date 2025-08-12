@@ -102,4 +102,4 @@ export const followerHandler = async (req: Request, res: Response) => {
         return handleResponse(res, 500, errors.catch_error, lang);
     }
 };
-  
+

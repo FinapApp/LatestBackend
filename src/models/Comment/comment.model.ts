@@ -5,8 +5,8 @@ export type ICommentSchema = {
     flick?: Types.ObjectId;
     comment: ITextDataSchema[];
     parentComment?: Types.ObjectId;
-    suspended : boolean;
-    suspendedReason : string;
+    suspended: boolean;
+    suspendedReason: string;
 };
 
 export type ITextDataSchema = {
@@ -16,14 +16,14 @@ export type ITextDataSchema = {
 };
 
 export const TextDataSchema = new Schema<ITextDataSchema>(
-    {  
+    {
         mention: {
             type: Schema.Types.ObjectId,    // It gets the latest data from here so basically we need this.
             ref: 'user',
         },
         text: {
             type: String,
-            required : true 
+            required: true
         },
         hashtag: {
             type: Schema.Types.ObjectId,
@@ -37,36 +37,36 @@ export const TextDataSchema = new Schema<ITextDataSchema>(
 
 
 const CommentSchema = new Schema<ICommentSchema>(
-    {
-        user: {
-            type: Schema.Types.ObjectId,
-            required: true,
-            ref: 'user', // Someone who does this.
+        {
+            user: {
+                type: Schema.Types.ObjectId,
+                required: true,
+                ref: 'user', // Someone who does this.
+            },
+            flick: {
+                type: Schema.Types.ObjectId,
+                ref: 'flick',  // To which reel he did that.
+            },
+            comment: {
+                type: [TextDataSchema],
+                required: true,  // the overall text thingy
+            },
+            parentComment: {
+                type: Schema.Types.ObjectId,
+                ref: 'comment', //To which comment of the reel it is
+            },
+            suspended: {
+                type: Boolean,
+                default: false
+            },
+            suspendedReason: {
+                type: String
+            }
         },
-        flick: {
-            type: Schema.Types.ObjectId,
-            ref: 'flick',  // To which reel he did that.
-        },
-        comment: {
-            type: [TextDataSchema],
-            required: true,  // the overall text thingy
-        },
-        parentComment: {
-            type: Schema.Types.ObjectId,
-            ref: 'comment', //To which comment of the reel it is
-        },  
-        suspended : {   
-            type: Boolean,
-            default: false
-        },
-        suspendedReason : {
-            type: String
-        }
-    },
-    { timestamps: true, versionKey: false }
-);
+        { timestamps: true, versionKey: false }
+    );
 
 CommentSchema.index({ createdAt: -1 })
 
-export const COMMENT = model<ICommentSchema>('comment',CommentSchema);
+export const COMMENT = model<ICommentSchema>('comment', CommentSchema);
 export type IComment = InstanceType<typeof Comment>;

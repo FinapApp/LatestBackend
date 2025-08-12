@@ -17,15 +17,11 @@ export const sendFollowNotification = async (
     targetId: string,
 ) => {
     const kafkaMessage = {
-        key: type,
-        value: {
-            userId: followerId,
-            targetUserId: targetId,
-        },
+        userId: followerId,
+        targetUserId: targetId,
     };
-
     try {
-        await sendNotificationKafka(type, kafkaMessage);
+        sendNotificationKafka(type, kafkaMessage);
     } catch (err) {
         sendErrorToDiscord(`Kafka notification error in ${type}`, err);
     }
