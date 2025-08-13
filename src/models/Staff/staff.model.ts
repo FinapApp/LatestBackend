@@ -24,8 +24,8 @@ export const StaffSchema = new Schema<IStaff>(
         username: { type: String, unique: true },
         fcmToken: { type: String },
         refreshToken: { type: String },
-        email: { type: String, unique: true },
-        phone: { type: String, unique: true },
+        email: { type: String, unique: true, sparse: true },
+        phone: { type: String, unique: true, sparse: true },
         address: { type: String },
         password: { type: String },
         photo: { type: String }, //  fetch the data from the url for the s3
