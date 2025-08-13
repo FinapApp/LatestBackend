@@ -17,7 +17,7 @@ export interface IQuestApplicant extends Document {
 }
 
 interface Media {
-    type: 'photo' | 'video' | 'audio' | 'pdf';
+    type: 'photo' | 'video' | 'audio' | 'file';
     url: string;
     thumbnail: string;
 }
@@ -27,7 +27,7 @@ const MediaSchema = new Schema<Media>(
         url: { type: String, required: true },
         type: {
             type: String,
-            enum: ['photo', 'video', 'audio', 'pdf'],
+            enum: ['video', 'photo', 'audio', 'file'],
             required: true,
         },
         thumbnail: { type: String, required: true }

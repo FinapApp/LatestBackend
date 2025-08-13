@@ -34,7 +34,7 @@ interface IQuests extends Document {
 
 const MediaSchema = new Schema<IMediaSchema>(
     {
-        type: { type: String, enum: ['video', 'photo'] },
+        type: { type: String, enum: ['video', 'photo',  'audio', 'file'] },
         duration: { type: Number },
         audio: { type: Schema.Types.ObjectId, ref: "audio" },
         thumbnailURL: { type: String },

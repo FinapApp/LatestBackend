@@ -1295,7 +1295,7 @@ export const validateCreateQuest = (body: object, params: object, query: object)
     title: Joi.string().required(),
     description: Joi.string().required(),
     media: Joi.array().items(Joi.object({
-      type: Joi.string().valid("photo", "video").required(),
+      type: Joi.string().valid('video', 'photo', 'audio', 'file').required(),
       duration: Joi.number().optional(),
       audio: Joi.string().regex(/^[0-9a-fA-F]{24}$/, 'object Id').optional(),
       alt: Joi.array().items(Joi.string().required()).required(),
@@ -1417,7 +1417,7 @@ export const validateUpdateQuest = (body: object, params: object, query: object)
     title: Joi.string().optional(),
     description: Joi.string().optional(),
     media: Joi.array().items(Joi.object({
-      type: Joi.string().valid("photo", "video").optional(),
+      type: Joi.string().valid('video', 'photo', 'audio', 'file').optional(),
       duration: Joi.number().optional(),
       audio: Joi.string().regex(/^[0-9a-fA-F]{24}$/, 'object Id').optional(),
       alt: Joi.array().items(Joi.string().optional()).optional(),
@@ -1488,7 +1488,7 @@ export const validateCreateQuestApplication = (body: object, params: object, que
         .message("url must be a valid URL").required(),
       thumbnail: Joi.string().pattern(new RegExp(`^${config.R2.R2_PUBLIC_URL}/.+$`))
         .message("thumbnail must be a valid URL").required(),
-      type: Joi.string().valid('photo', 'video', 'audio', 'pdf').required()
+      type: Joi.string().valid('video', 'photo', 'audio', 'file').required()
     })).required(),
   })
   const combinedSchema = Joi.object({
@@ -1526,7 +1526,7 @@ export const validateUpdateQuestApplicant = (body: object, params: object, query
         .message("url must be a valid URL").required(),
       thumbnail: Joi.string().pattern(new RegExp(`^${config.R2.R2_PUBLIC_URL}/.+$`))
         .message("thumbnail must be a valid URL").required(),
-      type: Joi.string().valid('photo', 'video', 'audio', 'pdf').required()
+      type: Joi.string().valid('video', 'photo', 'audio', 'file').required()
     })).required(),
   })
   const combinedSchema = Joi.object({

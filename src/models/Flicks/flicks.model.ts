@@ -51,7 +51,7 @@
 
 
     export interface IMediaSchema extends Document {
-        type: 'video' | 'photo';
+        type: 'video' | 'photo' | 'audio' | 'file';
         duration?: number;
         audio?: Schema.Types.ObjectId;
         alt: string[];
