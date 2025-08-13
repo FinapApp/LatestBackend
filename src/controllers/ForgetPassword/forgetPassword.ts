@@ -45,7 +45,7 @@ export const forgetPassword = async (req: Request, res: Response) => {
                 checkUser.email as string,
                 checkUser.username as string,
             );
-            return handleResponse(res, 200 , { message : `An OTP has been sent to your email. ${checkUser.email}` });
+            return handleResponse(res, 200 , `An OTP has been sent to your email. ${checkUser.email}` , lang);
         }
         if (checkUser.phone) {
             await sendForgotPasswordPhone(
@@ -53,7 +53,7 @@ export const forgetPassword = async (req: Request, res: Response) => {
                 checkUser.phone as string,
             );
         }
-        return handleResponse(res, 200, {message : `An OTP has been sent to your phone. ${checkUser.phone}`});
+        return handleResponse(res, 200, `An OTP has been sent to your phone. ${checkUser.phone}` , lang);
     } catch (err: any) {
         console.log(err)
         sendErrorToDiscord("POST:forget-password", err);

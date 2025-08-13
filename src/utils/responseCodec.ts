@@ -624,7 +624,13 @@ export const errors = {
       hi: "थीम सेटिंग्स प्राप्त नहीं की जा सकीं। कृपया पुनः प्रयास करें।"
   },
   // Quest-related errors
-  status_cannot_revert: {
+  quest_applicant_had_already_won: {
+      en: "Quest Applicant has already won. Status changes are not allowed.",
+        ru: "У заявителя квеста уже есть победа. Изменения статуса не разрешены.",
+        uz: "Quest arizachisi allaqachon g'alaba qozongan. Holat o'zgarishlari ruxsat etilmaydi.",
+        hi: "क्वेस्ट आवेदक पहले ही जीत चुका है। स्थिति परिवर्तन की अनुमति नहीं है।"
+  },
+  quest_status_cannot_revert: {
     
       en: "Status cannot be reverted back to pending once changed.",
       ru: "Статус не может быть возвращен в ожидание после изменения.",

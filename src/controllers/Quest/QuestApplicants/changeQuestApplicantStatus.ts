@@ -33,9 +33,7 @@ export const changeQuestApplicantStatus = async (req: Request, res: Response) =>
 
         // ❌ Block status changes if quest is deposited
         if (applicant.isDeposited) {
-            return handleResponse(res, 403, {
-                message: "Quest is already deposited. Status changes are not allowed.",
-            }, lang);
+            return handleResponse(res, 403, errors.quest_applicant_had_already_won, lang);
         }
 
         const previousStatus = applicant.status;
@@ -45,9 +43,7 @@ export const changeQuestApplicantStatus = async (req: Request, res: Response) =>
 
         // ❌ Disallow reverting to pending
         if ((previousStatus === "approved" || previousStatus === "rejected") && status === "pending") {
-            return handleResponse(res, 403, {
-                message: "Status cannot be reverted back to pending once changed.",
-            }, lang);
+            return handleResponse(res, 403, errors.quest_status_cannot_revert, lang);
         }
 
         // ✅ Rejection cap using dynamic formula

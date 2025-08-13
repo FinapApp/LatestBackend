@@ -18,7 +18,7 @@ export const bulkChangeStatus = async (req: Request, res: Response) => {
         const { questApplicantIds } = req.body;
         const { status } = req.query;
         if (status === "pending") {
-            return handleResponse(res, 403, errors.status_cannot_revert, lang);
+            return handleResponse(res, 403, errors.quest_status_cannot_revert, lang);
         }
         const applicants = await QUEST_APPLICANT.find({
             _id: { $in: questApplicantIds },
@@ -102,9 +102,7 @@ export const bulkChangeStatus = async (req: Request, res: Response) => {
                     const rejectionThreshold = Math.min(seventyPercent, quest.maxApplicants);
 
                     if (remainingApplicants < rejectionThreshold) {
-                        return handleResponse(res, 403, {
-                            message: `Rejection cap exceeded. At least ${rejectionThreshold} applicants must remain after rejection.`,
-                        } , lang);
+                        return handleResponse(res, 403,  `Rejection cap exceeded. At least ${rejectionThreshold} applicants must remain after rejection.` , lang);
                     }
 
                     rejectedDelta++;
