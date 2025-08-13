@@ -1661,17 +1661,22 @@ export const validateGetQuests = (query: object) => {
 
 
 
-export const validateQuestApplicantStatusBatch = (query: object, body: object) => {
+export const validateQuestApplicantStatusBatch = (query: object, body: object, params: object) => {
   const querySchema = Joi.object({
     lang: langSchema,
     status: Joi.string().valid("approved", "rejected").required(),
   })
+  const paramsSchema = Joi.object({
+    questId: Joi.string().regex(/^[0-9a-fA-F]{24}$/, 'object Id').required()
+  })
+  // Assuming questApplicantIds is an array of object IDs
   const bodySchema = Joi.object({
     questApplicantIds: Joi.array().items(Joi.string().regex(/^[0-9a-fA-F]{24}$/, 'object Id').required()).required()
   })
   const combinedSchema = Joi.object({
     query: querySchema,
-    body: bodySchema
+    body: bodySchema,
+    params: paramsSchema
   })
   const { error } = combinedSchema.validate({ query, body })
   return error

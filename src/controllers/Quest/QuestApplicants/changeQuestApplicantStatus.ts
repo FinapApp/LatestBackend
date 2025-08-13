@@ -21,7 +21,7 @@ export const changeQuestApplicantStatus = async (req: Request, res: Response) =>
         const { questApplicantId } = req.params;
         const { status } = req.query;
 
-        const applicant = await QUEST_APPLICANT.findById(questApplicantId).select("status quest user isDeposited");
+        const applicant = await QUEST_APPLICANT.findById(questApplicantId).select("status quest user isDeposited description title media");
         if (!applicant) {
             return handleResponse(res, 404, errors.quest_applicant_not_found, lang);
         }
@@ -114,15 +114,45 @@ export const changeQuestApplicantStatus = async (req: Request, res: Response) =>
             }
 
             await QUESTS.findByIdAndUpdate(quest._id, questUpdate, { session });
-
+            const kafkaMessages  = []
             // ✅ Wallet updates
             if (previousStatus === "approved" && status !== "approved") {
+                kafkaMessages.push({
+                    key: `QUEST_APPLICANT_STATUS_CHANGE`,
+                    value: {
+                        userId : res.locals.userId,
+                        contentUserId: applicant.user.toString(),
+                        metadata: {
+                            questId: quest._id.toString(),
+                            title: quest.title,
+                            description: quest.description,
+                            status: "rejected",
+                            thumbnailURL: quest.media[0]?.thumbnailURL || "",
+                        },
+                        timestamp: new Date().toISOString(),
+                    }
+                }); 
                 await WALLET.findOneAndUpdate(
                     { user: applicant.user },
                     { $inc: { reservedBalance: -quest.avgAmountPerPerson } },
-                    { session , upsert: true}
+                    { session , upsert: true }
                 );
             } else if (previousStatus !== "approved" && status === "approved") {
+                kafkaMessages.push({
+                    key: `QUEST_APPLICANT_STATUS_CHANGE`,
+                    value: {
+                        userId: applicant.user,
+                        contentUserId: quest.user.toString(),
+                        metadata: {
+                            questId: applicant.quest.toString(),
+                            title: applicant.title,
+                            description: applicant.description,
+                            status: "approved",
+                            thumbnailURL: applicant?.media[0]?.thumbnail || "",
+                        },
+                        timestamp: new Date().toISOString(),
+                    }
+                });
                 await WALLET.findOneAndUpdate(
                     { user: applicant.user },
                     { $inc: { reservedBalance: quest.avgAmountPerPerson } },
@@ -130,7 +160,6 @@ export const changeQuestApplicantStatus = async (req: Request, res: Response) =>
                 );
             }
         });
-
         return handleResponse(res, 200, success.status_changed_flicked, lang);
     } catch (error) {
         console.error("🔥 [Error] Exception in changeQuestApplicantStatus:", error);

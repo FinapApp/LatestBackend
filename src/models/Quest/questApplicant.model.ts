@@ -6,7 +6,7 @@ export interface IQuestApplicant extends Document {
     user: Types.ObjectId;
     quest: Types.ObjectId;
     description?: ITextDataSchema[];
-    media?: Media[];
+    media: Media[];
     status: 'pending' | 'approved' | 'rejected';
     partialAllowance: boolean;
     suspendedReason: string;

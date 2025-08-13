@@ -7,12 +7,13 @@ import { getIndex } from "../../../config/melllisearch/mellisearch.config";
 import { IMediaSchema } from "../../../models/Flicks/flicks.model";
 import { WALLET } from "../../../models/Wallet/wallet.model";
 import { TRANSACTION } from "../../../models/Wallet/transaction.model";
+import { sendNotificationKafka } from "../../../utils/sendNotificationKafka";
 export const createQuest = async (req: Request, res: Response) => {
-    const lang = req.query.lang as Lang  || 'en';
+    const lang = req.query.lang as Lang || 'en';
     try {
-        const validationError: Joi.ValidationError | undefined = validateCreateQuest(req.body, req.params , req.query);
+        const validationError: Joi.ValidationError | undefined = validateCreateQuest(req.body, req.params, req.query);
         if (validationError) {
-            return handleResponse(res, 400, errors.validation, lang , validationError.details);
+            return handleResponse(res, 400, errors.validation, lang, validationError.details);
         }
 
         const userId = res.locals.userId;  // session-derived
@@ -81,6 +82,16 @@ export const createQuest = async (req: Request, res: Response) => {
             photo: userDetails.user.photo,
             questId,
         }]);
+        const kafkaMessages = {
+            userId,
+            metadata: {
+                questId,
+                title: quest.title,
+                description: quest.description,
+                thumbnailURL: quest.media[0]?.thumbnailURL || "",
+            }   
+        }
+        sendNotificationKafka('NEW_QUEST', kafkaMessages);
         return handleResponse(res, 200, success.quest_created, lang);
     } catch (error: any) {
         console.error(error);
