@@ -22,7 +22,7 @@ export const changeQuestApplicantStatus = async (req: Request, res: Response) =>
         const { questApplicantId } = req.params;
         const { status } = req.query;
 
-        const applicant = await QUEST_APPLICANT.findById(questApplicantId).select("status quest user isDeposited description title media");
+        const applicant = await QUEST_APPLICANT.findById(questApplicantId).select("status quest user isDeposited description media");
         if (!applicant) {
             return handleResponse(res, 404, errors.quest_applicant_not_found, lang);
         }
@@ -125,8 +125,7 @@ export const changeQuestApplicantStatus = async (req: Request, res: Response) =>
                         contentUserId: applicant.user.toString(),
                         metadata: {
                             questId: quest._id.toString(),
-                            title: quest.title,
-                            description: quest.description,
+                            description: (applicant.description?.map(desc => desc.text).join(", ")) || "",
                             status: "rejected",
                             thumbnailURL: quest.media[0]?.thumbnailURL || "",
                         },
@@ -146,8 +145,7 @@ export const changeQuestApplicantStatus = async (req: Request, res: Response) =>
                         contentUserId: quest.user.toString(),
                         metadata: {
                             questId: applicant.quest.toString(),
-                            title: applicant.title,
-                            description: applicant.description,
+                            description: Array.isArray(applicant.description) ? applicant.description.map(desc => desc.text).join(", ") : "",
                             status: "approved",
                             thumbnailURL: applicant?.media[0]?.thumbnail || "",
                         },
