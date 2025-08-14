@@ -7,6 +7,7 @@ import { QUEST_APPLICANT } from '../../../models/Quest/questApplicant.model';
 import { sendErrorToDiscord } from '../../../config/discord/errorDiscord';
 import { QUESTS } from '../../../models/Quest/quest.model';
 import { config } from '../../../config/generalconfig';
+import { sendNotificationKafka } from '../../../utils/sendNotificationKafka';
 
 export const createQuestApplicant = async (req: Request, res: Response) => {
         const lang = req.query.lang as Lang|| 'en';
@@ -37,10 +38,8 @@ export const createQuestApplicant = async (req: Request, res: Response) => {
         if (existingApplication) {
             return handleResponse(res, 403, errors.quest_already_applied, lang);
         }
-     
-
         // Create applicant & increment count in parallel
-        const [createdApplicant] = await Promise.all([
+        const [createdApplicant ] = await Promise.all([
             QUEST_APPLICANT.create({
                 _id: questApplicantId,
                 user,
@@ -52,6 +51,17 @@ export const createQuestApplicant = async (req: Request, res: Response) => {
         if (!createdApplicant) {
             return handleResponse(res, 500, errors.create_quest_applicants, lang);
         }
+        // Notify the friends and some random users out of 20 users at max.
+        sendNotificationKafka("QUEST_APPLICANT_CREATED", {
+            userId : user,
+            contentUserId: questData.user.toString(),  // Friends of the quest owner should be notified
+            metadata: {
+                questId: quest,
+                description: Array.isArray(createdApplicant.description) ? createdApplicant.description.map(desc => desc.text).join(", ") : "",
+                status: "pending",
+                thumbnailURL: createdApplicant.media[0]?.thumbnail || "",
+            },
+        });
         if (questData.mode == "Goflick") {
             let qrString = `quest:${quest}:${questApplicantId}`;
             qrString = jwt.sign(
@@ -61,7 +71,7 @@ export const createQuestApplicant = async (req: Request, res: Response) => {
             );
             return handleResponse(res, 201, { qrString });
         }
-        return handleResponse(res, 201, success.quest_applicant_updated, lang);
+        return handleResponse(res, 201, success.create_quest_applicants, lang);
     } catch (err) {
         console.error(err);
         sendErrorToDiscord("create-quest-applicant", err);

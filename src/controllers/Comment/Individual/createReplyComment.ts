@@ -5,9 +5,9 @@ import { COMMENT, ITextDataSchema } from "../../../models/Comment/comment.model"
 import { errors, handleResponse, Lang, success } from "../../../utils/responseCodec"
 import { sendErrorToDiscord } from "../../../config/discord/errorDiscord"
 import { FLICKS } from "../../../models/Flicks/flicks.model";
-import { sendNotificationKafka } from "../../../utils/sendNotificationKafka"
 import { Types } from "mongoose"
 import { FOLLOW } from "../../../models/User/userFollower.model"
+import { sendBulkNotificationKafka } from "../../../utils/sendNotificationKafka"
 
 export const createReplyComment = async (req: Request, res: Response) => {
     const lang = req.query.lang as Lang || 'en';
@@ -21,7 +21,7 @@ export const createReplyComment = async (req: Request, res: Response) => {
         const { flickId: flick, commentId: parentComment } = req.params;
         const comment = req.body.comment;
 
-        const parentCommentCheck = await COMMENT.findById(parentComment, "user flick").lean();
+        const parentCommentCheck = await COMMENT.findById(parentComment, "user flick comment").lean();
         if (!parentCommentCheck) {
             return handleResponse(res, 404, errors.comment_not_found, lang);
         }
@@ -42,7 +42,7 @@ export const createReplyComment = async (req: Request, res: Response) => {
                 following: flickUser
             });
             if (!isFollowing) {
-                return handleResponse(res, 403, errors.permission_denied , lang);
+                return handleResponse(res, 403, errors.permission_denied, lang);
             }
         } else if (flickExists.commentSetting !== 'everyone' && !isOwner) {
             return handleResponse(res, 403, errors.permission_denied, lang);
@@ -71,6 +71,23 @@ export const createReplyComment = async (req: Request, res: Response) => {
             .map((seg: ITextDataSchema) => seg.text || '')
             .join(' ')
             .slice(0, 100);
+        let kafkaMessages = [];
+        if (user !== parentCommentCheck.user.toString()) {
+            kafkaMessages.push({
+                key: `NEW_COMMENT_REPLY`,
+                value: {
+                    userId: user,
+                    recipientUserId: parentCommentCheck.user.toString(), // The one who gets the notification
+                    triggeredByUserId: user, // The replier
+                    metadata: {
+                        commentSnippet,
+                        thumbnailURL: updatedFlick.thumbnailURL,
+                        commentCount: updatedFlick.commentCount,
+                    },
+                    timestamp: new Date().toISOString(),
+                }
+            });
+        }
         const mentionedUserIdsSet = new Set<string>();
         comment.forEach((segment: ITextDataSchema) => {
             if (segment.mention) {
@@ -81,23 +98,25 @@ export const createReplyComment = async (req: Request, res: Response) => {
             }
         });
         const mentionedUserIds = Array.from(mentionedUserIdsSet);
-        if (user !== parentCommentCheck.user.toString()) {
-            const kafkaMessage = {
-                userId: user,
-                commentId: parentComment,
-                metadata: {
-                    mentionedUserIds,
-                    commentSnippet,
-                    thumbnailURL: updatedFlick.thumbnailURL,
-                },
-                timestamp: new Date().toISOString(),
-            };
-            // fire and forget notification
-            sendNotificationKafka("CREATE_REPLY_COMMENT", kafkaMessage).catch((err) => {
-                console.error("Kafka notification error in createReplyComment:", err);
+        if (mentionedUserIds.length > 0) {
+            kafkaMessages.push({
+                key: `MENTIONED_COMMENT_REPLY`,
+                value: {
+                    userId: user,
+                    contentUserId: mentionedUserIds,
+                    metadata: {
+                        commentSnippet,
+                        thumbnailURL: updatedFlick.thumbnailURL,
+                        commentCount: updatedFlick.commentCount,
+                    },
+                    timestamp: new Date().toISOString(),
+                }
             });
         }
-        return handleResponse(res, 200, success.create_comment , lang);
+        if (kafkaMessages.length > 0) {
+            await sendBulkNotificationKafka(kafkaMessages);
+        }
+        return handleResponse(res, 200, success.create_comment, lang);
     } catch (error) {
         sendErrorToDiscord("POST:create-reply-comment", error);
         return handleResponse(res, 500, errors.catch_error, lang);

@@ -89,7 +89,8 @@ export const createQuest = async (req: Request, res: Response) => {
                 title: quest.title,
                 description: quest.description,
                 thumbnailURL: quest.media[0]?.thumbnailURL || "",
-            }   
+            },
+            timestamp: new Date().toISOString(),
         }
         sendNotificationKafka('NEW_QUEST', kafkaMessages);
         return handleResponse(res, 200, success.quest_created, lang);

@@ -7,7 +7,7 @@ import { errors, handleResponse, Lang, success } from "../../utils/responseCodec
 import { FLICKS } from "../../models/Flicks/flicks.model";
 import { sendErrorToDiscord } from "../../config/discord/errorDiscord";
 import mongoose from "mongoose";
-import { FOLLOW } from "../../models/User/userFollower.model";
+import { FOLLOW } from "../../models/User/userFollower.model";  
 import { sendBulkNotificationKafka } from "../../utils/sendNotificationKafka";
 // import { sendNotificationKafka } from "../../config/kafka/kafka.config";
 export const createComment = async (req: Request, res: Response) => {
@@ -91,7 +91,7 @@ export const createComment = async (req: Request, res: Response) => {
         const mentionedUserIds = Array.from(mentionedUserIdsSet);
         if (mentionedUserIds.length > 0) {
             kafkaMessages.push({
-                key: `MENTIONED_COMMENT`,
+                key: `MENTIONED_CREATE_COMMENT`,
                 value: {
                     userId: user,
                     contentUserId: mentionedUserIds,   // send to all mentioned users
@@ -105,10 +105,12 @@ export const createComment = async (req: Request, res: Response) => {
             });
         }
         // Send Kafka notifications for new comment
-        await sendBulkNotificationKafka(kafkaMessages);
-        return handleResponse(res, 201, success.create_comment , lang, );
+        if (kafkaMessages.length > 0) {
+            await sendBulkNotificationKafka(kafkaMessages);
+        }
+        return handleResponse(res, 201, success.create_comment, lang);
     } catch (error) {
         sendErrorToDiscord("POST:create-comment", error);
-        return handleResponse(res, 500, errors.catch_error , lang);
+        return handleResponse(res, 500, errors.catch_error, lang);
     }
 };
