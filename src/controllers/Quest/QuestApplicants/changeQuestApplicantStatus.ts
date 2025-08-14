@@ -6,16 +6,17 @@ import { QUEST_APPLICANT } from "../../../models/Quest/questApplicant.model";
 import { validateQuestApplicantStatus } from "../../../validators/validators";
 import { QUESTS } from "../../../models/Quest/quest.model";
 import { WALLET } from "../../../models/Wallet/wallet.model";
+import { sendBulkNotificationKafka} from "../../../utils/sendNotificationKafka";
 
 export const changeQuestApplicantStatus = async (req: Request, res: Response) => {
-    const lang = req.query.lang as Lang|| 'en';
+    const lang = req.query.lang as Lang || 'en';
     console.info("🔄 [changeQuestApplicantStatus] Request received with params:", req.params, "and query:", req.query);
 
     try {
         const validationError: Joi.ValidationError | undefined = validateQuestApplicantStatus(req.query, req.params);
 
         if (validationError) {
-            return handleResponse(res, 400, errors.validation, 'en' , validationError.details);
+            return handleResponse(res, 400, errors.validation, 'en', validationError.details);
         }
 
         const { questApplicantId } = req.params;
@@ -114,13 +115,13 @@ export const changeQuestApplicantStatus = async (req: Request, res: Response) =>
             }
 
             await QUESTS.findByIdAndUpdate(quest._id, questUpdate, { session });
-            const kafkaMessages  = []
+            const kafkaMessages = []
             // ✅ Wallet updates
             if (previousStatus === "approved" && status !== "approved") {
                 kafkaMessages.push({
                     key: `QUEST_APPLICANT_STATUS_CHANGE`,
                     value: {
-                        userId : res.locals.userId,
+                        userId: res.locals.userId,
                         contentUserId: applicant.user.toString(),
                         metadata: {
                             questId: quest._id.toString(),
@@ -131,11 +132,11 @@ export const changeQuestApplicantStatus = async (req: Request, res: Response) =>
                         },
                         timestamp: new Date().toISOString(),
                     }
-                }); 
+                });
                 await WALLET.findOneAndUpdate(
                     { user: applicant.user },
                     { $inc: { reservedBalance: -quest.avgAmountPerPerson } },
-                    { session , upsert: true }
+                    { session, upsert: true }
                 );
             } else if (previousStatus !== "approved" && status === "approved") {
                 kafkaMessages.push({
@@ -156,11 +157,12 @@ export const changeQuestApplicantStatus = async (req: Request, res: Response) =>
                 await WALLET.findOneAndUpdate(
                     { user: applicant.user },
                     { $inc: { reservedBalance: quest.avgAmountPerPerson } },
-                    { session, upsert : true}
+                    { session, upsert: true }
                 );
             }
+            sendBulkNotificationKafka(kafkaMessages);
         });
-        return handleResponse(res, 200, success.status_changed_flicked, lang);
+        return handleResponse(res, 200, success.quest_applicant_approved, lang);
     } catch (error) {
         console.error("🔥 [Error] Exception in changeQuestApplicantStatus:", error);
         sendErrorToDiscord("PUT:quest-change-status-applicant", error);

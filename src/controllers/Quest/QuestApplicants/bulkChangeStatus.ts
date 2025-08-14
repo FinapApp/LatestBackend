@@ -179,7 +179,7 @@ export const bulkChangeStatus = async (req: Request, res: Response) => {
             }   
         };
         sendNotificationKafka("QUEST_APPLICANT_STATUS_CHANGE_BULK", kafkaMessages);
-        return handleResponse(res, 200, success.status_changed_flicked, lang);
+        return handleResponse(res, 200, success.quest_applicant_approved, lang);
     } catch (error: any) {
         console.error("🔥 Error in bulkChangeStatus:", error);
         sendErrorToDiscord("PUT:bulk-quest-applicant-status", error);

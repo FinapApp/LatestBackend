@@ -1291,6 +1291,12 @@ export const success = {
       uz: "Questingiz o'chirildi.",
       hi: "आपका क्वेस्ट हटा दिया गया है।"
   },
+  quest_applicant_approved: {
+    en: "Quest applicant approved successfully.",
+    ru: "Заявитель квеста успешно одобрен.",
+    uz: "Quest arizachisi muvaffaqiyatli tasdiqlandi.",
+    hi: "क्वेस्ट आवेदक सफलतापूर्वक स्वीकृत किया गया है।"
+  },
   create_quest_applicants: {
     
       en: "Quest applicants have been added successfully.",
