@@ -1,4 +1,5 @@
-import { NOTIFICATION } from "../models/Notification/notification.model"
+import { NOTIFICATION } from "../models/User/userNotification.model";
+
 export const getNotificationAggregation = async (userId: string, skip: string) => {
     try {
         const result = await NOTIFICATION.aggregate([

@@ -14,6 +14,32 @@ interface ForgetPasswordRequest {
     username?: string;
     phone?: string;
 }
+
+const changeLanguage = (lang: Lang ,email: string ,phone: string): string => {
+    switch (lang) {
+        case 'en':
+            return email
+            ? `An OTP has been sent to your email ${email}.`
+            : `An OTP has been sent to your phone ${phone}.`;
+        case 'hi':
+            return email
+            ? `एक ओटीपी आपके ईमेल ${email} पर भेजा गया है।`
+            : `एक ओटीपी आपके फ़ोन नंबर ${phone} पर भेजा गया है।`;
+        case 'ru':
+            return email
+            ? `На ваш адрес электронной почты ${email} отправлен OTP.`
+            : `OTP отправлен на ваш номер телефона ${phone}.`;
+        case 'uz':
+            return email
+            ? `OTP sizning elektron pochtangizga (${email}) yuborildi.`
+            : `OTP sizning telefon raqamingizga (${phone}) yuborildi.`;
+        default:
+            return email
+            ? `An OTP has been sent to your email ${email}.`
+            : `An OTP has been sent to your phone ${phone}.`;
+    }
+};
+
 export const forgetPassword = async (req: Request, res: Response) => {
     const lang = req.query.lang as Lang || 'en';
     try {
@@ -45,7 +71,7 @@ export const forgetPassword = async (req: Request, res: Response) => {
                 checkUser.email as string,
                 checkUser.username as string,
             );
-            return handleResponse(res, 200 , `An OTP has been sent to your email. ${checkUser.email}` , lang);
+            return handleResponse(res, 200 , changeLanguage(lang, checkUser.email as string, ""));
         }
         if (checkUser.phone) {
             await sendForgotPasswordPhone(
@@ -53,9 +79,9 @@ export const forgetPassword = async (req: Request, res: Response) => {
                 checkUser.phone as string,
             );
         }
-        return handleResponse(res, 200, `An OTP has been sent to your phone. ${checkUser.phone}` , lang);
+        return handleResponse(res, 200, changeLanguage(lang, "", checkUser.phone as string));
     } catch (err: any) {
-        console.log(err)
+        console.log(err);
         sendErrorToDiscord("POST:forget-password", err);
         return handleResponse(res, 500, errors.catch_error , lang);
     }
