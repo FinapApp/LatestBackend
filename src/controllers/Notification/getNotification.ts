@@ -15,9 +15,9 @@ export const getNotifications = async (req: Request, res: Response) => {
         let { page, limit = 10 } = req.query as any
         limit = Number(limit);
         const skip = ((Number(page) || 1) - 1) * limit;
-        const NOTIFICATIONS = await getNotificationAggregation(res.locals.userId, skip , limit);
-        if (NOTIFICATIONS) {
-            return handleResponse(res, 200, { notification: NOTIFICATIONS });
+        const notification = await getNotificationAggregation(res.locals.userId, skip , limit);
+        if (notification) {
+            return handleResponse(res, 200, notification);
         }
         return handleResponse(res, 404, errors.notification, lang);
     } catch (err: any) {
