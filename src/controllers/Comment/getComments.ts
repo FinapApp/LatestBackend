@@ -122,25 +122,25 @@ export const getComments = async (req: Request, res: Response) => {
                             }
                         },
 
-                        /** Reply count **/
-                        {
-                            $lookup: {
-                                from: 'comments',
-                                let: { parentId: '$_id' },
-                                pipeline: [
-                                    { $match: { $expr: { $eq: ['$parentComment', '$$parentId'] } } },
-                                    { $count: 'count' }
-                                ],
-                                as: 'replyCountData'
-                            }
-                        },
-                        {
-                            $addFields: {
-                                replyCount: {
-                                    $ifNull: [{ $arrayElemAt: ['$replyCountData.count', 0] }, 0]
-                                }
-                            }
-                        },
+                        // /** Reply count **/
+                        // {
+                        //     $lookup: {
+                        //         from: 'comments',
+                        //         let: { parentId: '$_id' },
+                        //         pipeline: [
+                        //             { $match: { $expr: { $eq: ['$parentComment', '$$parentId'] } } },
+                        //             { $count: 'count' }
+                        //         ],
+                        //         as: 'replyCountData'
+                        //     }
+                        // },
+                        // {
+                        //     $addFields: {
+                        //         replyCount: {
+                        //             $ifNull: [{ $arrayElemAt: ['$replyCountData.count', 0] }, 0]
+                        //         }
+                        //     }
+                        // },
 
                         /** isLiked for main comment **/
                         {

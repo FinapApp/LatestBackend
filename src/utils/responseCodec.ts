@@ -927,15 +927,30 @@ export const errors = {
       hi: "इस समय साइन किया गया URL उत्पन्न नहीं किया जा सका।"
   },
   cannot_rerunIt: {
-    
       en: "This operation cannot be repeated. Please contact support if you need assistance.",
       ru: "Эту операцию нельзя повторить. Пожалуйста, обратитесь в поддержку, если нужна помощь.",
       uz: "Ushbu amalni takrorlab bo'lmaydi. Yordam kerak bo'lsa, texnik yordamga murojaat qiling.",
       hi: "इस क्रिया को दोहराया नहीं जा सकता। सहायता के लिए कृपया समर्थन से संपर्क करें।"
   },
+
+  // Notification-related errors
+    notification_deleted: {
+      en: "Notification deleted successfully.",
+      ru: "Уведомление успешно удалено.",
+      uz: "Bildirishnoma muvaffaqiyatli o'chirildi.",
+      hi: "सूचना सफलतापूर्वक हटा दी गई।"
+  }
 };
 
 export const success = {
+    // Notification-related success
+    notification_deleted: {
+        en: "Notification deleted successfully.",
+        ru: "Уведомление успешно удалено.",
+        uz: "Bildirishnoma muvaffaqiyatli o'chirildi.",
+        hi: "सूचना सफलतापूर्वक हटा दी गई।"
+    },
+
   // Referral Code
   referral_code_applied: {
     

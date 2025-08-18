@@ -5,6 +5,7 @@ export type ICommentSchema = {
     flick?: Types.ObjectId;
     comment: ITextDataSchema[];
     parentComment?: Types.ObjectId;
+    replyCount? : number;
     suspended: boolean;
     suspendedReason: string;
     likeCount: number;
@@ -51,6 +52,10 @@ const CommentSchema = new Schema<ICommentSchema>(
             comment: {
                 type: [TextDataSchema],
                 required: true,  // the overall text thingy
+            },
+            replyCount : {
+                type: Number,
+                default: 0
             },
             parentComment: {
                 type: Schema.Types.ObjectId,

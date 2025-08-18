@@ -51,21 +51,19 @@ export const createReplyComment = async (req: Request, res: Response) => {
             user,
             flick,
             comment,
-            parentComment
+            parentComment,
         });
         if (!createReplyComment) {
             return handleResponse(res, 304, errors.create_comment, lang);
         }
-
-        // Update flick's commentCount in MongoDB
-        const updatedFlick = await FLICKS.findByIdAndUpdate(
-            flick,
-            { $inc: { commentCount: 1 } },
-            { new: true, projection: { commentCount: 1 } }
-        );
-        if (!updatedFlick) {
+        const updateReplyCount = await COMMENT.findByIdAndUpdate(
+            parentComment,
+            { $inc: { replyCount: 1 } },
+            { new: true }
+        ); 
+        if (!updateReplyCount) {
             await COMMENT.deleteOne({ _id: createReplyComment._id });
-            return handleResponse(res, 404, errors.flick_not_found, lang);
+            return handleResponse(res, 404, errors.comment_not_found, lang);
         }
         const commentSnippet = comment
             .map((seg: ITextDataSchema) => seg.text || '')
@@ -78,11 +76,11 @@ export const createReplyComment = async (req: Request, res: Response) => {
                 value: {
                     userId: user,
                     recipientUserId: parentCommentCheck.user.toString(), // The one who gets the notification
-                    triggeredByUserId: user, // The replier
+                    triggeredByUserId: user, 
                     metadata: {
+                        flick,
+                        parentComment,
                         commentSnippet,
-                        thumbnailURL: updatedFlick.thumbnailURL,
-                        commentCount: updatedFlick.commentCount,
                     },
                     timestamp: new Date().toISOString(),
                 }
@@ -103,13 +101,13 @@ export const createReplyComment = async (req: Request, res: Response) => {
                 key: `MENTIONED_COMMENT_REPLY`,
                 value: {
                     userId: user,
-                    contentUserId: mentionedUserIds,
+                    contentUserIds: mentionedUserIds,
                     metadata: {
                         commentSnippet,
-                        commentId: createReplyComment._id.toString(),
-                        flickId: flick,
-                        thumbnailURL: updatedFlick.thumbnailURL,
-                        commentCount: updatedFlick.commentCount,
+                        comment: createReplyComment._id.toString(),
+                        parentComment,
+                        flick,
+                        thumbnailURL: flickExists.thumbnailURL,
                     },
                     timestamp: new Date().toISOString(),
                 }

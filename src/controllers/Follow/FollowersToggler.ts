@@ -6,6 +6,7 @@ import { FOLLOW } from '../../models/User/userFollower.model';
 import { USER } from '../../models/User/user.model';
 import { sendErrorToDiscord } from '../../config/discord/errorDiscord';
 import { sendFollowNotification } from '../../utils/utils';
+import { NOTIFICATION } from '../../models/User/userNotification.model';
 
 export const followerHandler = async (req: Request, res: Response) => {
     const lang = req.query.lang as Lang || 'en';
@@ -55,6 +56,11 @@ export const followerHandler = async (req: Request, res: Response) => {
                     USER.findByIdAndUpdate(me, { $inc: { followingCount: -1 } }),
                     USER.findByIdAndUpdate(followerId, { $inc: { followerCount: -1 } }),
                 ]);
+                await NOTIFICATION.deleteMany({
+                    follower: me,
+                    user : followerId,
+                });
+                // If unfollowed, return success
                 return handleResponse(res, 200, success.user_unfollowed, lang);
             }
 

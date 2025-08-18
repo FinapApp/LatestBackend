@@ -10,8 +10,10 @@ export interface INotificationSchema extends Document {
     song?: Types.ObjectId;
     messaging?: Types.ObjectId;
     session?: Types.ObjectId;
+    parentComment?: Types.ObjectId; // For comment replies
     title: string;
     description: string;
+    photo?: string; // Optional field for media content in notifications
     readAt?: Date;
     visited?: Boolean;
     createdAt: Date;
@@ -42,6 +44,10 @@ const NotificationSchema = new Schema<INotificationSchema>(
             ref: 'follower',
         },
         comment: {
+            type: Schema.Types.ObjectId,
+            ref: 'comment',
+        },
+        parentComment: {
             type: Schema.Types.ObjectId,
             ref: 'comment',
         },

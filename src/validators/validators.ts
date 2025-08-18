@@ -1497,6 +1497,21 @@ export const validateCreateQuestApplication = (body: object, params: object, que
   return error
 }
 
+
+export const validateDeleteNotification = (params: object, query: object) => {
+  const querySchema = Joi.object({
+    lang: langSchema
+  })
+  const paramsSchema = Joi.object({
+    notificationId: Joi.string().regex(/^[0-9a-fA-F]{24}$/, 'object Id').required()
+  })
+  const combinedSchema = Joi.object({
+    params: paramsSchema,
+    query: querySchema
+  })
+  const { error } = combinedSchema.validate({ params, query })
+  return error
+}
 export const validateUpdateQuestApplicant = (body: object, params: object, query: object) => {
   const querySchema = Joi.object({
     lang: langSchema
