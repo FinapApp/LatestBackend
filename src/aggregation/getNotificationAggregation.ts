@@ -1,6 +1,6 @@
 import { NOTIFICATION } from "../models/User/userNotification.model";
 
-export const getNotificationAggregation = async (userId: string, skip: string) => {
+export const getNotificationAggregation = async (userId: string, skip: number, limit: number) => {
     try {
         const result = await NOTIFICATION.aggregate([
             {
@@ -13,8 +13,8 @@ export const getNotificationAggregation = async (userId: string, skip: string) =
                     ],
                     notification: [
                         { $sort: { createdAt: -1 } },
-                        { $skip: +skip },
-                        { $limit: 10 },
+                        { $skip: skip },
+                        { $limit: limit },
                         {
                             $lookup: {
                                 from: 'users',

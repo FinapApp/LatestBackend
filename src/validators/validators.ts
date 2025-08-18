@@ -1154,7 +1154,10 @@ export const validateNotificationQuery = (query: object) => {
     lang: langSchema,
     page: Joi.number().integer().min(1).optional(),
     limit: Joi.number().integer().min(1).max(20).optional(),
+  }).and("limit", "page").messages({
+    "object.and": "Limit and page must be provided together",
   })
+  // Validate the query parameters
   const { error } = schema.validate(query)
   return error
 }
