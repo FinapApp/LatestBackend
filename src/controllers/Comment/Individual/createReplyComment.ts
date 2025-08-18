@@ -106,6 +106,8 @@ export const createReplyComment = async (req: Request, res: Response) => {
                     contentUserId: mentionedUserIds,
                     metadata: {
                         commentSnippet,
+                        commentId: createReplyComment._id.toString(),
+                        flickId: flick,
                         thumbnailURL: updatedFlick.thumbnailURL,
                         commentCount: updatedFlick.commentCount,
                     },

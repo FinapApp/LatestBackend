@@ -6,6 +6,7 @@ import { errors, handleResponse, Lang, success } from "../../../utils/responseCo
 import { sendErrorToDiscord } from "../../../config/discord/errorDiscord";
 import { FLICKS } from "../../../models/Flicks/flicks.model";
 import mongoose from "mongoose";
+import { NOTIFICATION } from "../../../models/User/userNotification.model";
 
 
 
@@ -37,7 +38,15 @@ export const deleteComment = async (req: Request, res: Response) => {
         }
 
         // Delete the comment
-        const deletedComment = await COMMENT.findByIdAndDelete(req.params.commentId);
+        const [deletedComment ,  deleteNotification ] = await Promise.all([
+            COMMENT.findByIdAndDelete(req.params.commentId),
+            NOTIFICATION.deleteMany({
+                comment: req.params.commentId,
+            })
+        ]);
+        if (!deleteNotification) {
+            sendErrorToDiscord("DELETE:delete-comment",  new Error("Failed to delete notifications"));
+        }
         if (!deletedComment) {
             return handleResponse(res, 404, errors.comment_delete , lang);
         }

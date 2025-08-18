@@ -2,6 +2,7 @@ import { Schema, model, Types } from 'mongoose';
 
 export interface INotificationSchema extends Document {
     user: Types.ObjectId;
+    user2?: Types.ObjectId; // Optional for cases like follow requests where the user is not the one being notified
     flick?: Types.ObjectId;
     comment?: Types.ObjectId;
     like?: Types.ObjectId;
@@ -11,18 +12,6 @@ export interface INotificationSchema extends Document {
     session?: Types.ObjectId;
     title: string;
     description: string;
-    message: string;
-    category:
-    | 'auth'
-    | 'comment'
-    | 'story-reaction'
-    | 'follower'
-    | 'like'
-    | 'user'
-    | 'reel'
-    | 'policy'
-    | 'quest'
-    | 'messaging';
     readAt?: Date;
     visited?: Boolean;
     createdAt: Date;
@@ -34,6 +23,11 @@ const NotificationSchema = new Schema<INotificationSchema>(
         user: {
             type: Schema.Types.ObjectId,
             ref: 'user',
+        },
+        user2: {
+            type: Schema.Types.ObjectId,
+            ref: 'user',
+            required: false, // Optional for cases like follow requests
         },
         song: {
             type: Schema.Types.ObjectId,
@@ -61,8 +55,7 @@ const NotificationSchema = new Schema<INotificationSchema>(
         },
         messaging: { type: Schema.Types.ObjectId, ref: 'messaging' },  // Not required in here
         title: { type: String },
-        description :   { type: String }, // Added description field for more context in notifications
-        message: { type: String },
+        description: { type: String }, // Added description field for more context in notifications
         readAt: { type: Date },
         visited: {
             type: Boolean,

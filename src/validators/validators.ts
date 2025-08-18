@@ -359,14 +359,11 @@ export const validateComment = (body: object, params: object, query: object) => 
     comment: Joi.array().items(Joi.object({
       mention: Joi.string().regex(/^[0-9a-fA-F]{24}$/, 'object Id').optional(),
       hashtag: Joi.string().regex(/^[0-9a-fA-F]{24}$/, 'object Id').optional(),
-      text: Joi.string().when(Joi.object({ mention: Joi.exist() }).unknown(), {
-        then: Joi.required(),
-        otherwise: Joi.when(Joi.object({ hashtag: Joi.exist() }).unknown(), {
-          then: Joi.required(),
-          otherwise: Joi.optional(),
-        }),
-      }),
-    })).required(),
+      text: Joi.string()
+        .when('mention', { is: Joi.exist(), then: Joi.required() })
+        .when('hashtag', { is: Joi.exist(), then: Joi.required() })
+        .optional(),
+    })).required()
   })
   const paramSchema = Joi.object({
     flickId: Joi.string().regex(/^[0-9a-fA-F]{24}$/, 'object Id').required(),
