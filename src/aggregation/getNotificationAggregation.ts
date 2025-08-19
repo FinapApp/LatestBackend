@@ -1,17 +1,18 @@
+import { Types } from 'mongoose';
 import { NOTIFICATION } from "../models/User/userNotification.model";
 
 export const getNotificationAggregation = async (userId: string, skip: number, limit: number) => {
     try {
         const result = await NOTIFICATION.aggregate([
             {
-                $match: { user: userId },
+                $match: { user: new Types.ObjectId(userId) }
             },
             {
                 $facet: {
                     totalCount: [
                         { $count: 'total' }
                     ],
-                    notification: [
+                    notifications: [ // Fixed: Changed 'notification' to 'notifications' for consistency
                         { $sort: { createdAt: -1 } },
                         { $skip: skip },
                         { $limit: limit },
@@ -33,6 +34,12 @@ export const getNotificationAggregation = async (userId: string, skip: number, l
                             }
                         },
                         {
+                            $unwind: {
+                                path: '$user',
+                                preserveNullAndEmptyArrays: true
+                            }
+                        },
+                        {
                             $lookup: {
                                 from: "flicks",
                                 localField: "flick",
@@ -46,6 +53,12 @@ export const getNotificationAggregation = async (userId: string, skip: number, l
                                         }
                                     }
                                 ]
+                            }
+                        },
+                        {
+                            $unwind: {
+                                path: '$flick',
+                                preserveNullAndEmptyArrays: true
                             }
                         },
                         {
@@ -74,6 +87,12 @@ export const getNotificationAggregation = async (userId: string, skip: number, l
                                         }
                                     },
                                     {
+                                        $unwind: {
+                                            path: '$commentUser',
+                                            preserveNullAndEmptyArrays: true
+                                        }
+                                    },
+                                    {
                                         $project: {
                                             _id: 1,
                                             comment: 1,
@@ -83,14 +102,24 @@ export const getNotificationAggregation = async (userId: string, skip: number, l
                                 ]
                             }
                         },
+                        {
+                            $unwind: {
+                                path: '$comment',
+                                preserveNullAndEmptyArrays: true
+                            }
+                        }
                     ]
                 }
             }
-        ])
-        const totalCount = result[0]?.totalCount?.[0]?.count || 0; // Handle case where no notifications exist
+        ]);
+
+        // Fixed: Corrected property access
+        const totalCount = result[0]?.totalCount?.[0]?.total || 0;
         const notifications = result[0]?.notifications || [];
+
         return { totalCount, notifications };
     } catch (err: any) {
-        throw err;
+        console.error('Error in getNotificationAggregation:', err);
+        throw new Error(`Failed to fetch notifications: ${err.message}`);
     }
-} 
+};

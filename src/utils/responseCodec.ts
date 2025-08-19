@@ -25,8 +25,7 @@ export const handleResponse = (
   if (statusCode > 205) {
     return res.status(statusCode).json({
       success: false,
-      message: selectedMessage,
-      details: meta.length ? meta : undefined,
+      message: selectedMessage || meta?.[0]?.message || null,
     });
   }
 
