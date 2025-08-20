@@ -5,6 +5,7 @@ export interface INotificationSchema extends Document {
     user2?: Types.ObjectId; // Optional for cases like follow requests where the user is not the one being notified
     flick?: Types.ObjectId;
     comment?: Types.ObjectId;
+    quest?: Types.ObjectId; // For quest-related notifications
     like?: Types.ObjectId;
     follower?: Types.ObjectId;
     song?: Types.ObjectId;
@@ -30,6 +31,10 @@ const NotificationSchema = new Schema<INotificationSchema>(
             type: Schema.Types.ObjectId,
             ref: 'user',
             required: false, // Optional for cases like follow requests
+        },
+        quest: {
+            type: Schema.Types.ObjectId,
+            ref: 'quest',
         },
         song: {
             type: Schema.Types.ObjectId,

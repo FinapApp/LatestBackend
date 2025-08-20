@@ -6,7 +6,7 @@ import { QUEST_APPLICANT } from "../../../models/Quest/questApplicant.model";
 import { validateQuestApplicantStatus } from "../../../validators/validators";
 import { QUESTS } from "../../../models/Quest/quest.model";
 import { WALLET } from "../../../models/Wallet/wallet.model";
-import { sendBulkNotificationKafka} from "../../../utils/sendNotificationKafka";
+import { sendBulkNotificationKafka } from "../../../utils/sendNotificationKafka";
 
 export const changeQuestApplicantStatus = async (req: Request, res: Response) => {
     const lang = req.query.lang as Lang || 'en';
@@ -113,9 +113,8 @@ export const changeQuestApplicantStatus = async (req: Request, res: Response) =>
             } else if (quest.status === "completed") {
                 questUpdate.$set.status = "pending";
             }
-
             await QUESTS.findByIdAndUpdate(quest._id, questUpdate, { session });
-            const kafkaMessages = []
+            const kafkaMessages = [];
             // ✅ Wallet updates
             if (previousStatus === "approved" && status !== "approved") {
                 kafkaMessages.push({
@@ -125,9 +124,9 @@ export const changeQuestApplicantStatus = async (req: Request, res: Response) =>
                         contentUserId: applicant.user.toString(),
                         metadata: {
                             questId: quest._id.toString(),
-                            description: (applicant.description?.map(desc => desc.text).join(", ")) || "",
+                            questTitle: quest?.title ?? "",
                             status: "rejected",
-                            thumbnailURL: quest.media[0]?.thumbnailURL || "",
+                            thumbnailURL: quest?.media[0]?.thumbnailURL || "",
                         },
                         timestamp: new Date().toISOString(),
                     }
@@ -144,8 +143,11 @@ export const changeQuestApplicantStatus = async (req: Request, res: Response) =>
                         userId: applicant.user,
                         contentUserId: quest.user.toString(),
                         metadata: {
-                            questId: applicant.quest.toString(),
-                            description: Array.isArray(applicant.description) ? applicant.description.map(desc => desc.text).join(", ") : "",
+                            questId: quest._id.toString(),
+                            questTitle: quest?.title ?? "",
+                            questDesc: Array.isArray(quest?.description)
+                                ? quest.description.map((desc: { text: string }) => desc.text).join(", ")
+                                : (quest?.description || ""),
                             status: "approved",
                             thumbnailURL: applicant?.media[0]?.thumbnail || "",
                         },
